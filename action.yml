@@ -1,0 +1,10 @@
+name: 'Compile open firmware solution'
+description: 'Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more'
+author: '9elements'
+inputs:
+  target:
+    description: 'The firmware stack to build'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/invoke-action.js'
