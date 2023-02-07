@@ -1,3 +1,4 @@
 node_modules
 .task
+package-lock.json
 megalinter-reports
