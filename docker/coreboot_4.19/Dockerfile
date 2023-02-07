@@ -11,7 +11,7 @@ RUN apt-get -y update && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:git-core/ppa && \
     apt-get -y update && \
-    apt-get install -y git curl tzdata \ 
+    apt-get install -y git curl tzdata \
     bison build-essential curl flex git gnat iucode-tool \
     libncurses5-dev m4 zlib1g-dev bc libelf-dev python3-pip && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
@@ -30,7 +30,7 @@ RUN mkdir /repo && cd /repo && git clone https://review.coreboot.org/coreboot.gi
     rm -rf /repo/coreboot/util/crossgcc/tarballs/ && \
     rm -rf /repo/coreboot/.git && \
     rm -rf /repo/coreboot/src && rm -rf /repo/coreboot/payloads && rm -rf /repo/coreboot/tests
-    
+
 # Install MEAnalyser
 RUN mkdir -p /repo && cd repo && git clone https://github.com/platomav/MEAnalyzer.git
 
