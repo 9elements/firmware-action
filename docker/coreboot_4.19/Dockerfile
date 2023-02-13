@@ -31,6 +31,9 @@ RUN mkdir /repo && cd /repo && git clone https://review.coreboot.org/coreboot.gi
     rm -rf /repo/coreboot/.git && \
     rm -rf /repo/coreboot/src && rm -rf /repo/coreboot/payloads && rm -rf /repo/coreboot/tests
 
+# Let coreboot know the toolchain path
+ENV XGCCPATH=/repo/coreboot/util/crossgcc/xgcc/bin/
+
 # Install MEAnalyser
 RUN mkdir -p /repo && cd repo && git clone https://github.com/platomav/MEAnalyzer.git
 
