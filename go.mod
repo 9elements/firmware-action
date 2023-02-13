@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	dagger.io/dagger v0.4.4
+	github.com/plus3it/gorecurcopy v0.0.1
 	github.com/sethvargo/go-githubactions v1.1.0
 )
 
