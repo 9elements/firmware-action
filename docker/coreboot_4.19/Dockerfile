@@ -37,3 +37,6 @@ ENV XGCCPATH=/repo/coreboot/util/crossgcc/xgcc/bin/
 # Install MEAnalyser
 RUN mkdir -p /repo && cd repo && git clone https://github.com/platomav/MEAnalyzer.git
 
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1001 ubuntu
+USER ubuntu
+WORKDIR /repo
