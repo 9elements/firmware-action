@@ -15,7 +15,7 @@ RUN apt-get -y update && \
     bison build-essential curl flex git gnat iucode-tool \
     libncurses5-dev m4 zlib1g-dev bc libelf-dev python3-pip python-is-python3 && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
-    pip3 install colorama crccheck pltable
+    pip3 install --no-cache-dir colorama crccheck pltable
 
 # coreboot toolchain
 RUN mkdir /repo && cd /repo && git clone https://review.coreboot.org/coreboot.git && \
