@@ -4,8 +4,7 @@
   "description": "Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more",
   "main": "dist/invoke-action.js",
   "scripts": {
-    "lint": "rome ci .",
-    "format": "rome format --write ."
+    "lint": "mega-linter-runner --flavor cupcake"
   },
   "repository": {
     "type": "git",
