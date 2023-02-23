@@ -6,10 +6,35 @@
     ".vscode",
     "megalinter",
     "package-lock.json",
-    "report"
+    "report",
+    "docker/**"
   ],
   "language": "en",
   "noConfigSearch": true,
-  "words": ["megalinter", "oxsecurity"],
+  "words": [
+    "megalinter",
+    "oxsecurity",
+    "wagoid",
+    "commitlint",
+    "gorecurcopy",
+    "sethvargo",
+    "gocyclo",
+    "nolint",
+    "workdir",
+    "coreboot",
+    "defconfig",
+    "dotconfig",
+    "kconfig",
+    "distclean",
+    "kbuild",
+    "savedefconfig",
+    "mainboard",
+    "mainboarddir",
+    "githubactions",
+    "rdparty",
+    "uefi",
+    "edkii",
+    "iasl"
+  ],
   "version": "0.2"
 }

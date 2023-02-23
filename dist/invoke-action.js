@@ -23,8 +23,8 @@ function main() {
   if (binary === '') {
     process.exit(1);
   }
-  const actionBin = `${__dirname}/bin/${binary}`;
-  // Execute main Go programm
+  const actionBin = path.join(`${__dirname}`, 'bin', `${binary}`)
+  // Execute main Go program
   const spawnSyncReturns = childProcess.spawnSync(actionBin, {
     stdio: 'inherit'
   });
