@@ -1,115 +1,115 @@
 ---
 name: 'Compile open firmware solution'
 description: |
-    Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
-    The generated files will be placed in $GITHUB_WORKSPACE/build/
+  Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
+  The generated files will be placed in $GITHUB_WORKSPACE/build/
 author: '9elements'
 inputs:
   target:
     description: |
-          The firmware stack to build.
-          One of the following:
-            - coreboot
+      The firmware stack to build.
+      One of the following:
+        - coreboot
     required: true
   path:
     description: |
-          *path* gives the (relative) path to the target (firmware) repository.
-          If the current repository contains the selected target, specify: '.'
-          Otherwise the path should point to the target (firmware) repository
-          submodule that had previously been checked out.
+      *path* gives the (relative) path to the target (firmware) repository.
+      If the current repository contains the selected target, specify: '.'
+      Otherwise the path should point to the target (firmware) repository
+      submodule that had previously been checked out.
     required: true
   defconfig:
     description: |
-          *defconfig* gives the (relative) path to the defconfig that
-          should be used to build the target.
-          For coreboot and linux this is a defconfig.
-          For EDK2 this is a one-line file containing the build defines.
+      *defconfig* gives the (relative) path to the defconfig that
+      should be used to build the target.
+      For coreboot and linux this is a defconfig.
+      For EDK2 this is a one-line file containing the build defines.
     required: true
   platform:
     description: |
-          *platform* specifies the DSC to use when building EDK2.
-          For example:
-            UefiPayloadPkg/UefiPayloadPkg.dsc
+      *platform* specifies the DSC to use when building EDK2.
+      For example:
+        UefiPayloadPkg/UefiPayloadPkg.dsc
     required: true
   sdk_version:
     description: |
-          *sdk_version* specifies the docker toolchain tag to use
-          when building the image. This has an influence on the
-          IASL, GCC and host GCC version that is used to build
-          the target.
-          You must match the source level and sdk_version.
-          *Note:* Updating the sdk_version might result in different
-          binaries using the same source code.
+      *sdk_version* specifies the docker toolchain tag to use
+      when building the image. This has an influence on the
+      IASL, GCC and host GCC version that is used to build
+      the target.
+      You must match the source level and sdk_version.
+      *Note:* Updating the sdk_version might result in different
+      binaries using the same source code.
     required: true
   payload_file:
     description: |
-          *payload_file* gives the (relative) path to the payload.
-          Depending on the defconfig it may not be added to the ROM.
-          The file will be placed at
-          `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
-          The Kconfig `CONFIG_PAYLOAD_FILE` will point to the same
-          path.
+      *payload_file* gives the (relative) path to the payload.
+      Depending on the defconfig it may not be added to the ROM.
+      The file will be placed at
+      `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
+      The Kconfig `CONFIG_PAYLOAD_FILE` will point to the same
+      path.
     required: false
   blob_intel_ifd:
     description: |
-          *blob_intel_ifd* gives the (relative) path to the Intel
-          Flash descriptor binary.
-          In a 'coreboot' build:
-            The file will be placed at
-            `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/descriptor.bin`.
-            The Kconfig `CONFIG_IFD_BIN_PATH` will point to the same
-            path.
-          Depending on the defconfig it may not be added to the ROM.
+      *blob_intel_ifd* gives the (relative) path to the Intel
+      Flash descriptor binary.
+      In a 'coreboot' build:
+        The file will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/descriptor.bin`.
+        The Kconfig `CONFIG_IFD_BIN_PATH` will point to the same
+        path.
+      Depending on the defconfig it may not be added to the ROM.
     required: false
   blob_intel_me:
     description: |
-          *blob_intel_me* gives the (relative) path to the Intel
-          Management engine binary.
-          In a 'coreboot' build:
-            The file will be placed at
-            `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/me.bin`.
-            The Kconfig `CONFIG_ME_BIN_PATH` will point to the same
-            path.
-          Depending on the defconfig it may not be added to the ROM.
+      *blob_intel_me* gives the (relative) path to the Intel
+      Management engine binary.
+      In a 'coreboot' build:
+        The file will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/me.bin`.
+        The Kconfig `CONFIG_ME_BIN_PATH` will point to the same
+        path.
+      Depending on the defconfig it may not be added to the ROM.
     required: false
   blob_intel_gbe:
     description: |
-          *blob_intel_gbe* gives the (relative) path to the Intel
-          Gigabit Ethernet engine binary.
-          In a 'coreboot' build:
-            The file will be placed at
-            `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/gbe.bin`.
-            The Kconfig `CONFIG_GBE_BIN_PATH` will point to the same
-            path.
-          Depending on the defconfig it may not be added to the ROM.
+      *blob_intel_gbe* gives the (relative) path to the Intel
+      Gigabit Ethernet engine binary.
+      In a 'coreboot' build:
+        The file will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/gbe.bin`.
+        The Kconfig `CONFIG_GBE_BIN_PATH` will point to the same
+        path.
+      Depending on the defconfig it may not be added to the ROM.
     required: false
   fsp_binary_path:
     description: |
-          *fsp_binary_path* gives the (relative) path to the Intel
-          FSP binary.
-          In a 'coreboot' build:
-            The file will be placed at
-            `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
-            The Kconfig `CONFIG_FSP_FD_PATH` will point to the same
-            path.
+      *fsp_binary_path* gives the (relative) path to the Intel
+      FSP binary.
+      In a 'coreboot' build:
+        The file will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
+        The Kconfig `CONFIG_FSP_FD_PATH` will point to the same
+        path.
     required: false
   fsp_header_path:
     description: |
-          *fsp_header_path* gives the (relative) path to the Intel
-          FSP header folder.
-          In a 'coreboot' build:
-            The files will be placed at
-            `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Include`.
-            The Kconfig `CONFIG_FSP_HEADER_PATH` will point to the same
-            path.
+      *fsp_header_path* gives the (relative) path to the Intel
+      FSP header folder.
+      In a 'coreboot' build:
+        The files will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Include`.
+        The Kconfig `CONFIG_FSP_HEADER_PATH` will point to the same
+        path.
     required: false
   release_type:
     description: |
-          *release_type* specifies the build type to use when building EDK2.
-          Defaults to DEBUG.
-          Supported options:
-            - RELEASE
-            - DEBUG
+      *release_type* specifies the build type to use when building EDK2.
+      Defaults to DEBUG.
+      Supported options:
+        - RELEASE
+        - DEBUG
     required: false
     default: DEBUG
 
