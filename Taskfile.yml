@@ -1,0 +1,27 @@
+---
+version: '3'
+vars:
+  SEMVER: '0.0.1'
+tasks:
+  deploy-binaries:
+    desc: Compile and shrink action binaries
+    dir: action
+    cmds:
+      - GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/action-linux-amd64-{{.SEMVER}}
+      - upx -9 ../bin/action-linux-amd64-{{.SEMVER}}
+      - GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/action-darwin-amd64-{{.SEMVER}}
+      - upx -9 ../bin/action-darwin-amd64-{{.SEMVER}}
+      - GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/action-windows-amd64-{{.SEMVER}}
+      - upx -9 ../bin/action-windows-amd64-{{.SEMVER}}
+    env:
+      CGO_ENABLED: 0
+  lint:
+    desc: Run the linters
+    cmds:
+      - npm run lint
+  build-coreboot:
+    desc: Run action to build coreboot
+    cmds:
+      - ./bin/action-{{OS}}-amd64-{{.SEMVER}}
+    env:
+      INPUT_TARGET: coreboot
