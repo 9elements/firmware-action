@@ -13,6 +13,7 @@ RUN apt-get -y update && \
     apt-get -y update && \
     apt-get install -y git curl tzdata \
     bison build-essential curl flex git gnat iucode-tool \
+    nodejs \
     libncurses5-dev m4 zlib1g-dev bc libelf-dev python3-pip python-is-python3 && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     pip3 install --no-cache-dir colorama crccheck pltable

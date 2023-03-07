@@ -17,6 +17,7 @@ RUN dpkg --add-architecture i386 && \
     apt-get install -y openssh-client git gcc-${GCCVERSION} g++-${GCCVERSION} \
       python \
       uuid-dev acpica-tools nano vim nasm wine-stable wine32 wine64 bsdmainutils less \
+      nodejs \
       iucode-tool && apt-get clean && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCCVERSION} 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCCVERSION} 100 && \
