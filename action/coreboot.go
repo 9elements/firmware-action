@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/pkg/kconfig"
 	"github.com/plus3it/gorecurcopy"
 	"github.com/sethvargo/go-githubactions"
 )
@@ -149,7 +150,7 @@ func coreboot(ctx context.Context, action *githubactions.Action, client *dagger.
 	if err != nil {
 		return fmt.Errorf("Failed to read defconfig: %v", err)
 	}
-	defconfigConfig, err := NewKconfig(string(data))
+	defconfigConfig, err := kconfig.NewKconfig(string(data))
 	if err != nil {
 		return err
 	}
