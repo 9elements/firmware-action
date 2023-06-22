@@ -1,0 +1,28 @@
+# EditorConfig: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+charset = utf-8
+indent_style = tab
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,js}]
+indent_style = space
+indent_size = 2
+
+[Dockerfile]
+indent_style = space
+indent_size = 4
+
+[.pylint]
+indent_style = unset
+indent_size = unset
+generated_code = true
+
