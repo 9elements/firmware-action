@@ -13,11 +13,11 @@ ENV WORKSPACE_CORE=/repo/Edk2
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y openssh-client git gcc-${GCCVERSION} g++-${GCCVERSION} \
-      python-is-python3 python2 python3 \
-      uuid-dev acpica-tools nano vim nasm wine-stable wine32 wine64 bsdmainutils less \
-      clang llvm lld gcc-multilib \
-      nodejs \
-      iucode-tool && apt-get clean && \
+        python-is-python3 python2 python3 \
+        uuid-dev acpica-tools nano vim nasm wine-stable wine32 wine64 bsdmainutils less \
+        clang llvm lld gcc-multilib \
+        nodejs \
+        iucode-tool && apt-get clean && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCCVERSION} 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCCVERSION} 100 && \
     mkdir -p /repo
