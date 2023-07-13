@@ -28,5 +28,5 @@ jobs:
           BUILD_TIMELESS: 1
         run: |
           make clean
-          make defconfig KBUILD_DEFCONFIG=../tests/coreboot-defconfig-qemu
+          make defconfig KBUILD_DEFCONFIG=../tests/coreboot/coreboot-defconfig-qemu
           make -j "$(nproc)" || make
