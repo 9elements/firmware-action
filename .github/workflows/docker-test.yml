@@ -13,7 +13,7 @@ jobs:
       image: ghcr.io/9elements/coreboot:4.19
     strategy:
       matrix:
-        payload: [ seabios ]
+        payload: [ seabios, seabios_coreinfo, seabios_nvramcui ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
