@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/9elements/coreboot:4.19
+    strategy:
+      matrix:
+        payload: [ seabios ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -28,5 +31,5 @@ jobs:
           BUILD_TIMELESS: 1
         run: |
           make clean
-          make defconfig KBUILD_DEFCONFIG=../tests/coreboot/coreboot-defconfig-qemu
+          make defconfig KBUILD_DEFCONFIG=../tests/coreboot/${{ matrix.payload }}.defconfig
           make -j "$(nproc)" || make
