@@ -15,7 +15,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  REPONAME: ${{ github.repository }}
 
 jobs:
   build-docker:
@@ -38,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.dockerfile }}
+          images: ${{ env.REGISTRY }}/${{ env.REPONAME }}/${{ matrix.dockerfile }}
           # https://github.com/docker/metadata-action#tags-input
           tags: |
             type=schedule,pattern={{date 'YYYYMMDD-hhmmss' tz='Europe/Berlin'}}
