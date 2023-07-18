@@ -4,6 +4,7 @@ ARG TARGETARCH=amd64
 
 # Install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
+ENV BUILDGCC_OPTIONS=-m
 
 # Install git from PPA as v2.34 cannot clone coreboot...
 RUN apt-get -y update && \
