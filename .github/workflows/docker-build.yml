@@ -24,6 +24,10 @@ jobs:
       contents: read
       packages: write
 
+    strategy:
+      matrix:
+        dockerfile: ['coreboot_4.19']
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -34,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.dockerfile }}
           # https://github.com/docker/metadata-action#tags-input
           tags: |
             type=schedule,pattern={{date 'YYYYMMDD-hhmmss' tz='Europe/Berlin'}}
@@ -54,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./docker/coreboot_4.19/Dockerfile
+          file: ./docker/${{ matrix.dockerfile }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
