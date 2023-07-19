@@ -2,30 +2,37 @@
 # Test built docker images by building simple projects inside them
 
 name: Docker test
+
 on:
   pull_request:
     branches:
       - main
+
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
+
 jobs:
   qemu-coreboot:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/9elements/coreboot:4.19
+
     strategy:
       matrix:
         payload: [seabios, seabios_coreinfo, seabios_nvramcui]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Clone coreboot repository
         shell: bash
         run: |
           git clone --branch 4.19 --depth 1 https://review.coreboot.org/coreboot
+
       - name: Build coreboot for QEMU
         shell: bash
         working-directory: ./coreboot
