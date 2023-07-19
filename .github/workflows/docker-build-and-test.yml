@@ -1,22 +1,86 @@
+# Docs:
+# https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+# https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#publishing-a-package-using-an-action
+
 ---
 # Test built docker images by building simple projects inside them
 
-name: Docker test
+name: Docker building and testing
 
-on:
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
+env:
+  REGISTRY: ghcr.io
+
 jobs:
-  qemu-coreboot:
+  build-docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        dockerfile: ['coreboot_4.19']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Calculate short SHA
+        id: short-sha
+        run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.dockerfile }}
+          # https://github.com/docker/metadata-action#tags-input
+          tags: |
+            type=schedule,pattern={{date 'YYYYMMDD-hhmmss' tz='Europe/Berlin'}}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha
+          labels: |
+            org.opencontainers.image.title=${{ github.repository }}/${{ matrix.dockerfile }}
+            org.opencontainers.image.description=Container for building ${{ matrix.dockerfile }}
+
+      - name: Log in to Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/${{ matrix.dockerfile }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+    outputs:
+      dockerfile: ${{ matrix.dockerfile }}
+      short-sha: ${{ steps.short-sha.outputs.sha8 }}
+
+  test-docker:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     container:
-      image: ghcr.io/9elements/coreboot:4.19
+      image: ghcr.io/${{ github.repository }}/${{ needs.build-docker.outputs.dockerfile }}:sha-${{ needs.build-docker.outputs.short-sha }}
 
     strategy:
       matrix:
