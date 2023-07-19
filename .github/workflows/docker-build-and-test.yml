@@ -82,28 +82,13 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository }}/${{ needs.build-docker.outputs.dockerfile }}:sha-${{ needs.build-docker.outputs.short-sha }}
 
-    strategy:
-      matrix:
-        payload: [seabios, seabios_coreinfo, seabios_nvramcui]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Clone coreboot repository
+      - name: Run test script
         shell: bash
         run: |
-          git clone --branch 4.19 --depth 1 https://review.coreboot.org/coreboot
-
-      - name: Build coreboot for QEMU
-        shell: bash
-        working-directory: ./coreboot
-        env:
-          XGCCPATH: '/repo/coreboot/util/crossgcc/xgcc/bin/'
-          BUILD_TIMELESS: 1
-        run: |
-          make clean
-          make defconfig KBUILD_DEFCONFIG=../tests/coreboot/${{ matrix.payload }}.defconfig
-          make -j "$(nproc)" || make
+          ./tests/coreboot/test_${{ needs.build-docker.outputs.dockerfile }}.sh
