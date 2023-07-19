@@ -25,7 +25,16 @@ jobs:
 
     strategy:
       matrix:
-        dockerfile: ['coreboot_4.19']
+        dockerfile: [
+          'coreboot_4.19',
+          'uefi_edk2-stable202008',
+          'uefi_edk2-stable202105',
+          'uefi_edk2-stable202111',
+          'uefi_edk2-stable202205',
+          'uefi_edk2-stable202208',
+          'uefi_edk2-stable202211',
+          'uefi_vUDK2017'
+        ]
 
     steps:
       - name: Checkout
