@@ -1,6 +1,10 @@
-# Docs:
-# https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
-# https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#publishing-a-package-using-an-action
+# Docs
+#   GitHub packages and container registry:
+#   - https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+#   - https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions#publishing-a-package-using-an-action
+#
+# Note on automatic generating of matrix:
+#   - https://code.dblock.org/2021/09/03/generating-task-matrix-by-looping-over-repo-files-with-github-actions.html
 
 ---
 # Test built docker images by building simple projects inside them
@@ -31,7 +35,6 @@ jobs:
         id: generate-matrix
         run: |
           echo "dockerfiles=$( ls ./docker/ -1 | grep -vi README.md | jq -R -s -c 'split("\n")[:-1]' )" >> $GITHUB_OUTPUT
-          #python -c 'import os; print("dockerfile-dirs=\"{",next(os.walk("./docker"))[1],"}\"")' >> $GITHUB_OUTPUT
 
   build-docker:
     needs: matrix
