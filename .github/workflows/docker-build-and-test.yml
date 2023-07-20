@@ -109,7 +109,7 @@ jobs:
         dockerfile: ${{ fromJSON(needs.matrix.outputs.dockerfiles) }}
 
     container:
-      image: ghcr.io/${{ github.repository }}/${{ needs.build-docker.outputs.dockerfile }}:sha-${{ needs.build-docker.outputs.short-sha }}
+      image: ghcr.io/${{ github.repository }}/${{ matrix.dockerfile }}:sha-${{ needs.build-docker.outputs.short-sha }}
 
     steps:
       - name: Checkout
@@ -120,4 +120,4 @@ jobs:
       - name: Run test script
         shell: bash
         run: |
-          ./tests/coreboot/test_${{ needs.build-docker.outputs.dockerfile }}.sh
+          ./tests/coreboot/test_${{ matrix.dockerfile }}.sh
