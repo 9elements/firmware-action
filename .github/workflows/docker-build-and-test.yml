@@ -17,7 +17,24 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      dockerfiles: ${{ steps.generate-matrix.outputs.dockerfiles }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate matrix
+        id: generate-matrix
+        run: |
+          echo "dockerfiles=$( ls ./docker/ -1 | grep -vi README.md | jq -R -s -c 'split("\n")[:-1]' )" >> $GITHUB_OUTPUT
+          #python -c 'import os; print("dockerfile-dirs=\"{",next(os.walk("./docker"))[1],"}\"")' >> $GITHUB_OUTPUT
+
   build-docker:
+    needs: matrix
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,16 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dockerfile: [
-          'coreboot_4.19',
-          'uefi_edk2-stable202008',
-          'uefi_edk2-stable202105',
-          'uefi_edk2-stable202111',
-          'uefi_edk2-stable202205',
-          'uefi_edk2-stable202208',
-          'uefi_edk2-stable202211',
-          'uefi_vUDK2017'
-        ]
+        dockerfile: ${{ fromJSON(needs.matrix.outputs.dockerfiles) }}
 
     steps:
       - name: Checkout
@@ -90,6 +98,13 @@ jobs:
     permissions:
       contents: read
       packages: read
+
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: ${{ fromJSON(needs.matrix.outputs.dockerfiles) }}
+
     container:
       image: ghcr.io/${{ github.repository }}/${{ needs.build-docker.outputs.dockerfile }}:sha-${{ needs.build-docker.outputs.short-sha }}
 
