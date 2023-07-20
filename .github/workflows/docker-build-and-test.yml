@@ -23,7 +23,9 @@ jobs:
       contents: read
       packages: write
 
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         dockerfile: [
           'coreboot_4.19',
