@@ -120,4 +120,4 @@ jobs:
       - name: Run test script
         shell: bash
         run: |
-          ./tests/coreboot/test_${{ matrix.dockerfile }}.sh
+          ./tests/test_${{ matrix.dockerfile }}.sh

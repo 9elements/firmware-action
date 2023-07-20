@@ -19,6 +19,6 @@ cd coreboot
 # Make
 for PAYLOAD in "${PAYLOADS[@]}"; do
 	make clean
-	make defconfig KBUILD_DEFCONFIG="../tests/coreboot/${PAYLOAD}.defconfig"
+	make defconfig KBUILD_DEFCONFIG="../tests/coreboot_4.19/${PAYLOAD}.defconfig"
 	make -j "$(nproc)" || make
 done
