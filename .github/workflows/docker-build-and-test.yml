@@ -96,7 +96,7 @@ jobs:
       short-sha: ${{ steps.short-sha.outputs.sha8 }}
 
   test-docker:
-    needs: build-docker
+    needs: [build-docker, matrix]
     runs-on: ubuntu-latest
     permissions:
       contents: read
