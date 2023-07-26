@@ -1,0 +1,6 @@
+firmware-action:
+  coreboot_4.19:
+    build:
+      context: coreboot
+    args:
+      - COREBOOT_VERSION=4.19
