@@ -8,6 +8,8 @@ import os
 import textwrap
 import pytest
 
+from lib.filesystem import mkdir
+
 
 # ===========================
 #  Add SLOW marker
@@ -65,3 +67,65 @@ def create_file():
         with open(path, 'w', encoding='utf-8') as myfile:
             myfile.write(content)
     return _create_file
+
+
+@pytest.fixture
+def create_dockerfile(create_file):
+    def _create_dockerfile(path: str):
+        create_file(path=path, content=textwrap.dedent("""\
+                FROM ubuntu:22.04 AS base
+                ARG TARGETARCH=amd64
+                ARG COREBOOT_VERSION=4.19
+                RUN apt-get update && \\
+                    apt-get install -y --no-install-recommends \\
+                        bc nano git \\
+                    && \\
+                    rm -rf /var/lib/apt/lists/*\
+                    """))
+    return _create_dockerfile
+
+
+@pytest.fixture
+def create_dockerfile_broken(create_file):
+    def _create_dockerfile_broken(path: str):
+        create_file(path=path, content=textwrap.dedent("""\
+                FROM ubuntu:22.04 AS base
+                RUN false\
+                    """))
+    return _create_dockerfile_broken
+
+
+@pytest.fixture
+def create_docker_compose_file(create_file):
+    def _create_docker_compose_file(path: str):
+        create_file(path=path, content=textwrap.dedent("""\
+                services:
+                  coreboot_4.19:
+                    build:
+                      context: coreboot"""))
+    return _create_docker_compose_file
+
+
+@pytest.fixture
+def create_docker_compose_file_complex(create_file):
+    def _create_docker_compose_file_complex(path: str):
+        create_file(path=path, content=textwrap.dedent("""\
+                services:
+                  coreboot_4.19:
+                    build:
+                      context: coreboot
+                      args:
+                        - COREBOOT_VERSION=4.19
+                  coreboot_4.20:
+                    build:
+                      args:
+                        - COREBOOT_VERSION=4.20
+                  edk2:
+                    build:
+                      context: edk2
+                  meh:
+                    build:
+                      args:
+                        - more=meh\
+                """))
+    return _create_docker_compose_file_complex
