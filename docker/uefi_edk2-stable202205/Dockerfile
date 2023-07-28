@@ -28,6 +28,4 @@ RUN dpkg --add-architecture i386 && \
     cd /repo/Edk2; make -C BaseTools/ -j $(nproc) && \
     winecfg
 
-RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1001 ubuntu
-USER ubuntu
 WORKDIR /repo
