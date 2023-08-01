@@ -6,8 +6,17 @@ Docs: https://docs.docker.com/compose/compose-file/
 It implements only specific functions that are needed in this top_element.
 '''
 
+import logging
+from pprint import pformat
+import subprocess
 import yaml
 import dagger
+
+
+class DockerComposeValidate(Exception):
+    '''
+    Failed validation of docker compose yaml file
+    '''
 
 
 def select(heap: list, needle: str = None) -> str:
@@ -36,6 +45,18 @@ class DockerCompose():
         with open(path, 'r', encoding='utf-8') as composefile:
             self.yaml = yaml.safe_load(composefile.read())
             # yaml.safe_load might raise yaml.YAMLError
+        self.validate()
+
+    def validate(self):
+        '''
+        Valide the compose.yaml file
+        '''
+        cmd = ['docker-compose', '-f', self.path, 'config']
+        output = subprocess.run(cmd, check=False, capture_output=True)
+        if output.returncode != 0:
+            logging.critical('Docker compose file "%s" failed validation', self.path)
+            logging.critical(pformat(output))
+            raise DockerComposeValidate('Failed docker compose validation')
 
     def get_top_elements(self) -> list:
         '''

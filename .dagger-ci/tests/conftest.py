@@ -107,6 +107,16 @@ def create_docker_compose_file(create_file):
 
 
 @pytest.fixture
+def create_docker_compose_file_broken(create_file):
+    def _create_docker_compose_file_broken(path: str):
+        create_file(path=path, content=textwrap.dedent("""\
+                services:
+                  coreboot_4.19:
+                    asdfgh context coreboot"""))
+    return _create_docker_compose_file_broken
+
+
+@pytest.fixture
 def create_docker_compose_file_complex(create_file):
     def _create_docker_compose_file_complex(path: str):
         create_file(path=path, content=textwrap.dedent("""\
