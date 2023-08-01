@@ -23,6 +23,13 @@ def test__select(heap, needle, expected, expectation):
         assert select(heap=heap, needle=needle) == expected
 
 
+def test__docker_compose_broken(tmpdir, create_docker_compose_file_broken):
+    compose_file = os.path.join(tmpdir, 'compose.yaml')
+    create_docker_compose_file_broken(path=compose_file)
+    with pytest.raises(DockerComposeValidate):
+        mydockercompose = DockerCompose(path=compose_file)
+
+
 def test__docker_compose(tmpdir, create_docker_compose_file_complex):
     compose_file = os.path.join(tmpdir, 'compose.yaml')
     create_docker_compose_file_complex(path=compose_file)
