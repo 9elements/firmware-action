@@ -60,6 +60,9 @@ def anyio_backend():
 
 @pytest.fixture
 def create_file():
+    '''
+    Create text file at "path" with "content" as its content.
+    '''
     def _create_file(path: str, content: str):
         rootdir = os.path.dirname(path)
         if not os.path.isdir(rootdir):
@@ -70,72 +73,94 @@ def create_file():
 
 
 @pytest.fixture
-def create_dockerfile(create_file):
-    def _create_dockerfile(path: str):
-        create_file(path=path, content=textwrap.dedent("""\
-                FROM ubuntu:22.04 AS base
-                ARG TARGETARCH=amd64
-                ARG COREBOOT_VERSION=4.19
-                RUN apt-get update && \\
-                    apt-get install -y --no-install-recommends \\
-                        bc nano git \\
-                    && \\
-                    rm -rf /var/lib/apt/lists/*\
-                    """))
-    return _create_dockerfile
+def dockerfile(create_file):
+    '''
+    Generic Dockerfile content
+    '''
+    return textwrap.dedent("""\
+        FROM ubuntu:22.04 AS base
+        ARG TARGETARCH=amd64
+        ARG COREBOOT_VERSION=4.19
+        RUN apt-get update && \\
+            apt-get install -y --no-install-recommends \\
+                bc nano git \\
+            && \\
+            rm -rf /var/lib/apt/lists/*\
+            """)
 
 
 @pytest.fixture
-def create_dockerfile_broken(create_file):
-    def _create_dockerfile_broken(path: str):
-        create_file(path=path, content=textwrap.dedent("""\
-                FROM ubuntu:22.04 AS base
-                RUN false\
-                    """))
-    return _create_dockerfile_broken
+def dockerfile_dummy_tests(create_file):
+    '''
+    Dockerfile content specifically for executing tests inside docker
+    '''
+    return textwrap.dedent("""\
+        FROM ubuntu:22.04 AS base
+        ARG TARGETARCH=amd64
+        ARG CONTEXT=dummy
+        ARG VARIANT=success
+        ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
+        RUN apt-get update && \\
+            apt-get install -y --no-install-recommends \\
+                bc nano git \\
+            && \\
+            rm -rf /var/lib/apt/lists/*\
+            """)
 
 
 @pytest.fixture
-def create_docker_compose_file(create_file):
-    def _create_docker_compose_file(path: str):
-        create_file(path=path, content=textwrap.dedent("""\
-                services:
-                  coreboot_4.19:
-                    build:
-                      context: coreboot"""))
-    return _create_docker_compose_file
+def dockerfile_broken(create_file):
+    '''
+    Dockerfile content which should fail to build
+    '''
+    return textwrap.dedent("""\
+        FROM ubuntu:22.04 AS base
+        RUN false\
+            """)
 
 
-@pytest.fixture
-def create_docker_compose_file_broken(create_file):
-    def _create_docker_compose_file_broken(path: str):
-        create_file(path=path, content=textwrap.dedent("""\
-                services:
-                  coreboot_4.19:
-                    asdfgh context coreboot"""))
-    return _create_docker_compose_file_broken
+@ pytest.fixture
+def docker_compose_file(create_file):
+    '''
+    Generic Docker compose
+    '''
+    return textwrap.dedent("""\
+        services:
+          coreboot_4.19:
+            build:
+              context: coreboot""")
 
 
-@pytest.fixture
-def create_docker_compose_file_complex(create_file):
-    def _create_docker_compose_file_complex(path: str):
-        create_file(path=path, content=textwrap.dedent("""\
-                services:
-                  coreboot_4.19:
-                    build:
-                      context: coreboot
-                      args:
-                        - COREBOOT_VERSION=4.19
-                  coreboot_4.20:
-                    build:
-                      args:
-                        - COREBOOT_VERSION=4.20
-                  edk2:
-                    build:
-                      context: edk2
-                  meh:
-                    build:
-                      args:
-                        - more=meh\
-                """))
-    return _create_docker_compose_file_complex
+@ pytest.fixture
+def docker_compose_file_broken(create_file):
+    '''
+    Docker compose which should fail syntax falidation
+    '''
+    return textwrap.dedent("""\
+        services:
+          coreboot_4.19:
+            asdfgh context coreboot""")
+
+
+@ pytest.fixture
+def docker_compose_file_complex(create_file):
+    # TODO
+    return textwrap.dedent("""\
+        services:
+          coreboot_4.19:
+            build:
+              context: coreboot
+              args:
+                - COREBOOT_VERSION=4.19
+          coreboot_4.20:
+            build:
+              args:
+                - COREBOOT_VERSION=4.20
+          edk2:
+            build:
+              context: edk2
+          meh:
+            build:
+              args:
+                - more=meh\
+        """)
