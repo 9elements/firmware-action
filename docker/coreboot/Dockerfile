@@ -7,6 +7,11 @@ FROM ubuntu:22.04 AS base
 
 ARG TARGETARCH=amd64
 ARG COREBOOT_VERSION=4.19
+ARG CONTEXT=coreboot
+
+# Verification test
+ENV VERIFICATION_TEST=./tests/test_${CONTEXT}.sh
+ENV VERIFICATION_TEST_COREBOOT_VERSION=$COREBOOT_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Directory for coreboot toolchain, MEAnalyser etc.
