@@ -27,3 +27,10 @@ services:
         - COREBOOT_VERSION=4.20
 ```
 
+
+## Environment variables
+
+There are environment variables `VERIFICATION_TEST` and possibly more `VERIFICATION_TEST_*`, these are for when the docker containers are built to test the functionality.
+
+`VERIFICATION_TEST` should contain a path to test script, `VERIFICATION_TEST_*` variables are used in said script.
+
