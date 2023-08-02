@@ -42,9 +42,10 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
     with pytest.raises(ValueError):
         mydockercompose.__select_top_element__('')
 
-    assert mydockercompose.get_dockerfiles() == ['coreboot_4.19', 'coreboot_4.20', 'edk2', 'meh']
     assert mydockercompose.get_dockerfiles(
-        top_element='services') == ['coreboot_4.19', 'coreboot_4.20', 'edk2', 'meh']
+    ) == ['coreboot_4.19', 'coreboot_4.20', 'edk2', 'meh', 'meh2']
+    assert mydockercompose.get_dockerfiles(
+        top_element='services') == ['coreboot_4.19', 'coreboot_4.20', 'edk2', 'meh', 'meh2']
 
     assert mydockercompose.__select_dockerfile__() == 'coreboot_4.19'
     assert mydockercompose.__select_dockerfile__('coreboot_4.19') == 'coreboot_4.19'
@@ -60,6 +61,7 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
     assert mydockercompose.get_dockerfile_context('coreboot_4.19', 'services') == 'coreboot'
     assert mydockercompose.get_dockerfile_context('coreboot_4.20') == None
     assert mydockercompose.get_dockerfile_context('meh') == None
+    assert mydockercompose.get_dockerfile_context('meh2') == None
 
     assert mydockercompose.get_dockerfile_args(
     ) == [dagger.api.gen.BuildArg('COREBOOT_VERSION', '4.19')]
