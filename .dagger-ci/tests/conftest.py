@@ -72,6 +72,12 @@ def create_file():
     return _create_file
 
 
+# ===========================
+#
+#  Dockerfile fixtures
+#
+# ===========================
+
 @pytest.fixture
 def dockerfile(create_file):
     '''
@@ -119,6 +125,12 @@ def dockerfile_broken(create_file):
             """)
 
 
+# ===========================
+#
+#  Docker Compose fixtures
+#
+# ===========================
+
 @ pytest.fixture
 def docker_compose_file(create_file):
     '''
@@ -162,5 +174,7 @@ def docker_compose_file_complex(create_file):
           meh:
             build:
               args:
-                - more=meh\
+                - more=meh
+          meh2:
+            image: ubuntu\
         """)
