@@ -9,6 +9,8 @@ import textwrap
 import pytest
 
 from lib.filesystem import mkdir
+from lib.docker_compose import DockerCompose
+from lib.orchestrator import Orchestrator
 
 
 # ===========================
@@ -79,7 +81,7 @@ def create_file():
 # ===========================
 
 @pytest.fixture
-def dockerfile(create_file):
+def dockerfile():
     '''
     Generic Dockerfile content
     '''
@@ -96,7 +98,7 @@ def dockerfile(create_file):
 
 
 @pytest.fixture
-def dockerfile_dummy_tests(create_file):
+def dockerfile_dummy_tests_success():
     '''
     Dockerfile content specifically for executing tests inside docker
     '''
@@ -106,16 +108,27 @@ def dockerfile_dummy_tests(create_file):
         ARG CONTEXT=dummy
         ARG VARIANT=success
         ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
-        RUN apt-get update && \\
-            apt-get install -y --no-install-recommends \\
-                bc nano git \\
-            && \\
-            rm -rf /var/lib/apt/lists/*\
-            """)
+        RUN echo 'hello world'\
+        """)
 
 
 @pytest.fixture
-def dockerfile_broken(create_file):
+def dockerfile_dummy_tests_fail():
+    '''
+    Dockerfile content specifically for executing tests inside docker
+    '''
+    return textwrap.dedent("""\
+        FROM ubuntu:22.04 AS base
+        ARG TARGETARCH=amd64
+        ARG CONTEXT=dummy
+        ARG VARIANT=fail
+        ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
+        RUN echo 'hello world'\
+        """)
+
+
+@pytest.fixture
+def dockerfile_broken():
     '''
     Dockerfile content which should fail to build
     '''
@@ -132,7 +145,7 @@ def dockerfile_broken(create_file):
 # ===========================
 
 @ pytest.fixture
-def docker_compose_file(create_file):
+def docker_compose_file():
     '''
     Generic Docker compose
     '''
@@ -144,7 +157,7 @@ def docker_compose_file(create_file):
 
 
 @ pytest.fixture
-def docker_compose_file_broken(create_file):
+def docker_compose_file_broken():
     '''
     Docker compose which should fail syntax falidation
     '''
@@ -155,7 +168,7 @@ def docker_compose_file_broken(create_file):
 
 
 @ pytest.fixture
-def docker_compose_file_complex(create_file):
+def docker_compose_file_complex():
     # TODO
     return textwrap.dedent("""\
         services:
@@ -178,3 +191,79 @@ def docker_compose_file_complex(create_file):
           meh2:
             image: ubuntu\
         """)
+
+
+@ pytest.fixture
+def docker_compose_file_multi_comprehensive_build():
+    return [
+        textwrap.dedent("""\
+        services:
+          dummy_1:
+            build:
+              context: dummy
+              args:
+                - VARIANT=success
+          dummy_2:
+            build:
+              context: dummy
+              args:
+                - VARIANT=success
+          dummy_3:
+            build:
+              context: dummy
+              args:
+                - VARIANT=fail
+        """),
+        {'services': {
+            'dummy_1': {
+                'build': True,
+                'export': True,
+                'test': True,
+                'publish': False,
+                'publish_msg': 'skip',
+            },
+            'dummy_2': {
+                'build': True,
+                'export': True,
+                'test': True,
+                'publish': False,
+                'publish_msg': 'skip',
+            },
+            'dummy_3': {
+                'build': True,
+                'export': True,
+                'test': False,
+            },
+        }}
+    ]
+
+# ===========================
+#
+#  Misc fixtures
+#
+# ===========================
+
+
+@ pytest.fixture
+def create_orchestrator(create_file, docker_compose_file, dockerfile):
+    def _create_orchestrator(dirpath: str, compose_file_content: str = None, dockerfile_content: str = None):
+        # Create docker compose
+        docker_compose_file_path = os.path.join(dirpath, 'compose.yaml')
+        if compose_file_content is None:
+            compose_file_content = docker_compose_file
+        create_file(path=docker_compose_file_path, content=compose_file_content)
+
+        # Create dockerfiles accoridng to docker compose
+        my_dockercompose = DockerCompose(path=docker_compose_file_path)
+        for df in my_dockercompose.get_dockerfiles():
+            dockerfile_path = os.path.join(
+                dirpath,
+                my_dockercompose.get_dockerfile_context(df),
+                'Dockerfile')
+            if dockerfile_content is None:
+                dockerfile_content = dockerfile
+            if not os.path.isfile(dockerfile_path):
+                create_file(path=dockerfile_path, content=dockerfile_content)
+
+        return Orchestrator(docker_compose_path=docker_compose_file_path)
+    return _create_orchestrator
