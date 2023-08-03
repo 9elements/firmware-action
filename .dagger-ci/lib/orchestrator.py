@@ -13,6 +13,7 @@ from lib.filesystem import mkdir
 from lib.docker_compose import DockerCompose, DockerComposeValidate
 from lib.env import get_env_var_value
 from lib.git import git_get_latest_commit_sha_long, git_get_latest_commit_sha_short, git_describe
+from lib.results import Results
 
 
 class ContainerMissingTestEnvVar(Exception):
@@ -94,7 +95,7 @@ class Orchestrator():
             self.publish = False
 
         # Variable(s) for storing results of builds, tests and publishing
-        self.results = {}
+        self.results = Results()
 
         self.docker_compose = DockerCompose(path=self.docker_compose_path)
 
@@ -145,12 +146,6 @@ class Orchestrator():
         Build, test and publish ...
         The actual calls, logic and error handling is here.
         '''
-        # Prepare reporting
-        if top_element not in self.results:
-            self.results[top_element] = {}
-        if dockerfile not in self.results[top_element]:
-            self.results[top_element][dockerfile] = {}
-
         # Prepare variables
         dockerfile_dir = os.path.join(
             os.path.dirname(self.docker_compose_path),
@@ -170,15 +165,14 @@ class Orchestrator():
         # BUILD
         logging.info('%s/%s: BUILDING', top_element, dockerfile)
         built_docker = await self.__build__(client=client, dockerfile_dir=dockerfile_dir, dockerfile_args=dockerfile_args)
-        self.results[top_element][dockerfile]['build'] = True
+        self.results.add(top_element, dockerfile, 'build')
 
         # export as tarball
         if not await built_docker.export(tarball_file):
-            self.results[top_element][dockerfile]['export'] = False
-            self.results[top_element][dockerfile][
-                'export_msg'] = f"Failed to export docker container {dockerfile} as tarball"
+            self.results.add(top_element, dockerfile, 'export', False,
+                             f"Failed to export docker container {dockerfile} as tarball")
             return
-        self.results[top_element][dockerfile]['export'] = True
+        self.results.add(top_element, dockerfile, 'export')
 
         # =======
         # TEST
@@ -186,17 +180,16 @@ class Orchestrator():
         try:
             await self.__test__(client=client, tarball_file=tarball_file)
         except ContainerTestFailed as exc:
-            self.results[top_element][dockerfile]['test'] = False
+            self.results.add(top_element, dockerfile, 'test', False)
             return
-        self.results[top_element][dockerfile]['test'] = True
+        self.results.add(top_element, dockerfile, 'test')
 
         # =======
         # PUBLISH
         if self.publish:
             self.__publish__()
         else:
-            self.results[top_element][dockerfile]['publish'] = False
-            self.results[top_element][dockerfile]['publish_msg'] = 'skip'
+            self.results.add(top_element, dockerfile, 'publish', False, 'skip')
 
         # TODO: call self.__publish__
 

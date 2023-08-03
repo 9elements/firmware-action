@@ -55,13 +55,17 @@ async def test__orchestrator__run_test_script_fail(tmpdir, create_orchestrator, 
     my_orchestrator = create_orchestrator(
         dirpath=tmpdir, dockerfile_content=dockerfile_dummy_tests_fail)
     results = await my_orchestrator.build_test_publish()
-    assert results == {
+    assert results.results == {
         'services': {
             'coreboot_4.19': {
                 'build': True,
+                'build_msg': None,
                 'export': True,
+                'export_msg': None,
                 'test': False,
+                'test_msg': None,
             }}}
+    assert results.return_code == 1
 
 
 @pytest.mark.slow
@@ -72,15 +76,20 @@ async def test__orchestrator__run_test_script_success(tmpdir, create_orchestrato
     '''
     my_orchestrator = create_orchestrator(
         dirpath=tmpdir, dockerfile_content=dockerfile_dummy_tests_success)
-    assert await my_orchestrator.build_test_publish() == {
+    results = await my_orchestrator.build_test_publish()
+    assert results.results == {
         'services': {
             'coreboot_4.19': {
                 'build': True,
+                'build_msg': None,
                 'export': True,
+                'export_msg': None,
                 'test': True,
+                'test_msg': None,
                 'publish': False,
                 'publish_msg': 'skip',
             }}}
+    assert results.return_code == 0
 
 
 @pytest.mark.slow
@@ -96,4 +105,4 @@ async def test__orchestrator__multi_comprehensive_build(tmpdir, create_orchestra
         dockerfile_content=dockerfile_dummy_tests_success,
     )
     results = await my_orchestrator.build_test_publish()
-    assert results == expected_results
+    assert results.results == expected_results
