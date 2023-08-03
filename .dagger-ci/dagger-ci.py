@@ -15,13 +15,13 @@ import humanize
 import yaml
 import argparse
 import textwrap
-import prettytable
 from pprint import pformat
 import anyio
 import dagger
 
 from lib.filesystem import mkdir
 from lib.orchestrator import Orchestrator
+from lib.results import Results
 
 
 def cli(args: list = None):
@@ -95,49 +95,9 @@ async def main(args: list = None):
     # Perform builds, tests and publishing
     results = await my_orchestrator.build_test_publish(dockerfiles_override=args.dockerfile)
 
-    # =====================
     # Pretty print results
-    #   Print out some summary at the end
-    #   and return 1 in case any of the tasks failed
-    ret_val = 0
-    all_dockerfiles = []
-    all_stages = []
-
-    for top_element, te_value in results.items():
-        for dockerfile, df_value in te_value.items():
-            # add to list of all dockerfiles
-            entry = [top_element, dockerfile]
-            if entry not in all_dockerfiles:
-                all_dockerfiles.append(entry)
-            # check stages
-            for stage, st_value in df_value.items():
-                # add to list of all stages
-                if stage not in all_stages:
-                    all_stages.append(stage)
-                if te_value[dockerfile] is False:
-                    logging.error(
-                        'Failed %s/%s %s stage: %s',
-                        top_element,
-                        dockerfile,
-                        stage,
-                        te_value[stage+'_msg'])
-                    ret_val = 1
-
-    # Prettytable
-    my_table = prettytable.PrettyTable()
-    my_table.field_names = ['container']+all_stages
-    for dockerfile in all_dockerfiles:
-        row = [f'{dockerfile[0]}/{dockerfile[1]}']
-        for stage in all_stages:
-            res = results[dockerfile[0]][dockerfile[1]]
-            if stage in res:
-                row.append('OK' if res[stage] else 'fail')
-            else:
-                row.append(res['skip'])
-        my_table.add_row(row)
-    print(my_table)
-
-    return ret_val
+    results.print()
+    return results.return_code
 
 
 if __name__ == '__main__':

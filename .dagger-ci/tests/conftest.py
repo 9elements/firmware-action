@@ -217,22 +217,31 @@ def docker_compose_file_multi_comprehensive_build():
         {'services': {
             'dummy_1': {
                 'build': True,
+                'build_msg': None,
                 'export': True,
+                'export_msg': None,
                 'test': True,
+                'test_msg': None,
                 'publish': False,
                 'publish_msg': 'skip',
             },
             'dummy_2': {
                 'build': True,
+                'build_msg': None,
                 'export': True,
+                'export_msg': None,
                 'test': True,
+                'test_msg': None,
                 'publish': False,
                 'publish_msg': 'skip',
             },
             'dummy_3': {
                 'build': True,
+                'build_msg': None,
                 'export': True,
+                'export_msg': None,
                 'test': False,
+                'test_msg': None,
             },
         }}
     ]
