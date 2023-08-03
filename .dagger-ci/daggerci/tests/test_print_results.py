@@ -12,22 +12,28 @@ from lib.results import Results
 @pytest.mark.parametrize(
     "results, expected",
     [
-        ([['services', 'coreboot', 'build', True]], 0),
-        ([['services', 'coreboot', 'build', False]], 1),
-        ([
-            ['services', 'coreboot', 'build', True],
-            ['services', 'coreboot', 'export', True],
-            ['services', 'coreboot', 'test', True],
-            ['services', 'coreboot', 'publish', False, 'skip'],
-        ], 0),
-        ([
-            ['services', 'coreboot', 'build', True],
-            ['services', 'coreboot', 'export', True],
-            ['services', 'coreboot', 'test', True],
-            ['services', 'coreboot', 'publish', False, 'skip'],
-            ['services', 'edk2', 'build', False],
-        ], 1),
-    ]
+        ([["services", "coreboot", "build", True]], 0),
+        ([["services", "coreboot", "build", False]], 1),
+        (
+            [
+                ["services", "coreboot", "build", True],
+                ["services", "coreboot", "export", True],
+                ["services", "coreboot", "test", True],
+                ["services", "coreboot", "publish", False, "skip"],
+            ],
+            0,
+        ),
+        (
+            [
+                ["services", "coreboot", "build", True],
+                ["services", "coreboot", "export", True],
+                ["services", "coreboot", "test", True],
+                ["services", "coreboot", "publish", False, "skip"],
+                ["services", "edk2", "build", False],
+            ],
+            1,
+        ),
+    ],
 )
 def test__results(results, expected):
     my_results = Results()

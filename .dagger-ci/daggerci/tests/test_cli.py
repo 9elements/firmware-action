@@ -12,10 +12,11 @@ from lib.cli import cli
 @pytest.mark.parametrize(
     "args, expectation",
     [
-        (['--help'], pytest.raises(SystemExit)),
-        ([],         does_not_raise()),
-        (['-d'],     pytest.raises(SystemExit)),
-    ])
+        (["--help"], pytest.raises(SystemExit)),
+        ([], does_not_raise()),
+        (["-d"], pytest.raises(SystemExit)),
+    ],
+)
 def test__cli__smoke_test(args, expectation):
     with expectation:
         arguments, _ = cli(args=args)
@@ -24,9 +25,10 @@ def test__cli__smoke_test(args, expectation):
 @pytest.mark.parametrize(
     "args, expected",
     [
-        (['-c'], True),
-        ([],     False),
-    ])
+        (["-c"], True),
+        ([], False),
+    ],
+)
 def test__cli__concurent(args, expected):
     arguments, _ = cli(args=args)
     assert arguments.concurent == expected
@@ -35,9 +37,10 @@ def test__cli__concurent(args, expected):
 @pytest.mark.parametrize(
     "args, expected",
     [
-        (['-v'], True),
-        ([],     False),
-    ])
+        (["-v"], True),
+        ([], False),
+    ],
+)
 def test__cli__verbose(args, expected):
     arguments, _ = cli(args=args)
     assert arguments.verbose == expected
@@ -46,9 +49,10 @@ def test__cli__verbose(args, expected):
 @pytest.mark.parametrize(
     "args, expected",
     [
-        (['-p'], True),
-        ([],     False),
-    ])
+        (["-p"], True),
+        ([], False),
+    ],
+)
 def test__cli__pyblish(args, expected):
     arguments, _ = cli(args=args)
     assert arguments.publish == expected
@@ -57,9 +61,10 @@ def test__cli__pyblish(args, expected):
 @pytest.mark.parametrize(
     "args, expected",
     [
-        (['-d', 'hello'],          ['hello']),
-        (['-d', 'hello', 'world'], ['hello', 'world']),
-    ])
+        (["-d", "hello"], ["hello"]),
+        (["-d", "hello", "world"], ["hello", "world"]),
+    ],
+)
 def test__cli__dockerfile(args, expected):
     arguments, _ = cli(args=args)
     assert arguments.dockerfile == expected

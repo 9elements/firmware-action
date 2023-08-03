@@ -10,7 +10,7 @@ from lib.filesystem import mkdir
 
 
 def test__mkdir(tmpdir):
-    path = os.path.join(tmpdir, 'whatever')
+    path = os.path.join(tmpdir, "whatever")
 
     # directory does not exist
     assert not os.path.isdir(path)
