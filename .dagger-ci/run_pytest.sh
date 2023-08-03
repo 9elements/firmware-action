@@ -6,9 +6,9 @@ set -Eeuo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
-cd "${SCRIPT_DIR}"
+cd "${SCRIPT_DIR}/daggerci"
 
-pytest \
+python -m pytest \
 	--cov \
 	--cov-report=term-missing \
 	--cov-report=html \

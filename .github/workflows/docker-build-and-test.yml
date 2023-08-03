@@ -14,7 +14,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/checkout@v3
       - name: Install deps
-        run: pip install -r ./.dagger-ci/requirements.txt
+        run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - uses: actions/checkout@v3
       - name: Run Dagger pipeline
-        run: python .dagger-ci/dagger-ci.py
+        run: python .dagger-ci/daggerci/main.py
