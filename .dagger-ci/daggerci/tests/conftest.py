@@ -1,8 +1,7 @@
-#!/usr/bin/python
-
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# mypy: disable-error-code="import, no-untyped-def"
 
 import os
 import textwrap
@@ -255,7 +254,7 @@ def docker_compose_file_multi_comprehensive_build():
 
 @ pytest.fixture
 def create_orchestrator(create_file, docker_compose_file, dockerfile):
-    def _create_orchestrator(dirpath: str, compose_file_content: str = None, dockerfile_content: str = None):
+    def _create_orchestrator(dirpath: str, compose_file_content: str | None = None, dockerfile_content: str | None = None):
         # Create docker compose
         docker_compose_file_path = os.path.join(dirpath, 'compose.yaml')
         if compose_file_content is None:

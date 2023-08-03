@@ -22,7 +22,7 @@ def git_get_latest_commit_sha_short() -> str:
     return git_get_latest_commit_sha_long()[:7]
 
 
-def git_describe() -> str:
+def git_describe() -> str | None:
     '''
     Run "git describe --tags"
     '''
@@ -32,7 +32,7 @@ def git_describe() -> str:
         return None
 
 
-def git_get_tag() -> str:
+def git_get_tag() -> str | None:
     '''
     Return a tag if currently tag is checked-out, else neturn None
     '''

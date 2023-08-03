@@ -12,15 +12,20 @@ class Results():
     Class to handle results of building, testing and publishing
     '''
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.return_code = 0
-        self.all_dockerfiles = []
-        self.all_stages = []
+        self.all_dockerfiles: list[list[str]] = []
+        self.all_stages: list[str] = []
         self.table = prettytable.PrettyTable()
-        self.errors = []
-        self.results = {}
+        self.errors: list[str] = []
+        self.results: dict[str, dict[str, dict[str, str | bool | None]]] = {}
 
-    def add(self, top_element: str, dockerfile: str, stage: str, status: bool = True, message: str = None) -> None:
+    def add(self,   # pylint: disable=too-many-arguments
+            top_element: str,
+            dockerfile: str,
+            stage: str,
+            status: bool = True,
+            message: str | None = None) -> None:
         '''
         Add entry into results
         '''
@@ -35,12 +40,8 @@ class Results():
         # Update return code and collect error message
         if not status and message != 'skip':
             self.return_code = 1
-            self.errors.append('Failed {}/{} in {} stage, error message: {}'.format(
-                top_element,
-                dockerfile,
-                stage,
-                message,
-            ))
+            self.errors.append(
+                f'Failed {top_element}/{dockerfile} in {stage} stage, error message: {message}')
 
         # Update results
         if top_element not in self.results:
@@ -57,7 +58,7 @@ class Results():
         # Construct the pretty table
         self.table.field_names = ['container']+self.all_stages
         for dockerfile in self.all_dockerfiles:
-            row = ['{}/{}'.format(*dockerfile)]
+            row = ['{}/{}'.format(*dockerfile)]  # pylint: disable=consider-using-f-string
             for stage in self.all_stages:
                 res = self.results[dockerfile[0]][dockerfile[1]]
                 if stage in res:

@@ -1,11 +1,14 @@
 '''
 The main class to abstract all actions
 '''
+# pylint: disable=too-many-instance-attributes
+# mypy: disable-error-code="import"
 
 import os
 import sys
 import logging
 import datetime
+from typing import Any
 import anyio
 import dagger
 
@@ -57,9 +60,11 @@ class Orchestrator():
         self.tag_sha_short = git_get_latest_commit_sha_short()
         self.git_ref = get_env_var_value(['GITHUB_REF'], fallback=git_describe())
         self.project_name = 'firmware-action'
-        self.project_url = get_env_var_value(['GITHUB_SERVER_URL'], fallback='https://github.com') + \
-            '/' + get_env_var_value(['GITHUB_REPOSITORY'],
-                                    fallback=f'9elements/{self.project_name}')
+        self.project_url = get_env_var_value(
+            ['GITHUB_SERVER_URL'],
+            fallback='https://github.com') + '/' + get_env_var_value(
+            ['GITHUB_REPOSITORY'],
+            fallback=f'9elements/{self.project_name}')
         # Container registry vars
         self.container_registry = get_env_var_value(['env.REGISTRY'], None)
         self.container_registry_username = get_env_var_value(['github.actor'], None)
@@ -111,7 +116,7 @@ class Orchestrator():
         # )
         # .with_label("org.opencontainers.image.licenses", "MIT")
 
-    async def build_test_publish(self, dockerfiles_override: list = None):
+    async def build_test_publish(self, dockerfiles_override: list[str] | None = None) -> Results:
         '''
         Main function to call, it will:
         - build
@@ -124,7 +129,7 @@ class Orchestrator():
         top_element = 'services'
         if top_element not in self.docker_compose.get_top_elements():
             raise DockerComposeValidate(
-                'Top element "%s" not found in provided docker compose', top_element)
+                f'Top element "{top_element}" not found in provided docker compose')
 
         all_dockerfiles = self.docker_compose.get_dockerfiles(top_element=top_element)
         if dockerfiles_override is not None:
@@ -141,7 +146,7 @@ class Orchestrator():
 
         return self.results
 
-    async def __build_test_publish__(self, client, top_element: str, dockerfile: str):
+    async def __build_test_publish__(self, client: dagger.Client, top_element: str, dockerfile: str) -> None:
         '''
         Build, test and publish ...
         The actual calls, logic and error handling is here.
@@ -179,7 +184,7 @@ class Orchestrator():
         logging.info('%s/%s: TESTING', top_element, dockerfile)
         try:
             await self.__test__(client=client, tarball_file=tarball_file)
-        except ContainerTestFailed as exc:
+        except ContainerTestFailed:
             self.results.add(top_element, dockerfile, 'test', False)
             return
         self.results.add(top_element, dockerfile, 'test')
@@ -187,20 +192,27 @@ class Orchestrator():
         # =======
         # PUBLISH
         if self.publish:
-            self.__publish__()
+            # TODO:
+            # await self.__publish__(client=client)
+            pass
         else:
             self.results.add(top_element, dockerfile, 'publish', False, 'skip')
 
-        # TODO: call self.__publish__
-
-    async def __build__(self, client, dockerfile_dir: str, dockerfile_args: list):
+    async def __build__(self,
+                        client: dagger.Client,
+                        dockerfile_dir: str,
+                        dockerfile_args: list[Any]) -> dagger.Container:
+        # dockerfile_args: list[dagger.api.gen.BuildArg]) -> dagger.Container:
+        # For some reason I get
+        #   "AttributeError: module 'dagger' has no attribute 'api'"
         '''
         Does the actual building of docker container
         '''
         context_dir = client.host().directory(dockerfile_dir)
-        return await context_dir.docker_build(build_args=dockerfile_args)
+        return await context_dir.docker_build(  # type: ignore [no-any-return]
+            build_args=dockerfile_args)
 
-    async def __test__(self, client, tarball_file: str):
+    async def __test__(self, client: dagger.Client, tarball_file: str) -> None:
         '''
         Test / verify that the built container is functional by executing a script inside
         '''
@@ -247,53 +259,53 @@ class Orchestrator():
         except dagger.exceptions.ExecError as ex:
             # When command in '.with_exec()' fails, exception is raised
             #   said exception contains STDERR and STDOUT
-            for std in [
+            for std_streams in [
                 [f'{container_name}_stdout.log', ex.stdout],
                 [f'{container_name}_stderr.log', ex.stderr],
             ]:
-                with open(os.path.join(self.logdir, std[0]), 'w', encoding='utf-8') as logfile:
-                    logfile.write(std[1])
+                with open(os.path.join(self.logdir, std_streams[0]), 'w', encoding='utf-8') as logfile:
+                    logfile.write(std_streams[1])
             logging.error("Test on %s failed", container_name)
-            raise ContainerTestFailed(ex.message)
+            raise ContainerTestFailed(ex.message)  # pylint: disable=raise-missing-from
             # This return will execute after 'finally' completes
             #   see: https://git.sr.ht/~atomicfs/dotfiles/tree/master/item/Templates/python-except-finally-example.py
         else:
             # When command in '.with_exec()' suceeds, STDERR and STDOUT are automatically
             #   redirected into text files, which must be extracted from the container
-            for std in [f'{container_name}_stdout.log', f'{container_name}_stderr.log']:
-                await test_container.file(std).export(os.path.join(self.logdir, std))
+            for std_log in [f'{container_name}_stdout.log', f'{container_name}_stderr.log']:
+                await test_container.file(std_log).export(os.path.join(self.logdir, std_log))
             # No return here, so the execution continues normally
         finally:
             # Cleanup
             os.remove(tarball_file)
 
-    async def __publish__(self, client, dockerfile: str, top_element: str):
+    async def __publish__(self, client: dagger.Client, dockerfile: str, top_element: str) -> None:
         '''
         Publish the built container to container registry
         '''
         # TODO: unfinished
-        try:
-            registry = os.environ[ENV_VAR_CONTAINER_REGISTRY]
-            username = os.environ[ENV_VAR_CONTAINER_REGISTRY_USERNAME]
-            password = os.environ[ENV_VAR_CONTAINER_REGISTRY_PASSWORD]
-        except KeyError:
-            logging.warning(
-                'Missing environment variables present in GitHub CI, skipping container publishing step')
-            results[docker]['success'] = True
-            results[docker]['msg'] = 'skipping publishing step'
-            return
+        # try:
+        #    registry = os.environ[ENV_VAR_CONTAINER_REGISTRY]
+        #    username = os.environ[ENV_VAR_CONTAINER_REGISTRY_USERNAME]
+        #    password = os.environ[ENV_VAR_CONTAINER_REGISTRY_PASSWORD]
+        # except KeyError:
+        #    logging.warning(
+        #        'Missing environment variables present in GitHub CI, skipping container publishing step')
+        #    results[docker]['success'] = True
+        #    results[docker]['msg'] = 'skipping publishing step'
+        #    return
 
-        logging.info("Publishing: %s", docker)
+        # logging.info("Publishing: %s", docker)
 
-        await built_docker.with_registry_auth(registry, username, password).publish(f'{username}/{REPOSITORY}/{docker}')
+        # await built_docker.with_registry_auth(registry, username, password).publish(f'{username}/{REPOSITORY}/{docker}')
 
-        image_ref = docker_container[docker].publish(f'{docker}')
-        logging.info('Published image to: %s', image_ref)
+        # image_ref = docker_container[docker].publish(f'{docker}')
+        # logging.info('Published image to: %s', image_ref)
 
         # publish image to registry
 
         # print image address
         # print(f"Image published at: {address}")
-        results[docker]['success'] = True
-        results[docker]['msg'] = 'success'
-        return
+        # results[docker]['success'] = True
+        # results[docker]['msg'] = 'success'
+        # return
