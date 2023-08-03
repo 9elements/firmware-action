@@ -1,12 +1,13 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# mypy: disable-error-code="import, no-untyped-def"
 
 import re
 import pytest
 from unittest.mock import patch
 
-from lib.git import *
+from lib.git import git_get_latest_commit_sha_long, git_get_latest_commit_sha_short, git_describe, git_get_tag
 
 
 def test__git_get_latest_commit_sha_long():

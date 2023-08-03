@@ -2,6 +2,7 @@
 '''
 Python script to build and test Docker containers for coreboot and EDK2 compilation
 '''
+# mypy: disable-error-code="import"
 
 # Logging
 # https://docs.python.org/3/howto/logging.html
@@ -16,11 +17,11 @@ from lib.cli import cli
 from lib.orchestrator import Orchestrator
 
 
-async def main(args: list = None):
+async def main(inargs: list[str] | None = None) -> int:
     '''
     The main function, duh
     '''
-    args, parser = cli(args=args)
+    args, _ = cli(args=inargs)
 
     # Setup nice logging
     logging.basicConfig(format='%(levelname)s: %(message)s',
@@ -45,7 +46,7 @@ async def main(args: list = None):
 
     # Pretty print results
     results.print()
-    return results.return_code
+    return results.return_code  # type: ignore [no-any-return]
 
 
 if __name__ == '__main__':

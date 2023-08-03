@@ -1,13 +1,14 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# mypy: disable-error-code="import, no-untyped-def"
 
 import os
 import dagger
 import pytest
 from contextlib import nullcontext as does_not_raise
 
-from lib.docker_compose import *
+from lib.docker_compose import select, DockerCompose, DockerComposeValidate, DockerComposeMissingElement
 
 
 @pytest.mark.parametrize(
@@ -39,7 +40,7 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
 
     assert mydockercompose.__select_top_element__() == 'services'
     assert mydockercompose.__select_top_element__('services') == 'services'
-    with pytest.raises(ValueError):
+    with pytest.raises(DockerComposeMissingElement):
         mydockercompose.__select_top_element__('')
 
     assert mydockercompose.get_dockerfiles(
@@ -51,9 +52,9 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
     assert mydockercompose.__select_dockerfile__('coreboot_4.19') == 'coreboot_4.19'
     assert mydockercompose.__select_dockerfile__(
         'coreboot_4.19', 'services') == 'coreboot_4.19'
-    with pytest.raises(ValueError):
+    with pytest.raises(DockerComposeMissingElement):
         mydockercompose.__select_dockerfile__('')
-    with pytest.raises(ValueError):
+    with pytest.raises(DockerComposeMissingElement):
         mydockercompose.__select_dockerfile__('', '')
 
     assert mydockercompose.get_dockerfile_context() == 'coreboot'

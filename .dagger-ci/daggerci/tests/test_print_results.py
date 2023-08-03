@@ -1,11 +1,12 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# mypy: disable-error-code="import, no-untyped-def"
 
 import pytest
 from unittest.mock import patch
 
-from lib.results import *
+from lib.results import Results
 
 
 @pytest.mark.parametrize(

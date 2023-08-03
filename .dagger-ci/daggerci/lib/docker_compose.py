@@ -5,10 +5,12 @@ Docs: https://docs.docker.com/compose/compose-file/
 !!! This is class / parses is incomplete implementation of Docker Compose specification !!!
 It implements only specific functions that are needed in this top_element.
 '''
+# mypy: disable-error-code="import"
 
 import logging
 from pprint import pformat
 import subprocess
+from typing import Any
 import yaml
 import dagger
 
@@ -19,7 +21,13 @@ class DockerComposeValidate(Exception):
     '''
 
 
-def select(heap: list, needle: str = None) -> str:
+class DockerComposeMissingElement(Exception):
+    '''
+    Failed to get element from docker compose yaml file
+    '''
+
+
+def select(heap: list[str], needle: str | None = None) -> str:
     '''
     Select either top_element or dockerfile from conpose YAML
         - as default return first defined top_element or dockerfile
@@ -47,7 +55,7 @@ class DockerCompose():
             # yaml.safe_load might raise yaml.YAMLError
         self.validate()
 
-    def validate(self):
+    def validate(self) -> None:
         '''
         Valide the compose.yaml file
         '''
@@ -58,13 +66,13 @@ class DockerCompose():
             logging.critical(pformat(output))
             raise DockerComposeValidate('Failed docker compose validation')
 
-    def get_top_elements(self) -> list:
+    def get_top_elements(self) -> list[str]:
         '''
         Return a list of all top_elements found (list of strings)
         '''
         return list(self.yaml.keys())
 
-    def __select_top_element__(self, top_element: str = None) -> str:
+    def __select_top_element__(self, top_element: str | None = None) -> str:
         '''
         Check if top_element in YAML
           if true, return said top_element name
@@ -74,9 +82,10 @@ class DockerCompose():
         try:
             return select(heap=self.get_top_elements(), needle=top_element)
         except ValueError:
-            raise ValueError(f'Top element {top_element} not found in YAML file')
+            raise DockerComposeMissingElement(  # pylint: disable=raise-missing-from
+                f'Top element {top_element} not found in YAML file')
 
-    def get_dockerfiles(self, top_element: str = None) -> list:
+    def get_dockerfiles(self, top_element: str | None = None) -> list[str]:
         '''
         Return a list of all docker files in top_element (list of strings)
         if no top_element provided, use the first one
@@ -84,7 +93,9 @@ class DockerCompose():
         this_top_element = self.__select_top_element__(top_element)
         return list(self.yaml[this_top_element].keys())
 
-    def __select_dockerfile__(self, dockerfile: str = None, top_element: str = None) -> str:
+    def __select_dockerfile__(self,
+                              dockerfile: str | None = None,
+                              top_element: str | None = None) -> str:
         '''
         Check if dockerfile under top_element in YAML
           if true, return said dockerfile name
@@ -95,10 +106,12 @@ class DockerCompose():
         try:
             return select(heap=self.get_dockerfiles(top_element=this_top_element), needle=dockerfile)
         except ValueError:
-            raise ValueError(
+            raise DockerComposeMissingElement(  # pylint: disable=raise-missing-from
                 f'Dockerfile {dockerfile} not found in YAML file under {top_element} top_element')
 
-    def get_dockerfile_context(self, dockerfile: str = None, top_element: str = None) -> str:
+    def get_dockerfile_context(self,
+                               dockerfile: str | None = None,
+                               top_element: str | None = None) -> str | None:
         '''
         Return a context of given dockerfile
         '''
@@ -107,10 +120,15 @@ class DockerCompose():
 
         if 'build' in self.yaml[this_top_element][this_dockerfile]:
             if 'context' in self.yaml[this_top_element][this_dockerfile]['build']:
-                return self.yaml[this_top_element][this_dockerfile]['build']['context']
+                return str(self.yaml[this_top_element][this_dockerfile]['build']['context'])
         return None
 
-    def get_dockerfile_args(self, dockerfile: str = None, top_element: str = None) -> list:
+    def get_dockerfile_args(self,
+                            dockerfile: str | None = None,
+                            top_element: str | None = None) -> list[Any]:
+        # top_element: str | None = None) -> list[dagger.api.gen.BuildArg]:
+        # For some reason I get
+        #   "AttributeError: module 'dagger' has no attribute 'api'"
         '''
         Return a list of args for given dockerfile
             return list of dagger.api.gen.BuildArg

@@ -1,11 +1,12 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# mypy: disable-error-code="import, no-untyped-def"
 
 import os
 import pytest
 
-from lib.env import *
+from lib.env import get_env_var_value
 
 
 @pytest.mark.parametrize(

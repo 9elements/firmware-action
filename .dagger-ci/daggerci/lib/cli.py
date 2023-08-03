@@ -6,7 +6,7 @@ import argparse
 import textwrap
 
 
-def cli(args: list = None):
+def cli(args: list[str] | None = None) -> tuple[argparse.Namespace, argparse.ArgumentParser]:
     '''
     Command Line Interface
       The optional "args" is for unit-testing
