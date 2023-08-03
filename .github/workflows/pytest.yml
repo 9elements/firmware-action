@@ -1,0 +1,26 @@
+---
+# Test built docker images by building simple projects inside them
+
+name: pytest
+on: [push, pull_request]
+
+jobs:
+  pytest:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - uses: actions/checkout@v3
+      - name: Install deps
+        run: |
+          curl -SL "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+          docker-compose -f docker/compose.yaml config
+      - name: Install python deps
+        run: pip install -r ./.dagger-ci/requirements.txt
+      - uses: actions/checkout@v3
+      - name: Run pytest
+        run: .dagger-ci/run_pytest.sh
