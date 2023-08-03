@@ -4,21 +4,21 @@ The main class to abstract all actions
 # pylint: disable=too-many-instance-attributes
 # mypy: disable-error-code="import"
 
+import datetime
+import logging
 import os
 import sys
-import logging
-import datetime
 from typing import Any
+
 import anyio
 import dagger
-
-from lib.filesystem import mkdir
 from lib.docker_compose import DockerCompose, DockerComposeValidate
 from lib.env import get_env_var_value
+from lib.filesystem import mkdir
 from lib.git import (
+    git_describe,
     git_get_latest_commit_sha_long,
     git_get_latest_commit_sha_short,
-    git_describe,
 )
 from lib.results import Results
 

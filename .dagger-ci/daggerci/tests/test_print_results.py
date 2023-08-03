@@ -4,8 +4,6 @@
 # mypy: disable-error-code="import, no-untyped-def"
 
 import pytest
-from unittest.mock import patch
-
 from lib.results import Results
 
 

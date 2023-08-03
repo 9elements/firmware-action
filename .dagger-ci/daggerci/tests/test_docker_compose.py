@@ -4,15 +4,15 @@
 # mypy: disable-error-code="import, no-untyped-def"
 
 import os
-import dagger
-import pytest
 from contextlib import nullcontext as does_not_raise
 
+import dagger
+import pytest
 from lib.docker_compose import (
-    select,
     DockerCompose,
-    DockerComposeValidate,
     DockerComposeMissingElement,
+    DockerComposeValidate,
+    select,
 )
 
 
@@ -34,7 +34,7 @@ def test__docker_compose_broken(tmpdir, create_file, docker_compose_file_broken)
     compose_file = os.path.join(tmpdir, "compose.yaml")
     create_file(path=compose_file, content=docker_compose_file_broken)
     with pytest.raises(DockerComposeValidate):
-        mydockercompose = DockerCompose(path=compose_file)
+        DockerCompose(path=compose_file)
 
 
 def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
@@ -81,9 +81,9 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
         mydockercompose.get_dockerfile_context("coreboot_4.19", "services")
         == "coreboot"
     )
-    assert mydockercompose.get_dockerfile_context("coreboot_4.20") == None
-    assert mydockercompose.get_dockerfile_context("meh") == None
-    assert mydockercompose.get_dockerfile_context("meh2") == None
+    assert mydockercompose.get_dockerfile_context("coreboot_4.20") is None
+    assert mydockercompose.get_dockerfile_context("meh") is None
+    assert mydockercompose.get_dockerfile_context("meh2") is None
 
     assert mydockercompose.get_dockerfile_args() == [
         dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")

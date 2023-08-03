@@ -2,8 +2,9 @@
 Class to handle results of building, testing and publishing
 """
 
-import re
 import logging
+import re
+
 import prettytable
 
 

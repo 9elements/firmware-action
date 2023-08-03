@@ -5,12 +5,11 @@
 
 import os
 import textwrap
+
 import pytest
-
-from lib.filesystem import mkdir
 from lib.docker_compose import DockerCompose
+from lib.filesystem import mkdir
 from lib.orchestrator import Orchestrator
-
 
 # ===========================
 #  Add SLOW marker
