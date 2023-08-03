@@ -3,9 +3,7 @@
 # pylint: disable=too-many-arguments
 # mypy: disable-error-code="import, no-untyped-def"
 
-import os
 import pytest
-
 from lib.env import get_env_var_value
 
 

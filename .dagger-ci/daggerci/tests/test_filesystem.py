@@ -4,8 +4,8 @@
 # mypy: disable-error-code="import, no-untyped-def"
 
 import os
-import pytest
 
+import pytest
 from lib.filesystem import mkdir
 
 

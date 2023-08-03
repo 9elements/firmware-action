@@ -8,11 +8,10 @@ Python script to build and test Docker containers for coreboot and EDK2 compilat
 # https://docs.python.org/3/howto/logging.html
 # DEBUG, INFO, WARNING, ERROR, CRITICAL
 import logging
-
 import os
 import sys
-import anyio
 
+import anyio
 from lib.cli import cli
 from lib.orchestrator import Orchestrator
 

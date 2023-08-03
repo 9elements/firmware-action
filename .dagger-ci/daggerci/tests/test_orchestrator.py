@@ -3,14 +3,10 @@
 # pylint: disable=too-many-arguments
 # mypy: disable-error-code="import, no-untyped-def"
 
-import os
-import textwrap
 import dagger
 import pytest
-from contextlib import nullcontext as does_not_raise
-
-from lib.orchestrator import Orchestrator, ContainerMissingTestEnvVar
 from lib.docker_compose import DockerComposeValidate
+from lib.orchestrator import ContainerMissingTestEnvVar
 
 
 @pytest.mark.slow

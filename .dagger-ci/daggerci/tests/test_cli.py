@@ -3,8 +3,8 @@
 # pylint: disable=too-many-arguments
 # mypy: disable-error-code="import, no-untyped-def"
 
-import importlib
 from contextlib import nullcontext as does_not_raise
+
 import pytest
 from lib.cli import cli
 

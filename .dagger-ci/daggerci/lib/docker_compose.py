@@ -8,11 +8,12 @@ It implements only specific functions that are needed in this top_element.
 # mypy: disable-error-code="import"
 
 import logging
-from pprint import pformat
 import subprocess
+from pprint import pformat
 from typing import Any
-import yaml
+
 import dagger
+import yaml
 
 
 class DockerComposeValidate(Exception):

@@ -4,13 +4,13 @@
 # mypy: disable-error-code="import, no-untyped-def"
 
 import re
-import pytest
 from unittest.mock import patch
 
+import pytest
 from lib.git import (
+    git_describe,
     git_get_latest_commit_sha_long,
     git_get_latest_commit_sha_short,
-    git_describe,
     git_get_tag,
 )
 
