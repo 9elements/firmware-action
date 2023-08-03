@@ -5,7 +5,7 @@
 import importlib
 from contextlib import nullcontext as does_not_raise
 import pytest
-daggerci = importlib.import_module("dagger-ci")
+from lib.cli import *
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,7 @@ daggerci = importlib.import_module("dagger-ci")
     ])
 def test__cli__smoke_test(args, expectation):
     with expectation:
-        arguments, _ = daggerci.cli(args=args)
+        arguments, _ = cli(args=args)
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,7 @@ def test__cli__smoke_test(args, expectation):
         ([],     False),
     ])
 def test__cli__concurent(args, expected):
-    arguments, _ = daggerci.cli(args=args)
+    arguments, _ = cli(args=args)
     assert arguments.concurent == expected
 
 
@@ -38,7 +38,7 @@ def test__cli__concurent(args, expected):
         ([],     False),
     ])
 def test__cli__verbose(args, expected):
-    arguments, _ = daggerci.cli(args=args)
+    arguments, _ = cli(args=args)
     assert arguments.verbose == expected
 
 
@@ -49,7 +49,7 @@ def test__cli__verbose(args, expected):
         ([],     False),
     ])
 def test__cli__pyblish(args, expected):
-    arguments, _ = daggerci.cli(args=args)
+    arguments, _ = cli(args=args)
     assert arguments.publish == expected
 
 
@@ -60,5 +60,5 @@ def test__cli__pyblish(args, expected):
         (['-d', 'hello', 'world'], ['hello', 'world']),
     ])
 def test__cli__dockerfile(args, expected):
-    arguments, _ = daggerci.cli(args=args)
+    arguments, _ = cli(args=args)
     assert arguments.dockerfile == expected

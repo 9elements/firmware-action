@@ -3,7 +3,7 @@ To run pytest and all tests, firstly `cd` into this directory with `cd .dagger-c
 
 Then just run:
 ```
-$ pytest
+$ cd daggerci; python -m pytest
 ```
 
 ## Coverage
@@ -27,6 +27,6 @@ You can also get more info with HTML report by using argument `--cov-report=html
 
 ## Recap
 ```
-$ pytest --cov --cov-report=term-missing --runslow --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --cov-report=html
+$ cd daggerci; python -m pytest --cov --cov-report=term-missing --runslow --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --cov-report=html
 ```
 

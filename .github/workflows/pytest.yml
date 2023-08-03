@@ -20,7 +20,7 @@ jobs:
           docker-compose --version
           docker-compose -f docker/compose.yaml config
       - name: Install python deps
-        run: pip install -r ./.dagger-ci/requirements.txt
+        run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - uses: actions/checkout@v3
       - name: Run pytest
         run: .dagger-ci/run_pytest.sh
