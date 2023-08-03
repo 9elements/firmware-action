@@ -20,6 +20,7 @@ from lib.orchestrator import Orchestrator
 # To tun slow tests, call pytest with additional "--runslow" argument
 # Docs: https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
 
+
 def pytest_addoption(parser):
     parser.addoption(
         "--runslow", action="store_true", default=False, help="run slow tests"
@@ -44,13 +45,14 @@ def pytest_collection_modifyitems(config, items):
 #  Allow testing
 # ===========================
 
+
 @pytest.fixture
 def anyio_backend():
-    '''
+    """
     Needed for anyio
       https://anyio.readthedocs.io/en/stable/testing.html#testing-with-anyio
-    '''
-    return 'asyncio'
+    """
+    return "asyncio"
 
 
 # ===========================
@@ -59,17 +61,20 @@ def anyio_backend():
 #
 # ===========================
 
+
 @pytest.fixture
 def create_file():
-    '''
+    """
     Create text file at "path" with "content" as its content.
-    '''
+    """
+
     def _create_file(path: str, content: str):
         rootdir = os.path.dirname(path)
         if not os.path.isdir(rootdir):
             mkdir(rootdir)
-        with open(path, 'w', encoding='utf-8') as myfile:
+        with open(path, "w", encoding="utf-8") as myfile:
             myfile.write(content)
+
     return _create_file
 
 
@@ -79,12 +84,14 @@ def create_file():
 #
 # ===========================
 
+
 @pytest.fixture
 def dockerfile():
-    '''
+    """
     Generic Dockerfile content
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64
         ARG COREBOOT_VERSION=4.19
@@ -93,48 +100,55 @@ def dockerfile():
                 bc nano git \\
             && \\
             rm -rf /var/lib/apt/lists/*\
-            """)
+            """
+    )
 
 
 @pytest.fixture
 def dockerfile_dummy_tests_success():
-    '''
+    """
     Dockerfile content specifically for executing tests inside docker
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64
         ARG CONTEXT=dummy
         ARG VARIANT=success
         ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
         RUN echo 'hello world'\
-        """)
+        """
+    )
 
 
 @pytest.fixture
 def dockerfile_dummy_tests_fail():
-    '''
+    """
     Dockerfile content specifically for executing tests inside docker
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64
         ARG CONTEXT=dummy
         ARG VARIANT=fail
         ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
         RUN echo 'hello world'\
-        """)
+        """
+    )
 
 
 @pytest.fixture
 def dockerfile_broken():
-    '''
+    """
     Dockerfile content which should fail to build
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         FROM ubuntu:22.04 AS base
         RUN false\
-            """)
+            """
+    )
 
 
 # ===========================
@@ -143,33 +157,39 @@ def dockerfile_broken():
 #
 # ===========================
 
-@ pytest.fixture
+
+@pytest.fixture
 def docker_compose_file():
-    '''
+    """
     Generic Docker compose
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         services:
           coreboot_4.19:
             build:
-              context: coreboot""")
+              context: coreboot"""
+    )
 
 
-@ pytest.fixture
+@pytest.fixture
 def docker_compose_file_broken():
-    '''
+    """
     Docker compose which should fail syntax falidation
-    '''
-    return textwrap.dedent("""\
+    """
+    return textwrap.dedent(
+        """\
         services:
           coreboot_4.19:
-            asdfgh context coreboot""")
+            asdfgh context coreboot"""
+    )
 
 
-@ pytest.fixture
+@pytest.fixture
 def docker_compose_file_complex():
     # TODO
-    return textwrap.dedent("""\
+    return textwrap.dedent(
+        """\
         services:
           coreboot_4.19:
             build:
@@ -189,13 +209,15 @@ def docker_compose_file_complex():
                 - more=meh
           meh2:
             image: ubuntu\
-        """)
+        """
+    )
 
 
-@ pytest.fixture
+@pytest.fixture
 def docker_compose_file_multi_comprehensive_build():
     return [
-        textwrap.dedent("""\
+        textwrap.dedent(
+            """\
         services:
           dummy_1:
             build:
@@ -212,38 +234,42 @@ def docker_compose_file_multi_comprehensive_build():
               context: dummy
               args:
                 - VARIANT=fail
-        """),
-        {'services': {
-            'dummy_1': {
-                'build': True,
-                'build_msg': None,
-                'export': True,
-                'export_msg': None,
-                'test': True,
-                'test_msg': None,
-                'publish': False,
-                'publish_msg': 'skip',
-            },
-            'dummy_2': {
-                'build': True,
-                'build_msg': None,
-                'export': True,
-                'export_msg': None,
-                'test': True,
-                'test_msg': None,
-                'publish': False,
-                'publish_msg': 'skip',
-            },
-            'dummy_3': {
-                'build': True,
-                'build_msg': None,
-                'export': True,
-                'export_msg': None,
-                'test': False,
-                'test_msg': None,
-            },
-        }}
+        """
+        ),
+        {
+            "services": {
+                "dummy_1": {
+                    "build": True,
+                    "build_msg": None,
+                    "export": True,
+                    "export_msg": None,
+                    "test": True,
+                    "test_msg": None,
+                    "publish": False,
+                    "publish_msg": "skip",
+                },
+                "dummy_2": {
+                    "build": True,
+                    "build_msg": None,
+                    "export": True,
+                    "export_msg": None,
+                    "test": True,
+                    "test_msg": None,
+                    "publish": False,
+                    "publish_msg": "skip",
+                },
+                "dummy_3": {
+                    "build": True,
+                    "build_msg": None,
+                    "export": True,
+                    "export_msg": None,
+                    "test": False,
+                    "test_msg": None,
+                },
+            }
+        },
     ]
+
 
 # ===========================
 #
@@ -252,11 +278,15 @@ def docker_compose_file_multi_comprehensive_build():
 # ===========================
 
 
-@ pytest.fixture
+@pytest.fixture
 def create_orchestrator(create_file, docker_compose_file, dockerfile):
-    def _create_orchestrator(dirpath: str, compose_file_content: str | None = None, dockerfile_content: str | None = None):
+    def _create_orchestrator(
+        dirpath: str,
+        compose_file_content: str | None = None,
+        dockerfile_content: str | None = None,
+    ):
         # Create docker compose
-        docker_compose_file_path = os.path.join(dirpath, 'compose.yaml')
+        docker_compose_file_path = os.path.join(dirpath, "compose.yaml")
         if compose_file_content is None:
             compose_file_content = docker_compose_file
         create_file(path=docker_compose_file_path, content=compose_file_content)
@@ -265,13 +295,13 @@ def create_orchestrator(create_file, docker_compose_file, dockerfile):
         my_dockercompose = DockerCompose(path=docker_compose_file_path)
         for df in my_dockercompose.get_dockerfiles():
             dockerfile_path = os.path.join(
-                dirpath,
-                my_dockercompose.get_dockerfile_context(df),
-                'Dockerfile')
+                dirpath, my_dockercompose.get_dockerfile_context(df), "Dockerfile"
+            )
             if dockerfile_content is None:
                 dockerfile_content = dockerfile
             if not os.path.isfile(dockerfile_path):
                 create_file(path=dockerfile_path, content=dockerfile_content)
 
         return Orchestrator(docker_compose_path=docker_compose_file_path)
+
     return _create_orchestrator

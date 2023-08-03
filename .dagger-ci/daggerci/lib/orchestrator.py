@@ -1,6 +1,6 @@
-'''
+"""
 The main class to abstract all actions
-'''
+"""
 # pylint: disable=too-many-instance-attributes
 # mypy: disable-error-code="import"
 
@@ -15,31 +15,37 @@ import dagger
 from lib.filesystem import mkdir
 from lib.docker_compose import DockerCompose, DockerComposeValidate
 from lib.env import get_env_var_value
-from lib.git import git_get_latest_commit_sha_long, git_get_latest_commit_sha_short, git_describe
+from lib.git import (
+    git_get_latest_commit_sha_long,
+    git_get_latest_commit_sha_short,
+    git_describe,
+)
 from lib.results import Results
 
 
 class ContainerMissingTestEnvVar(Exception):
-    '''
+    """
     Container is missing environment variable for testing
-    '''
+    """
 
 
 class ContainerTestFailed(Exception):
-    '''
+    """
     Test executed inside built container failed
-    '''
+    """
 
 
-class Orchestrator():
-    '''
+class Orchestrator:
+    """
     The main class to abstract all actions
-    '''
+    """
 
-    def __init__(self, docker_compose_path: str, concurent: bool = False, publish: bool = False):
-        '''
+    def __init__(
+        self, docker_compose_path: str, concurent: bool = False, publish: bool = False
+    ):
+        """
         There is a lot to initialize
-        '''
+        """
         self.docker_compose_path = docker_compose_path
         self.concurent = concurent
 
@@ -50,29 +56,39 @@ class Orchestrator():
         #       14 GB of SSD space
         #   At the time of writing, all Docker containers when build have over 14 GB
         #   Docs: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-        self.build_dir = get_env_var_value(['GITHUB_WORKSPACE', 'RUNNER_TMP'], fallback='/tmp')
-        self.cache_dir = get_env_var_value(['XDG_CACHE_DIR', 'RUNNER_TMP'], fallback='/tmp')
+        self.build_dir = get_env_var_value(
+            ["GITHUB_WORKSPACE", "RUNNER_TMP"], fallback="/tmp"
+        )
+        self.cache_dir = get_env_var_value(
+            ["XDG_CACHE_DIR", "RUNNER_TMP"], fallback="/tmp"
+        )
         # Log location
-        self.logdir = os.path.join(self.build_dir, 'logs')
+        self.logdir = os.path.join(self.build_dir, "logs")
         mkdir(path=self.logdir)
         # GIT related info
         self.tag_sha = git_get_latest_commit_sha_long()
         self.tag_sha_short = git_get_latest_commit_sha_short()
-        self.git_ref = get_env_var_value(['GITHUB_REF'], fallback=git_describe())
-        self.project_name = 'firmware-action'
-        self.project_url = get_env_var_value(
-            ['GITHUB_SERVER_URL'],
-            fallback='https://github.com') + '/' + get_env_var_value(
-            ['GITHUB_REPOSITORY'],
-            fallback=f'9elements/{self.project_name}')
+        self.git_ref = get_env_var_value(["GITHUB_REF"], fallback=git_describe())
+        self.project_name = "firmware-action"
+        self.project_url = (
+            get_env_var_value(["GITHUB_SERVER_URL"], fallback="https://github.com")
+            + "/"
+            + get_env_var_value(
+                ["GITHUB_REPOSITORY"], fallback=f"9elements/{self.project_name}"
+            )
+        )
         # Container registry vars
-        self.container_registry = get_env_var_value(['env.REGISTRY'], None)
-        self.container_registry_username = get_env_var_value(['github.actor'], None)
-        self.container_registry_password = get_env_var_value(['secrets.GITHUB_TOKEN'], None)
+        self.container_registry = get_env_var_value(["env.REGISTRY"], None)
+        self.container_registry_username = get_env_var_value(["github.actor"], None)
+        self.container_registry_password = get_env_var_value(
+            ["secrets.GITHUB_TOKEN"], None
+        )
 
         # Publishing-related info
         self.labels = {
-            "org.opencontainers.image.created": datetime.datetime.now().astimezone().isoformat(),
+            "org.opencontainers.image.created": datetime.datetime.now()
+            .astimezone()
+            .isoformat(),
             "org.opencontainers.image.licenses": "MIT",
             "org.opencontainers.image.revision": self.tag_sha,
             "org.opencontainers.image.source": self.project_url,
@@ -94,9 +110,14 @@ class Orchestrator():
             # type = sha
         ]
         self.publish = publish
-        if self.container_registry is None or self.container_registry_username is None or self.container_registry_password is None:
+        if (
+            self.container_registry is None
+            or self.container_registry_username is None
+            or self.container_registry_password is None
+        ):
             logging.warning(
-                'Missing environment variables present in GitHub CI, skipping container publishing step')
+                "Missing environment variables present in GitHub CI, skipping container publishing step"
+            )
             self.publish = False
 
         # Variable(s) for storing results of builds, tests and publishing
@@ -116,8 +137,10 @@ class Orchestrator():
         # )
         # .with_label("org.opencontainers.image.licenses", "MIT")
 
-    async def build_test_publish(self, dockerfiles_override: list[str] | None = None) -> Results:
-        '''
+    async def build_test_publish(
+        self, dockerfiles_override: list[str] | None = None
+    ) -> Results:
+        """
         Main function to call, it will:
         - build
         - test
@@ -125,11 +148,12 @@ class Orchestrator():
         all docker containers specified in docker compose file.
         It is also responsible for concurrent dispatching and result reporting.
         Returns results which is dictionary.
-        '''
-        top_element = 'services'
+        """
+        top_element = "services"
         if top_element not in self.docker_compose.get_top_elements():
             raise DockerComposeValidate(
-                f'Top element "{top_element}" not found in provided docker compose')
+                f'Top element "{top_element}" not found in provided docker compose'
+            )
 
         all_dockerfiles = self.docker_compose.get_dockerfiles(top_element=top_element)
         if dockerfiles_override is not None:
@@ -139,55 +163,73 @@ class Orchestrator():
             for dockerfile in all_dockerfiles:
                 if self.concurent:
                     async with anyio.create_task_group() as task_group:
-                        task_group.start_soon(self.__build_test_publish__,
-                                              client, top_element=top_element, dockerfile=dockerfile)
+                        task_group.start_soon(
+                            self.__build_test_publish__,
+                            client,
+                            top_element=top_element,
+                            dockerfile=dockerfile,
+                        )
                 else:
-                    await self.__build_test_publish__(client, top_element=top_element, dockerfile=dockerfile)
+                    await self.__build_test_publish__(
+                        client, top_element=top_element, dockerfile=dockerfile
+                    )
 
         return self.results
 
-    async def __build_test_publish__(self, client: dagger.Client, top_element: str, dockerfile: str) -> None:
-        '''
+    async def __build_test_publish__(
+        self, client: dagger.Client, top_element: str, dockerfile: str
+    ) -> None:
+        """
         Build, test and publish ...
         The actual calls, logic and error handling is here.
-        '''
+        """
         # Prepare variables
         dockerfile_dir = os.path.join(
             os.path.dirname(self.docker_compose_path),
-            self.docker_compose.yaml[top_element][dockerfile]['build']['context'],
+            self.docker_compose.yaml[top_element][dockerfile]["build"]["context"],
         )
         dockerfile_path = os.path.join(
             dockerfile_dir,
-            'Dockerfile',
+            "Dockerfile",
         )
         if not os.path.isfile(dockerfile_path):
             raise FileNotFoundError(dockerfile_path)
         dockerfile_args = self.docker_compose.get_dockerfile_args(
-            dockerfile=dockerfile, top_element=top_element)
+            dockerfile=dockerfile, top_element=top_element
+        )
         tarball_file = os.path.join(self.build_dir, f"{dockerfile}.tar")
 
         # =======
         # BUILD
-        logging.info('%s/%s: BUILDING', top_element, dockerfile)
-        built_docker = await self.__build__(client=client, dockerfile_dir=dockerfile_dir, dockerfile_args=dockerfile_args)
-        self.results.add(top_element, dockerfile, 'build')
+        logging.info("%s/%s: BUILDING", top_element, dockerfile)
+        built_docker = await self.__build__(
+            client=client,
+            dockerfile_dir=dockerfile_dir,
+            dockerfile_args=dockerfile_args,
+        )
+        self.results.add(top_element, dockerfile, "build")
 
         # export as tarball
         if not await built_docker.export(tarball_file):
-            self.results.add(top_element, dockerfile, 'export', False,
-                             f"Failed to export docker container {dockerfile} as tarball")
+            self.results.add(
+                top_element,
+                dockerfile,
+                "export",
+                False,
+                f"Failed to export docker container {dockerfile} as tarball",
+            )
             return
-        self.results.add(top_element, dockerfile, 'export')
+        self.results.add(top_element, dockerfile, "export")
 
         # =======
         # TEST
-        logging.info('%s/%s: TESTING', top_element, dockerfile)
+        logging.info("%s/%s: TESTING", top_element, dockerfile)
         try:
             await self.__test__(client=client, tarball_file=tarball_file)
         except ContainerTestFailed:
-            self.results.add(top_element, dockerfile, 'test', False)
+            self.results.add(top_element, dockerfile, "test", False)
             return
-        self.results.add(top_element, dockerfile, 'test')
+        self.results.add(top_element, dockerfile, "test")
 
         # =======
         # PUBLISH
@@ -196,74 +238,70 @@ class Orchestrator():
             # await self.__publish__(client=client)
             pass
         else:
-            self.results.add(top_element, dockerfile, 'publish', False, 'skip')
+            self.results.add(top_element, dockerfile, "publish", False, "skip")
 
-    async def __build__(self,
-                        client: dagger.Client,
-                        dockerfile_dir: str,
-                        dockerfile_args: list[Any]) -> dagger.Container:
+    async def __build__(
+        self, client: dagger.Client, dockerfile_dir: str, dockerfile_args: list[Any]
+    ) -> dagger.Container:
         # dockerfile_args: list[dagger.api.gen.BuildArg]) -> dagger.Container:
         # For some reason I get
         #   "AttributeError: module 'dagger' has no attribute 'api'"
-        '''
+        """
         Does the actual building of docker container
-        '''
+        """
         context_dir = client.host().directory(dockerfile_dir)
         return await context_dir.docker_build(  # type: ignore [no-any-return]
-            build_args=dockerfile_args)
-
-    async def __test__(self, client: dagger.Client, tarball_file: str) -> None:
-        '''
-        Test / verify that the built container is functional by executing a script inside
-        '''
-        # Create container from tarball
-        context_tarball = client.host().file(tarball_file)
-        test_container = (
-            client.pipeline('test')
-            .container()
-            .import_(context_tarball)
+            build_args=dockerfile_args
         )
 
+    async def __test__(self, client: dagger.Client, tarball_file: str) -> None:
+        """
+        Test / verify that the built container is functional by executing a script inside
+        """
+        # Create container from tarball
+        context_tarball = client.host().file(tarball_file)
+        test_container = client.pipeline("test").container().import_(context_tarball)
+
         # Make sure that container has environment variable "VERIFICATION_TEST"
-        verification_test = await test_container.env_variable('VERIFICATION_TEST')
+        verification_test = await test_container.env_variable("VERIFICATION_TEST")
         if verification_test is None:
             msg = 'Container is missing "VERIFICATION_TEST" environment variable'
             logging.critical(msg)
             raise ContainerMissingTestEnvVar(msg)
-        logging.debug('VERIFICATION_TEST=%s', verification_test)
+        logging.debug("VERIFICATION_TEST=%s", verification_test)
 
         # Figure out location of test-related files
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        logging.debug('Current working directory: %s', current_dir)
+        logging.debug("Current working directory: %s", current_dir)
         repo_root_dir = current_dir
         while os.path.basename(repo_root_dir) != self.project_name:
             repo_root_dir = os.path.dirname(repo_root_dir)
-        logging.debug('Repository root directory: %s', repo_root_dir)
-        test_dir = os.path.join(repo_root_dir, 'tests')
-        logging.debug('Directory with tests: %s', test_dir)
+        logging.debug("Repository root directory: %s", repo_root_dir)
+        test_dir = os.path.join(repo_root_dir, "tests")
+        logging.debug("Directory with tests: %s", test_dir)
 
         # Execute test
         context_test_dir = client.host().directory(test_dir)
         container_name = os.path.basename(tarball_file)
         try:
-            test_container = (
-                test_container
-                .with_directory('tests', context_test_dir)
-                .with_exec(
-                    [verification_test],
-                    redirect_stdout=f'{container_name}_stdout.log',
-                    redirect_stderr=f'{container_name}_stderr.log',
-                )
+            test_container = test_container.with_directory(
+                "tests", context_test_dir
+            ).with_exec(
+                [verification_test],
+                redirect_stdout=f"{container_name}_stdout.log",
+                redirect_stderr=f"{container_name}_stderr.log",
             )
             test_container = await test_container.sync()
         except dagger.exceptions.ExecError as ex:
             # When command in '.with_exec()' fails, exception is raised
             #   said exception contains STDERR and STDOUT
             for std_streams in [
-                [f'{container_name}_stdout.log', ex.stdout],
-                [f'{container_name}_stderr.log', ex.stderr],
+                [f"{container_name}_stdout.log", ex.stdout],
+                [f"{container_name}_stderr.log", ex.stderr],
             ]:
-                with open(os.path.join(self.logdir, std_streams[0]), 'w', encoding='utf-8') as logfile:
+                with open(
+                    os.path.join(self.logdir, std_streams[0]), "w", encoding="utf-8"
+                ) as logfile:
                     logfile.write(std_streams[1])
             logging.error("Test on %s failed", container_name)
             raise ContainerTestFailed(ex.message)  # pylint: disable=raise-missing-from
@@ -272,17 +310,24 @@ class Orchestrator():
         else:
             # When command in '.with_exec()' suceeds, STDERR and STDOUT are automatically
             #   redirected into text files, which must be extracted from the container
-            for std_log in [f'{container_name}_stdout.log', f'{container_name}_stderr.log']:
-                await test_container.file(std_log).export(os.path.join(self.logdir, std_log))
+            for std_log in [
+                f"{container_name}_stdout.log",
+                f"{container_name}_stderr.log",
+            ]:
+                await test_container.file(std_log).export(
+                    os.path.join(self.logdir, std_log)
+                )
             # No return here, so the execution continues normally
         finally:
             # Cleanup
             os.remove(tarball_file)
 
-    async def __publish__(self, client: dagger.Client, dockerfile: str, top_element: str) -> None:
-        '''
+    async def __publish__(
+        self, client: dagger.Client, dockerfile: str, top_element: str
+    ) -> None:
+        """
         Publish the built container to container registry
-        '''
+        """
         # TODO: unfinished
         # try:
         #    registry = os.environ[ENV_VAR_CONTAINER_REGISTRY]
