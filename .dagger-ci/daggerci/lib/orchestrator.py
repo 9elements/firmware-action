@@ -167,8 +167,8 @@ class Orchestrator:
                         task_group.start_soon(
                             self.__build_test_publish__,
                             client,
-                            top_element=top_element,
-                            dockerfile=dockerfile,
+                            top_element,
+                            dockerfile,
                         )
                 else:
                     await self.__build_test_publish__(
