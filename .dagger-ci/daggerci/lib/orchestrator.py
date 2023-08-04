@@ -159,6 +159,7 @@ class Orchestrator:
         all_dockerfiles = self.docker_compose.get_dockerfiles(top_element=top_element)
         if dockerfiles_override is not None:
             all_dockerfiles = dockerfiles_override
+        logging.info(f"To build: {all_dockerfiles}")
 
         async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
             for dockerfile in all_dockerfiles:
@@ -194,7 +195,8 @@ class Orchestrator:
             "Dockerfile",
         )
         if not os.path.isfile(dockerfile_path):
-            raise FileNotFoundError(dockerfile_path)
+            self.results.add(top_element, dockerfile, "build", False, f"File '{dockerfile_path}' not found")
+            return
         dockerfile_args = self.docker_compose.get_dockerfile_args(
             dockerfile=dockerfile, top_element=top_element
         )
@@ -203,11 +205,15 @@ class Orchestrator:
         # =======
         # BUILD
         logging.info("%s/%s: BUILDING", top_element, dockerfile)
-        built_docker = await self.__build__(
-            client=client,
-            dockerfile_dir=dockerfile_dir,
-            dockerfile_args=dockerfile_args,
-        )
+        try:
+            built_docker = await self.__build__(
+                client=client,
+                dockerfile_dir=dockerfile_dir,
+                dockerfile_args=dockerfile_args,
+            )
+        except dagger.exceptions.ExecError as exc:
+            self.results.add(top_element, dockerfile, "build", False, exc.message)
+            return
         self.results.add(top_element, dockerfile, "build")
 
         # export as tarball
