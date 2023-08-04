@@ -10,11 +10,11 @@ services:
   #==================
   # edk2
   #==================
-  vudk2017:
+  udk2017:
     build:
       context: edk2
       args:
-        - EDK2_VERSION=vUDK2017
+        - EDK2_VERSION=UDK2017
         - SOURCE_IMAGE=buildpack-deps:bionic
         - EDK2_PLATFORM_COMMIT=5b849a6397d51607098cb4d0cf8b9b3f88731912
         - EDK2_NON_OSI_COMMIT=663322292e2cc81ee6ec26aa0c5948f4d8c4849a
