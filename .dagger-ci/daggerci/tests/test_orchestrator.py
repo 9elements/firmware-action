@@ -36,10 +36,10 @@ async def test__orchestrator__broken_dockerfile(
     )
     result = await my_orchestrator.build_test_publish()
     assert result.results == {
-        'services': {
-            'coreboot_4.19': {
-                'build': False,
-                'build_msg': 'failed to solve: process "/bin/sh -c false" did not complete successfully: exit code: 1'
+        "services": {
+            "coreboot_4.19": {
+                "build": False,
+                "build_msg": 'failed to solve: process "/bin/sh -c false" did not complete successfully: exit code: 1',
             }
         }
     }
