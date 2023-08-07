@@ -15,7 +15,7 @@ async def test__orchestrator__broken_compose(
     tmpdir, create_orchestrator, docker_compose_file_broken
 ):
     """
-    Test with broken docker compose file
+    Test with broken docker-compose file
     """
     with pytest.raises(DockerComposeValidate):
         create_orchestrator(

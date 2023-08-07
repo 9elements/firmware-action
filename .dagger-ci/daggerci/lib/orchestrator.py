@@ -145,14 +145,14 @@ class Orchestrator:
         - build
         - test
         - publish
-        all docker containers specified in docker compose file.
+        all docker containers specified in docker-compose file.
         It is also responsible for concurrent dispatching and result reporting.
         Returns results which is dictionary.
         """
         top_element = "services"
         if top_element not in self.docker_compose.get_top_elements():
             raise DockerComposeValidate(
-                f'Top element "{top_element}" not found in provided docker compose'
+                f'Top element "{top_element}" not found in provided docker-compose'
             )
 
         all_dockerfiles = self.docker_compose.get_dockerfiles(top_element=top_element)

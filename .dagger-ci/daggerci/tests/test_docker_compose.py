@@ -40,23 +40,23 @@ def test__docker_compose_broken(tmpdir, create_file, docker_compose_file_broken)
 def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
     compose_file = os.path.join(tmpdir, "compose.yaml")
     create_file(path=compose_file, content=docker_compose_file_complex)
-    mydockercompose = DockerCompose(path=compose_file)
+    my_docker_compose = DockerCompose(path=compose_file)
 
-    assert mydockercompose.get_top_elements() == ["services"]
+    assert my_docker_compose.get_top_elements() == ["services"]
 
-    assert mydockercompose.__select_top_element__() == "services"
-    assert mydockercompose.__select_top_element__("services") == "services"
+    assert my_docker_compose.__select_top_element__() == "services"
+    assert my_docker_compose.__select_top_element__("services") == "services"
     with pytest.raises(DockerComposeMissingElement):
-        mydockercompose.__select_top_element__("")
+        my_docker_compose.__select_top_element__("")
 
-    assert mydockercompose.get_dockerfiles() == [
+    assert my_docker_compose.get_dockerfiles() == [
         "coreboot_4.19",
         "coreboot_4.20",
         "edk2",
         "meh",
         "meh2",
     ]
-    assert mydockercompose.get_dockerfiles(top_element="services") == [
+    assert my_docker_compose.get_dockerfiles(top_element="services") == [
         "coreboot_4.19",
         "coreboot_4.20",
         "edk2",
@@ -64,34 +64,34 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
         "meh2",
     ]
 
-    assert mydockercompose.__select_dockerfile__() == "coreboot_4.19"
-    assert mydockercompose.__select_dockerfile__("coreboot_4.19") == "coreboot_4.19"
+    assert my_docker_compose.__select_dockerfile__() == "coreboot_4.19"
+    assert my_docker_compose.__select_dockerfile__("coreboot_4.19") == "coreboot_4.19"
     assert (
-        mydockercompose.__select_dockerfile__("coreboot_4.19", "services")
+        my_docker_compose.__select_dockerfile__("coreboot_4.19", "services")
         == "coreboot_4.19"
     )
     with pytest.raises(DockerComposeMissingElement):
-        mydockercompose.__select_dockerfile__("")
+        my_docker_compose.__select_dockerfile__("")
     with pytest.raises(DockerComposeMissingElement):
-        mydockercompose.__select_dockerfile__("", "")
+        my_docker_compose.__select_dockerfile__("", "")
 
-    assert mydockercompose.get_dockerfile_context() == "coreboot"
-    assert mydockercompose.get_dockerfile_context("coreboot_4.19") == "coreboot"
+    assert my_docker_compose.get_dockerfile_context() == "coreboot"
+    assert my_docker_compose.get_dockerfile_context("coreboot_4.19") == "coreboot"
     assert (
-        mydockercompose.get_dockerfile_context("coreboot_4.19", "services")
+        my_docker_compose.get_dockerfile_context("coreboot_4.19", "services")
         == "coreboot"
     )
-    assert mydockercompose.get_dockerfile_context("coreboot_4.20") is None
-    assert mydockercompose.get_dockerfile_context("meh") is None
-    assert mydockercompose.get_dockerfile_context("meh2") is None
+    assert my_docker_compose.get_dockerfile_context("coreboot_4.20") is None
+    assert my_docker_compose.get_dockerfile_context("meh") is None
+    assert my_docker_compose.get_dockerfile_context("meh2") is None
 
-    assert mydockercompose.get_dockerfile_args() == [
+    assert my_docker_compose.get_dockerfile_args() == [
         dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
     ]
-    assert mydockercompose.get_dockerfile_args("coreboot_4.19") == [
+    assert my_docker_compose.get_dockerfile_args("coreboot_4.19") == [
         dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
     ]
-    assert mydockercompose.get_dockerfile_args("coreboot_4.19", "services") == [
+    assert my_docker_compose.get_dockerfile_args("coreboot_4.19", "services") == [
         dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
     ]
-    assert mydockercompose.get_dockerfile_args("edk2") == []
+    assert my_docker_compose.get_dockerfile_args("edk2") == []
