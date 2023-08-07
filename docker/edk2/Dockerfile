@@ -76,11 +76,11 @@ FROM ${INTERMEDIATE_IMAGE} AS toolchain
 WORKDIR $TOOLSDIR
 RUN git clone --recurse-submodules https://github.com/tianocore/edk2-platforms.git Edk2Platforms && \
     cd Edk2Platforms && \
-    git checkout ${EDK2_PLATFORM_COMMIT}
+    git checkout "${EDK2_PLATFORM_COMMIT}"
 RUN git clone --recurse-submodules https://github.com/tianocore/edk2-non-osi.git Edk2NonOsi && \
     cd Edk2NonOsi && \
-    git checkout ${EDK2_NON_OSI_COMMIT}
-RUN git clone --recurse-submodules https://github.com/tianocore/edk2.git --depth 2 --branch ${EDK2_VERSION} Edk2 && \
+    git checkout "${EDK2_NON_OSI_COMMIT}"
+RUN git clone --recurse-submodules https://github.com/tianocore/edk2.git --depth 2 --branch "${EDK2_VERSION}" Edk2 && \
     cd Edk2 && \
     make -C BaseTools/ -j $(nproc)
 
