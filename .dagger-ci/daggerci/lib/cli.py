@@ -37,7 +37,7 @@ def cli(
         help=textwrap.dedent(
             """\
                 select which dockerfile to build
-                - enter name from docker compose
+                - enter name from docker-compose
                 - multiple entries are possible
                 - by default tries to build all"""
         ),

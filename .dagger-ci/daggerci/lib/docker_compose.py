@@ -1,8 +1,8 @@
 """
-Functions to help parse Docker Compose
+Functions to help parse docker-compose
 Docs: https://docs.docker.com/compose/compose-file/
 
-!!! This class / parser is incomplete implementation of Docker Compose specification !!!
+!!! This class / parser is incomplete implementation of docker-compose specification !!!
 It implements only specific functions that are needed in this specific project.
 """
 # mypy: disable-error-code="import"
@@ -18,13 +18,13 @@ import yaml
 
 class DockerComposeValidate(Exception):
     """
-    Failed validation of docker compose yaml file
+    Failed validation of docker-compose yaml file
     """
 
 
 class DockerComposeMissingElement(Exception):
     """
-    Failed to get element from docker compose yaml file
+    Failed to get element from docker-compose yaml file
     """
 
 
@@ -46,7 +46,7 @@ def select(heap: list[str], needle: str | None = None) -> str:
 
 class DockerCompose:
     """
-    Class to parse docker compose file
+    Class to parse docker-compose file
     """
 
     def __init__(self, path: str):
@@ -63,9 +63,9 @@ class DockerCompose:
         cmd = ["docker-compose", "-f", self.path, "config"]
         output = subprocess.run(cmd, check=False, capture_output=True)
         if output.returncode != 0:
-            logging.critical('Docker compose file "%s" failed validation', self.path)
+            logging.critical('Docker-compose file "%s" failed validation', self.path)
             logging.critical(pformat(output))
-            raise DockerComposeValidate("Failed docker compose validation")
+            raise DockerComposeValidate("Failed docker-compose validation")
 
     def get_top_elements(self) -> list[str]:
         """
@@ -89,7 +89,7 @@ class DockerCompose:
 
     def get_dockerfiles(self, top_element: str | None = None) -> list[str]:
         """
-        Return a list of all docker files in top_element (list of strings)
+        Return a list of all dockerfiles in top_element (list of strings)
         if no top_element provided, use the first one
         """
         this_top_element = self.__select_top_element__(top_element)

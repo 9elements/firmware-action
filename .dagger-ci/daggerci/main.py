@@ -28,7 +28,7 @@ async def main(inargs: list[str] | None = None) -> int:
         level=logging.DEBUG if args.verbose else logging.INFO,
     )
 
-    # Figure out location of docker compose
+    # Figure out location of docker-compose
     current_dir = os.path.dirname(os.path.realpath(__file__))
     repo_root_dir = current_dir
     while os.path.basename(repo_root_dir) != "firmware-action":

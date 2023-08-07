@@ -4,9 +4,9 @@ Collection of dockerfiles and open source tools to
 build various firmware images.
 
 
-## Docker compose
+## Docker-compose
 
-The compose file is not used at the moment by actual docker-compose, it is manually parsed and fed to dagger. In addition, at the time of writing, dagger does not support docker compose.
+The compose file is not used at the moment by actual docker-compose, it is manually parsed and fed to dagger. In addition, at the time of writing, dagger does not support docker-compose.
 
 The core problem was too many dockerfiles with practically identical content. And instead ot making up some custom configuration solution, we just decided to use existing and defined docker-compose yaml config structure.
 

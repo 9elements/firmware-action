@@ -160,7 +160,7 @@ def dockerfile_broken():
 @pytest.fixture
 def docker_compose_file():
     """
-    Generic Docker compose
+    Generic docker-compose
     """
     return textwrap.dedent(
         """\
@@ -174,7 +174,7 @@ def docker_compose_file():
 @pytest.fixture
 def docker_compose_file_broken():
     """
-    Docker compose which should fail syntax validation
+    Docker-compose which should fail syntax validation
     """
     return textwrap.dedent(
         """\
@@ -284,17 +284,17 @@ def create_orchestrator(create_file, docker_compose_file, dockerfile):
         compose_file_content: str | None = None,
         dockerfile_content: str | None = None,
     ):
-        # Create docker compose
+        # Create docker-compose
         docker_compose_file_path = os.path.join(dirpath, "compose.yaml")
         if compose_file_content is None:
             compose_file_content = docker_compose_file
         create_file(path=docker_compose_file_path, content=compose_file_content)
 
-        # Create dockerfiles according to docker compose
-        my_dockercompose = DockerCompose(path=docker_compose_file_path)
-        for df in my_dockercompose.get_dockerfiles():
+        # Create dockerfiles according to docker-compose
+        my_docker_compose = DockerCompose(path=docker_compose_file_path)
+        for df in my_docker_compose.get_dockerfiles():
             dockerfile_path = os.path.join(
-                dirpath, my_dockercompose.get_dockerfile_context(df), "Dockerfile"
+                dirpath, my_docker_compose.get_dockerfile_context(df), "Dockerfile"
             )
             if dockerfile_content is None:
                 dockerfile_content = dockerfile
