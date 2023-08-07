@@ -34,7 +34,7 @@ def git_describe() -> str | None:
 
 def git_get_tag() -> str | None:
     """
-    Return a tag if currently tag is checked-out, else neturn None
+    Return a tag if currently tag is checked-out, else return None
     """
     describe = git_describe()
     if describe is None:

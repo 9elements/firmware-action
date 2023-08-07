@@ -29,9 +29,9 @@ def test__cli__smoke_test(args, expectation):
         ([], False),
     ],
 )
-def test__cli__concurent(args, expected):
+def test__cli__concurrent(args, expected):
     arguments, _ = cli(args=args)
-    assert arguments.concurent == expected
+    assert arguments.concurrent == expected
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test__cli__verbose(args, expected):
         ([], False),
     ],
 )
-def test__cli__pyblish(args, expected):
+def test__cli__publish(args, expected):
     arguments, _ = cli(args=args)
     assert arguments.publish == expected
 

@@ -41,17 +41,17 @@ class Orchestrator:
     """
 
     def __init__(
-        self, docker_compose_path: str, concurent: bool = False, publish: bool = False
+        self, docker_compose_path: str, concurrent: bool = False, publish: bool = False
     ):
         """
         There is a lot to initialize
         """
         self.docker_compose_path = docker_compose_path
-        self.concurent = concurent
+        self.concurrent = concurrent
 
         # Build location
         #   On local system, you probably want to build in /tmp, but pipeline is different story.
-        #   Accorgding to docs, Linux virtual machines have rather limited memory and disk space:
+        #   According to docs, Linux virtual machines have rather limited memory and disk space:
         #       7 GB of RAM
         #       14 GB of SSD space
         #   At the time of writing, all Docker containers when build have over 14 GB
@@ -161,7 +161,7 @@ class Orchestrator:
 
         async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
             for dockerfile in all_dockerfiles:
-                if self.concurent:
+                if self.concurrent:
                     async with anyio.create_task_group() as task_group:
                         task_group.start_soon(
                             self.__build_test_publish__,
@@ -308,7 +308,7 @@ class Orchestrator:
             # This return will execute after 'finally' completes
             #   see: https://git.sr.ht/~atomicfs/dotfiles/tree/master/item/Templates/python-except-finally-example.py
         else:
-            # When command in '.with_exec()' suceeds, STDERR and STDOUT are automatically
+            # When command in '.with_exec()' succeeds, STDERR and STDOUT are automatically
             #   redirected into text files, which must be extracted from the container
             for std_log in [
                 f"{container_name}_stdout.log",

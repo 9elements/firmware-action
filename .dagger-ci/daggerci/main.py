@@ -38,7 +38,7 @@ async def main(inargs: list[str] | None = None) -> int:
     # Init the Orchestrator
     my_orchestrator = Orchestrator(
         docker_compose_path=docker_compose_path,
-        concurent=args.concurent,
+        concurrent=args.concurrent,
         publish=args.publish,
     )
 

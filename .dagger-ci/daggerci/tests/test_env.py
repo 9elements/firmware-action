@@ -10,7 +10,7 @@ from lib.env import get_env_var_value
 @pytest.mark.parametrize(
     "list_of_maybe_existing_env_vars, fallback, presets, expected",
     [
-        # No env vars set, should return fallfack
+        # No env vars set, should return fallback
         (["NONEXISTING_A", "NONEXISTING_B"], "/tmp", [], "/tmp"),
         # First env var set, should return that
         (

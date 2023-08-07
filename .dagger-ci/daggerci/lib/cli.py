@@ -27,8 +27,8 @@ def cli(
     )
     parser.add_argument(
         "-c",
-        "--concurent",
-        help="execute builds concurently",
+        "--concurrent",
+        help="execute builds concurrently",
         action="store_true",
     )
     parser.add_argument(

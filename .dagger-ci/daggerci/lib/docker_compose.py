@@ -2,8 +2,8 @@
 Functions to help parse Docker Compose
 Docs: https://docs.docker.com/compose/compose-file/
 
-!!! This is class / parses is incomplete implementation of Docker Compose specification !!!
-It implements only specific functions that are needed in this top_element.
+!!! This class / parser is incomplete implementation of Docker Compose specification !!!
+It implements only specific functions that are needed in this specific project.
 """
 # mypy: disable-error-code="import"
 
@@ -30,7 +30,7 @@ class DockerComposeMissingElement(Exception):
 
 def select(heap: list[str], needle: str | None = None) -> str:
     """
-    Select either top_element or dockerfile from conpose YAML
+    Select either top_element or dockerfile from compose YAML
         - as default return first defined top_element or dockerfile
         - return needle
     """
@@ -58,7 +58,7 @@ class DockerCompose:
 
     def validate(self) -> None:
         """
-        Valide the compose.yaml file
+        Validate the compose.yaml file
         """
         cmd = ["docker-compose", "-f", self.path, "config"]
         output = subprocess.run(cmd, check=False, capture_output=True)

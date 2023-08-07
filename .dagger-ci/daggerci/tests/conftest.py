@@ -174,7 +174,7 @@ def docker_compose_file():
 @pytest.fixture
 def docker_compose_file_broken():
     """
-    Docker compose which should fail syntax falidation
+    Docker compose which should fail syntax validation
     """
     return textwrap.dedent(
         """\
@@ -290,7 +290,7 @@ def create_orchestrator(create_file, docker_compose_file, dockerfile):
             compose_file_content = docker_compose_file
         create_file(path=docker_compose_file_path, content=compose_file_content)
 
-        # Create dockerfiles accoridng to docker compose
+        # Create dockerfiles according to docker compose
         my_dockercompose = DockerCompose(path=docker_compose_file_path)
         for df in my_dockercompose.get_dockerfiles():
             dockerfile_path = os.path.join(
