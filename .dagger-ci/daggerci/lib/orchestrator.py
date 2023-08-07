@@ -19,6 +19,7 @@ from lib.git import (
     git_describe,
     git_get_latest_commit_sha_long,
     git_get_latest_commit_sha_short,
+    git_get_root_directory,
 )
 from lib.results import Results
 
@@ -271,11 +272,7 @@ class Orchestrator:
         logging.debug("VERIFICATION_TEST=%s", verification_test)
 
         # Figure out location of test-related files
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        logging.debug("Current working directory: %s", current_dir)
-        repo_root_dir = current_dir
-        while os.path.basename(repo_root_dir) != self.project_name:
-            repo_root_dir = os.path.dirname(repo_root_dir)
+        repo_root_dir = git_get_root_directory()
         logging.debug("Repository root directory: %s", repo_root_dir)
         test_dir = os.path.join(repo_root_dir, "tests")
         logging.debug("Directory with tests: %s", test_dir)
