@@ -13,6 +13,7 @@ import sys
 
 import anyio
 from lib.cli import cli
+from lib.git import git_get_root_directory
 from lib.orchestrator import Orchestrator
 
 
@@ -29,11 +30,9 @@ async def main(inargs: list[str] | None = None) -> int:
     )
 
     # Figure out location of docker-compose
-    current_dir = os.path.dirname(os.path.realpath(__file__))
-    repo_root_dir = current_dir
-    while os.path.basename(repo_root_dir) != "firmware-action":
-        repo_root_dir = os.path.dirname(repo_root_dir)
-    docker_compose_path = os.path.join(repo_root_dir, "docker", "compose.yaml")
+    docker_compose_path = os.path.join(
+        git_get_root_directory(), "docker", "compose.yaml"
+    )
 
     # Init the Orchestrator
     my_orchestrator = Orchestrator(

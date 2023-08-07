@@ -42,3 +42,15 @@ def git_get_tag() -> str | None:
     if re.match(r"^v?\d+\.\d+(?:\.\d+)?$", describe):
         return describe
     return None
+
+
+def git_get_root_directory() -> str:
+    """
+    Assuming that current working directory is part of git repository,
+    get the root directory of said git repository
+    """
+    return (
+        subprocess.check_output(["git", "rev-parse", "--show-toplevel"])
+        .strip()
+        .decode()
+    )
