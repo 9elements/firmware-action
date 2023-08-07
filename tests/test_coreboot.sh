@@ -17,7 +17,7 @@ cd coreboot
 
 # Make
 for PAYLOAD in "${PAYLOADS[@]}"; do
-	echo "TETING: ${PAYLOAD}"
+	echo "TESTING: ${PAYLOAD}"
 	make clean
 	cp "/tests/coreboot_${VERIFICATION_TEST_COREBOOT_VERSION}/${PAYLOAD}.defconfig" "./${PAYLOAD}.defconfig"
 	make defconfig KBUILD_DEFCONFIG="./${PAYLOAD}.defconfig"

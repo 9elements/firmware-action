@@ -17,7 +17,7 @@ To run slow tests, simply use following argument `--runslow`.
 ## Live log
 To see live log from tests, for example docker-building with dagger, simply use following arguments `--log-cli-level NOTSET  --show-capture no`.
 
-To ommit the summary at the end, use argument `--no-summary`.
+To omit the summary at the end, use argument `--no-summary`.
 
 ## Log verbosity
 By default it is `DEBUG`, you can reduce it by using argument `--log-cli-level=INFO`.

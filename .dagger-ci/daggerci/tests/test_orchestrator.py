@@ -117,7 +117,7 @@ async def test__orchestrator__multi_comprehensive_build(
     dockerfile_dummy_tests_fail,
 ):
     """
-    Test the orchestrator with something similar to real-world usecase
+    Test the orchestrator with something similar to real-world use case
     """
     compose_yaml, expected_results = docker_compose_file_multi_comprehensive_build
     my_orchestrator = create_orchestrator(
