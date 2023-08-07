@@ -53,15 +53,15 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
         "coreboot_4.19",
         "coreboot_4.20",
         "edk2",
-        "meh",
-        "meh2",
+        "dummy",
+        "dummy2",
     ]
     assert my_docker_compose.get_dockerfiles(top_element="services") == [
         "coreboot_4.19",
         "coreboot_4.20",
         "edk2",
-        "meh",
-        "meh2",
+        "dummy",
+        "dummy2",
     ]
 
     assert my_docker_compose.__select_dockerfile__() == "coreboot_4.19"
@@ -82,8 +82,8 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
         == "coreboot"
     )
     assert my_docker_compose.get_dockerfile_context("coreboot_4.20") is None
-    assert my_docker_compose.get_dockerfile_context("meh") is None
-    assert my_docker_compose.get_dockerfile_context("meh2") is None
+    assert my_docker_compose.get_dockerfile_context("dummy") is None
+    assert my_docker_compose.get_dockerfile_context("dummy2") is None
 
     assert my_docker_compose.get_dockerfile_args() == [
         dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
