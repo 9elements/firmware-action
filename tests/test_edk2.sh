@@ -6,14 +6,14 @@ set -Ee
 # Verify GCC version
 #==========================
 
-FOUND_GCC_VERSION=$( gcc -dumpversion )
+FOUND_GCC_VERSION=$(gcc -dumpversion)
 
-match_version(){
+match_version() {
 	# Since we also have GCC 4.8 the version matching became more complex
 	REQUIRED="${1}"
 	FOUND_FULL="${2}"
-	FOUND_MAJOR=$( echo "${FOUND_FULL}" | sed -E 's/\..*//g' )
-	FOUND_MAJOR_MINOR=$( echo "${FOUND_FULL}" | sed -E 's/\.[0-9]+$//g' )
+	FOUND_MAJOR=$(echo "${FOUND_FULL}" | sed -E 's/\..*//g')
+	FOUND_MAJOR_MINOR=$(echo "${FOUND_FULL}" | sed -E 's/\.[0-9]+$//g')
 
 	if [ "${REQUIRED}" == "${FOUND_FULL}" ]; then
 		return 0
@@ -35,7 +35,6 @@ else
 	exit 1
 fi
 
-
 #==========================
 # Try to build edk2
 #==========================
@@ -51,7 +50,7 @@ if [ "${VERIFICATION_TEST_EDK2_VERSION}" == "edk2-stable202008" ]; then
 	PAYLOAD=UefiPayloadPkg/UefiPayloadPkgIa32X64.dsc
 fi
 
-if [ "${VERIFICATION_TEST_EDK2_VERSION}" == "UDK2017" ] ; then
+if [ "${VERIFICATION_TEST_EDK2_VERSION}" == "UDK2017" ]; then
 	OvmfPkg/build.sh -a X64
 else
 	build -D BOOTLOADER=COREBOOT -a IA32 -a X64 -t GCC5 -b DEBUG -p "${PAYLOAD}"
