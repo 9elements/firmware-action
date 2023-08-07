@@ -202,11 +202,11 @@ def docker_compose_file_complex():
           edk2:
             build:
               context: edk2
-          meh:
+          dummy:
             build:
               args:
-                - more=meh
-          meh2:
+                - dummy_arg=dummy
+          dummy2:
             image: ubuntu\
         """
     )
