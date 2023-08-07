@@ -57,7 +57,7 @@ RUN git clone "https://review.coreboot.org/coreboot.git"
 WORKDIR $TOOLSDIR/coreboot
 RUN git checkout "${COREBOOT_VERSION}"
 WORKDIR $TOOLSDIR/coreboot/util/crossgcc
-RUN make build-i386 CPUS=$(nproc) && \
+RUN make build-i386 CPUS="$(nproc)" && \
     make build_iasl && \
     make build_nasm
 WORKDIR $TOOLSDIR/coreboot
