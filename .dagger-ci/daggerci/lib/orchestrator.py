@@ -195,8 +195,13 @@ class Orchestrator:
             "Dockerfile",
         )
         if not os.path.isfile(dockerfile_path):
-            self.results.add(top_element, dockerfile, "build", False,
-                             f"File '{dockerfile_path}' not found")
+            self.results.add(
+                top_element,
+                dockerfile,
+                "build",
+                False,
+                f"File '{dockerfile_path}' not found",
+            )
             return
         dockerfile_args = self.docker_compose.get_dockerfile_args(
             dockerfile=dockerfile, top_element=top_element
