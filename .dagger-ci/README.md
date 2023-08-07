@@ -2,7 +2,7 @@
 To run pytest and all tests, firstly `cd` into this directory with `cd .dagger-ci`.
 
 Then just run:
-```
+```bash
 $ cd .dagger-ci/daggerci; python -m pytest
 ```
 
@@ -26,7 +26,7 @@ By default it is `DEBUG`, you can reduce it by using argument `--log-cli-level=I
 You can also get more info with HTML report by using argument `--cov-report=html` and then opening `firmware-action/.dagger-ci/htmlcov/index.html` in browser.
 
 ### Recap
-```
+```bash
 $ cd daggerci; python -m pytest --cov --cov-report=term-missing --runslow --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --cov-report=html
 ```
 
@@ -37,12 +37,12 @@ $ cd daggerci; python -m pytest --cov --cov-report=term-missing --runslow --log-
 
 ### pip
 If you are into `pip` and stuff.
-```
+```bash
 $ python3 -m pip install r requirements.txt
 ```
 
 ### ArchLinux
-```
+```bash
 $ pacman -S --needed \
 	dagger \
 	docker-compose \
