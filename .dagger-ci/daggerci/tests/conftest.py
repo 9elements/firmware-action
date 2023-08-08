@@ -7,6 +7,7 @@ import os
 import textwrap
 
 import pytest
+import yaml
 from lib.docker_compose import DockerCompose
 from lib.filesystem import mkdir
 from lib.orchestrator import Orchestrator
@@ -49,7 +50,7 @@ def pytest_collection_modifyitems(config, items):
 def anyio_backend():
     """
     Needed for anyio
-      https://anyio.readthedocs.io/en/stable/testing.html#testing-with-anyio
+        https://anyio.readthedocs.io/en/stable/testing.html#testing-with-anyio
     """
     return "asyncio"
 
@@ -61,8 +62,8 @@ def anyio_backend():
 # ===========================
 
 
-@pytest.fixture
-def create_file():
+@pytest.fixture(name="create_file")
+def fixture_create_file():
     """
     Create text file at "path" with "content" as its content.
     """
@@ -84,8 +85,8 @@ def create_file():
 # ===========================
 
 
-@pytest.fixture
-def dockerfile():
+@pytest.fixture(name="dockerfile")
+def fixture_dockerfile():
     """
     Generic Dockerfile content
     """
@@ -157,17 +158,13 @@ def dockerfile_broken():
 # ===========================
 
 
-@pytest.fixture
-def docker_compose_file():
+@pytest.fixture(name="docker_compose_file")
+def fixture_docker_compose_file():
     """
     Generic docker-compose
     """
-    return textwrap.dedent(
-        """\
-        services:
-          coreboot_4.19:
-            build:
-              context: coreboot"""
+    return yaml.dump(
+        {"services": {"coreboot_4.19": {"build": {"context": "coreboot"}}}}
     )
 
 
@@ -176,64 +173,45 @@ def docker_compose_file_broken():
     """
     Docker-compose which should fail syntax validation
     """
-    return textwrap.dedent(
-        """\
-        services:
-          coreboot_4.19:
-            asdfgh context coreboot"""
-    )
+    return yaml.dump({"services": {"coreboot_4.19": "rubbish context coreboot"}})
 
 
 @pytest.fixture
 def docker_compose_file_complex():
     # TODO
-    return textwrap.dedent(
-        """\
-        services:
-          coreboot_4.19:
-            build:
-              context: coreboot
-              args:
-                - COREBOOT_VERSION=4.19
-          coreboot_4.20:
-            build:
-              args:
-                - COREBOOT_VERSION=4.20
-          edk2:
-            build:
-              context: edk2
-          dummy:
-            build:
-              args:
-                - dummy_arg=dummy
-          dummy2:
-            image: ubuntu\
-        """
+    return yaml.dump(
+        {
+            "services": {
+                "coreboot_4.19": {
+                    "build": {"args": ["COREBOOT_VERSION=4.19"], "context": "coreboot"}
+                },
+                "coreboot_4.20": {"build": {"args": ["COREBOOT_VERSION=4.20"]}},
+                "dummy": {"build": {"args": ["dummy_arg=dummy"]}},
+                "dummy2": {"image": "ubuntu"},
+                "edk2": {"build": {"context": "edk2"}},
+            }
+        }
     )
 
 
+# pylint: disable=duplicate-code
 @pytest.fixture
 def docker_compose_file_multi_comprehensive_build():
     return [
-        textwrap.dedent(
-            """\
-        services:
-          dummy_1:
-            build:
-              context: dummy
-              args:
-                - VARIANT=success
-          dummy_2:
-            build:
-              context: dummy
-              args:
-                - VARIANT=success
-          dummy_3:
-            build:
-              context: dummy
-              args:
-                - VARIANT=fail
-        """
+        yaml.dump(
+            {
+                "services": {
+                    "dummy_1": {
+                        "build": {"context": "dummy", "args": ["VARIANT=success"]}
+                    },
+                    "dummy_2": {
+                        "build": {"context": "dummy", "args": ["VARIANT=success"]}
+                    },
+                    "dummy_3": {
+                        "build": {"context": "dummy", "args": ["VARIANT=fail"]}
+                    },
+                }
+            }
         ),
         {
             "services": {
@@ -268,6 +246,9 @@ def docker_compose_file_multi_comprehensive_build():
             }
         },
     ]
+
+
+# pylint: enable=duplicate-code
 
 
 # ===========================

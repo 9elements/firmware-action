@@ -19,7 +19,7 @@ from lib.cli import cli
 )
 def test__cli__smoke_test(args, expectation):
     with expectation:
-        arguments, _ = cli(args=args)
+        cli(args=args)
 
 
 @pytest.mark.parametrize(

@@ -82,7 +82,7 @@ RUN git clone --recurse-submodules https://github.com/tianocore/edk2-non-osi.git
     git checkout "${EDK2_NON_OSI_COMMIT}"
 RUN git clone --recurse-submodules https://github.com/tianocore/edk2.git --depth 2 --branch "${EDK2_VERSION}" Edk2 && \
     cd Edk2 && \
-    make -C BaseTools/ -j $(nproc)
+    make -C BaseTools/ -j "$(nproc)"
 
 
 #=============

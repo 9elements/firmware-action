@@ -11,7 +11,7 @@ def cli(
 ) -> tuple[argparse.Namespace, argparse.ArgumentParser]:
     """
     Command Line Interface
-      The optional "args" is for unit-testing
+        The optional "args" is for unit-testing
     """
     # Define CLI
     parser = argparse.ArgumentParser(

@@ -6,6 +6,9 @@ Then just run:
 $ cd .dagger-ci/daggerci; python -m pytest
 ```
 
+
+## Pytest options
+
 ### Coverage
 Pytest can report test coverage, simply use following arguments `--cov --cov-report=term-missing`.
 

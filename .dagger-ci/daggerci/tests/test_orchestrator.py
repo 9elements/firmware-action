@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# pylint: disable=unused-import
 # mypy: disable-error-code="import, no-untyped-def"
 
 import dagger
@@ -50,7 +51,7 @@ async def test__orchestrator__broken_dockerfile(
 async def test__orchestrator__missing_env_var(tmpdir, create_orchestrator, dockerfile):
     """
     Try to execute test inside docker container, but there is no
-      "VERIFICATION_TEST" defined
+        "VERIFICATION_TEST" defined
     """
     my_orchestrator = create_orchestrator(dirpath=tmpdir, dockerfile_content=dockerfile)
     with pytest.raises(ContainerMissingTestEnvVar):
@@ -64,7 +65,7 @@ async def test__orchestrator__run_test_script_fail(
 ):
     """
     Test container by running a script inside it,
-      the script returns non-zero return code
+        the script returns non-zero return code
     """
     my_orchestrator = create_orchestrator(
         dirpath=tmpdir, dockerfile_content=dockerfile_dummy_tests_fail
@@ -121,7 +122,6 @@ async def test__orchestrator__multi_comprehensive_build(
     create_orchestrator,
     docker_compose_file_multi_comprehensive_build,
     dockerfile_dummy_tests_success,
-    dockerfile_dummy_tests_fail,
 ):
     """
     Test the orchestrator with something similar to real-world use case
