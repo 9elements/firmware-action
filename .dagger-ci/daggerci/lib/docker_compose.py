@@ -80,9 +80,9 @@ class DockerCompose:
     def __select_top_element__(self, top_element: str | None = None) -> str:
         """
         Check if top_element in YAML
-          if true, return said top_element name
-          if None provided, default to the first top_element in YAML
-          if false, raise ValueError exception
+            if true, return said top_element name
+            if None provided, default to the first top_element in YAML
+            if false, raise ValueError exception
         """
         try:
             return select(heap=self.get_top_elements(), needle=top_element)
@@ -104,9 +104,9 @@ class DockerCompose:
     ) -> str:
         """
         Check if dockerfile under top_element in YAML
-          if true, return said dockerfile name
-          if None provided, default to the first dockerfile under top_element
-          if false, raise ValueError exception
+            if true, return said dockerfile name
+            if None provided, default to the first dockerfile under top_element
+            if false, raise ValueError exception
         """
         this_top_element = self.__select_top_element__(top_element)
         try:

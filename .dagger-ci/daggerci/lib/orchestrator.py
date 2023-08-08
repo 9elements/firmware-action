@@ -159,7 +159,7 @@ class Orchestrator:
         all_dockerfiles = self.docker_compose.get_dockerfiles(top_element=top_element)
         if dockerfiles_override is not None:
             all_dockerfiles = dockerfiles_override
-        logging.info(f"To build: {all_dockerfiles}")
+        logging.info("To build: %s", all_dockerfiles)
 
         async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
             for dockerfile in all_dockerfiles:

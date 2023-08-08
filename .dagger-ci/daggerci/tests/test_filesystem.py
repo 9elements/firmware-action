@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=too-many-arguments
+# pylint: disable=unused-import
 # mypy: disable-error-code="import, no-untyped-def"
 
 import os
