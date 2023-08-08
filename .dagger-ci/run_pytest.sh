@@ -15,4 +15,4 @@ python -m pytest \
 	--log-cli-level NOTSET \
 	--show-capture no \
 	--log-cli-level=INFO \
-	--runslow
+	--runslow "$@"
