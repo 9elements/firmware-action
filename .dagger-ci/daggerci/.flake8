@@ -1,0 +1,8 @@
+[flake8]
+# Ignore things handled by pylint
+# E501: line too long
+extend-ignore = E501
+per-file-ignores =
+	# imported but unused
+	test_filesystem.py: F401
+	test_orchestrator.py: F401

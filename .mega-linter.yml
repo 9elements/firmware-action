@@ -1,5 +1,19 @@
 APPLY_FIXES: all
 DISABLE:
   - COPYPASTE
+DISABLE_LINTERS:
+  - REPOSITORY_KICS
+  - SPELL_LYCHEE
 SHOW_ELAPSED_TIME: true
 FILEIO_REPORTER: false
+
+# Python
+PYTHON_PYLINT_CONFIG_FILE: .dagger-ci/daggerci/.pylintrc
+PYTHON_FLAKE8_CONFIG_FILE: .dagger-ci/daggerci/.flake8
+PYTHON_RUFF_CONFIG_FILE: .dagger-ci/daggerci/.ruff.toml
+
+# Spelling
+SPELL_CSPELL_ANALYZE_FILE_NAMES: false
+
+# Trivy
+REPOSITORY_TRIVY_CONFIG_FILE: .trivy.yaml
