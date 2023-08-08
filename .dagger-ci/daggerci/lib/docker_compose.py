@@ -60,8 +60,12 @@ class DockerCompose:
         """
         Validate the compose.yaml file
         """
-        cmd = ["docker-compose", "-f", self.path, "config"]
-        output = subprocess.run(cmd, check=False, capture_output=True)
+        try:
+            cmd = ["docker-compose", "-f", self.path, "config"]
+            output = subprocess.run(cmd, check=False, capture_output=True)
+        except FileNotFoundError as exc:
+            logging.error('Missing dependency "docker-compose", please install it')
+            raise exc
         if output.returncode != 0:
             logging.critical('Docker-compose file "%s" failed validation', self.path)
             logging.critical(pformat(output))
