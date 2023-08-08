@@ -1,0 +1,7 @@
+# Ignore things handled by pylint
+# E501: Line too long
+ignore = ["E501"]
+
+[per-file-ignores]
+"test_filesystem.py" = ["F401"]
+"test_orchestrator.py" = ["F401"]

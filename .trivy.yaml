@@ -1,0 +1,4 @@
+rego:
+  trace: false
+  policy:
+    - .trivy_policy/policy/

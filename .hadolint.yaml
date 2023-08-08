@@ -1,0 +1,8 @@
+---
+##########################
+## Hadolint config file ##
+##########################
+ignored:
+  - DL3003 # Use WORKDIR to switch to a directory - GitHub discourages use of WORKDIR
+  - DL3006 # Always tag the version of an image explicitly - false positives, we are going that
+  - DL3018 # Pin versions in apk add

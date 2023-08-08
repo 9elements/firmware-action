@@ -1,4 +1,6 @@
 ---
+quiet: true
 skip-check:
   - CKV_DOCKER_2
   - CKV_DOCKER_3
+  - CKV_DOCKER_7
