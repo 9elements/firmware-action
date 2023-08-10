@@ -7,6 +7,7 @@ The main class to abstract all actions
 import datetime
 import logging
 import os
+import re
 import sys
 from typing import Any
 
@@ -17,10 +18,13 @@ from lib.env import get_env_var_value
 from lib.filesystem import mkdir
 from lib.git import (
     git_describe,
+    git_get_branch_name,
     git_get_latest_commit_sha_long,
     git_get_latest_commit_sha_short,
     git_get_root_directory,
+    git_get_tag,
 )
+from lib.github import github_get_project_url, github_get_pull_request_number
 from lib.results import Results
 
 
@@ -69,20 +73,41 @@ class Orchestrator:
         # GIT related info
         self.tag_sha = git_get_latest_commit_sha_long()
         self.tag_sha_short = git_get_latest_commit_sha_short()
+        self.tag_tag = git_get_tag()
+        self.tag_timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.tag_branch = git_get_branch_name()
+        self.tag_pull_request_number = github_get_pull_request_number()
+        self.tag_pull_request = f"pull_request_{self.tag_pull_request_number}"
         self.git_ref = get_env_var_value(["GITHUB_REF"], fallback=git_describe())
+        self.version = next(
+            # Version of docker container
+            # pick first non-None value from a list
+            (
+                i
+                for i in [
+                    self.tag_tag,
+                    self.tag_pull_request if self.tag_pull_request_number else None,
+                    self.tag_branch,
+                    self.tag_sha,
+                ]
+                if i is not None
+            ),
+            None,
+        )
+        self.organization = "9elements"
         self.project_name = "firmware-action"
-        self.project_url = (
-            get_env_var_value(["GITHUB_SERVER_URL"], fallback="https://github.com")
-            + "/"
-            + get_env_var_value(
-                ["GITHUB_REPOSITORY"], fallback=f"9elements/{self.project_name}"
-            )
+        self.project_url = github_get_project_url(
+            project_name=f"{self.organization}/{self.project_name}"
         )
         # Container registry vars
-        self.container_registry = get_env_var_value(["env.REGISTRY"], None)
-        self.container_registry_username = get_env_var_value(["github.actor"], None)
+        self.container_registry = get_env_var_value(
+            ["env.REGISTRY", "GITHUB_REGISTRY"], None
+        )
+        self.container_registry_username = get_env_var_value(
+            ["github.actor", "GITHUB_ACTOR"], None
+        )
         self.container_registry_password = get_env_var_value(
-            ["secrets.GITHUB_TOKEN"], None
+            ["secrets.GITHUB_TOKEN", "GITHUB_TOKEN"], None
         )
 
         # Publishing-related info
@@ -92,51 +117,50 @@ class Orchestrator:
             .isoformat(),
             "org.opencontainers.image.licenses": "MIT",
             "org.opencontainers.image.revision": self.tag_sha,
+            "org.opencontainers.image.version": self.version,
+            "org.opencontainers.image.ref.name": self.version,
             "org.opencontainers.image.source": self.project_url,
             "org.opencontainers.image.url": self.project_url,
-            "org.opencontainers.image.version": "main",  # TODO
-            # container specific
-            "org.opencontainers.image.ref.name": "ubuntu",  # TODO
-            "org.opencontainers.image.description": "Container for building coreboot_4.19",  # TODO
-            # TODO
-            "org.opencontainers.image.title": f"9elements/{self.project_name}/coreboot_4.19",
+            "org.opencontainers.image.documentation": self.project_url,
         }
+        # Should contain:
+        # - short sha
+        # - branch
+        # - tag if exists
+        # - latest if tag exists
+        # - pull request if exists
         self.tags = [
             self.tag_sha_short,
-            # TODO
-            # type = schedule, pattern = {{date 'YYYYMMDD-hhmmss' tz = 'Europe/Berlin'}}
-            # type = ref, event = branch
-            # type = ref, event = tag
-            # type = ref, event = pr
-            # type = sha
+            re.sub(r"[\/-]", r"_", self.tag_branch),
+            # self.tag_timestamp,
         ]
+        if self.tag_tag is not None:
+            self.tags += [self.tag_tag, "latest"]
+        if self.tag_pull_request_number is not None:
+            self.tags += [self.tag_pull_request]
+
+        # Publishing
         self.publish = publish
-        if (
-            self.container_registry is None
-            or self.container_registry_username is None
-            or self.container_registry_password is None
-        ):
-            logging.warning(
-                "Missing environment variables present in GitHub CI, skipping container publishing step"
-            )
+        if self.container_registry is None:
+            logging.warning("Publishing: Missing container registry")
             self.publish = False
+        if self.container_registry_username is None:
+            logging.warning("Publishing: Missing container registry username")
+            self.publish = False
+        if self.container_registry_password is None:
+            logging.warning("Publishing: Missing container registry token")
+            self.publish = False
+        if not self.publish:
+            logging.warning("Skipping container publishing step")
+        logging.info(
+            "container registry: %s; username: %s",
+            self.container_registry,
+            self.container_registry_username,
+        )
 
         # Variable(s) for storing results of builds, tests and publishing
         self.results = Results()
-
         self.docker_compose = DockerCompose(path=self.docker_compose_path)
-
-        # .with_label("org.opencontainers.image.title", "my-alpine")
-        # .with_label("org.opencontainers.image.version", "1.0")
-        # .with_label(
-        #    "org.opencontainers.image.created",
-        #    datetime.now(timezone.utc).isoformat(),
-        # )
-        # .with_label(
-        #    "org.opencontainers.image.source",
-        #    "https://github.com/alpinelinux/docker-alpine",
-        # )
-        # .with_label("org.opencontainers.image.licenses", "MIT")
 
     async def build_test_publish(
         self, dockerfiles_override: list[str] | None = None
@@ -222,6 +246,22 @@ class Orchestrator:
             return
         self.results.add(top_element, dockerfile, "build")
 
+        # add container specific labels into self.labels
+        self.labels[
+            "org.opencontainers.image.description"
+        ] = f"Container for building {dockerfile}"
+        self.labels[
+            "org.opencontainers.image.title"
+        ] = f"{self.organization}/{self.project_name}/{dockerfile}"
+
+        # add labels to the container
+        for name, val in self.labels.items():
+            built_docker = await built_docker.with_label(name=name, value=val)
+
+        logging.info("Docker container labels:")
+        for label in await built_docker.labels():
+            logging.info("label: %s = %s", await label.name(), await label.value())
+
         # export as tarball
         if not await built_docker.export(tarball_file):
             self.results.add(
@@ -247,9 +287,23 @@ class Orchestrator:
         # =======
         # PUBLISH
         if self.publish:
-            # TODO:
-            # await self.__publish__(client=client)
-            pass
+            logging.info("%s/%s: PUBLISHING", top_element, dockerfile)
+            # pylint: disable=attribute-defined-outside-init
+            self.secret_token = client.set_secret(
+                "GITHUB_TOKEN", self.container_registry_password
+            )
+            # pylint: enable=attribute-defined-outside-init
+            try:
+                await self.__publish__(
+                    container=built_docker,
+                    dockerfile=dockerfile,
+                    top_element=top_element,
+                )
+                self.results.add(top_element, dockerfile, "publish", True)
+            except dagger.QueryError as exc:
+                logging.error(exc)
+                self.results.add(top_element, dockerfile, "publish", False)
+                return
         else:
             self.results.add(top_element, dockerfile, "publish", False, "skip")
 
@@ -332,34 +386,19 @@ class Orchestrator:
             os.remove(tarball_file)
 
     async def __publish__(
-        self, client: dagger.Client, dockerfile: str, top_element: str
+        self, container: dagger.Container, dockerfile: str, top_element: str
     ) -> None:
         """
         Publish the built container to container registry
         """
-        # TODO: unfinished
-        # try:
-        #    registry = os.environ[ENV_VAR_CONTAINER_REGISTRY]
-        #    username = os.environ[ENV_VAR_CONTAINER_REGISTRY_USERNAME]
-        #    password = os.environ[ENV_VAR_CONTAINER_REGISTRY_PASSWORD]
-        # except KeyError:
-        #    logging.warning(
-        #        'Missing environment variables present in GitHub CI, skipping container publishing step')
-        #    results[docker]['success'] = True
-        #    results[docker]['msg'] = 'skipping publishing step'
-        #    return
-
-        # logging.info("Publishing: %s", docker)
-
-        # await built_docker.with_registry_auth(registry, username, password).publish(f'{username}/{REPOSITORY}/{docker}')
-
-        # image_ref = docker_container[docker].publish(f'{docker}')
-        # logging.info('Published image to: %s', image_ref)
-
-        # publish image to registry
-
-        # print image address
-        # print(f"Image published at: {address}")
-        # results[docker]['success'] = True
-        # results[docker]['msg'] = 'success'
-        # return
+        for tag in self.tags:
+            image_ref = await container.with_registry_auth(
+                address=str(self.container_registry),
+                username=str(self.container_registry_username),
+                secret=self.secret_token,
+            ).publish(
+                f"{self.container_registry}/{self.organization}/{self.project_name}/{dockerfile}:{tag}"
+            )
+            logging.info(
+                "%s/%s: Published image to: %s", top_element, dockerfile, image_ref
+            )

@@ -30,7 +30,7 @@ def test__cli__smoke_test(args, expectation):
     ],
 )
 def test__cli__concurrent(args, expected):
-    arguments, _ = cli(args=args)
+    arguments = cli(args=args)
     assert arguments.concurrent == expected
 
 
@@ -42,7 +42,7 @@ def test__cli__concurrent(args, expected):
     ],
 )
 def test__cli__verbose(args, expected):
-    arguments, _ = cli(args=args)
+    arguments = cli(args=args)
     assert arguments.verbose == expected
 
 
@@ -54,7 +54,7 @@ def test__cli__verbose(args, expected):
     ],
 )
 def test__cli__publish(args, expected):
-    arguments, _ = cli(args=args)
+    arguments = cli(args=args)
     assert arguments.publish == expected
 
 
@@ -66,5 +66,5 @@ def test__cli__publish(args, expected):
     ],
 )
 def test__cli__dockerfile(args, expected):
-    arguments, _ = cli(args=args)
+    arguments = cli(args=args)
     assert arguments.dockerfile == expected

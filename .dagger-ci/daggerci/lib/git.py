@@ -44,6 +44,17 @@ def git_get_tag() -> str | None:
     return None
 
 
+def git_get_branch_name() -> str:
+    """
+    Return name of current branch
+    """
+    return (
+        subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+        .strip()
+        .decode()
+    )
+
+
 def git_get_root_directory() -> str:
     """
     Assuming that current working directory is part of git repository,

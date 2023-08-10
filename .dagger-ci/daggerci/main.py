@@ -21,7 +21,7 @@ async def main(inargs: list[str] | None = None) -> int:
     """
     The main function, duh
     """
-    args, _ = cli(args=inargs)
+    args = cli(args=inargs)
 
     # Setup nice logging
     logging.basicConfig(
