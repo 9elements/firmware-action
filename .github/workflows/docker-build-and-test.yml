@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and test
+    name: build_test_publish
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,8 +36,16 @@ jobs:
       - name: Install deps
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - uses: actions/checkout@v3
-      - name: Run Dagger pipeline
-        run: python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }} --publish
+      - name: Run dagger pipeline
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]]; then
+            echo "Enable publishing"
+            python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }} --publish
+          else
+            echo "Disable publishing"
+            python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }}
+          fi
+        shell: bash
         env:
           GITHUB_REGISTRY: ${{ env.REGISTRY }}
           GITHUB_ACTOR: ${{ github.actor }}
