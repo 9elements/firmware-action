@@ -8,7 +8,7 @@ import textwrap
 
 def cli(
     args: list[str] | None = None,
-) -> tuple[argparse.Namespace, argparse.ArgumentParser]:
+) -> argparse.Namespace:
     """
     Command Line Interface
         The optional "args" is for unit-testing
@@ -52,7 +52,7 @@ def cli(
 
     # If unit-testing parse passed "args"
     if args is not None:
-        return parser.parse_args(args=args), parser
+        return parser.parse_args(args=args)
 
     # If not unit-testing, parse arguments from console
-    return parser.parse_args(), parser
+    return parser.parse_args()
