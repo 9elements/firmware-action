@@ -10,7 +10,6 @@ It implements only specific functions that are needed in this specific project.
 import logging
 import subprocess
 from pprint import pformat
-from typing import Any
 
 import dagger
 import yaml
@@ -137,21 +136,18 @@ class DockerCompose:
 
     def get_dockerfile_args(
         self, dockerfile: str | None = None, top_element: str | None = None
-    ) -> list[Any]:
-        # top_element: str | None = None) -> list[dagger.api.gen.BuildArg]:
-        # For some reason I get
-        #   "AttributeError: module 'dagger' has no attribute 'api'"
+    ) -> list[dagger.BuildArg]:
         """
         Return a list of args for given dockerfile
-            return list of dagger.api.gen.BuildArg
-            https://dagger-io.readthedocs.io/en/sdk-python-v0.6.4/api.html#dagger.api.gen.BuildArg
+            return list of dagger.BuildArg
+            https://dagger-io.readthedocs.io/en/sdk-python-v0.8.2/client.html#dagger.BuildArg
         """
         this_top_element = self.__select_top_element__(top_element)
         this_dockerfile = self.__select_dockerfile__(dockerfile)
 
         if "args" in self.yaml[this_top_element][this_dockerfile]["build"]:
             return [
-                dagger.api.gen.BuildArg(i.split("=")[0], i.split("=")[1])
+                dagger.BuildArg(i.split("=")[0], i.split("=")[1])
                 for i in self.yaml[this_top_element][this_dockerfile]["build"]["args"]
             ]
         return []

@@ -241,8 +241,11 @@ class Orchestrator:
                 dockerfile_dir=dockerfile_dir,
                 dockerfile_args=dockerfile_args,
             )
-        except dagger.exceptions.ExecError as exc:
+        except dagger.ExecError as exc:
             self.results.add(top_element, dockerfile, "build", False, exc.message)
+            return
+        except dagger.QueryError as exc:
+            self.results.add(top_element, dockerfile, "build", False, exc.debug_query())  # type: ignore [no-untyped-call]
             return
         self.results.add(top_element, dockerfile, "build")
 
@@ -355,7 +358,7 @@ class Orchestrator:
                 redirect_stderr=f"{container_name}_stderr.log",
             )
             test_container = await test_container.sync()
-        except dagger.exceptions.ExecError as ex:
+        except dagger.ExecError as ex:
             # When command in '.with_exec()' fails, exception is raised
             #   said exception contains STDERR and STDOUT
             for std_streams in [
