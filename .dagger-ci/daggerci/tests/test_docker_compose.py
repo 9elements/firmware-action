@@ -86,12 +86,12 @@ def test__docker_compose(tmpdir, create_file, docker_compose_file_complex):
     assert my_docker_compose.get_dockerfile_context("dummy2") is None
 
     assert my_docker_compose.get_dockerfile_args() == [
-        dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
+        dagger.BuildArg("COREBOOT_VERSION", "4.19")
     ]
     assert my_docker_compose.get_dockerfile_args("coreboot_4.19") == [
-        dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
+        dagger.BuildArg("COREBOOT_VERSION", "4.19")
     ]
     assert my_docker_compose.get_dockerfile_args("coreboot_4.19", "services") == [
-        dagger.api.gen.BuildArg("COREBOOT_VERSION", "4.19")
+        dagger.BuildArg("COREBOOT_VERSION", "4.19")
     ]
     assert my_docker_compose.get_dockerfile_args("edk2") == []

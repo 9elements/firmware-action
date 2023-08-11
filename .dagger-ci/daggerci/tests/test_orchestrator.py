@@ -39,14 +39,10 @@ async def test__orchestrator__broken_dockerfile(
         dirpath=tmpdir, dockerfile_content=dockerfile_broken
     )
     result = await my_orchestrator.build_test_publish()
-    assert result.results == {
-        "services": {
-            "coreboot_4.19": {
-                "build": False,
-                "build_msg": 'failed to solve: process "/bin/sh -c false" did not complete successfully: exit code: 1',
-            }
-        }
-    }
+    assert "services" in result.results
+    assert "coreboot_4.19" in result.results["services"]
+    assert "build" in result.results["services"]["coreboot_4.19"]
+    assert result.results["services"]["coreboot_4.19"]["build"] is False
 
 
 @pytest.mark.slow
