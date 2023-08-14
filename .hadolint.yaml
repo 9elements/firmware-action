@@ -6,3 +6,4 @@ ignored:
   - DL3003 # Use WORKDIR to switch to a directory - GitHub discourages use of WORKDIR
   - DL3006 # Always tag the version of an image explicitly - false positives, we are going that
   - DL3018 # Pin versions in apk add
+  - DL3008 # Pin versions in apt get install - we are using specific versions of Ubuntu (Ubuntu is not rolling release) so this should be taken care of upstream; also adding this would make re-using Dockerfiles much harder
