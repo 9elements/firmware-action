@@ -4,11 +4,7 @@
 name: dagger
 on:
   pull_request:
-    branches: [main]
-    types: [opened, synchronize]
-  push:
-    branches:
-      - main
+  merge_group:
 
 env:
   REGISTRY: ghcr.io
