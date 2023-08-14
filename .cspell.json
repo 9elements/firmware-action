@@ -53,6 +53,7 @@
     "inargs",
     "kbuild",
     "kconfig",
+    "kernelbuild",
     "levelname",
     "logdir",
     "mainboard",
@@ -63,6 +64,7 @@
     "nolint",
     "nproc",
     "nvramcui",
+    "olddefconfig",
     "opencontainers",
     "oxsecurity",
     "pacman",
@@ -93,7 +95,8 @@
     "hhmmss",
     "htmlcov",
     "mypy",
-    "prettytable"
+    "prettytable",
+    "unxz"
   ],
   "version": "0.2"
 }
