@@ -4,11 +4,7 @@
 name: Lint
 on:
   pull_request:
-    branches: [main]
-    types: [opened, synchronize]
-  push:
-    branches:
-      - main
+  merge_group:
 
 env:
   APPLY_FIXES: none
