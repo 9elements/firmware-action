@@ -3,7 +3,7 @@
 
 #=============
 # "base" stage with all needed build dependencies
-FROM ubuntu:22.04 AS base
+FROM ubuntu:jammy AS base
 
 ARG TARGETARCH=amd64
 ARG COREBOOT_VERSION=4.19
