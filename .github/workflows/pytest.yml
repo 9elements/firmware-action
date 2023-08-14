@@ -2,7 +2,13 @@
 # Test built docker images by building simple projects inside them
 
 name: pytest
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
