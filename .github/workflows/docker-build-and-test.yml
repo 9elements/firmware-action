@@ -2,7 +2,13 @@
 # Test built docker images by building simple projects inside them
 
 name: dagger
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, closed ]
+  push:
+    branches-ignore:
+      - main
 
 env:
   REGISTRY: ghcr.io
