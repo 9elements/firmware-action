@@ -74,3 +74,11 @@ services:
         - EDK2_PLATFORM_COMMIT=b36fe8bc9b6812e9b4ec360a2ab513a0437d4132
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
+  #==================
+  # linux
+  #==================
+  linux_6.1.45:
+    build:
+      context: linux
+      args:
+        - LINUX_VERSION=6.1.45
