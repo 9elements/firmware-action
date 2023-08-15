@@ -41,6 +41,6 @@ fi
 
 # Make
 cd "${LINUX_BASE}"
-cp "${SCRIPT_DIR}/linux_${VERIFICATION_TEST_LINUX_VERSION}/linux.defconfig" ./.config
-make olddefconfig
+cp "${SCRIPT_DIR}/linux_${VERIFICATION_TEST_LINUX_VERSION}/linux.defconfig" ./arch/x86/configs/ci_defconfig
+make ci_defconfig
 make -j "$(nproc)"

@@ -37,6 +37,7 @@ RUN apt-get update && \
         libssl-dev \
         libudev-dev \
         llvm \
+        nodejs \
         openssl \
         wget \
     && \
