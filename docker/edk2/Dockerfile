@@ -37,6 +37,7 @@ RUN dpkg --add-architecture i386 && \
         git \
         iucode-tool \
         nasm \
+        nodejs \
         openssh-client \
         ${PYTHON_PACKAGES} \
         qemu-system-x86 \
