@@ -5,6 +5,9 @@ name: Lint
 on:
   pull_request:
   merge_group:
+  push:
+    branches:
+      - main
 
 env:
   APPLY_FIXES: none
