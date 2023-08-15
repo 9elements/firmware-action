@@ -32,6 +32,7 @@ RUN apt-get update && \
         libelf-dev \
         libncurses5-dev \
         m4 \
+        nodejs \
         python-is-python3 \
         python3-pip \
         tzdata \
