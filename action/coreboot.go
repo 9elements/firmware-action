@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/pkg/kconfig"
+	"github.com/9elements/firmware-action/action/kconfig"
 	"github.com/plus3it/gorecurcopy"
 	"github.com/sethvargo/go-githubactions"
 )
@@ -135,8 +135,7 @@ func preCheck(ctx context.Context, action *githubactions.Action) error {
 
 func coreboot(ctx context.Context, action *githubactions.Action, client *dagger.Client) error { //nolint:gocyclo
 
-	err := preCheck(ctx, action)
-	if err != nil {
+	if err := preCheck(ctx, action); err != nil {
 		return err
 	}
 
@@ -150,6 +149,7 @@ func coreboot(ctx context.Context, action *githubactions.Action, client *dagger.
 	if err != nil {
 		return fmt.Errorf("Failed to read defconfig: %v", err)
 	}
+
 	defconfigConfig, err := kconfig.NewKconfig(string(data))
 	if err != nil {
 		return err
@@ -238,30 +238,26 @@ func coreboot(ctx context.Context, action *githubactions.Action, client *dagger.
 	}
 
 	outDir := filepath.Join(workspace, "build")
-	err = os.Mkdir(outDir, os.ModePerm)
-	if err != nil {
+	if err = os.Mkdir(outDir, os.ModePerm); err != nil {
 		return err
 	}
 
 	// export rom file from build container back to host
-	_, err = corebootContainer.File("build/coreboot.rom").Export(ctx, filepath.Join(outDir, "coreboot.rom"))
-	if err != nil {
+	if _, err = corebootContainer.File("build/coreboot.rom").Export(ctx, filepath.Join(outDir, "coreboot.rom")); err != nil {
 		return err
 	}
 	// export defconfig file from build container back to host
-	_, err = corebootContainer.File("defconfig").Export(ctx, filepath.Join(outDir, "defconfig"))
-	if err != nil {
+	if _, err = corebootContainer.File("defconfig").Export(ctx, filepath.Join(outDir, "defconfig")); err != nil {
 		return err
 	}
 	// export config file from build container back to host
-	_, err = corebootContainer.File(".config").Export(ctx, filepath.Join(outDir, "config"))
-	if err != nil {
+	if _, err = corebootContainer.File(".config").Export(ctx, filepath.Join(outDir, "config")); err != nil {
 		return err
 	}
 
-	exitcode, err := corebootContainer.ExitCode(ctx)
-	if exitcode != 0 {
-		return fmt.Errorf("Non zero exit code %d: %v", exitcode, err)
+	if _, err := corebootContainer.Sync(ctx); err != nil {
+		return fmt.Errorf("Error during execution: %v", err)
 	}
-	return err
+
+	return nil
 }
