@@ -52,7 +52,7 @@ func NewKconfig(c string) (*Kconfig, error) {
 func (c *Kconfig) String() string {
 	s := ""
 	keys := make([]string, 0)
-	for k, _ := range *c {
+	for k := range *c {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
