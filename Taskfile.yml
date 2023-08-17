@@ -1,0 +1,65 @@
+---
+version: '3'
+vars:
+  SEMVER: '0.0.1'
+
+tasks:
+  build-go-binary:
+    desc: Template task to build a go binary
+    dir: action
+    cmds:
+      - GOOS={{.OS}} GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/action-{{.OS}}-amd64-{{.SEMVER}}
+      - upx -9 ../bin/action-{{.OS}}-amd64-{{.SEMVER}}
+    env:
+      CGO_ENABLED: 0
+
+  deploy-binaries:
+    desc: Compile action binaries
+    cmds:
+      - task: build-go-binary
+        vars: {
+          OS: "linux"
+        }
+      - task: build-go-binary
+        vars: {
+          OS: "darwin"
+        }
+      - task: build-go-binary
+        vars: {
+          OS: "windows"
+        }
+
+  lint:
+    desc: Run the linters
+    dir: action
+    cmds:
+      - revive ./...
+      - go vet ./...
+      - staticcheck -fail "" ./...
+      - golangci-lint run --issues-exit-code 0 ./...
+
+  format:
+    desc: Run gofumt (fork of gofmt, stricter)
+    cmds:
+      - gofumpt -w action
+
+  test:
+    desc: Run tests
+    dir: action
+    cmds:
+      - go test {{.CLI_ARGS}} -covermode=count -coverprofile coverage.out ./...
+      - go tool cover -func=coverage.out
+      - go tool cover -html=coverage.out -o coverage.html
+
+  godocs:
+    desc: Start godocs http server
+    dir: action
+    cmds:
+      - godoc -http=:6060
+
+  build-coreboot:
+    desc: Run action to build coreboot
+    cmds:
+      - ./bin/action-{{OS}}-amd64-{{.SEMVER}}
+    env:
+      INPUT_TARGET: coreboot
