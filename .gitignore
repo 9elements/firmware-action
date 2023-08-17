@@ -1,4 +1,7 @@
-node_modules
-.task
-megalinter-reports
 .coverage
+.task
+action/coverage.html
+action/coverage.out
+bin/
+megalinter-reports
+node_modules

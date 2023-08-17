@@ -2,7 +2,7 @@
 
 // Package main implements the core logic of running composable Dagger pipelines
 // via GitHub Actions. Currently supported are coreboot and Linux pipelines.
-package main
+package recepies
 
 import (
 	"context"
@@ -12,6 +12,19 @@ import (
 	"github.com/9elements/firmware-action/action/kconfig"
 	"github.com/sethvargo/go-githubactions"
 )
+
+func Execute(ctx context.Context, client *dagger.Client, action *githubactions.Action) error {
+	switch action.GetInput("target") {
+	case "coreboot":
+		return coreboot(ctx, action, client)
+	case "linux":
+		return linux(ctx, action, client)
+	case "":
+		return fmt.Errorf("no target specified")
+	default:
+		return fmt.Errorf("unsupported target: %s", action.GetInput("target"))
+	}
+}
 
 func generateDotConfigFromDefconfig(ctx context.Context, action *githubactions.Action, client *dagger.Client, defconfig string) (*kconfig.Kconfig, error) {
 	corebootContainer, err := setupCorebootContainer(ctx, action, client, defconfig)

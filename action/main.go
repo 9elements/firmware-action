@@ -6,35 +6,27 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"os"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/recepies"
 	"github.com/sethvargo/go-githubactions"
 )
 
 func main() {
-	action := githubactions.New()
-	if err := run(context.Background(), action); err != nil {
-		action.Fatalf("%v", err)
+	if err := run(context.Background()); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func run(ctx context.Context, action *githubactions.Action) error {
+func run(ctx context.Context) error {
+	action := githubactions.New()
+
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-
-	switch action.GetInput("target") {
-	case "coreboot":
-		return coreboot(ctx, action, client)
-	case "linux":
-		return linux(ctx, action, client)
-	case "":
-		return fmt.Errorf("no target specified")
-	default:
-		return fmt.Errorf("unsupported target: %s", action.GetInput("target"))
-	}
+	return recepies.Execute(ctx, client, action)
 }
