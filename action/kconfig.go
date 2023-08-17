@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/pkg/kconfig"
+	"github.com/9elements/firmware-action/action/kconfig"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -21,9 +21,9 @@ func generateDotConfigFromDefconfig(ctx context.Context, action *githubactions.A
 
 	// generate .config
 	corebootContainer = corebootContainer.WithExec([]string{"rm", ".config"})
-	exitcode, err := corebootContainer.ExitCode(ctx)
-	if exitcode != 0 {
-		return nil, fmt.Errorf("Non zero exit code %d: %v", exitcode, err)
+	corebootContainer, err = corebootContainer.Sync(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Error during execution: %v", err)
 	}
 
 	o, err := corebootContainer.Stdout(ctx)
@@ -43,10 +43,11 @@ func generateDotConfigFromDefconfig(ctx context.Context, action *githubactions.A
 	}
 
 	corebootContainer = corebootContainer.WithExec([]string{"make", "defconfig", "KBUILD_DEFCONFIG=defconfig"})
-	exitcode, err = corebootContainer.ExitCode(ctx)
-	if exitcode != 0 {
-		return nil, fmt.Errorf("Non zero exit code %d: %v", exitcode, err)
+	corebootContainer, err = corebootContainer.Sync(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("Error during execution: %v", err)
 	}
+
 	o, err = corebootContainer.Stdout(ctx)
 	if o != "" {
 		fmt.Println(o)
@@ -75,5 +76,6 @@ func generateDotConfigFromDefconfig(ctx context.Context, action *githubactions.A
 	if err != nil {
 		return nil, fmt.Errorf("Failed to convert .config: %v", err)
 	}
+
 	return dotConfig, nil
 }
