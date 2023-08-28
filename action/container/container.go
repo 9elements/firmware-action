@@ -6,6 +6,7 @@ package container
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"dagger.io/dagger"
 )
@@ -20,41 +21,41 @@ var (
 // SetupOpts congregates options for Setup function
 // None of the values can be empty string, and mountContainerDir cannot be '.' or '/'
 type SetupOpts struct {
-	containerURL      string
-	mountContainerDir string
-	mountHostDir      string
-	workdirContainer  string
+	ContainerURL      string // URL or name of docker container (name-only will try to look for containers in ghcr.io/9elements/firmware-action
+	MountHostDir      string // Directory from host to mount into container
+	MountContainerDir string // Where to mount ^^^ host directory inside container
+	WorkdirContainer  string // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
 }
 
 // Setup for setting up a Docker container via dagger
 func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger.Container, error) {
 	// Make sure there is a non-empty URL or name provided
-	if opts.containerURL == "" {
+	if opts.ContainerURL == "" {
 		return nil, errEmptyURL
 	}
 
 	// None of the directories can be empty string
-	for _, val := range []string{opts.mountContainerDir, opts.mountHostDir, opts.workdirContainer} {
+	for _, val := range []string{opts.MountContainerDir, opts.MountHostDir, opts.WorkdirContainer} {
 		if val == "" {
 			return nil, errDirectoryNotSpecified
 		}
 	}
 
 	// The mount target directory in container must not be root
-	if opts.mountContainerDir == "." || opts.mountContainerDir == "/" {
+	if opts.MountContainerDir == "." || opts.MountContainerDir == "/" {
 		return nil, errDirectoryInvalid
 	}
 
 	// Pull docker container
-	container := client.Container().From(opts.containerURL)
+	container := client.Container().From(opts.ContainerURL)
 
 	// Mount repository into the container
 	return container.
-		WithExec([]string{"mkdir", "-p", opts.mountContainerDir}).
+		WithExec([]string{"mkdir", "-p", opts.MountContainerDir}).
 		WithMountedDirectory(
-			opts.mountContainerDir,
-			client.Host().Directory(opts.mountHostDir)).
-		WithWorkdir(opts.workdirContainer).
+			opts.MountContainerDir,
+			client.Host().Directory(opts.MountHostDir)).
+		WithWorkdir(opts.WorkdirContainer).
 		Sync(ctx)
 	// WithDirectory
 	//	Copy files from host to container
@@ -67,23 +68,42 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 // Artifacts is passes to GetArtifacts as argument, and specifies extraction of files
 // form container at containerDir to host at hostDir
 type Artifacts struct {
-	containerDir string
-	hostDir      string
+	ContainerPath string // Path inside container
+	ContainerDir  bool   // Is ^^^ path directory?
+	HostPath      string // Path inside host
 }
 
 // GetArtifacts extracts files from container to host
-func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *Artifacts) error {
-	if artifacts.containerDir == "" || artifacts.hostDir == "" {
-		return errDirectoryNotSpecified
-	}
+// Either both ContainerDir and HostDir must be directories, or both must be files
+func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[]Artifacts) error {
+	for _, artifact := range *artifacts {
+		if artifact.ContainerPath == "" || artifact.HostPath == "" {
+			return errDirectoryNotSpecified
+		}
 
-	// Get reference to artifacts directory in the container
-	output := container.Directory(artifacts.containerDir)
+		// Get reference to artifacts directory in the container
+		var success bool
+		var err error
 
-	// Copy contents of containers artifacts directory to host
-	success, err := output.Export(ctx, artifacts.hostDir)
-	if err != nil || !success {
-		return errExportFailed
+		// Export
+		// If allowParentDirPath is true, the path argument can be a directory path, in which case
+		// the file will be created in that directory.
+		if artifact.ContainerDir {
+			output := container.Directory(artifact.ContainerPath)
+			success, err = output.Export(ctx, artifact.HostPath)
+		} else {
+			output := container.File(artifact.ContainerPath)
+			success, err = output.Export(
+				ctx,
+				artifact.HostPath,
+				dagger.FileExportOpts{AllowParentDirPath: true},
+			)
+		}
+
+		// Copy contents of containers artifacts directory to host
+		if err != nil || !success {
+			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, fmt.Errorf("%w", err), artifact.ContainerPath, artifact.HostPath)
+		}
 	}
 
 	return nil
