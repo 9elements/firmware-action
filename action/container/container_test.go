@@ -37,10 +37,10 @@ func TestSetup(t *testing.T) {
 		{
 			name: "empty URL",
 			opts: SetupOpts{
-				containerURL:      "",
-				mountContainerDir: "",
-				mountHostDir:      "",
-				workdirContainer:  "",
+				ContainerURL:      "",
+				MountContainerDir: "",
+				MountHostDir:      "",
+				WorkdirContainer:  "",
 			},
 			wantErr:       errEmptyURL,
 			lsContains:    "",
@@ -49,10 +49,10 @@ func TestSetup(t *testing.T) {
 		{
 			name: "empty directory strings",
 			opts: SetupOpts{
-				containerURL:      "ubuntu:latest",
-				mountContainerDir: "",
-				mountHostDir:      "",
-				workdirContainer:  "",
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: "",
+				MountHostDir:      "",
+				WorkdirContainer:  "",
 			},
 			wantErr:       errDirectoryNotSpecified,
 			lsContains:    "",
@@ -61,10 +61,10 @@ func TestSetup(t *testing.T) {
 		{
 			name: "invalid directory strings: .",
 			opts: SetupOpts{
-				containerURL:      "ubuntu:latest",
-				mountContainerDir: ".",
-				mountHostDir:      ".",
-				workdirContainer:  ".",
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: ".",
+				MountHostDir:      ".",
+				WorkdirContainer:  ".",
 			},
 			wantErr:       errDirectoryInvalid,
 			lsContains:    "",
@@ -73,10 +73,10 @@ func TestSetup(t *testing.T) {
 		{
 			name: "invalid directory strings: /",
 			opts: SetupOpts{
-				containerURL:      "ubuntu:latest",
-				mountContainerDir: "/",
-				mountHostDir:      ".",
-				workdirContainer:  ".",
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: "/",
+				MountHostDir:      ".",
+				WorkdirContainer:  ".",
 			},
 			wantErr:       errDirectoryInvalid,
 			lsContains:    "",
@@ -85,10 +85,10 @@ func TestSetup(t *testing.T) {
 		{
 			name: "valid inputs",
 			opts: SetupOpts{
-				containerURL:      "ubuntu:latest",
-				mountContainerDir: "/src",
-				mountHostDir:      ".",
-				workdirContainer:  "/src",
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: "/src",
+				MountHostDir:      ".",
+				WorkdirContainer:  "/src",
 			},
 			wantErr:       nil,
 			lsContains:    "container_test.go",
@@ -96,24 +96,26 @@ func TestSetup(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		container, err := Setup(ctx, client, &tc.opts)
-		assert.ErrorIs(t, err, tc.wantErr)
-		if err != nil {
-			// No need to continue on err
-			continue
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			container, err := Setup(ctx, client, &tc.opts)
+			assert.ErrorIs(t, err, tc.wantErr)
+			if err != nil {
+				// No need to continue on err
+				return
+			}
 
-		// Get contents of current workign directory in the container
-		stdout, err := container.WithExec([]string{"ls", "."}).
-			Stdout(ctx)
-		assert.NoError(t, err)
+			// Get contents of current workign directory in the container
+			stdout, err := container.WithExec([]string{"ls", "."}).
+				Stdout(ctx)
+			assert.NoError(t, err)
 
-		// Check the directory contents
-		ls := strings.Split(stdout, "\n")
-		assert.True(t, slices.Contains(ls, tc.lsContains))
-		if tc.lsNotContains != "" {
-			assert.True(t, !slices.Contains(ls, tc.lsNotContains))
-		}
+			// Check the directory contents
+			ls := strings.Split(stdout, "\n")
+			assert.True(t, slices.Contains(ls, tc.lsContains))
+			if tc.lsNotContains != "" {
+				assert.True(t, !slices.Contains(ls, tc.lsNotContains))
+			}
+		})
 	}
 }
 
@@ -129,91 +131,135 @@ func TestGetArtifacts(t *testing.T) {
 	assert.NoError(t, err)
 	defer client.Close()
 	filename := "my_file.txt"
+	filename2 := "my_file2.txt"
 	prefix := "my_directory"
 
 	opts := SetupOpts{
-		containerURL:      "ubuntu:latest",
-		mountContainerDir: "/src",
-		mountHostDir:      ".",
-		workdirContainer:  "/src",
+		ContainerURL:      "ubuntu:latest",
+		MountContainerDir: "/src",
+		MountHostDir:      ".",
+		WorkdirContainer:  "/src",
 	}
 
 	testCases := []struct {
 		name           string
 		cmdToRun       [][]string
-		artifacts      Artifacts
+		artifacts      []Artifacts
 		wantErrExport  error
-		filepathToTest string
+		filepathToTest []string
 		wantErrFile    error
 	}{
 		{
 			name:     "empty directory string",
 			cmdToRun: [][]string{{"true"}},
-			artifacts: Artifacts{
-				containerDir: "",
-				hostDir:      tmpDir,
-			},
+			artifacts: []Artifacts{{
+				ContainerPath: "",
+				ContainerDir:  true,
+				HostPath:      tmpDir,
+			}},
 			wantErrExport:  errDirectoryNotSpecified,
-			filepathToTest: filename,
+			filepathToTest: []string{filename},
 			wantErrFile:    os.ErrNotExist,
 		},
 		{
-			name:     "single file",
+			name:     "single file -> dir",
 			cmdToRun: [][]string{{"touch", filename}},
-			artifacts: Artifacts{
-				containerDir: "/src",
-				hostDir:      tmpDir,
-			},
+			artifacts: []Artifacts{{
+				ContainerPath: "/src",
+				ContainerDir:  true,
+				HostPath:      tmpDir,
+			}},
 			wantErrExport:  nil,
-			filepathToTest: filename,
+			filepathToTest: []string{filename},
 			wantErrFile:    os.ErrExist,
 		},
 		{
-			name: "entire directory",
+			name:     "single file -> file",
+			cmdToRun: [][]string{{"touch", filename}},
+			artifacts: []Artifacts{{
+				ContainerPath: filepath.Join("/src", filename),
+				ContainerDir:  false,
+				HostPath:      filepath.Join(tmpDir, filename),
+			}},
+			wantErrExport:  nil,
+			filepathToTest: []string{filename},
+			wantErrFile:    os.ErrExist,
+		},
+		{
+			name: "two files -> dir",
+			cmdToRun: [][]string{
+				{"touch", filename},
+				{"touch", filename2},
+				{"ls", "-a1"},
+			},
+			artifacts: []Artifacts{
+				{
+					ContainerPath: filepath.Join("/src", filename),
+					ContainerDir:  false,
+					HostPath:      tmpDir,
+				},
+				{
+					ContainerPath: filepath.Join("/src", filename2),
+					ContainerDir:  false,
+					HostPath:      tmpDir,
+				},
+			},
+			wantErrExport:  nil,
+			filepathToTest: []string{filename, filename2},
+			wantErrFile:    os.ErrExist,
+		},
+		{
+			name: "entire directory -> dir",
 			cmdToRun: [][]string{
 				{"mkdir", prefix},
 				{"touch", filepath.Join(prefix, filename)},
 			},
-			artifacts: Artifacts{
-				containerDir: "/src",
-				hostDir:      tmpDir,
-			},
+			artifacts: []Artifacts{{
+				ContainerPath: "/src",
+				ContainerDir:  true,
+				HostPath:      tmpDir,
+			}},
 			wantErrExport:  nil,
-			filepathToTest: filepath.Join(prefix, filename),
+			filepathToTest: []string{filepath.Join(prefix, filename)},
 			wantErrFile:    os.ErrExist,
 		},
 		{
 			name:     "export non-existing directory",
 			cmdToRun: [][]string{{"true"}},
-			artifacts: Artifacts{
-				containerDir: "/some/non-existing/directory/path",
-				hostDir:      tmpDir,
-			},
+			artifacts: []Artifacts{{
+				ContainerPath: "/some/non-existing/directory/path",
+				ContainerDir:  true,
+				HostPath:      tmpDir,
+			}},
 			wantErrExport:  errExportFailed,
-			filepathToTest: filepath.Join(prefix, filename),
+			filepathToTest: []string{filepath.Join(prefix, filename)},
 			wantErrFile:    os.ErrNotExist,
 		},
 	}
 	for _, tc := range testCases {
-		container, err := Setup(ctx, client, &opts)
-		assert.NoError(t, err)
-
-		// Run commands in container
-		for _, cmd := range tc.cmdToRun {
-			container, err = container.WithExec(cmd).
-				Sync(ctx)
+		t.Run(tc.name, func(t *testing.T) {
+			container, err := Setup(ctx, client, &opts)
 			assert.NoError(t, err)
-		}
 
-		// Extract artifacts
-		err = GetArtifacts(ctx, container, &tc.artifacts)
-		assert.ErrorIs(t, err, tc.wantErrExport)
-		if err != nil {
-			// No need to continue on err
-			continue
-		}
-		assert.ErrorIs(t,
-			filesystem.CheckFileExists(filepath.Join(tmpDir, tc.filepathToTest)),
-			tc.wantErrFile)
+			// Run commands in container
+			for _, cmd := range tc.cmdToRun {
+				container, err = container.WithExec(cmd).
+					Sync(ctx)
+				assert.NoError(t, err)
+			}
+
+			// Extract artifacts
+			err = GetArtifacts(ctx, container, &tc.artifacts)
+			assert.ErrorIs(t, err, tc.wantErrExport)
+			if err != nil {
+				// No need to continue on err
+				return
+			}
+			for _, file := range tc.filepathToTest {
+				assert.ErrorIs(t,
+					filesystem.CheckFileExists(filepath.Join(tmpDir, file)),
+					tc.wantErrFile)
+			}
+		})
 	}
 }
