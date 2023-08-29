@@ -26,7 +26,7 @@ fi
 # un-xz
 if [ ! -f "${LINUX_TAR}" ]; then
 	# LINUX_TAR_XZ -> LINUX_TAR
-	unxz --keep "${LINUX_TAR_XZ}" > /dev/null
+	unxz --keep "${LINUX_TAR_XZ}" >/dev/null
 fi
 
 # Verify
