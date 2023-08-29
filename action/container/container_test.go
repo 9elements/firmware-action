@@ -7,13 +7,13 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/filesystem"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/slices"
 )
 
 func TestSetup(t *testing.T) {
