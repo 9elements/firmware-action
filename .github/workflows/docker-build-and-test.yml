@@ -35,13 +35,16 @@ jobs:
             'udk2017'
           ]
     steps:
-      - uses: actions/setup-python@v4
+      - name: Setup python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - uses: actions/checkout@v3
-      - name: Install deps
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install python dependencies
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
-      - uses: actions/checkout@v3
       - name: Run dagger pipeline
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]]; then
