@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-package recepies
+package recipes
 
 import (
 	"testing"

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-// Package recepies / coreboot
-package recepies
+// Package recipes / coreboot
+package recipes
 
 import (
 	"context"
@@ -87,7 +87,7 @@ func TestCoreboot(t *testing.T) {
 	err = coreboot(ctx, client, &common, &corebootOpts, &artifacts)
 	assert.NoError(t, err)
 
-	// Check artifects
+	// Check artifacts
 	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(tmpDir, "coreboot.rom")), os.ErrExist)
 	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(tmpDir, "defconfig")), os.ErrExist)
 }

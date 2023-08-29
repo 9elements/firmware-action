@@ -104,7 +104,7 @@ func TestSetup(t *testing.T) {
 				return
 			}
 
-			// Get contents of current workign directory in the container
+			// Get contents of current working directory in the container
 			stdout, err := container.WithExec([]string{"ls", "."}).
 				Stdout(ctx)
 			assert.NoError(t, err)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-// Package recepies / coreboot
-package recepies
+// Package recipes / coreboot
+package recipes
 
 import (
 	"context"

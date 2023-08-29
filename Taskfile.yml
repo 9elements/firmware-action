@@ -17,17 +17,11 @@ tasks:
     desc: Compile action binaries
     cmds:
       - task: build-go-binary
-        vars: {
-          OS: "linux"
-        }
+        vars: { OS: 'linux' } # yamllint disable-line
       - task: build-go-binary
-        vars: {
-          OS: "darwin"
-        }
+        vars: { OS: 'darwin' } # yamllint disable-line
       - task: build-go-binary
-        vars: {
-          OS: "windows"
-        }
+        vars: { OS: 'windows' } # yamllint disable-line
 
   lint:
     desc: Run the linters

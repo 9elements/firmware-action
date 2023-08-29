@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-// Package recepies yay!
-package recepies
+// Package recipes yay!
+package recipes
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type (
 	getValFunc func(string) string
 )
 
-// commontOpts is common to all targets
+// commonOpts is common to all targets
 // Used to store data from githubaction.Action
 // For details see action.yml
 type commonOpts struct {
@@ -39,7 +39,7 @@ type commonOpts struct {
 	outputDir        string
 }
 
-// commonGetOpts is used to fill commontOpts with data from githubaction.Action
+// commonGetOpts is used to fill commonOpts with data from githubaction.Action
 func commonGetOpts(get getValFunc) (commonOpts, error) {
 	opts := commonOpts{
 		target:           get("target"),
@@ -120,7 +120,7 @@ func corebootGetOpts(get getValFunc) (corebootOpts, error) {
 // Universal Functions
 //=====================
 
-// Execute recepie
+// Execute recipe
 func Execute(ctx context.Context, client *dagger.Client, action *githubactions.Action) error {
 	switch action.GetInput("target") {
 	case "coreboot":

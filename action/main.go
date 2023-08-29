@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 // Package main implements the core logic of running composable Dagger pipelines
-// via GitHub Actions. Currently supported are coreboot and Linux pipelines.
 package main
 
 import (
@@ -10,7 +9,7 @@ import (
 	"os"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/recepies"
+	"github.com/9elements/firmware-action/action/recipes"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -21,12 +20,15 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	action := githubactions.New()
-
+	// Setup dagger client
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
 		return err
 	}
 	defer client.Close()
-	return recepies.Execute(ctx, client, action)
+
+	// Setup GitHub action SDK
+	action := githubactions.New()
+
+	return recipes.Execute(ctx, client, action)
 }
