@@ -60,10 +60,5 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, op
 	}
 
 	// Extract artifacts
-	err = container.GetArtifacts(ctx, corebootContainer, artifacts)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return container.GetArtifacts(ctx, corebootContainer, artifacts)
 }

@@ -102,7 +102,7 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 
 		// Copy contents of containers artifacts directory to host
 		if err != nil || !success {
-			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, fmt.Errorf("%w", err), artifact.ContainerPath, artifact.HostPath)
+			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, err, artifact.ContainerPath, artifact.HostPath)
 		}
 	}
 

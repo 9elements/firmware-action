@@ -23,9 +23,7 @@ import (
 
 var errRequiredOptionUndefined = errors.New("required option is undefined")
 
-type (
-	getValFunc func(string) string
-)
+type getValFunc func(string) string
 
 // commonOpts is common to all targets
 // Used to store data from githubaction.Action
@@ -70,8 +68,7 @@ func commonGetOpts(get getValFunc) (commonOpts, error) {
 	}
 
 	// Check if sdk_version is URL, if not make it into URL defaulting to our containers
-	_, err := url.ParseRequestURI(opts.sdkVersion)
-	if err != nil {
+	if _, err := url.ParseRequestURI(opts.sdkVersion); err != nil {
 		opts.sdkVersion = path.Join("ghcr.io/9elements/firmware-action", opts.sdkVersion)
 	}
 	return opts, nil
