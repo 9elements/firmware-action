@@ -46,8 +46,7 @@ inputs:
     required: true
   output:
     description: |
-      *output* specifies path (relative) to where place
-      the produced files
+      *output* specifies the (relative) path where to place the produced files
     required: true
 
   #-------------------------------
