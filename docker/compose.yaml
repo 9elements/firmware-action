@@ -25,6 +25,7 @@ services:
         - EDK2_NON_OSI_COMMIT=663322292e2cc81ee6ec26aa0c5948f4d8c4849a
         - GCC_VERSION=4.8
         - PYTHON_PACKAGES=python
+        - GCC_CROSS_COMPILER_PACKAGES=gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi gcc-i686-linux-gnu
       # NonOSI wasn't used in 2017
   edk2-stable202008:
     build:

@@ -14,6 +14,7 @@ ARG EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
 ARG GCC_VERSION=9
 ENV GCC_VERSION=$GCC_VERSION
 ARG PYTHON_PACKAGES=python-is-python3 python2 python3
+ARG GCC_CROSS_COMPILER_PACKAGES=gcc-${GCC_VERSION}-aarch64-linux-gnu gcc-${GCC_VERSION}-arm-linux-gnueabi gcc-${GCC_VERSION}-i686-linux-gnu
 
 ARG CONTEXT=edk2
 
@@ -30,16 +31,17 @@ ENV WORKSPACE=$TOOLSDIR/Edk2
 RUN dpkg --add-architecture i386 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
+        ${PYTHON_PACKAGES} \
         acpica-tools \
         bsdmainutils \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
+        ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
         iucode-tool \
         nasm \
         nodejs \
         openssh-client \
-        ${PYTHON_PACKAGES} \
         qemu-system-x86 \
         uuid-dev \
         wine-stable \
