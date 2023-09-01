@@ -41,7 +41,7 @@ tasks:
     desc: Run tests
     dir: action
     cmds:
-      - go test {{.CLI_ARGS}} -covermode=count -coverprofile coverage.out ./...
+      - go test {{.CLI_ARGS}} -shuffle=on -covermode=count -coverprofile coverage.out ./...
       - go tool cover -func=coverage.out
       - go tool cover -html=coverage.out -o coverage.html
 
