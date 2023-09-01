@@ -34,6 +34,7 @@ func TestCoreboot(t *testing.T) {
 	opts := map[string]string{
 		"target":           "coreboot",
 		"sdk_version":      fmt.Sprintf("coreboot_%s:main", corebootVersion),
+		"architecture":     "x86",
 		"repo_path":        filepath.Join(tmpDir, "coreboot"),
 		"defconfig_path":   "defconfig",
 		"containerWorkDir": "/coreboot",
@@ -49,6 +50,7 @@ func TestCoreboot(t *testing.T) {
 
 	// Change current working directory
 	pwd, err := os.Getwd()
+	defer os.Chdir(pwd) // nolint:errcheck
 	assert.NoError(t, err)
 	err = os.Chdir(tmpDir)
 	assert.NoError(t, err)
@@ -66,20 +68,23 @@ func TestCoreboot(t *testing.T) {
 		filepath.Join(pwd, fmt.Sprintf("../../tests/coreboot_%s/seabios.defconfig", corebootVersion)),
 		defconfigPath,
 	)
-	// ^^^ this relative path might be funky
+	//   ^^^ this relative path might be funky
 	assert.NoError(t, err)
 
 	// Artifacts
+	outputPath := filepath.Join(tmpDir, common.outputDir)
+	err = os.MkdirAll(outputPath, os.ModePerm)
+	assert.NoError(t, err)
 	artifacts := []container.Artifacts{
 		{
 			ContainerPath: filepath.Join(common.containerWorkDir, "build", "coreboot.rom"),
 			ContainerDir:  false,
-			HostPath:      tmpDir,
+			HostPath:      outputPath,
 		},
 		{
 			ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
 			ContainerDir:  false,
-			HostPath:      tmpDir,
+			HostPath:      outputPath,
 		},
 	}
 
@@ -88,6 +93,6 @@ func TestCoreboot(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Check artifacts
-	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(tmpDir, "coreboot.rom")), os.ErrExist)
-	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(tmpDir, "defconfig")), os.ErrExist)
+	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "coreboot.rom")), os.ErrExist)
+	assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
 }

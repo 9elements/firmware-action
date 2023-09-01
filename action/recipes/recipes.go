@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"dagger.io/dagger"
@@ -21,7 +22,10 @@ import (
 // Universal options
 //===================
 
-var errRequiredOptionUndefined = errors.New("required option is undefined")
+var (
+	errRequiredOptionUndefined = errors.New("required option is undefined")
+	errArchUndefined           = errors.New("environment variable 'ARCH' is not defined")
+)
 
 type getValFunc func(string) string
 
@@ -31,6 +35,7 @@ type getValFunc func(string) string
 type commonOpts struct {
 	target           string
 	sdkVersion       string
+	arch             string
 	repoPath         string
 	defconfigPath    string
 	containerWorkDir string
@@ -42,6 +47,7 @@ func commonGetOpts(get getValFunc) (commonOpts, error) {
 	opts := commonOpts{
 		target:           get("target"),
 		sdkVersion:       get("sdk_version"),
+		arch:             get("architecture"),
 		repoPath:         get("repo_path"),
 		defconfigPath:    get("defconfig_path"),
 		containerWorkDir: get("GITHUB_WORKSPACE"),
@@ -109,6 +115,16 @@ func corebootGetOpts(get getValFunc) (corebootOpts, error) {
 // LINUX
 //=======
 
+// Used to store data from githubaction.Action
+// For details see action.yml
+type linuxOpts struct{}
+
+// linuxGetOpts is used to fill linuxOpts with data from githubaction.Action
+func linuxGetOpts(_ getValFunc) (linuxOpts, error) {
+	opts := linuxOpts{}
+	return opts, nil
+}
+
 //======
 // EDK2
 //======
@@ -119,12 +135,13 @@ func corebootGetOpts(get getValFunc) (corebootOpts, error) {
 
 // Execute recipe
 func Execute(ctx context.Context, client *dagger.Client, action *githubactions.Action) error {
+	common, err := commonGetOpts(action.GetInput)
+	if err != nil {
+		return err
+	}
+
 	switch action.GetInput("target") {
 	case "coreboot":
-		common, err := commonGetOpts(action.GetInput)
-		if err != nil {
-			return err
-		}
 		opts, err := corebootGetOpts(action.GetInput)
 		if err != nil {
 			return err
@@ -142,9 +159,25 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 			},
 		}
 		return coreboot(ctx, client, &common, &opts, &artifacts)
+	case "linux":
+		opts, err := linuxGetOpts(action.GetInput)
+		if err != nil {
+			return err
+		}
+		artifacts := []container.Artifacts{
+			{
+				ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
+				ContainerDir:  false,
+				HostPath:      common.outputDir,
+			},
+			{
+				ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+				ContainerDir:  false,
+				HostPath:      common.outputDir,
+			},
+		}
+		return linux(ctx, client, &common, &opts, &artifacts)
 	/*
-		case "linux":
-			return linux(ctx, action, client)
 		case "edk2":
 			return edk2(ctx, action, client)
 	*/
@@ -153,4 +186,95 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 	default:
 		return fmt.Errorf("unsupported target: %s", action.GetInput("target"))
 	}
+}
+
+// buildWithKernelBuildSystem is a generic function to build stuff with Kernel Build System
+// usable for linux kernel and coreboot
+// https://www.kernel.org/doc/html/latest/kbuild/index.html
+func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, common *commonOpts, envVars map[string]string, artifacts *[]container.Artifacts) error {
+	// Spin up container
+	containerOpts := container.SetupOpts{
+		ContainerURL:      common.sdkVersion,
+		MountContainerDir: common.containerWorkDir,
+		MountHostDir:      common.repoPath,
+		WorkdirContainer:  common.containerWorkDir,
+	}
+	myContainer, err := container.Setup(ctx, client, &containerOpts)
+	if err != nil {
+		return err
+	}
+
+	// Copy over the defconfig file
+	defconfigBasename := filepath.Base(common.defconfigPath)
+	if strings.Contains(defconfigBasename, ".defconfig") {
+		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
+		// contains '.defconfig' string ...
+		// it will just fail with generic error (defconfigBasename="linux.defconfig"):
+		//   make[1]: *** No rule to make target 'linux.defconfig'.  Stop.
+		//   make: *** [Makefile:704: linux.defconfig] Error 2
+		// but defconfigBasename="linux_defconfig" works fine
+		return fmt.Errorf("filename '%s' specified by defconfig_path must not contain '.defconfig' in the name", defconfigBasename)
+	}
+	myContainer = myContainer.WithFile(
+		common.defconfigPath,
+		myContainer.File(
+			filepath.Join(common.containerWorkDir, defconfigBasename),
+		))
+
+	// Setup environment variables in the container
+	for key, value := range envVars {
+		myContainer = myContainer.WithEnvVariable(key, value)
+	}
+
+	// Assemble commands to build
+	buildSteps := [][]string{
+		// remove existing config if exists
+		// -f: ignore nonexistent files
+		{"rm", "-f", ".config"},
+	}
+	switch common.target {
+	case "coreboot":
+		// this thing works because of some black magic script in coreboot build chain
+		// does not work for linux kernel
+		buildSteps = append(
+			buildSteps,
+			[]string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"},
+		)
+	case "linux":
+		// results should be: make ARCH=x86 custom_defconfig
+		arch, ok := envVars["ARCH"]
+		if !ok {
+			return errArchUndefined
+		}
+		buildSteps = append(
+			buildSteps,
+			[]string{"ln", "--symbolic", "--relative", "arch/x86", "arch/x86_64"},
+			[]string{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", arch, defconfigBasename)},
+			[]string{"make", defconfigBasename},
+		)
+	}
+	buildSteps = append(
+		buildSteps,
+		[]string{"make", "-j", fmt.Sprintf("%d", runtime.NumCPU())},
+		// for documenting purposes
+		[]string{"make", "savedefconfig"},
+	)
+
+	// Build
+	for step := range buildSteps {
+		myContainer, err = myContainer.
+			WithExec(buildSteps[step]).
+			Sync(ctx)
+		if err != nil {
+			return fmt.Errorf("%s build failed: %w", common.target, err)
+		}
+	}
+
+	// Extract artifacts
+	err = container.GetArtifacts(ctx, myContainer, artifacts)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
