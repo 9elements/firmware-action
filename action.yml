@@ -30,6 +30,10 @@ inputs:
         edk2-stable202111:latest
       See https://github.com/orgs/9elements/packages
     required: true
+  architecture:
+    description: |
+      *architecture* specifies target architecture, such as 'x86' or 'arm64'.
+    required: true
   repo_path:
     description: |
       *repo_path* gives the (relative) path to the target (firmware) repository.

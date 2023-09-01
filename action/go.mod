@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	dagger.io/dagger v0.8.3
+	github.com/Masterminds/semver v1.5.0
 	github.com/sethvargo/go-githubactions v1.1.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63

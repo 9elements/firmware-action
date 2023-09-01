@@ -1,0 +1,157 @@
+// SPDX-License-Identifier: MIT
+
+// Package recipes / linux
+package recipes
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"testing"
+
+	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/Masterminds/semver"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestLinux(t *testing.T) {
+	// This test is really slow (like 100 seconds)
+	/*
+		if testing.Short() {
+			t.Skip("skipping test in short mode")
+		}
+	*/
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+	defer os.Chdir(pwd) // nolint:errcheck
+
+	testCases := []struct {
+		name         string
+		linuxVersion string
+		arch         string
+		wantErr      error
+	}{
+		{
+			name:         "normal build for x86 64bit",
+			linuxVersion: "6.1.45",
+			arch:         "x86_64",
+			wantErr:      nil,
+		},
+		{
+			name:         "normal build for x86 32bit",
+			linuxVersion: "6.1.45",
+			arch:         "x86",
+			wantErr:      nil,
+		},
+		{
+			name:         "normal build for arm64",
+			linuxVersion: "6.1.45",
+			arch:         "arm64",
+			wantErr:      nil,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.NoError(t, os.Chdir(pwd)) // just to make sure
+
+			linuxVersion, err := semver.NewVersion(tc.linuxVersion)
+			assert.NoError(t, err)
+			ctx := context.Background()
+			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+			assert.NoError(t, err)
+			defer client.Close()
+
+			// Prepare options
+			tmpDir := t.TempDir()
+			opts := map[string]string{
+				"target":           "linux",
+				"sdk_version":      fmt.Sprintf("linux_%s:main", linuxVersion.String()),
+				"architecture":     tc.arch,
+				"repo_path":        filepath.Join(tmpDir, "linux"),
+				"defconfig_path":   "custom_defconfig",
+				"containerWorkDir": "/linux",
+				"GITHUB_WORKSPACE": "/linux",
+				"output":           "output",
+			}
+			getFunc := func(key string) string {
+				return opts[key]
+			}
+			common, err := commonGetOpts(getFunc)
+			assert.NoError(t, err)
+			linuxOpts := linuxOpts{}
+
+			// Change current working directory
+			//   create __tmp_files__ directory to store source-code of Linux Kernel
+			//   mostly useful for repeated local-run tests to save bandwidth and time
+			tmpFiles := filepath.Join(pwd, "__tmp_files__")
+			err = exec.Command("mkdir", "-p", tmpFiles).Run()
+			assert.NoError(t, err)
+			err = os.Chdir(tmpFiles)
+			assert.NoError(t, err)
+
+			// Download linux source code to __tmp_files__
+			var commands [][]string
+			if errors.Is(filesystem.CheckFileExists(fmt.Sprintf("linux-%s", linuxVersion.String())), os.ErrNotExist) {
+				commands = [][]string{
+					// Get Linux Kernel sources
+					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.xz", linuxVersion.Major(), linuxVersion.String())},
+					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.sign", linuxVersion.Major(), linuxVersion.String())},
+					// un-xz
+					{"unxz", "--keep", fmt.Sprintf("linux-%s.tar.xz", linuxVersion.String())},
+					// GPG verify
+					{"gpg2", "--locate-keys", "torvalds@kernel.org", "gregkh@kernel.org"},
+					{"gpg2", "--verify", fmt.Sprintf("linux-%s.tar.sign", linuxVersion.String())},
+					// un-tar
+					{"tar", "-xvf", fmt.Sprintf("linux-%s.tar", linuxVersion.String())},
+				}
+			}
+			//   always copy from __tmp_files__ to tmpDir for each test
+			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", linuxVersion.String()), common.repoPath})
+			for _, cmd := range commands {
+				err = exec.Command(cmd[0], cmd[1:]...).Run()
+				assert.NoError(t, err)
+			}
+			err = os.Chdir(common.repoPath)
+			assert.NoError(t, err)
+
+			// Copy over defconfig file into tmpDir/linux
+			defconfigPath := filepath.Join(common.repoPath, common.defconfigPath)
+			err = filesystem.CopyFile(
+				filepath.Join(pwd, fmt.Sprintf("../../tests/linux_%s/linux.defconfig", linuxVersion.String())),
+				defconfigPath,
+			)
+			//   ^^^ this relative path might be funky
+			assert.NoError(t, err)
+
+			// Artifacts
+			outputPath := filepath.Join(tmpDir, common.outputDir)
+			err = os.MkdirAll(outputPath, os.ModePerm)
+			assert.NoError(t, err)
+			artifacts := []container.Artifacts{
+				{
+					ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
+					ContainerDir:  false,
+					HostPath:      outputPath,
+				},
+				{
+					ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+					ContainerDir:  false,
+					HostPath:      outputPath,
+				},
+			}
+
+			// Try to build linux kernel
+			err = linux(ctx, client, &common, &linuxOpts, &artifacts)
+			assert.ErrorIs(t, err, tc.wantErr)
+
+			// Check artifacts
+			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "vmlinux")), os.ErrExist)
+			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+		})
+	}
+}
