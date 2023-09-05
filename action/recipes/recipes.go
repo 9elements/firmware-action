@@ -158,7 +158,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 				HostPath:      common.outputDir,
 			},
 		}
-		return coreboot(ctx, client, &common, &opts, &artifacts)
+		return coreboot(ctx, client, &common, "", &opts, &artifacts)
 	case "linux":
 		opts, err := linuxGetOpts(action.GetInput)
 		if err != nil {
@@ -176,7 +176,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 				HostPath:      common.outputDir,
 			},
 		}
-		return linux(ctx, client, &common, &opts, &artifacts)
+		return linux(ctx, client, &common, "", &opts, &artifacts)
 	/*
 		case "edk2":
 			return edk2(ctx, action, client)
@@ -191,7 +191,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 // buildWithKernelBuildSystem is a generic function to build stuff with Kernel Build System
 // usable for linux kernel and coreboot
 // https://www.kernel.org/doc/html/latest/kbuild/index.html
-func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, common *commonOpts, envVars map[string]string, artifacts *[]container.Artifacts) error {
+func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, envVars map[string]string, artifacts *[]container.Artifacts) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      common.sdkVersion,
@@ -199,7 +199,7 @@ func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, comm
 		MountHostDir:      common.repoPath,
 		WorkdirContainer:  common.containerWorkDir,
 	}
-	myContainer, err := container.Setup(ctx, client, &containerOpts)
+	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
 		return err
 	}

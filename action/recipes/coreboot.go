@@ -11,10 +11,10 @@ import (
 )
 
 // coreboot builds coreboot with all blobs and stuff
-func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, opts *corebootOpts, artifacts *[]container.Artifacts) error {
+func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *corebootOpts, artifacts *[]container.Artifacts) error {
 	// TODO: get blobs in place!
 	_ = opts
 	envVars := map[string]string{}
 
-	return buildWithKernelBuildSystem(ctx, client, common, envVars, artifacts)
+	return buildWithKernelBuildSystem(ctx, client, common, dockerfileDirectoryPath, envVars, artifacts)
 }

@@ -89,7 +89,7 @@ func TestCoreboot(t *testing.T) {
 	}
 
 	// Try to build coreboot
-	err = coreboot(ctx, client, &common, &corebootOpts, &artifacts)
+	err = coreboot(ctx, client, &common, "", &corebootOpts, &artifacts)
 	assert.NoError(t, err)
 
 	// Check artifacts
