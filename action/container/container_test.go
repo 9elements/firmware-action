@@ -38,9 +38,9 @@ func TestSetup(t *testing.T) {
 			name: "empty URL",
 			opts: SetupOpts{
 				ContainerURL:      "",
-				MountContainerDir: "",
-				MountHostDir:      "",
-				WorkdirContainer:  "",
+				MountContainerDir: "/src",
+				MountHostDir:      ".",
+				WorkdirContainer:  "/src",
 			},
 			wantErr:       errEmptyURL,
 			lsContains:    "",
@@ -97,7 +97,7 @@ func TestSetup(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			container, err := Setup(ctx, client, &tc.opts)
+			container, err := Setup(ctx, client, &tc.opts, "")
 			assert.ErrorIs(t, err, tc.wantErr)
 			if err != nil {
 				// No need to continue on err
@@ -238,7 +238,7 @@ func TestGetArtifacts(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			container, err := Setup(ctx, client, &opts)
+			container, err := Setup(ctx, client, &opts, "")
 			assert.NoError(t, err)
 
 			// Run commands in container

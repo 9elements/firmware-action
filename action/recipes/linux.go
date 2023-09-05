@@ -14,7 +14,7 @@ import (
 var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-compilation")
 
 // linux builds linux kernel
-func linux(ctx context.Context, client *dagger.Client, common *commonOpts, opts *linuxOpts, artifacts *[]container.Artifacts) error {
+func linux(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *linuxOpts, artifacts *[]container.Artifacts) error {
 	// Not sure if there will be any linuxOpts
 	_ = opts
 
@@ -37,5 +37,5 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, opts 
 		envVars["CROSS_COMPILE"] = val
 	}
 
-	return buildWithKernelBuildSystem(ctx, client, common, envVars, artifacts)
+	return buildWithKernelBuildSystem(ctx, client, common, dockerfileDirectoryPath, envVars, artifacts)
 }

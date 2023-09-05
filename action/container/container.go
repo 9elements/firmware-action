@@ -28,11 +28,10 @@ type SetupOpts struct {
 }
 
 // Setup for setting up a Docker container via dagger
-func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger.Container, error) {
-	// Make sure there is a non-empty URL or name provided
-	if opts.ContainerURL == "" {
-		return nil, errEmptyURL
-	}
+func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfileDirectoryPath string) (*dagger.Container, error) {
+	// dockerfileDirectoryPath allows to use Dockerfile and build locally,
+	//   which is handy for testing changes to said Dockerfile without the need to
+	//   have the container uploaded into package registry
 
 	// None of the directories can be empty string
 	for _, val := range []string{opts.MountContainerDir, opts.MountHostDir, opts.WorkdirContainer} {
@@ -46,8 +45,27 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		return nil, errDirectoryInvalid
 	}
 
-	// Pull docker container
-	container := client.Container().From(opts.ContainerURL)
+	// Setup container either from URL or build from Dockerfile
+	var container *dagger.Container
+	if dockerfileDirectoryPath == "" {
+		// Use URL
+		fmt.Printf("Container setup: URL mode")
+
+		// Make sure there is a non-empty URL or name provided
+		if opts.ContainerURL == "" {
+			return nil, errEmptyURL
+		}
+
+		// Pull docker container
+		container = client.Container().From(opts.ContainerURL)
+	} else {
+		// Use Dockerfile
+		fmt.Printf("Container setup: Dockerfile mode")
+
+		container = client.Container().Build(
+			client.Host().Directory(dockerfileDirectoryPath),
+		)
+	}
 
 	// Mount repository into the container
 	return container.

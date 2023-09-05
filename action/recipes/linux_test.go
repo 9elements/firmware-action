@@ -30,6 +30,14 @@ func TestLinux(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Chdir(pwd) // nolint:errcheck
 
+	// Use "" if you want to test containers from github package registry
+	// Use "../../docker/linux" if you want to test containers built fresh from Dockerfile
+	dockerfilePath := ""
+	if true {
+		dockerfilePath, err = filepath.Abs("../../docker/linux")
+		assert.NoError(t, err)
+	}
+
 	testCases := []struct {
 		name         string
 		linuxVersion string
@@ -121,11 +129,13 @@ func TestLinux(t *testing.T) {
 
 			// Copy over defconfig file into tmpDir/linux
 			defconfigPath := filepath.Join(common.repoPath, common.defconfigPath)
+			defconfigLocalPath, err := filepath.Abs(filepath.Join(pwd, fmt.Sprintf("../../tests/linux_%s/linux.defconfig", linuxVersion.String())))
+			//   ^^^ this relative path might be funky
+			assert.NoError(t, err)
 			err = filesystem.CopyFile(
-				filepath.Join(pwd, fmt.Sprintf("../../tests/linux_%s/linux.defconfig", linuxVersion.String())),
+				defconfigLocalPath,
 				defconfigPath,
 			)
-			//   ^^^ this relative path might be funky
 			assert.NoError(t, err)
 
 			// Artifacts
@@ -146,12 +156,14 @@ func TestLinux(t *testing.T) {
 			}
 
 			// Try to build linux kernel
-			err = linux(ctx, client, &common, &linuxOpts, &artifacts)
+			err = linux(ctx, client, &common, dockerfilePath, &linuxOpts, &artifacts)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "vmlinux")), os.ErrExist)
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+			assert.NoError(t, os.Chdir(pwd)) // just to make sure
 		})
 	}
+	assert.NoError(t, os.Chdir(pwd)) // just to make sure
 }
