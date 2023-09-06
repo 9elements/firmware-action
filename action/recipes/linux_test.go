@@ -21,11 +21,10 @@ import (
 
 func TestLinux(t *testing.T) {
 	// This test is really slow (like 100 seconds)
-	/*
-		if testing.Short() {
-			t.Skip("skipping test in short mode")
-		}
-	*/
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
 	pwd, err := os.Getwd()
 	assert.NoError(t, err)
 	defer os.Chdir(pwd) // nolint:errcheck
@@ -33,7 +32,7 @@ func TestLinux(t *testing.T) {
 	// Use "" if you want to test containers from github package registry
 	// Use "../../docker/linux" if you want to test containers built fresh from Dockerfile
 	dockerfilePath := ""
-	if true {
+	if false {
 		dockerfilePath, err = filepath.Abs("../../docker/linux")
 		assert.NoError(t, err)
 	}
@@ -97,13 +96,15 @@ func TestLinux(t *testing.T) {
 			//   create __tmp_files__ directory to store source-code of Linux Kernel
 			//   mostly useful for repeated local-run tests to save bandwidth and time
 			tmpFiles := filepath.Join(pwd, "__tmp_files__")
-			err = exec.Command("mkdir", "-p", tmpFiles).Run()
+			err = os.MkdirAll(tmpFiles, 0o750)
 			assert.NoError(t, err)
 			err = os.Chdir(tmpFiles)
 			assert.NoError(t, err)
+			defer os.Chdir(pwd) // nolint:errcheck
 
 			// Download linux source code to __tmp_files__
 			var commands [][]string
+			// TODO: make these commands OS independent
 			if errors.Is(filesystem.CheckFileExists(fmt.Sprintf("linux-%s", linuxVersion.String())), os.ErrNotExist) {
 				commands = [][]string{
 					// Get Linux Kernel sources
@@ -129,9 +130,15 @@ func TestLinux(t *testing.T) {
 
 			// Copy over defconfig file into tmpDir/linux
 			defconfigPath := filepath.Join(common.repoPath, common.defconfigPath)
-			defconfigLocalPath, err := filepath.Abs(filepath.Join(pwd, fmt.Sprintf("../../tests/linux_%s/linux.defconfig", linuxVersion.String())))
-			//   ^^^ this relative path might be funky
+			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
 			assert.NoError(t, err)
+			//   common.repoPath = path to end user repository (in this case somewhere in /tmp)
+			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
+			defconfigLocalPath, err := filepath.Abs(filepath.Join(
+				repoRootPath,
+				fmt.Sprintf("tests/linux_%s/linux.defconfig", linuxVersion.String()),
+			))
+			assert.NoErrorf(t, err, "encountered issue with missing files, is '%s' the root of the repo?", repoRootPath)
 			err = filesystem.CopyFile(
 				defconfigLocalPath,
 				defconfigPath,
@@ -162,7 +169,6 @@ func TestLinux(t *testing.T) {
 			// Check artifacts
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "vmlinux")), os.ErrExist)
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
-			assert.NoError(t, os.Chdir(pwd)) // just to make sure
 		})
 	}
 	assert.NoError(t, os.Chdir(pwd)) // just to make sure

@@ -49,7 +49,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 	var container *dagger.Container
 	if dockerfileDirectoryPath == "" {
 		// Use URL
-		fmt.Printf("Container setup: URL mode")
+		fmt.Println("Container setup: URL mode")
 
 		// Make sure there is a non-empty URL or name provided
 		if opts.ContainerURL == "" {
@@ -60,7 +60,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 		container = client.Container().From(opts.ContainerURL)
 	} else {
 		// Use Dockerfile
-		fmt.Printf("Container setup: Dockerfile mode")
+		fmt.Println("Container setup: Dockerfile mode")
 
 		container = client.Container().Build(
 			client.Host().Directory(dockerfileDirectoryPath),

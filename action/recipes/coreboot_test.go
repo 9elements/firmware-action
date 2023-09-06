@@ -64,11 +64,14 @@ func TestCoreboot(t *testing.T) {
 
 	// Copy over defconfig file into tmpDir
 	defconfigPath := filepath.Join(common.repoPath, "defconfig")
+	repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
+	assert.NoError(t, err)
+	//   common.repoPath = path to end user repository (in this case somewhere in /tmp)
+	//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 	err = filesystem.CopyFile(
-		filepath.Join(pwd, fmt.Sprintf("../../tests/coreboot_%s/seabios.defconfig", corebootVersion)),
+		filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", corebootVersion)),
 		defconfigPath,
 	)
-	//   ^^^ this relative path might be funky
 	assert.NoError(t, err)
 
 	// Artifacts

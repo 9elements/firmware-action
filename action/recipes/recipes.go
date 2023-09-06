@@ -271,10 +271,5 @@ func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, comm
 	}
 
 	// Extract artifacts
-	err = container.GetArtifacts(ctx, myContainer, artifacts)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return container.GetArtifacts(ctx, myContainer, artifacts)
 }
