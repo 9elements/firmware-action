@@ -73,8 +73,17 @@ func commonGetOpts(get getValFunc) (commonOpts, error) {
 		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
 	}
 
-	// Check if sdk_version is URL, if not make it into URL defaulting to our containers
-	if _, err := url.ParseRequestURI(opts.sdkVersion); err != nil {
+	// Check if sdk_version is URL to a container in some container registry
+	//   (for example "docker.io/library/ubuntu:latest")
+	// If sdk_version is not a URL, assume it is a name of container and make it into URL
+	//   pointing to our container registry at "ghcr.io/9elements/firmware-action"
+	// WARNING:
+	//   For url.ParseRequestURI string "edk2-stable202105:main" is a valid URL (RFC 3986)
+	//     so checking err alone is not enough.
+	//   Valid URL should contain Fully Qualified Domain Name (FQDN) and so checking for empty
+	//     parsedUrl.Hostname seems to do the trick.
+	if parsedURL, err := url.ParseRequestURI(opts.sdkVersion); err != nil || parsedURL.Hostname() == "" {
+		// opts.sdkVersion is not URL
 		opts.sdkVersion = path.Join("ghcr.io/9elements/firmware-action", opts.sdkVersion)
 	}
 	return opts, nil
