@@ -29,6 +29,7 @@
     "BOOTLOADER",
     "HEALTHCHECK",
     "Hadolint",
+    "IPXE",
     "NOTSET",
     "TARGETARCH",
     "Taskfile",
