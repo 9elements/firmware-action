@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 // CheckFileExists checks if file exists at PATH
@@ -77,4 +78,24 @@ func MoveFile(pathSource, pathDestination string) error {
 	}
 
 	return os.Rename(pathSource, pathDestination)
+}
+
+// DirTree is equivalent to "tree" command
+func DirTree(root string) ([]string, error) {
+	var files []string
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		foundItem := path
+		if info.IsDir() {
+			foundItem = fmt.Sprintf("%s/", path)
+		}
+		files = append(files, foundItem)
+		return nil
+	})
+
+	for _, file := range files {
+		fmt.Println(file)
+	}
+
+	return files, err
 }
