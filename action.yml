@@ -46,7 +46,12 @@ inputs:
       *defconfig_path* gives the (relative to repo_path) path to the defconfig that
       should be used to build the target.
       For coreboot and linux this is a defconfig.
-      For EDK2 this is a one-line file containing the build defines.
+      For EDK2 this is a one-line file containing the build arguments
+        such as '-t GCC5 -D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
+        Some arguments will be added automatically from action inputs:
+          '-a <architecture>'
+          '-p <edk2__platform>'
+          '-b <edk2__release_type>'
     required: true
   output:
     description: |

@@ -138,6 +138,38 @@ func linuxGetOpts(_ getValFunc) (linuxOpts, error) {
 // EDK2
 //======
 
+// Used to store data from githubaction.Action
+// For details see action.yml
+type edk2Opts struct {
+	platform    string
+	releaseType string
+}
+
+// edk2GetOpts is used to fill edk2Opts with data from githubaction.Action
+func edk2GetOpts(get getValFunc) (edk2Opts, error) {
+	opts := edk2Opts{
+		platform:    get("edk2__platform"),
+		releaseType: get("edk2__release_type"),
+	}
+
+	// Check if required options are not empty
+	missing := []string{}
+	requiredOptions := map[string]string{
+		"edk2__platform":     opts.platform,
+		"edk2__release_type": opts.releaseType,
+	}
+	for key, val := range requiredOptions {
+		if val == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
+	}
+
+	return opts, nil
+}
+
 //=====================
 // Universal Functions
 //=====================
@@ -186,10 +218,19 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 			},
 		}
 		return linux(ctx, client, &common, "", &opts, &artifacts)
-	/*
-		case "edk2":
-			return edk2(ctx, action, client)
-	*/
+	case "edk2":
+		opts, err := edk2GetOpts(action.GetInput)
+		if err != nil {
+			return err
+		}
+		artifacts := []container.Artifacts{
+			{
+				ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
+				ContainerDir:  true,
+				HostPath:      common.outputDir,
+			},
+		}
+		return edk2(ctx, client, &common, "", &opts, &artifacts)
 	case "":
 		return fmt.Errorf("no target specified")
 	default:
