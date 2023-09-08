@@ -170,7 +170,7 @@ func TestGetArtifacts(t *testing.T) {
 				HostPath:      tmpDir,
 			}},
 			wantErrExport:  nil,
-			filepathToTest: []string{filename},
+			filepathToTest: []string{filepath.Join("/src", filename)},
 			wantErrFile:    os.ErrExist,
 		},
 		{
@@ -220,7 +220,7 @@ func TestGetArtifacts(t *testing.T) {
 				HostPath:      tmpDir,
 			}},
 			wantErrExport:  nil,
-			filepathToTest: []string{filepath.Join(prefix, filename)},
+			filepathToTest: []string{filepath.Join("/src", prefix, filename)},
 			wantErrFile:    os.ErrExist,
 		},
 		{

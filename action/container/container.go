@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"dagger.io/dagger"
 )
@@ -107,8 +108,11 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		// If allowParentDirPath is true, the path argument can be a directory path, in which case
 		// the file will be created in that directory.
 		if artifact.ContainerDir {
+			// container side
 			output := container.Directory(artifact.ContainerPath)
-			success, err = output.Export(ctx, artifact.HostPath)
+			// host side
+			dirName := filepath.Base(artifact.ContainerPath)
+			success, err = output.Export(ctx, filepath.Join(artifact.HostPath, dirName))
 		} else {
 			output := container.File(artifact.ContainerPath)
 			success, err = output.Export(
