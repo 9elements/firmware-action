@@ -58,3 +58,11 @@ func TestMoveFile(t *testing.T) {
 	assert.ErrorIs(t, CheckFileExists(pathSrc), os.ErrNotExist)
 	assert.ErrorIs(t, CheckFileExists(pathDest), os.ErrExist)
 }
+
+func TestDirTree(t *testing.T) {
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+	files, err := DirTree(pwd)
+	assert.NoError(t, err)
+	assert.True(t, len(files) > 0, "found no files or directories")
+}
