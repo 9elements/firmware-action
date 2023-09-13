@@ -32,15 +32,13 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 		return err
 	}
 
-	// There is no copying of config file at "defconfig_path"
-	// content of the config file at "defconfig_path" should be read into string instead
-
 	// Setup environment variables in the container
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
 
 	// Assemble build arguments
+	//   and read content of the config file at "defconfig_path"
 	buildArgs := fmt.Sprintf("-a %s -p %s -b %s", common.arch, opts.platform, opts.releaseType)
 	defconfigFileArgs, err := os.ReadFile(common.defconfigPath)
 	if err != nil {
