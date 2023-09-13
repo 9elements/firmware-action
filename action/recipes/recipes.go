@@ -170,6 +170,42 @@ func edk2GetOpts(get getValFunc) (edk2Opts, error) {
 	return opts, nil
 }
 
+//===========
+// Intel FSP
+//===========
+
+// Used to store data from githubaction.Action
+// For details see action.yml
+type fspOpts struct {
+	buildCmd    string
+	releaseType string
+}
+
+// fspGetOpts is used to fill fspOpts with data from githubaction.Action
+func fspGetOpts(get getValFunc) (fspOpts, error) {
+	opts := fspOpts{
+		buildCmd:    get("fsp__build_cmd"),
+		releaseType: get("fsp__release_type"),
+	}
+
+	// Check if required options are not empty
+	missing := []string{}
+	requiredOptions := map[string]string{
+		"fsp__build_cmd":    opts.buildCmd,
+		"fsp__release_type": opts.releaseType,
+	}
+	for key, val := range requiredOptions {
+		if val == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
+	}
+
+	return opts, nil
+}
+
 //=====================
 // Universal Functions
 //=====================
@@ -231,6 +267,19 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 			},
 		}
 		return edk2(ctx, client, &common, "", &opts, &artifacts)
+	case "fsp":
+		opts, err := fspGetOpts(action.GetInput)
+		if err != nil {
+			return err
+		}
+		artifacts := []container.Artifacts{
+			{
+				ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
+				ContainerDir:  true,
+				HostPath:      common.outputDir,
+			},
+		}
+		return fsp(ctx, client, &common, "", &opts, &artifacts)
 	case "":
 		return fmt.Errorf("no target specified")
 	default:

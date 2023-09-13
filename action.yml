@@ -12,6 +12,7 @@ inputs:
         - coreboot
         - linux
         - edk2
+        - fsp
     required: true
   #-------------------------------
   # Inputs common for all targets
@@ -32,7 +33,14 @@ inputs:
     required: true
   architecture:
     description: |
-      *architecture* specifies target architecture, such as 'x86' or 'arm64'.
+      *architecture* specifies target architecture, such as:
+      for coreoot or linux:
+        - 'x86'
+        - 'arm64'
+      for edk2:
+        - 'X64'
+      for FSP:
+        - '' (this input is unsed)
     required: true
   repo_path:
     description: |
@@ -52,10 +60,12 @@ inputs:
           '-a <architecture>'
           '-p <edk2__platform>'
           '-b <edk2__release_type>'
+      For FSP this is a one-line file containing the build arguments later exported as
+        environment variable 'FSP_BUILD_OPTION_PCD'
     required: true
   output:
     description: |
-      *output* specifies the (relative) path where to place the produced files
+      *output* specifies the (relative) path where to place the produced files or directories.
     required: true
 
   #-------------------------------
@@ -140,6 +150,22 @@ inputs:
         - DEBUG
     required: false
     default: DEBUG
+
+  #-------------------------------
+  # Inputs specific for Intel FSP target
+  fsp__release_type:
+    description: |
+      *fsp__release_type* specifies the build type to use when building Intel FSP.
+      For example:
+        - d32
+        - r32
+    required: false
+  fsp__build_cmd:
+    description:
+      *fsp__build_cmd* specifies the build command along with arguments.
+      For example:
+        'Intel/<arch>/build.sh <arch> GCC5'
+    required: false
 
 runs:
   using: 'node16'
