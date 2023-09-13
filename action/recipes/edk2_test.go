@@ -85,7 +85,7 @@ func TestEdk2(t *testing.T) {
 			assert.NoError(t, err)
 			defer os.Chdir(pwd) // nolint:errcheck
 
-			// Clone coreboot repo
+			// Clone edk2 repo
 			cmd := exec.Command("git", "clone", "--recurse-submodules", "--branch", tc.edk2Version, "--depth", "1", "https://github.com/tianocore/edk2.git", "Edk2")
 			err = cmd.Run()
 			assert.NoError(t, err)
