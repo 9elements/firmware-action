@@ -1,0 +1,130 @@
+---
+# Example of using firmware-action
+
+name: example
+on:
+  pull_request:
+  merge_group:
+  push:
+
+#    branches:
+#  - main
+
+env:
+  APPLY_FIXES: none
+  APPLY_FIXES_EVENT: pull_request
+  APPLY_FIXES_MODE: commit
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Example of building coreboot
+  build-coreboot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        coreboot-version:
+          [
+            '4.19',
+            '4.20.1',
+            '4.21'
+          ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Clone coreboot repo
+        run: |
+          git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot
+      - name: Move my defconfig into place (filename must not contain '.defconfig')
+        run: |
+          mv "tests/coreboot_${{ matrix.coreboot-version }}/seabios.defconfig" "seabios_defconfig"
+      - name: firmware-action
+        uses: ./
+        #uses: 9elements/firmware-action
+        with:
+          target: coreboot
+          sdk_version: "coreboot_${{ matrix.coreboot-version }}:main"
+          #architecture: x86	# default
+          repo_path: my_super_dooper_awesome_coreboot
+          defconfig_path: "seabios_defconfig"
+          #output: "output"	# default
+
+  # Example of building Linux kernel
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        linux-version: [6.1.45]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Prepare linux kernel
+        run: |
+          export LINUX_MAJOR_VERSION=$(echo "${{ matrix.linux-version }}" | sed -E 's/\..*//g')
+          echo "linux-version: ${{ matrix.linux-version }}"
+          echo "LINUX_MAJOR_VERSION: ${LINUX_MAJOR_VERSION}"
+          # Download source files
+          wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.xz"
+          wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.sign"
+          unxz "linux-${{ matrix.linux-version }}.tar.xz" >/dev/null
+          # Verify GPG signature
+          gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org
+          gpg2 --verify "linux-${{ matrix.linux-version }}.tar.sign"
+          # Extract
+          tar -xvf "linux-${{ matrix.linux-version }}.tar"
+      - name: Move my defconfig into place (filename must not contain '.defconfig')
+        run: |
+          mv "tests/linux_${{ matrix.linux-version }}/linux.defconfig" "ci_defconfig"
+      - name: firmware-action
+        uses: ./
+        #uses: 9elements/firmware-action
+        with:
+          target: linux
+          sdk_version: "linux_${{ matrix.linux-version }}:main"
+          #architecture: x86	# default
+          repo_path: "linux-${{ matrix.linux-version }}"
+          defconfig_path: "ci_defconfig"
+          #output: "output"	# default
+
+  # Example of building EDK2
+  build-edk2:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        edk2-version:
+          [
+            'edk2-stable202208',
+            'edk2-stable202211'
+          ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Clone edk2 repo
+        run: |
+          git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2
+      - name: Prepare file with build arguments
+        run: |
+          echo "-t GCC5 -D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
+      - name: firmware-action
+        uses: ./
+        #uses: 9elements/firmware-action
+        with:
+          target: edk2
+          sdk_version: "${{ matrix.edk2-version }}:main"
+          architecture: X64
+          repo_path: "Edk2"
+          defconfig_path: "edk2_config.cfg"
+          #output: "output"	# default
+          edk2__platform: "UefiPayloadPkg/UefiPayloadPkg.dsc"
+          #edk2__release_type: DEBUG  # default
+
