@@ -34,6 +34,7 @@ inputs:
     description: |
       *architecture* specifies target architecture, such as 'x86' or 'arm64'.
     required: true
+    default: 'x86'
   repo_path:
     description: |
       *repo_path* gives the (relative) path to the target (firmware) repository.
@@ -41,9 +42,10 @@ inputs:
       Otherwise the path should point to the target (firmware) repository
       submodule that had previously been checked out.
     required: true
+    default: '.'
   defconfig_path:
     description: |
-      *defconfig_path* gives the (relative to repo_path) path to the defconfig that
+      *defconfig_path* gives the (relative) path to the defconfig that
       should be used to build the target.
       For coreboot and linux this is a defconfig.
       For EDK2 this is a one-line file containing the build arguments
@@ -55,8 +57,9 @@ inputs:
     required: true
   output:
     description: |
-      *output* specifies the (relative) path where to place the produced files
+      *output* specifies the (relative) path to directory into which place the produced files
     required: true
+    default: 'output'
 
   #-------------------------------
   # Inputs specific for coreboot target

@@ -9,18 +9,30 @@ main();
 function main() {
   console.log("Node Version: ", process.version);
 
-  // Execute the main Go program
-  const spawnSyncReturns = spawnSync('go', ['run', 'main.go'], {
+  // Compile Go program
+  console.log("Building ...");
+  const goBuildReturns = spawnSync('go', ['build', '-o', '../action.bin'], {
     cwd: path.join(process.cwd(), 'action'),
-    env: process.env,
     stdio: 'inherit',
     encoding: 'utf-8'
   });
-
   // Check the exit code
-  const status = spawnSyncReturns.status;
-  if (typeof status === 'number') {
-    process.exit(status);
+  const statusBuild = goBuildReturns.status;
+  if (statusBuild !== 0) {
+    process.exit(statusBuild);
+  }
+
+  // Run Go program
+  console.log("Running ...");
+  const binRunReturns = spawnSync('./action.bin', [], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+    encoding: 'utf-8'
+  });
+  // Check the exit code
+  const statusRun = binRunReturns.status;
+  if (typeof statusRun === 'number') {
+    process.exit(statusRun);
   }
 
   // If we're here, something went wrong
