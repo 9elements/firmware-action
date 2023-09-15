@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -181,7 +182,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 		return err
 	}
 
-	switch action.GetInput("target") {
+	switch common.target {
 	case "coreboot":
 		opts, err := corebootGetOpts(action.GetInput)
 		if err != nil {
@@ -192,11 +193,13 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 				ContainerPath: filepath.Join(common.containerWorkDir, "build", "coreboot.rom"),
 				ContainerDir:  false,
 				HostPath:      common.outputDir,
+				HostDir:       true,
 			},
 			{
 				ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
 				ContainerDir:  false,
 				HostPath:      common.outputDir,
+				HostDir:       true,
 			},
 		}
 		return coreboot(ctx, client, &common, "", &opts, &artifacts)
@@ -210,11 +213,13 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 				ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
 				ContainerDir:  false,
 				HostPath:      common.outputDir,
+				HostDir:       true,
 			},
 			{
 				ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
 				ContainerDir:  false,
 				HostPath:      common.outputDir,
+				HostDir:       true,
 			},
 		}
 		return linux(ctx, client, &common, "", &opts, &artifacts)
@@ -228,6 +233,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 				ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
 				ContainerDir:  true,
 				HostPath:      common.outputDir,
+				HostDir:       true,
 			},
 		}
 		return edk2(ctx, client, &common, "", &opts, &artifacts)
@@ -265,11 +271,15 @@ func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, comm
 		// but defconfigBasename="linux_defconfig" works fine
 		return fmt.Errorf("filename '%s' specified by defconfig_path must not contain '.defconfig' in the name", defconfigBasename)
 	}
+	// Not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
 	myContainer = myContainer.WithFile(
-		common.defconfigPath,
-		myContainer.File(
-			filepath.Join(common.containerWorkDir, defconfigBasename),
-		))
+		filepath.Join(common.containerWorkDir, defconfigBasename),
+		client.Host().File(filepath.Join(pwd, common.defconfigPath)),
+	)
 
 	// Setup environment variables in the container
 	for key, value := range envVars {

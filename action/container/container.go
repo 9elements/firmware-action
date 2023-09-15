@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"dagger.io/dagger"
@@ -90,6 +91,7 @@ type Artifacts struct {
 	ContainerPath string // Path inside container
 	ContainerDir  bool   // Is ^^^ path directory?
 	HostPath      string // Path inside host
+	HostDir       bool   // Is ^^^ path directory?
 }
 
 // GetArtifacts extracts files from container to host
@@ -103,6 +105,12 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		// Get reference to artifacts directory in the container
 		var success bool
 		var err error
+
+		if artifact.HostDir {
+			if err := os.MkdirAll(artifact.HostPath, 0o755); err != nil {
+				return err
+			}
+		}
 
 		// Export
 		// If allowParentDirPath is true, the path argument can be a directory path, in which case

@@ -154,11 +154,13 @@ func TestLinux(t *testing.T) {
 					ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
+					HostDir:       true,
 				},
 				{
 					ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
+					HostDir:       true,
 				},
 			}
 
