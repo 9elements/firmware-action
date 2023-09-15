@@ -73,7 +73,7 @@ func TestEdk2(t *testing.T) {
 			getFunc := func(key string) string {
 				return opts[key]
 			}
-			common, err := commonGetOpts(getFunc)
+			common, err := commonGetOpts(getFunc, getFunc)
 			assert.NoError(t, err)
 			edk2Opts := edk2Opts{
 				platform:    tc.platform,

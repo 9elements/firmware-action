@@ -44,7 +44,7 @@ func TestCoreboot(t *testing.T) {
 	getFunc := func(key string) string {
 		return opts[key]
 	}
-	common, err := commonGetOpts(getFunc)
+	common, err := commonGetOpts(getFunc, getFunc)
 	assert.NoError(t, err)
 	corebootOpts := corebootOpts{}
 

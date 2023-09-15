@@ -11,7 +11,7 @@ import (
 func TestCommonGetOpts(t *testing.T) {
 	// Try with actual github action
 	action := githubactions.New()
-	_, err := commonGetOpts(action.GetInput)
+	_, err := commonGetOpts(action.GetInput, action.Getenv)
 	assert.ErrorIs(t, err, errRequiredOptionUndefined)
 
 	// Try few combinations of empty and non-empty values
@@ -131,7 +131,7 @@ func TestCommonGetOpts(t *testing.T) {
 			getFunc := func(key string) string {
 				return tc.opts[key]
 			}
-			_, err := commonGetOpts(getFunc)
+			_, err := commonGetOpts(getFunc, getFunc)
 			assert.ErrorIs(t, err, tc.wantErr)
 			for key, val := range tc.opts {
 				if val == "" {
