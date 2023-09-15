@@ -143,4 +143,4 @@ inputs:
 
 runs:
   using: 'node16'
-  main: 'dist/invoke-action.js'
+  main: 'dist/invoke-action.mjs'

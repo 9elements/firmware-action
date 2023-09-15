@@ -2,7 +2,7 @@
   "name": "firmware-action",
   "version": "0.0.1",
   "description": "Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more",
-  "main": "dist/invoke-action.js",
+  "main": "dist/invoke-action.mjs",
   "scripts": {
     "lint": "mega-linter-runner --flavor cupcake"
   },
