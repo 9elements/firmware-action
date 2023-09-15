@@ -43,15 +43,15 @@ type commonOpts struct {
 }
 
 // commonGetOpts is used to fill commonOpts with data from githubaction.Action
-func commonGetOpts(get getValFunc) (commonOpts, error) {
+func commonGetOpts(getInputVar getValFunc, getEnvVar getValFunc) (commonOpts, error) {
 	opts := commonOpts{
-		target:           get("target"),
-		sdkVersion:       get("sdk_version"),
-		arch:             get("architecture"),
-		repoPath:         get("repo_path"),
-		defconfigPath:    get("defconfig_path"),
-		containerWorkDir: get("GITHUB_WORKSPACE"),
-		outputDir:        get("output"),
+		target:           getInputVar("target"),
+		sdkVersion:       getInputVar("sdk_version"),
+		arch:             getInputVar("architecture"),
+		repoPath:         getInputVar("repo_path"),
+		defconfigPath:    getInputVar("defconfig_path"),
+		containerWorkDir: getEnvVar("GITHUB_WORKSPACE"),
+		outputDir:        getInputVar("output"),
 	}
 
 	// Check if required options are not empty
@@ -176,7 +176,7 @@ func edk2GetOpts(get getValFunc) (edk2Opts, error) {
 
 // Execute recipe
 func Execute(ctx context.Context, client *dagger.Client, action *githubactions.Action) error {
-	common, err := commonGetOpts(action.GetInput)
+	common, err := commonGetOpts(action.GetInput, action.Getenv)
 	if err != nil {
 		return err
 	}
