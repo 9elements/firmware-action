@@ -105,6 +105,7 @@ func TestEdk2(t *testing.T) {
 					ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
 					ContainerDir:  true,
 					HostPath:      outputPath,
+					HostDir:       true,
 				},
 			}
 

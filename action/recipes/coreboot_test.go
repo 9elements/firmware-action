@@ -36,7 +36,7 @@ func TestCoreboot(t *testing.T) {
 		"sdk_version":      fmt.Sprintf("coreboot_%s:main", corebootVersion),
 		"architecture":     "x86",
 		"repo_path":        filepath.Join(tmpDir, "coreboot"),
-		"defconfig_path":   "defconfig",
+		"defconfig_path":   "seabios_defconfig",
 		"containerWorkDir": "/coreboot",
 		"GITHUB_WORKSPACE": "/coreboot",
 		"output":           "output",
@@ -59,18 +59,15 @@ func TestCoreboot(t *testing.T) {
 	cmd := exec.Command("git", "clone", "--branch", corebootVersion, "--depth", "1", "https://review.coreboot.org/coreboot")
 	err = cmd.Run()
 	assert.NoError(t, err)
-	err = os.Chdir(common.repoPath)
-	assert.NoError(t, err)
 
 	// Copy over defconfig file into tmpDir
-	defconfigPath := filepath.Join(common.repoPath, "defconfig")
 	repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
 	assert.NoError(t, err)
 	//   common.repoPath = path to end user repository (in this case somewhere in /tmp)
 	//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 	err = filesystem.CopyFile(
 		filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", corebootVersion)),
-		defconfigPath,
+		filepath.Join(tmpDir, common.defconfigPath),
 	)
 	assert.NoError(t, err)
 
@@ -83,11 +80,13 @@ func TestCoreboot(t *testing.T) {
 			ContainerPath: filepath.Join(common.containerWorkDir, "build", "coreboot.rom"),
 			ContainerDir:  false,
 			HostPath:      outputPath,
+			HostDir:       true,
 		},
 		{
 			ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
 			ContainerDir:  false,
 			HostPath:      outputPath,
+			HostDir:       true,
 		},
 	}
 
