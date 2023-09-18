@@ -27,12 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        coreboot-version:
-          [
-            '4.19',
-            '4.20.1',
-            '4.21'
-          ]
+        coreboot-version: ['4.19', '4.20.1', '4.21']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -49,10 +44,10 @@ jobs:
         #uses: 9elements/firmware-action
         with:
           target: coreboot
-          sdk_version: "coreboot_${{ matrix.coreboot-version }}:main"
+          sdk_version: 'coreboot_${{ matrix.coreboot-version }}:main'
           #architecture: x86	# default
           repo_path: my_super_dooper_awesome_coreboot
-          defconfig_path: "seabios_defconfig"
+          defconfig_path: 'seabios_defconfig'
           #output: "output"	# default
 
   # Example of building Linux kernel
@@ -68,9 +63,6 @@ jobs:
           fetch-depth: 0
       - name: Prepare linux kernel
         run: |
-          export LINUX_MAJOR_VERSION=$(echo "${{ matrix.linux-version }}" | sed -E 's/\..*//g')
-          echo "linux-version: ${{ matrix.linux-version }}"
-          echo "LINUX_MAJOR_VERSION: ${LINUX_MAJOR_VERSION}"
           # Download source files
           wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.xz"
           wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.sign"
@@ -80,6 +72,8 @@ jobs:
           gpg2 --verify "linux-${{ matrix.linux-version }}.tar.sign"
           # Extract
           tar -xvf "linux-${{ matrix.linux-version }}.tar"
+        env:
+          LINUX_MAJOR_VERSION: 6
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
           mv "tests/linux_${{ matrix.linux-version }}/linux.defconfig" "ci_defconfig"
@@ -88,10 +82,10 @@ jobs:
         #uses: 9elements/firmware-action
         with:
           target: linux
-          sdk_version: "linux_${{ matrix.linux-version }}:main"
+          sdk_version: 'linux_${{ matrix.linux-version }}:main'
           #architecture: x86	# default
-          repo_path: "linux-${{ matrix.linux-version }}"
-          defconfig_path: "ci_defconfig"
+          repo_path: 'linux-${{ matrix.linux-version }}'
+          defconfig_path: 'ci_defconfig'
           #output: "output"	# default
 
   # Example of building EDK2
@@ -99,11 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        edk2-version:
-          [
-            'edk2-stable202208',
-            'edk2-stable202211'
-          ]
+        edk2-version: ['edk2-stable202208', 'edk2-stable202211']
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -120,11 +110,10 @@ jobs:
         #uses: 9elements/firmware-action
         with:
           target: edk2
-          sdk_version: "${{ matrix.edk2-version }}:main"
+          sdk_version: '${{ matrix.edk2-version }}:main'
           architecture: X64
-          repo_path: "Edk2"
-          defconfig_path: "edk2_config.cfg"
+          repo_path: 'Edk2'
+          defconfig_path: 'edk2_config.cfg'
           #output: "output"	# default
-          edk2__platform: "UefiPayloadPkg/UefiPayloadPkg.dsc"
+          edk2__platform: 'UefiPayloadPkg/UefiPayloadPkg.dsc'
           #edk2__release_type: DEBUG  # default
-
