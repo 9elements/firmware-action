@@ -72,9 +72,9 @@ inputs:
         `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
         The Kconfig `CONFIG_PAYLOAD_FILE` will point to the same path.
     required: false
-  coreboot__blob_intel_ifd_path:
+  coreboot__intel_ifd_path:
     description: |
-      *coreboot__blob_intel_ifd_path* gives the (relative) path to the Intel
+      *coreboot__intel_ifd_path* gives the (relative) path to the Intel
       Flash descriptor binary.
       In a 'coreboot' build:
         The file will be placed at
@@ -83,9 +83,9 @@ inputs:
         path.
       Depending on the defconfig it may not be added to the ROM.
     required: false
-  coreboot__blob_intel_me_path:
+  coreboot__intel_me_path:
     description: |
-      *coreboot__blob_intel_me_path* gives the (relative) path to the Intel
+      *coreboot__intel_me_path* gives the (relative) path to the Intel
       Management engine binary.
       In a 'coreboot' build:
         The file will be placed at
@@ -94,9 +94,9 @@ inputs:
         path.
       Depending on the defconfig it may not be added to the ROM.
     required: false
-  coreboot__blob_intel_gbe_path:
+  coreboot__intel_gbe_path:
     description: |
-      *coreboot__blob_intel_gbe_path* gives the (relative) path to the Intel
+      *coreboot__intel_gbe_path* gives the (relative) path to the Intel
       Gigabit Ethernet engine binary.
       In a 'coreboot' build:
         The file will be placed at
