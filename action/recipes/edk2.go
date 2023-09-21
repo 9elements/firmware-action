@@ -14,7 +14,6 @@ import (
 
 // edk2 builds edk2
 func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *edk2Opts, artifacts *[]container.Artifacts) error {
-	// TODO: get blobs in place!
 	envVars := map[string]string{
 		"WORKSPACE":      common.containerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",

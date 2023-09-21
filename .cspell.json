@@ -36,6 +36,7 @@
     "addinivalue",
     "addoption",
     "autopep",
+    "cmds",
     "commitlint",
     "composefile",
     "coreboot",
