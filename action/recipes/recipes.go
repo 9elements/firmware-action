@@ -94,30 +94,80 @@ func commonGetOpts(getInputVar getValFunc, getEnvVar getValFunc) (commonOpts, er
 // COREBOOT
 //==========
 
+// Used to store information about a single blob
+type blobDef struct {
+	actionInput         string
+	destinationFilename string
+	kconfigKey          string
+	isDirectory         bool
+}
+
 // Used to store data from githubaction.Action
 // For details see action.yml
 type corebootOpts struct {
-	payloadFilePath  string
-	blobIntelIfdPath string
-	blobIntelMePath  string
-	blobIntelGbePath string
-	fspBinaryPath    string
-	fspHeaderPath    string
+	blobs []blobDef
 }
 
 // commonGetOpts is used to fill corebootOpts with data from githubaction.Action
 func corebootGetOpts(get getValFunc) (corebootOpts, error) {
-	opts := corebootOpts{
-		payloadFilePath:  get("coreboot__payload_file_path"),
-		blobIntelIfdPath: get("coreboot__blob_intel_ifd_path"),
-		blobIntelMePath:  get("coreboot__blob_intel_me_path"),
-		blobIntelGbePath: get("coreboot__blob_intel_gbe_path"),
-		fspBinaryPath:    get("coreboot__fsp_binary_path"),
-		fspHeaderPath:    get("coreboot__fsp_header_path"),
+	// 'allOpts' most importantly contains definitions of all possible (supported) blobs
+	allOpts := corebootOpts{
+		blobs: []blobDef{
+			{
+				// Payload
+				// docs: https://doc.coreboot.org/payloads.html
+				actionInput:         get("coreboot__payload_file_path"),
+				destinationFilename: "payload",
+				kconfigKey:          "CONFIG_PAYLOAD_FILE",
+				isDirectory:         false,
+			},
+			{
+				// Intel IFD (Intel Flash Descriptor)
+				// docs: https://doc.coreboot.org/util/ifdtool/layout.html
+				actionInput:         get("coreboot__intel_ifd_path"),
+				destinationFilename: "descriptor.bin",
+				kconfigKey:          "CONFIG_IFD_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel ME (Intel Management Engine)
+				actionInput:         get("coreboot__intel_me_path"),
+				destinationFilename: "me.bin",
+				kconfigKey:          "CONFIG_ME_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel GbE (Intel Gigabit Ethernet)
+				actionInput:         get("coreboot__intel_gbe_path"),
+				destinationFilename: "gbe.bin",
+				kconfigKey:          "CONFIG_GBE_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel FSP binary (Intel Firmware Support Package)
+				actionInput:         get("coreboot__fsp_binary_path"),
+				destinationFilename: "Fsp.fd",
+				kconfigKey:          "CONFIG_FSP_FD_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel FSP header (Intel Firmware Support Package)
+				actionInput:         get("coreboot__fsp_header_path"),
+				destinationFilename: "Include",
+				kconfigKey:          "CONFIG_FSP_HEADER_PATH",
+				isDirectory:         true,
+			},
+		},
 	}
 
-	// Check if required options are not empty
-	// ... I don't think any of these are always required, might depend on provided defconfig
+	// If any of blobs defined in 'allOpts' is passed into the action as input, append it to 'opts'
+	opts := corebootOpts{}
+	for blob := range allOpts.blobs {
+		if allOpts.blobs[blob].actionInput != "" {
+			opts.blobs = append(opts.blobs, allOpts.blobs[blob])
+		}
+	}
+
 	return opts, nil
 }
 
@@ -292,14 +342,39 @@ func buildWithKernelBuildSystem(ctx context.Context, client *dagger.Client, comm
 		// -f: ignore nonexistent files
 		{"rm", "-f", ".config"},
 	}
+	generateDotConfigCmd := []string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"}
 	switch common.target {
 	case "coreboot":
 		// this thing works because of some black magic script in coreboot build chain
 		// does not work for linux kernel
 		buildSteps = append(
 			buildSteps,
-			[]string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"},
+			generateDotConfigCmd,
 		)
+		// Everything that follows is just to get blobs into proper place
+		//   Add additional commands to fix the defconfig
+		buildSteps = append(
+			buildSteps,
+			ctx.Value(additionalCommandsCtxKey).([][]string)[:]...,
+		)
+		//   Add CONFIG_MAINBOARD_DIR from defconfig as environment variable MAINBOARD_DIR
+		mainboardDir, err := myContainer.
+			WithExec(generateDotConfigCmd).
+			WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
+			Stdout(ctx)
+			// To extract value of 'CONFIG_MAINBOARD_DIR', there must be '.config'
+		if err != nil {
+			return err
+		}
+		//   Strip newline from mainboardDir
+		mainboardDir = strings.Replace(mainboardDir, "\n", "", -1)
+		myContainer = myContainer.WithEnvVariable("MAINBOARD_DIR", mainboardDir)
+		//   Add directory with blobs to container
+		myContainer = myContainer.
+			WithMountedDirectory(
+				filepath.Join(common.containerWorkDir, common.repoPath, blobsLocation),
+				client.Host().Directory(ctx.Value(blobsLocationCtxKey).(string)),
+			)
 	case "linux":
 		// results should be: make ARCH=x86 custom_defconfig
 		arch, ok := envVars["ARCH"]
