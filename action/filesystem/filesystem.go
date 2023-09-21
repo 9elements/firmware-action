@@ -4,23 +4,38 @@
 package filesystem
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/plus3it/gorecurcopy"
+)
+
+var (
+	ErrEmptyPath       = errors.New("provided path is empty")                      // ErrEmptyPath is returned when function is called with empty path parameter
+	ErrPathIsDirectory = fmt.Errorf("provided path is directory: %w", os.ErrExist) // ErrPathIsDirectory is returned when path exists, but is a directory and not a file
+	ErrFileNotRegular  = errors.New("file is not regular file")                    // ErrFileNotRegular is returned when path exists, but is not a regular file
 )
 
 // CheckFileExists checks if file exists at PATH
 func CheckFileExists(path string) error {
+	// Possible returns:
+	//   ErrEmptyPath		if path parameter is empty
+	//   ErrPathIsDirectory		if path exists and is directory
+	//   ErrFileNotRegular		if path exists and is not regular file or directory
+	//   os.ErrExist		if path exists and is file
+	//   os.ErrNotExist		if path does not exists
 	if path == "" {
-		return fmt.Errorf("empty path")
+		return fmt.Errorf("%w: %s", ErrEmptyPath, path)
 	}
 
 	fileInfo, err := os.Stat(path)
 	if err == nil {
 		// path exists
 		if fileInfo.IsDir() {
-			return fmt.Errorf("path '%s' is a directory", path)
+			return fmt.Errorf("%w: %s", ErrPathIsDirectory, path)
 		}
 		return os.ErrExist
 	}
@@ -29,19 +44,27 @@ func CheckFileExists(path string) error {
 
 // checkBeforeCopyOrMove runs some tests needed for both CopyFile and MoveFile
 func checkBeforeCopyOrMove(pathSource, pathDestination string) error {
-	if err := CheckFileExists(pathSource); os.IsNotExist(err) {
+	// Source must exists (be it file or directory)
+	err := CheckFileExists(pathSource)
+	if errors.Is(err, os.ErrNotExist) {
 		return err
 	}
-	if err := CheckFileExists(pathDestination); os.IsExist(err) {
+
+	// Destination must not exists
+	if err := CheckFileExists(pathDestination); errors.Is(err, os.ErrExist) {
 		return fmt.Errorf("destination '%s' %w", pathDestination, err)
 	}
+
+	// Source must be a regular file or directory
 	pathSourceStat, err := os.Stat(pathSource)
 	if err != nil {
 		return err
 	}
-	if !pathSourceStat.Mode().IsRegular() {
-		return fmt.Errorf("file %s is not a regular file", pathSource)
+	if !pathSourceStat.Mode().IsRegular() && !pathSourceStat.IsDir() {
+		return fmt.Errorf("%w: %s", ErrFileNotRegular, pathSource)
 	}
+
+	// No problems found
 	return nil
 }
 
@@ -68,6 +91,23 @@ func CopyFile(pathSource, pathDestination string) error {
 	// Copy
 	_, err = io.Copy(dst, src)
 	return err
+}
+
+// CopyDir copies directory recursively from SOURCE to DESTINATION
+func CopyDir(pathSource, pathDestination string) error {
+	// Checks and tests
+	if err := checkBeforeCopyOrMove(pathSource, pathDestination); err != nil {
+		return err
+	}
+
+	// Create a destination directory
+	// TODO: copy owner and permissions
+	if err := os.MkdirAll(pathDestination, 0o775); err != nil {
+		return err
+	}
+
+	// Copy
+	return gorecurcopy.CopyDirectory(pathSource, pathDestination)
 }
 
 // MoveFile moves file from SOURCE to DESTINATION

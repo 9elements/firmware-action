@@ -17,6 +17,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/plus3it/gorecurcopy v0.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sethvargo/go-envconfig v0.9.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.8 // indirect

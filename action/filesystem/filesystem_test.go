@@ -19,6 +19,14 @@ func TestCheckFileExists(t *testing.T) {
 	// Existing file
 	assert.NoError(t, os.WriteFile(path, []byte(""), 0o666))
 	assert.ErrorIs(t, CheckFileExists(path), os.ErrExist)
+
+	// Non-existing directory
+	path = filepath.Join(tmpDir, "directory")
+	assert.ErrorIs(t, CheckFileExists(path), os.ErrNotExist)
+
+	// Existing directory
+	assert.NoError(t, os.MkdirAll(path, 0o775))
+	assert.ErrorIs(t, CheckFileExists(path), ErrPathIsDirectory)
 }
 
 func TestCopyFile(t *testing.T) {
@@ -41,6 +49,31 @@ func TestCopyFile(t *testing.T) {
 
 	assert.ErrorIs(t, CheckFileExists(pathSrc), os.ErrExist)
 	assert.ErrorIs(t, CheckFileExists(pathDest), os.ErrExist)
+}
+
+func TestCopyDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	pathSrc := filepath.Join(tmpDir, "test_dir")
+	pathSrcFile := filepath.Join(pathSrc, "textfile.txt")
+	pathDest := filepath.Join(tmpDir, "test_dir_new")
+	pathDestFile := filepath.Join(pathDest, "textfile.txt")
+
+	assert.NoError(t, os.MkdirAll(pathSrc, 0o775))
+	assert.NoError(t, os.WriteFile(pathSrcFile, []byte(""), 0o666))
+	assert.ErrorIs(t, CheckFileExists(pathSrcFile), os.ErrExist)
+	assert.ErrorIs(t, CheckFileExists(pathDestFile), os.ErrNotExist)
+
+	// Copy it
+	assert.NoError(t, CopyDir(pathSrc, pathDest))
+
+	assert.ErrorIs(t, CheckFileExists(pathSrcFile), os.ErrExist)
+	assert.ErrorIs(t, CheckFileExists(pathDestFile), os.ErrExist)
+
+	// Copy it again (should fail)
+	assert.ErrorIs(t, CopyDir(pathSrc, pathDest), os.ErrExist)
+
+	assert.ErrorIs(t, CheckFileExists(pathSrcFile), os.ErrExist)
+	assert.ErrorIs(t, CheckFileExists(pathDestFile), os.ErrExist)
 }
 
 func TestMoveFile(t *testing.T) {
