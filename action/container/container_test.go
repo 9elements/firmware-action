@@ -125,7 +125,6 @@ func TestGetArtifacts(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	tmpDir := t.TempDir()
 	ctx := context.Background()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
@@ -133,6 +132,7 @@ func TestGetArtifacts(t *testing.T) {
 	filename := "my_file.txt"
 	filename2 := "my_file2.txt"
 	prefix := "my_directory"
+	hostArtifactsDir := "artifacts"
 
 	opts := SetupOpts{
 		ContainerURL:      "ubuntu:latest",
@@ -142,54 +142,68 @@ func TestGetArtifacts(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name           string
-		cmdToRun       [][]string
-		artifacts      []Artifacts
-		wantErrExport  error
-		filepathToTest []string
-		wantErrFile    error
+		name            string
+		cmdToRun        [][]string
+		artifacts       []Artifacts
+		wantErrExport   error
+		filepathsToTest []string
+		wantErrFile     error
 	}{
 		{
-			name:     "empty directory string",
-			cmdToRun: [][]string{{"true"}},
+			name: "empty directory string",
+			cmdToRun: [][]string{
+				{"true"},
+			},
 			artifacts: []Artifacts{{
 				ContainerPath: "",
 				ContainerDir:  true,
-				HostPath:      tmpDir,
+				HostPath:      hostArtifactsDir,
 				HostDir:       true,
 			}},
-			wantErrExport:  errDirectoryNotSpecified,
-			filepathToTest: []string{filename},
-			wantErrFile:    os.ErrNotExist,
+			wantErrExport:   errDirectoryNotSpecified,
+			filepathsToTest: []string{},
+			wantErrFile:     os.ErrNotExist, // Does not get tested
 		},
 		{
-			name:     "single file -> dir",
-			cmdToRun: [][]string{{"touch", filename}},
-			artifacts: []Artifacts{{
-				ContainerPath: "/src",
-				ContainerDir:  true,
-				HostPath:      tmpDir,
-				HostDir:       true,
-			}},
-			wantErrExport:  nil,
-			filepathToTest: []string{filepath.Join("/src", filename)},
-			wantErrFile:    os.ErrExist,
-		},
-		{
-			name:     "single file -> file",
-			cmdToRun: [][]string{{"touch", filename}},
+			name: "file -> file",
+			//	/src/my_file.txt -> /tmp/.../artifacts/my_file.txt
+			cmdToRun: [][]string{
+				{"touch", filename},
+			},
 			artifacts: []Artifacts{{
 				ContainerPath: filepath.Join("/src", filename),
 				ContainerDir:  false,
-				HostPath:      filepath.Join(tmpDir, filename),
+				HostPath:      filepath.Join(hostArtifactsDir, filename),
 				HostDir:       false,
 			}},
-			wantErrExport:  nil,
-			filepathToTest: []string{filename},
-			wantErrFile:    os.ErrExist,
+			wantErrExport: nil,
+			filepathsToTest: []string{
+				filepath.Join(hostArtifactsDir, filename),
+			},
+			wantErrFile: os.ErrExist,
 		},
 		{
-			name: "two files -> dir",
+			name: "file -> dir",
+			//	/src/my_file.txt -> /tmp/.../artifacts/
+			cmdToRun: [][]string{
+				{"touch", filename},
+			},
+			artifacts: []Artifacts{{
+				ContainerPath: filepath.Join("/src", filename),
+				ContainerDir:  false,
+				HostPath:      hostArtifactsDir,
+				HostDir:       true,
+			}},
+			wantErrExport: nil,
+			filepathsToTest: []string{
+				filepath.Join(hostArtifactsDir, filename),
+			},
+			wantErrFile: os.ErrExist,
+		},
+		{
+			name: "2x file -> dir",
+			//	/src/my_file.txt  -> /tmp/.../artifacts/
+			//	/src/my_file2.txt -> /tmp/.../artifacts/
 			cmdToRun: [][]string{
 				{"touch", filename},
 				{"touch", filename2},
@@ -199,22 +213,26 @@ func TestGetArtifacts(t *testing.T) {
 				{
 					ContainerPath: filepath.Join("/src", filename),
 					ContainerDir:  false,
-					HostPath:      tmpDir,
+					HostPath:      hostArtifactsDir,
 					HostDir:       true,
 				},
 				{
 					ContainerPath: filepath.Join("/src", filename2),
 					ContainerDir:  false,
-					HostPath:      tmpDir,
+					HostPath:      hostArtifactsDir,
 					HostDir:       true,
 				},
 			},
-			wantErrExport:  nil,
-			filepathToTest: []string{filename, filename2},
-			wantErrFile:    os.ErrExist,
+			wantErrExport: nil,
+			filepathsToTest: []string{
+				filepath.Join(hostArtifactsDir, filename),
+				filepath.Join(hostArtifactsDir, filename2),
+			},
+			wantErrFile: os.ErrExist,
 		},
 		{
-			name: "entire directory -> dir",
+			name: "dir -> dir",
+			//	/src/ -> /tmp/.../artifacts/src
 			cmdToRun: [][]string{
 				{"mkdir", prefix},
 				{"touch", filepath.Join(prefix, filename)},
@@ -222,29 +240,37 @@ func TestGetArtifacts(t *testing.T) {
 			artifacts: []Artifacts{{
 				ContainerPath: "/src",
 				ContainerDir:  true,
-				HostPath:      tmpDir,
+				HostPath:      hostArtifactsDir,
 				HostDir:       true,
 			}},
-			wantErrExport:  nil,
-			filepathToTest: []string{filepath.Join("/src", prefix, filename)},
-			wantErrFile:    os.ErrExist,
+			wantErrExport: nil,
+			filepathsToTest: []string{
+				filepath.Join(hostArtifactsDir, "src", prefix, filename),
+			},
+			wantErrFile: os.ErrExist,
 		},
 		{
-			name:     "export non-existing directory",
-			cmdToRun: [][]string{{"true"}},
+			name: "export non-existing directory",
+			cmdToRun: [][]string{
+				{"true"},
+			},
 			artifacts: []Artifacts{{
 				ContainerPath: "/some/non-existing/directory/path",
 				ContainerDir:  true,
-				HostPath:      tmpDir,
+				HostPath:      hostArtifactsDir,
 				HostDir:       true,
 			}},
-			wantErrExport:  errExportFailed,
-			filepathToTest: []string{filepath.Join(prefix, filename)},
-			wantErrFile:    os.ErrNotExist,
+			wantErrExport: errExportFailed,
+			filepathsToTest: []string{
+				filepath.Join(prefix, filename),
+			},
+			wantErrFile: os.ErrNotExist,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
 			container, err := Setup(ctx, client, &opts, "")
 			assert.NoError(t, err)
 
@@ -256,13 +282,17 @@ func TestGetArtifacts(t *testing.T) {
 			}
 
 			// Extract artifacts
+			for key := range tc.artifacts {
+				tc.artifacts[key].HostPath = filepath.Join(tmpDir, tc.artifacts[key].HostPath)
+			}
 			err = GetArtifacts(ctx, container, &tc.artifacts)
+
 			assert.ErrorIs(t, err, tc.wantErrExport)
 			if err != nil {
 				// No need to continue on err
 				return
 			}
-			for _, file := range tc.filepathToTest {
+			for _, file := range tc.filepathsToTest {
 				assert.ErrorIs(t,
 					filesystem.CheckFileExists(filepath.Join(tmpDir, file)),
 					tc.wantErrFile)
