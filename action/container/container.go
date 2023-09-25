@@ -113,7 +113,7 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		}
 
 		// Export
-		// If allowParentDirPath is true, the path argument can be a directory path, in which case
+		// If AllowParentDirPath is true, the path argument can be a directory path, in which case
 		// the file will be created in that directory.
 		if artifact.ContainerDir {
 			// container side
