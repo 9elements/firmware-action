@@ -23,10 +23,10 @@ var (
 func CheckFileExists(path string) error {
 	// Possible returns:
 	//   ErrEmptyPath		if path parameter is empty
+	//   os.ErrNotExist		if path does not exists
+	//   os.ErrExist		if path exists and is file
 	//   ErrPathIsDirectory		if path exists and is directory
 	//   ErrFileNotRegular		if path exists and is not regular file or directory
-	//   os.ErrExist		if path exists and is file
-	//   os.ErrNotExist		if path does not exists
 	if path == "" {
 		return fmt.Errorf("%w: %s", ErrEmptyPath, path)
 	}
@@ -101,8 +101,7 @@ func CopyDir(pathSource, pathDestination string) error {
 	}
 
 	// Create a destination directory
-	// TODO: copy owner and permissions
-	if err := os.MkdirAll(pathDestination, 0o775); err != nil {
+	if err := os.MkdirAll(pathDestination, 0o750); err != nil {
 		return err
 	}
 
