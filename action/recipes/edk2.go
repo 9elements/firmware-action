@@ -7,10 +7,43 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 )
+
+// Used to store data from githubaction.Action
+// For details see action.yml
+type edk2Opts struct {
+	platform    string
+	releaseType string
+}
+
+// edk2GetOpts is used to fill edk2Opts with data from githubaction.Action
+func edk2GetOpts(get getValFunc) (edk2Opts, error) {
+	opts := edk2Opts{
+		platform:    get("edk2__platform"),
+		releaseType: get("edk2__release_type"),
+	}
+
+	// Check if required options are not empty
+	missing := []string{}
+	requiredOptions := map[string]string{
+		"edk2__platform":     opts.platform,
+		"edk2__release_type": opts.releaseType,
+	}
+	for key, val := range requiredOptions {
+		if val == "" {
+			missing = append(missing, key)
+		}
+	}
+	if len(missing) > 0 {
+		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
+	}
+
+	return opts, nil
+}
 
 // edk2 builds edk2
 func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *edk2Opts, artifacts *[]container.Artifacts) error {

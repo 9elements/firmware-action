@@ -5,82 +5,211 @@ package recipes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 	"github.com/9elements/firmware-action/action/filesystem"
 )
 
-type ctxKey string
+// Used to store information about a single blob
+type blobDef struct {
+	actionInput         string
+	destinationFilename string
+	kconfigKey          string
+	isDirectory         bool
+}
 
-const (
-	blobsLocation                   = "3rdparty/blobs/mainboard/${MAINBOARD_DIR}"
-	blobsLocationCtxKey      ctxKey = "BLOBS_LOCATION"
-	additionalCommandsCtxKey ctxKey = "ADDITIONAL_COMMANDS_TO_RUN"
-)
+// Used to store data from githubaction.Action
+//
+//	For details see action.yml
+type corebootOpts struct {
+	blobs []blobDef
+}
+
+// commonGetOpts is used to fill corebootOpts with data from githubaction.Action
+func corebootGetOpts(get getValFunc) (corebootOpts, error) {
+	// 'allOpts' most importantly contains definitions of all possible (supported) blobs
+	allOpts := corebootOpts{
+		blobs: []blobDef{
+			{
+				// Payload
+				// docs: https://doc.coreboot.org/payloads.html
+				actionInput:         get("coreboot__payload_file_path"),
+				destinationFilename: "payload",
+				kconfigKey:          "CONFIG_PAYLOAD_FILE",
+				isDirectory:         false,
+			},
+			{
+				// Intel IFD (Intel Flash Descriptor)
+				// docs: https://doc.coreboot.org/util/ifdtool/layout.html
+				actionInput:         get("coreboot__intel_ifd_path"),
+				destinationFilename: "descriptor.bin",
+				kconfigKey:          "CONFIG_IFD_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel ME (Intel Management Engine)
+				actionInput:         get("coreboot__intel_me_path"),
+				destinationFilename: "me.bin",
+				kconfigKey:          "CONFIG_ME_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel GbE (Intel Gigabit Ethernet)
+				actionInput:         get("coreboot__intel_gbe_path"),
+				destinationFilename: "gbe.bin",
+				kconfigKey:          "CONFIG_GBE_BIN_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel FSP binary (Intel Firmware Support Package)
+				actionInput:         get("coreboot__fsp_binary_path"),
+				destinationFilename: "Fsp.fd",
+				kconfigKey:          "CONFIG_FSP_FD_PATH",
+				isDirectory:         false,
+			},
+			{
+				// Intel FSP header (Intel Firmware Support Package)
+				actionInput:         get("coreboot__fsp_header_path"),
+				destinationFilename: "Include",
+				kconfigKey:          "CONFIG_FSP_HEADER_PATH",
+				isDirectory:         true,
+			},
+		},
+	}
+
+	// If any of blobs defined in 'allOpts' is passed into the action as input, append it to 'opts'
+	opts := corebootOpts{}
+	for blob := range allOpts.blobs {
+		if allOpts.blobs[blob].actionInput != "" {
+			opts.blobs = append(opts.blobs, allOpts.blobs[blob])
+		}
+	}
+
+	return opts, nil
+}
 
 // coreboot builds coreboot with all blobs and stuff
 func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *corebootOpts, artifacts *[]container.Artifacts) error {
-	envVars := map[string]string{}
-
-	additionalCommandsToRun := [][]string{} // Used to modify defconfig inside container
-
-	// Handle blobs
-	//   To keep using 'buildWithKernelBuildSystem' without breaking Linux kernel build
-	//   there has to be a bit hackish solution ... :(
-	//   Biggest problem is that most preparation should be done here, but the container
-	//   is not available yet. So this solution exploits the context to pass over few things.
-	// Firstly copy all the blobs into temporary location, which will then be mounted into
-	//   building container.
-	// Then use './util/scripts/config' script in coreboot repository to update configuration
-	//   options for said blobs (this must run inside container).
-
-	//  Collect all blobs into temporary directory
-	tmpDir, err := os.MkdirTemp("", "blobs")
+	// Spin up container
+	containerOpts := container.SetupOpts{
+		ContainerURL:      common.sdkVersion,
+		MountContainerDir: common.containerWorkDir,
+		MountHostDir:      common.repoPath,
+		WorkdirContainer:  common.containerWorkDir,
+	}
+	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(tmpDir)
+
+	// Copy over the defconfig file
+	defconfigBasename := filepath.Base(common.defconfigPath)
+	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	myContainer = myContainer.WithFile(
+		filepath.Join(common.containerWorkDir, defconfigBasename),
+		client.Host().File(filepath.Join(pwd, common.defconfigPath)),
+	)
+
+	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
+	//   to extract value of 'CONFIG_MAINBOARD_DIR', there must be '.config'
+	generateDotConfigCmd := []string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"}
+	mainboardDir, err := myContainer.
+		WithExec(generateDotConfigCmd).
+		WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
+		Stdout(ctx)
+	if err != nil {
+		return err
+	}
+	//   strip newline from mainboardDir
+	mainboardDir = strings.Replace(mainboardDir, "\n", "", -1)
+
+	// Assemble commands to build
+	buildSteps := [][]string{
+		// remove existing config if exists
+		// -f: ignore nonexistent files
+		{"rm", "-f", ".config"},
+		// generate dotconfig from defconfig
+		generateDotConfigCmd,
+	}
+
+	// Handle blobs
+	// Firstly copy all the blobs into building container.
+	// Then use './util/scripts/config' script in coreboot repository to update configuration
+	//   options for said blobs (this must run inside container).
 	for blob := range opts.blobs {
-		src := opts.blobs[blob].actionInput
-		dst := filepath.Join(
-			blobsLocation,
-			opts.blobs[blob].destinationFilename,
+		// Path to local file on host
+		src := filepath.Join(
+			pwd,
+			opts.blobs[blob].actionInput,
 		)
-		tmpDst := filepath.Join(
-			tmpDir,
+		// Path to file in container
+		dst := filepath.Join(
+			common.containerWorkDir,
+			filepath.Join("3rdparty/blobs/mainboard", mainboardDir),
 			opts.blobs[blob].destinationFilename,
 		)
 
-		// Copy into proper places
+		// Copy into container
+		if err = filesystem.CheckFileExists(src); !errors.Is(err, os.ErrExist) {
+			return err
+		}
 		if opts.blobs[blob].isDirectory {
 			// Directory
-			if err := filesystem.CopyDir(src, tmpDst); err != nil {
-				return err
-			}
+			myContainer = myContainer.WithMountedDirectory(
+				dst,
+				client.Host().Directory(src),
+			)
 		} else {
 			// File
-			if err := filesystem.CopyFile(src, tmpDst); err != nil {
-				return err
-			}
+			myContainer = myContainer.WithFile(
+				dst,
+				client.Host().File(src),
+			)
 		}
 
 		// Fix defconfig
-		additionalCommandsToRun = append(
-			additionalCommandsToRun,
-			// The '"sh", "-c"' is needed to get access to environment variables
-			//   meaning replace '${MAINBOARD_DIR}' in 'blobsLocation' with actual path
-			[]string{"sh", "-c", fmt.Sprintf("./util/scripts/config --set-str %s \"%s\"", opts.blobs[blob].kconfigKey, dst)},
+		buildSteps = append(
+			buildSteps,
+			// update coreboot config value related to blob to actual path of the blob
+			[]string{"./util/scripts/config", "--set-str", opts.blobs[blob].kconfigKey, dst},
 		)
 	}
 
-	// Add additionalCommandsToRun into context
-	ctx = context.WithValue(ctx, additionalCommandsCtxKey, additionalCommandsToRun)
-	ctx = context.WithValue(ctx, blobsLocationCtxKey, tmpDir)
+	buildSteps = append(
+		buildSteps,
+		// compile
+		[]string{"make", "-j", fmt.Sprintf("%d", runtime.NumCPU())},
+		// for documenting purposes
+		[]string{"make", "savedefconfig"},
+	)
+
+	// Setup environment variables in the container
+	envVars := map[string]string{}
+	for key, value := range envVars {
+		myContainer = myContainer.WithEnvVariable(key, value)
+	}
 
 	// Build
-	return buildWithKernelBuildSystem(ctx, client, common, dockerfileDirectoryPath, envVars, artifacts)
+	for step := range buildSteps {
+		myContainer, err = myContainer.
+			WithExec(buildSteps[step]).
+			Sync(ctx)
+		if err != nil {
+			return fmt.Errorf("%s build failed: %w", common.target, err)
+		}
+	}
+
+	// Extract artifacts
+	return container.GetArtifacts(ctx, myContainer, artifacts)
 }
