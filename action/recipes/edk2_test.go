@@ -53,6 +53,9 @@ func TestEdk2(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			whatever(t)
+			t.Cleanup(whatever2)
+
 			ctx := context.Background()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)

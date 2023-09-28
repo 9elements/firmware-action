@@ -64,6 +64,9 @@ func TestLinux(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			whatever(t)
+			t.Cleanup(whatever2)
+
 			assert.NoError(t, os.Chdir(pwd)) // just to make sure
 
 			linuxVersion, err := semver.NewVersion(tc.linuxVersion)
@@ -174,4 +177,21 @@ func TestLinux(t *testing.T) {
 		})
 	}
 	assert.NoError(t, os.Chdir(pwd)) // just to make sure
+}
+
+func whatever(t *testing.T) {
+	t.Helper()
+	whatever2()
+}
+
+func whatever2() {
+	cmds := [][]string{
+		{"df", "-h"},
+		{"free"},
+	}
+	for _, cmd := range cmds {
+		meh := exec.Command(cmd[0], cmd[1:]...)
+		stdout, _ := meh.Output()
+		fmt.Println(string(stdout))
+	}
 }
