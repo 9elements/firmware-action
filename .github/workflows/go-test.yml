@@ -13,7 +13,29 @@ permissions:
   contents: read
 
 jobs:
+  go-test-resource-hogs:
+    # Run tests that take up a lot of system resources separately
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Taskfile
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
+      - name: Install go dependencies
+        run: |
+          cd action
+          go get -d ./...
+      - name: Run go test
+        run: |
+          cd action
+          go test -v -timeout 60m -shuffle=on -covermode=count -coverprofile coverage.out -run ${{ matrix.testregex }} ./...
+
   go-test:
+    # Run all remaining light tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,4 +48,6 @@ jobs:
           cd action
           go get -d ./...
       - name: Run go test
-        run: ./bin/task test
+        run: |
+          cd action
+          go test -v -timeout 60m -shuffle=on -covermode=count -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot)' ./...
