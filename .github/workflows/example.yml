@@ -48,6 +48,12 @@ jobs:
           repo_path: my_super_dooper_awesome_coreboot
           defconfig_path: 'seabios_defconfig'
           #output: "output"	# default
+      - name: Get artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: coreboot-${{ matrix.coreboot-version }}
+          path: output
+          retention-days: 14
 
   # Example of building Linux kernel
   build-linux:
@@ -86,6 +92,12 @@ jobs:
           repo_path: 'linux-${{ matrix.linux-version }}'
           defconfig_path: 'ci_defconfig'
           #output: "output"	# default
+      - name: Get artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.linux-version }}
+          path: output
+          retention-days: 14
 
   # Example of building EDK2
   build-edk2:
@@ -116,3 +128,9 @@ jobs:
           #output: "output"	# default
           edk2__platform: 'UefiPayloadPkg/UefiPayloadPkg.dsc'
           #edk2__release_type: DEBUG  # default
+      - name: Get artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.edk2-version }}
+          path: output
+          retention-days: 14
