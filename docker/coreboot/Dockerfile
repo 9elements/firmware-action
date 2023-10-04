@@ -33,6 +33,7 @@ RUN apt-get update && \
         libncurses5-dev \
         m4 \
         nodejs \
+        pkgconf \
         python-is-python3 \
         python3-pip \
         tzdata \
