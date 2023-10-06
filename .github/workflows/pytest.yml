@@ -16,6 +16,9 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
+      - name: Install Taskfile
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
       - name: Setup python
         uses: actions/setup-python@v4
         with:
@@ -32,4 +35,6 @@ jobs:
       - name: Install python dependencies
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - name: Run pytest
-        run: .dagger-ci/run_pytest.sh
+        run: |
+          cd .dagger-ci
+          task test

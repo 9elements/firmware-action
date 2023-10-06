@@ -1,0 +1,29 @@
+---
+version: '3'
+vars:
+  PROJECT: "daggerci"
+
+tasks:
+  lint-pylint:
+    desc: Run pylint
+    ignore_error: true
+    cmds:
+      - pylint --enable=fixme,line-too-long {{.PROJECT}}
+
+  lint-mypy:
+    desc: Run mypy static check
+    ignore_error: true
+    cmds:
+      - mypy --strict {{.PROJECT}}
+
+  format:
+    desc: Run formatters
+    cmds:
+      - find ./{{.PROJECT}}/ -type f -name '*.py' -exec sh -c 'echo "$1"; autopep8 -i "$1"' shell {} \;
+      - black {{.PROJECT}}
+
+  test:
+    desc: Run tests
+    dir: daggerci
+    cmds:
+      - python -m pytest --cov --cov-report=term-missing --cov-report=html --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --runslow {{.CLI_ARGS}}
