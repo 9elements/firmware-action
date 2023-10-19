@@ -155,7 +155,6 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 		)
 		// Path to file in container
 		dst := filepath.Join(
-			common.containerWorkDir,
 			filepath.Join("3rdparty/blobs/mainboard", mainboardDir),
 			opts.blobs[blob].destinationFilename,
 		)
