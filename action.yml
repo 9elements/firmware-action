@@ -125,6 +125,25 @@ inputs:
         The Kconfig `CONFIG_FSP_HEADER_PATH` will point to the same
         path.
     required: false
+  coreboot__vbt_path:
+    description: |
+      *coreboot__vbt_path* gives the (relative) path to the
+      Video BIOS Table binary.
+      In a 'coreboot' build:
+        The files will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/vbt.bin`.
+        The Kconfig `CONFIG_INTEL_GMA_VBT_FILE` will point to the same
+        path.
+    required: false
+  coreboot__ec_path:
+    description: |
+      *coreboot__ec_path* gives the (relative) path to the
+      Embedded Controller binary.
+      In a 'coreboot' build:
+        The files will be placed at
+        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/ec.bin`.
+        The Kconfig `CONFIG_EC_BIN_PATH` will point to the same path.
+    required: false
 
   #-------------------------------
   # Inputs specific for edk2 target or edk2 pyaload
