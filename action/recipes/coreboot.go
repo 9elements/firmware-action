@@ -81,6 +81,20 @@ func corebootGetOpts(get getValFunc) (corebootOpts, error) {
 				kconfigKey:          "CONFIG_FSP_HEADER_PATH",
 				isDirectory:         true,
 			},
+			{
+				// VBT (Video BIOS Table)
+				actionInput:         get("coreboot__vbt_path"),
+				destinationFilename: "vbt.bin",
+				kconfigKey:          "CONFIG_INTEL_GMA_VBT_FILE",
+				isDirectory:         false,
+			},
+			{
+				// EC (Embedded Controller)
+				actionInput:         get("coreboot__ec_path"),
+				destinationFilename: "ec.bin",
+				kconfigKey:          "CONFIG_EC_BIN_PATH",
+				isDirectory:         false,
+			},
 		},
 	}
 
