@@ -179,6 +179,7 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 		}
 		if opts.blobs[blob].isDirectory {
 			// Directory
+			myContainer = myContainer.WithExec([]string{"mkdir", "-p", dst})
 			myContainer = myContainer.WithMountedDirectory(
 				dst,
 				client.Host().Directory(src),
