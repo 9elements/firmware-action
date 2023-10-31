@@ -90,7 +90,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 
 	switch common.target {
 	case "coreboot":
-		opts, err := corebootGetOpts(action.GetInput)
+		opts, err := corebootGetOpts(action.GetInput, action.Getenv)
 		if err != nil {
 			return err
 		}
@@ -110,7 +110,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 		}
 		return coreboot(ctx, client, &common, "", &opts, &artifacts)
 	case "linux":
-		opts, err := linuxGetOpts(action.GetInput)
+		opts, err := linuxGetOpts(action.GetInput, action.Getenv)
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func Execute(ctx context.Context, client *dagger.Client, action *githubactions.A
 		}
 		return linux(ctx, client, &common, "", &opts, &artifacts)
 	case "edk2":
-		opts, err := edk2GetOpts(action.GetInput)
+		opts, err := edk2GetOpts(action.GetInput, action.Getenv)
 		if err != nil {
 			return err
 		}

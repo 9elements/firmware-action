@@ -21,14 +21,18 @@ var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-comp
 // Used to store data from githubaction.Action
 //
 //	For details see action.yml
-type linuxOpts struct{}
+type linuxOpts struct {
+	gccVersion string
+}
 
 // linuxGetOpts is used to fill linuxOpts with data from githubaction.Action
 //
 //	at the moment, there are no linux-specific options needed
 //	It is here to keep the same structure to other recipes
-func linuxGetOpts(_ getValFunc) (linuxOpts, error) {
-	opts := linuxOpts{}
+func linuxGetOpts(_ getValFunc, getEnvVar getValFunc) (linuxOpts, error) {
+	opts := linuxOpts{
+		gccVersion: getEnvVar("GCC_VERSION"),
+	}
 	return opts, nil
 }
 

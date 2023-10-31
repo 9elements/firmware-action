@@ -18,13 +18,15 @@ import (
 type edk2Opts struct {
 	platform    string
 	releaseType string
+	gccVersion  string
 }
 
 // edk2GetOpts is used to fill edk2Opts with data from githubaction.Action
-func edk2GetOpts(get getValFunc) (edk2Opts, error) {
+func edk2GetOpts(getInputVar getValFunc, getEnvVar getValFunc) (edk2Opts, error) {
 	opts := edk2Opts{
-		platform:    get("edk2__platform"),
-		releaseType: get("edk2__release_type"),
+		platform:    getInputVar("edk2__platform"),
+		releaseType: getInputVar("edk2__release_type"),
+		gccVersion:  getEnvVar("GCC_VERSION"),
 	}
 
 	// Check if required options are not empty
