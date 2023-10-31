@@ -26,7 +26,7 @@ func edk2GetOpts(getInputVar getValFunc, getEnvVar getValFunc) (edk2Opts, error)
 	opts := edk2Opts{
 		platform:    getInputVar("edk2__platform"),
 		releaseType: getInputVar("edk2__release_type"),
-		gccVersion:  getEnvVar("GCC_VERSION"),
+		gccVersion:  getEnvVar("USE_GCC_VERSION"),
 	}
 
 	// Check if required options are not empty
@@ -73,7 +73,7 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	buildArgs := fmt.Sprintf("-a %s -p %s -b %s", common.arch, opts.platform, opts.releaseType)
+	buildArgs := fmt.Sprintf("-a %s -p %s -b %s -t GCC%s", common.arch, opts.platform, opts.releaseType, opts.gccVersion)
 	defconfigFileArgs, err := os.ReadFile(common.defconfigPath)
 	if err != nil {
 		return err

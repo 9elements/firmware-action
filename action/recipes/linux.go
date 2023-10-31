@@ -31,7 +31,7 @@ type linuxOpts struct {
 //	It is here to keep the same structure to other recipes
 func linuxGetOpts(_ getValFunc, getEnvVar getValFunc) (linuxOpts, error) {
 	opts := linuxOpts{
-		gccVersion: getEnvVar("GCC_VERSION"),
+		gccVersion: getEnvVar("USE_GCC_VERSION"),
 	}
 	return opts, nil
 }
