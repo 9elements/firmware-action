@@ -34,14 +34,14 @@ type corebootOpts struct {
 }
 
 // commonGetOpts is used to fill corebootOpts with data from githubaction.Action
-func corebootGetOpts(get getValFunc) (corebootOpts, error) {
+func corebootGetOpts(getInputVar getValFunc, _ getValFunc) (corebootOpts, error) {
 	// 'allOpts' most importantly contains definitions of all possible (supported) blobs
 	allOpts := corebootOpts{
 		blobs: []blobDef{
 			{
 				// Payload
 				// docs: https://doc.coreboot.org/payloads.html
-				actionInput:         get("coreboot__payload_file_path"),
+				actionInput:         getInputVar("coreboot__payload_file_path"),
 				destinationFilename: "payload",
 				kconfigKey:          "CONFIG_PAYLOAD_FILE",
 				isDirectory:         false,
@@ -49,49 +49,49 @@ func corebootGetOpts(get getValFunc) (corebootOpts, error) {
 			{
 				// Intel IFD (Intel Flash Descriptor)
 				// docs: https://doc.coreboot.org/util/ifdtool/layout.html
-				actionInput:         get("coreboot__intel_ifd_path"),
+				actionInput:         getInputVar("coreboot__intel_ifd_path"),
 				destinationFilename: "descriptor.bin",
 				kconfigKey:          "CONFIG_IFD_BIN_PATH",
 				isDirectory:         false,
 			},
 			{
 				// Intel ME (Intel Management Engine)
-				actionInput:         get("coreboot__intel_me_path"),
+				actionInput:         getInputVar("coreboot__intel_me_path"),
 				destinationFilename: "me.bin",
 				kconfigKey:          "CONFIG_ME_BIN_PATH",
 				isDirectory:         false,
 			},
 			{
 				// Intel GbE (Intel Gigabit Ethernet)
-				actionInput:         get("coreboot__intel_gbe_path"),
+				actionInput:         getInputVar("coreboot__intel_gbe_path"),
 				destinationFilename: "gbe.bin",
 				kconfigKey:          "CONFIG_GBE_BIN_PATH",
 				isDirectory:         false,
 			},
 			{
 				// Intel FSP binary (Intel Firmware Support Package)
-				actionInput:         get("coreboot__fsp_binary_path"),
+				actionInput:         getInputVar("coreboot__fsp_binary_path"),
 				destinationFilename: "Fsp.fd",
 				kconfigKey:          "CONFIG_FSP_FD_PATH",
 				isDirectory:         false,
 			},
 			{
 				// Intel FSP header (Intel Firmware Support Package)
-				actionInput:         get("coreboot__fsp_header_path"),
+				actionInput:         getInputVar("coreboot__fsp_header_path"),
 				destinationFilename: "Include",
 				kconfigKey:          "CONFIG_FSP_HEADER_PATH",
 				isDirectory:         true,
 			},
 			{
 				// VBT (Video BIOS Table)
-				actionInput:         get("coreboot__vbt_path"),
+				actionInput:         getInputVar("coreboot__vbt_path"),
 				destinationFilename: "vbt.bin",
 				kconfigKey:          "CONFIG_INTEL_GMA_VBT_FILE",
 				isDirectory:         false,
 			},
 			{
 				// EC (Embedded Controller)
-				actionInput:         get("coreboot__ec_path"),
+				actionInput:         getInputVar("coreboot__ec_path"),
 				destinationFilename: "ec.bin",
 				kconfigKey:          "CONFIG_EC_BIN_PATH",
 				isDirectory:         false,
