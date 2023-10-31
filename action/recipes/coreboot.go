@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -179,8 +180,13 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 		}
 		if opts.blobs[blob].isDirectory {
 			// Directory
+			log.Printf("Copying directory '%s' to container at '%s'", src, dst)
 			myContainer = myContainer.WithExec([]string{"mkdir", "-p", dst})
-			myContainer = myContainer.WithMountedDirectory(
+			// myContainer = myContainer.WithMountedDirectory(
+			// can't use WithMountedDirectory because the repo (aka working directory)
+			//   is already mounted with WithMountedDirectory
+			//   this nesting causes problems
+			myContainer = myContainer.WithDirectory(
 				dst,
 				client.Host().Directory(src),
 			)
