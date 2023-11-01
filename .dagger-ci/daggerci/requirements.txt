@@ -1,11 +1,10 @@
 anyio~=3.7
-dagger-io~=0.8
-humanize~=4.7
-prettytable~=3.8
+dagger-io~=0.9
+prettytable~=3.9
 pytest~=7.4
 pytest-benchmark~=4.0
 pytest-cov~=4.1
 pytest-flake8~=1.1
-pytest-pylint~=0.19
-pytest-timeout~=2.1
+pytest-pylint~=0.20
+pytest-timeout~=2.2
 PyYAML~=6.0
