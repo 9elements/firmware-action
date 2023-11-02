@@ -5,6 +5,7 @@ package recipes
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -12,6 +13,8 @@ import (
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 )
+
+var errUnknownArch = errors.New("unknown architecture")
 
 // Used to store data from githubaction.Action
 // For details see action.yml
@@ -71,9 +74,22 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
 
+	// Figure out target architectures
+	architectures := map[string]string{
+		"AARCH64": "-a AARCH64",
+		"ARM":     "-a ARM",
+		"IA32":    "-a IA32",
+		"IA32X64": "-a IA32 -a X64",
+		"X64":     "-a X64",
+	}
+	arch, ok := architectures[common.arch]
+	if !ok {
+		return fmt.Errorf("%w: %s", errUnknownArch, common.arch)
+	}
+
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	buildArgs := fmt.Sprintf("-a %s -p %s -b %s -t GCC%s", common.arch, opts.platform, opts.releaseType, opts.gccVersion)
+	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.platform, opts.releaseType, opts.gccVersion)
 	defconfigFileArgs, err := os.ReadFile(common.defconfigPath)
 	if err != nil {
 		return err
