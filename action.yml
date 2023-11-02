@@ -33,7 +33,19 @@ inputs:
   architecture:
     description: |
       *architecture* specifies target architecture, such as 'x86' or 'arm64'.
-    required: true
+      Currently unused for coreboot.
+      Supported options for linux:
+        - 'x86'
+        - 'x86_64'
+        - 'arm'
+        - 'arm64'
+      Supported options for edk2:
+        - 'AARCH64'
+        - 'ARM'
+        - 'IA32'
+        - 'IA32X64'
+        - 'X64'
+    required: false
     default: 'x86'
   repo_path:
     description: |
