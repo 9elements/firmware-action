@@ -5,176 +5,19 @@ description: |
   The generated files will be placed in $GITHUB_WORKSPACE/build/
 author: '9elements'
 inputs:
+  config:
+    description: |
+      Path to the JSON configuration file.
+    required: true
   target:
     description: |
-      The firmware stack to build.
-      One of the following:
-        - coreboot
-        - linux
-        - edk2
+      The firmware recipe to build. Use ID from JSON configuration file.
     required: true
-  #-------------------------------
-  # Inputs common for all targets
-  sdk_version:
+  recursive:
     description: |
-      *sdk_version* specifies the docker toolchain tag to use
-      when building the image. This has an influence on the
-      IASL, GCC and host GCC version that is used to build
-      the target.
-      You must match the source level and sdk_version.
-      *Note:* Updating the sdk_version might result in different
-      binaries using the same source code.
-      For example:
-        coreboot_4.19:main
-        coreboot_4.19:latest
-        edk2-stable202111:latest
-      See https://github.com/orgs/9elements/packages
-    required: true
-  architecture:
-    description: |
-      *architecture* specifies target architecture, such as 'x86' or 'arm64'.
-      Currently unused for coreboot.
-      Supported options for linux:
-        - 'x86'
-        - 'x86_64'
-        - 'arm'
-        - 'arm64'
-      Supported options for edk2:
-        - 'AARCH64'
-        - 'ARM'
-        - 'IA32'
-        - 'IA32X64'
-        - 'X64'
+      Build target recursively, with all of its dependencies.
     required: false
-    default: 'x86'
-  repo_path:
-    description: |
-      *repo_path* gives the (relative) path to the target (firmware) repository.
-      If the current repository contains the selected target, specify: '.'
-      Otherwise the path should point to the target (firmware) repository
-      submodule that had previously been checked out.
-    required: true
-    default: '.'
-  defconfig_path:
-    description: |
-      *defconfig_path* gives the (relative) path to the defconfig that
-      should be used to build the target.
-      For coreboot and linux this is a defconfig.
-      For EDK2 this is a one-line file containing the build arguments
-        such as '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
-        Some arguments will be added automatically from action inputs:
-          '-a <architecture>'
-          '-p <edk2__platform>'
-          '-b <edk2__release_type>'
-          '-t <GCC version>' (defined as part of docker toolchain in sdk_version)
-    required: true
-  output:
-    description: |
-      *output* specifies the (relative) path to directory into which place the produced files
-    required: true
-    default: 'output'
-
-  #-------------------------------
-  # Inputs specific for coreboot target
-  coreboot__payload_file_path:
-    description: |
-      *coreboot__payload_file_path* gives the (relative) path to the payload.
-      Depending on the defconfig it may not be added to the ROM.
-      In a 'coreboot' build:
-        The file will be placed at
-        `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
-        The Kconfig `CONFIG_PAYLOAD_FILE` will point to the same path.
-    required: false
-  coreboot__intel_ifd_path:
-    description: |
-      *coreboot__intel_ifd_path* gives the (relative) path to the Intel
-      Flash descriptor binary.
-      In a 'coreboot' build:
-        The file will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/descriptor.bin`.
-        The Kconfig `CONFIG_IFD_BIN_PATH` will point to the same
-        path.
-      Depending on the defconfig it may not be added to the ROM.
-    required: false
-  coreboot__intel_me_path:
-    description: |
-      *coreboot__intel_me_path* gives the (relative) path to the Intel
-      Management engine binary.
-      In a 'coreboot' build:
-        The file will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/me.bin`.
-        The Kconfig `CONFIG_ME_BIN_PATH` will point to the same
-        path.
-      Depending on the defconfig it may not be added to the ROM.
-    required: false
-  coreboot__intel_gbe_path:
-    description: |
-      *coreboot__intel_gbe_path* gives the (relative) path to the Intel
-      Gigabit Ethernet engine binary.
-      In a 'coreboot' build:
-        The file will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/gbe.bin`.
-        The Kconfig `CONFIG_GBE_BIN_PATH` will point to the same
-        path.
-      Depending on the defconfig it may not be added to the ROM.
-    required: false
-  coreboot__fsp_binary_path:
-    description: |
-      *coreboot__fsp_binary_path* gives the (relative) path to the Intel
-      FSP binary.
-      In a 'coreboot' build:
-        The file will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
-        The Kconfig `CONFIG_FSP_FD_PATH` will point to the same
-        path.
-    required: false
-  coreboot__fsp_header_path:
-    description: |
-      *coreboot__fsp_header_path* gives the (relative) path to the Intel
-      FSP header folder.
-      In a 'coreboot' build:
-        The files will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Include`.
-        The Kconfig `CONFIG_FSP_HEADER_PATH` will point to the same
-        path.
-    required: false
-  coreboot__vbt_path:
-    description: |
-      *coreboot__vbt_path* gives the (relative) path to the
-      Video BIOS Table binary.
-      In a 'coreboot' build:
-        The files will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/vbt.bin`.
-        The Kconfig `CONFIG_INTEL_GMA_VBT_FILE` will point to the same
-        path.
-    required: false
-  coreboot__ec_path:
-    description: |
-      *coreboot__ec_path* gives the (relative) path to the
-      Embedded Controller binary.
-      In a 'coreboot' build:
-        The files will be placed at
-        `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/ec.bin`.
-        The Kconfig `CONFIG_EC_BIN_PATH` will point to the same path.
-    required: false
-
-  #-------------------------------
-  # Inputs specific for edk2 target or edk2 pyaload
-  edk2__platform:
-    description: |
-      *edk2__platform* specifies the DSC to use when building EDK2.
-      For example:
-        UefiPayloadPkg/UefiPayloadPkg.dsc
-    required: false
-  edk2__release_type:
-    description: |
-      *edk2__release_type* specifies the build type to use when building EDK2.
-      Defaults to DEBUG.
-      Supported options:
-        - RELEASE
-        - DEBUG
-    required: false
-    default: DEBUG
+    default: 'false'
 
 runs:
   using: 'node20'

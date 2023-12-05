@@ -5,7 +5,6 @@ package recipes
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,21 +33,32 @@ func TestEdk2(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
+	common := CommonOpts{
+		SdkURL:        "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
+		Arch:          "X64",
+		DefconfigPath: "defconfig",
+		OutputDir:     "output",
+	}
+
 	testCases := []struct {
 		name        string
-		edk2Version string
-		platform    string
-		arch        string
-		release     string
+		edk2Options Edk2Opts
+		version     string
+		gccVersion  string
 		wantErr     error
 	}{
 		{
-			name:        "normal build",
-			edk2Version: "edk2-stable202105",
-			platform:    "UefiPayloadPkg/UefiPayloadPkg.dsc",
-			arch:        "X64",
-			release:     "DEBUG",
-			wantErr:     nil,
+			name: "normal build",
+			edk2Options: Edk2Opts{
+				Common: common,
+				Specific: Edk2Specific{
+					Platform:    "UefiPayloadPkg/UefiPayloadPkg.dsc",
+					ReleaseType: "DEBUG",
+				},
+			},
+			version:    "edk2-stable202105",
+			gccVersion: "GCC5",
+			wantErr:    nil,
 		},
 	}
 	for _, tc := range testCases {
@@ -60,49 +70,45 @@ func TestEdk2(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
-			opts := map[string]string{
-				"target":           "edk2",
-				"sdk_version":      fmt.Sprintf("%s:main", tc.edk2Version),
-				"architecture":     tc.arch,
-				"repo_path":        filepath.Join(tmpDir, "Edk2"),
-				"defconfig_path":   "defconfig",
-				"containerWorkDir": "/Edk2",
-				"GITHUB_WORKSPACE": "/Edk2",
-				"output":           "output",
-			}
-			getFunc := func(key string) string {
-				return opts[key]
-			}
-			common, err := commonGetOpts(getFunc, getFunc)
+			tc.edk2Options.Common.RepoPath = filepath.Join(tmpDir, "Edk2")
+
+			// Change current working directory
+			//   create __tmp_files__ directory to store source-code
+			//   mostly useful for repeated local-run tests to save bandwidth and time
+			tmpFiles := filepath.Join(pwd, "__tmp_files__")
+			err = os.MkdirAll(tmpFiles, 0o750)
 			assert.NoError(t, err)
-			edk2Opts := edk2Opts{
-				platform:    tc.platform,
-				releaseType: tc.release,
+			err = os.Chdir(tmpFiles)
+			assert.NoError(t, err)
+			defer os.Chdir(pwd) // nolint:errcheck
+
+			// Clone edk2 repo
+			fileInfo, err := os.Stat(tc.version)
+			if err != nil {
+				cmd := exec.Command("git", "clone", "--recurse-submodules", "--branch", tc.version, "--depth", "1", "https://github.com/tianocore/edk2.git", tc.version)
+				err = cmd.Run()
+				assert.NoError(t, err)
 			}
+			cmd := exec.Command("cp", "-R", tc.version, filepath.Join(tmpDir, "Edk2"))
+			err = cmd.Run()
+			assert.NoError(t, err)
 
 			// Change current working directory
 			err = os.Chdir(tmpDir)
 			assert.NoError(t, err)
 			defer os.Chdir(pwd) // nolint:errcheck
 
-			// Clone edk2 repo
-			cmd := exec.Command("git", "clone", "--recurse-submodules", "--branch", tc.edk2Version, "--depth", "1", "https://github.com/tianocore/edk2.git", "Edk2")
-			err = cmd.Run()
-			assert.NoError(t, err)
-			err = os.Chdir(common.repoPath)
-			assert.NoError(t, err)
-
 			// Create "defconfig_path" file
-			err = os.WriteFile(common.defconfigPath, []byte("-D BOOTLOADER=COREBOOT -a IA32 -t GCC5"), 0o644)
+			err = os.WriteFile(tc.edk2Options.Common.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
 			assert.NoError(t, err)
 
 			// Artifacts
-			outputPath := filepath.Join(tmpDir, common.outputDir)
+			outputPath := filepath.Join(tmpDir, tc.edk2Options.Common.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			artifacts := []container.Artifacts{
 				{
-					ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
+					ContainerPath: filepath.Join(ContainerWorkDir, "Build"),
 					ContainerDir:  true,
 					HostPath:      outputPath,
 					HostDir:       true,
@@ -110,11 +116,13 @@ func TestEdk2(t *testing.T) {
 			}
 
 			// Try to build edk2
-			err = edk2(ctx, client, &common, dockerfilePath, &edk2Opts, &artifacts)
+			err = edk2(ctx, client, &tc.edk2Options, dockerfilePath, &artifacts)
 			assert.NoError(t, err)
 
 			// Check artifacts
-			fileInfo, err := os.Stat(filepath.Join(outputPath, "Build"))
+			fileInfo, err = os.Stat(outputPath)
+			assert.NoError(t, err)
+			fileInfo, err = os.Stat(filepath.Join(outputPath, "Build"))
 			assert.NoError(t, err)
 			assert.True(t, fileInfo.IsDir())
 		})

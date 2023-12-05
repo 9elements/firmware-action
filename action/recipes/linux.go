@@ -18,37 +18,39 @@ import (
 
 var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-compilation")
 
-// Used to store data from githubaction.Action
-//
-//	For details see action.yml
-type linuxOpts struct {
-	gccVersion string
+// LinuxSpecific is used to store data specific to linux
+type LinuxSpecific struct {
+	// TODO: either use or remove
+	GccVersion string `json:"gcc_version"`
 }
 
-// linuxGetOpts is used to fill linuxOpts with data from githubaction.Action
-//
-//	at the moment, there are no linux-specific options needed
-//	It is here to keep the same structure to other recipes
-func linuxGetOpts(_ getValFunc, getEnvVar getValFunc) (linuxOpts, error) {
-	opts := linuxOpts{
-		gccVersion: getEnvVar("USE_GCC_VERSION"),
-	}
-	return opts, nil
+// LinuxOpts is used to store all data needed to build linux
+type LinuxOpts struct {
+	// Uniq ID or name for this specific instance (used in 'Depends' list)
+	// Example: "MyLittleLinux"
+	ID string `json:"id"`
+
+	// List of IDs this instance depends on
+	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
+	Depends []string `json:"depends"`
+
+	// Common options like paths etc.
+	Common CommonOpts `json:"common"`
+
+	// Coreboot specific options
+	Specific LinuxSpecific `json:"specific"`
 }
 
 // linux builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
-func linux(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *linuxOpts, artifacts *[]container.Artifacts) error {
-	// No linuxOpts are needed nor used at the moment
-	_ = opts
-
+func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      common.sdkVersion,
-		MountContainerDir: common.containerWorkDir,
-		MountHostDir:      common.repoPath,
-		WorkdirContainer:  common.containerWorkDir,
+		ContainerURL:      opts.Common.SdkURL,
+		MountContainerDir: ContainerWorkDir,
+		MountHostDir:      opts.Common.RepoPath,
+		WorkdirContainer:  ContainerWorkDir,
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
@@ -56,7 +58,7 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(common.defconfigPath)
+	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
 	if strings.Contains(defconfigBasename, ".defconfig") {
 		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
 		// contains '.defconfig' string ...
@@ -76,8 +78,8 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 		return err
 	}
 	myContainer = myContainer.WithFile(
-		filepath.Join(common.containerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, common.defconfigPath)),
+		filepath.Join(ContainerWorkDir, defconfigBasename),
+		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
 	)
 
 	// Setup environment variables in the container
@@ -89,10 +91,10 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 		"arm64":  "aarch64-linux-gnu-",
 	}
 	envVars := map[string]string{
-		"ARCH": common.arch,
+		"ARCH": opts.Common.Arch,
 	}
 
-	val, ok := crossCompile[common.arch]
+	val, ok := crossCompile[opts.Common.Arch]
 	if !ok {
 		return errUnknownArchCrossCompile
 	}
@@ -105,6 +107,7 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 	}
 
 	// Assemble commands to build
+	// TODO: make independent on OS
 	buildSteps := [][]string{
 		// remove existing config if exists
 		//   -f: ignore nonexistent files
@@ -112,7 +115,7 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 		// x86_64 reuses x86
 		{"ln", "--symbolic", "--relative", "arch/x86", "arch/x86_64"},
 		// the symlink simplifies this command
-		{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", common.arch, defconfigBasename)},
+		{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", opts.Common.Arch, defconfigBasename)},
 		// generate dotconfig from defconfig
 		{"make", defconfigBasename},
 		// compile
@@ -127,7 +130,7 @@ func linux(ctx context.Context, client *dagger.Client, common *commonOpts, docke
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("%s build failed: %w", common.target, err)
+			return fmt.Errorf("linux build failed: %w", err)
 		}
 	}
 

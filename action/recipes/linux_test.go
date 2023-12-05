@@ -41,24 +41,28 @@ func TestLinux(t *testing.T) {
 		name         string
 		linuxVersion string
 		arch         string
+		linuxOptions LinuxOpts
 		wantErr      error
 	}{
 		{
 			name:         "normal build for x86 64bit",
 			linuxVersion: "6.1.45",
 			arch:         "x86_64",
+			linuxOptions: LinuxOpts{},
 			wantErr:      nil,
 		},
 		{
 			name:         "normal build for x86 32bit",
 			linuxVersion: "6.1.45",
 			arch:         "x86",
+			linuxOptions: LinuxOpts{},
 			wantErr:      nil,
 		},
 		{
 			name:         "normal build for arm64",
 			linuxVersion: "6.1.45",
 			arch:         "arm64",
+			linuxOptions: LinuxOpts{},
 			wantErr:      nil,
 		},
 	}
@@ -75,22 +79,14 @@ func TestLinux(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
-			opts := map[string]string{
-				"target":           "linux",
-				"sdk_version":      fmt.Sprintf("linux_%s:main", linuxVersion.String()),
-				"architecture":     tc.arch,
-				"repo_path":        filepath.Join(tmpDir, "linux"),
-				"defconfig_path":   "custom_defconfig",
-				"containerWorkDir": "/linux",
-				"GITHUB_WORKSPACE": "/linux",
-				"output":           "output",
+			commonOpts := CommonOpts{
+				SdkURL:        fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%s:main", linuxVersion.String()),
+				Arch:          tc.arch,
+				RepoPath:      filepath.Join(tmpDir, "linux"),
+				DefconfigPath: "custom_defconfig",
+				OutputDir:     "output",
 			}
-			getFunc := func(key string) string {
-				return opts[key]
-			}
-			common, err := commonGetOpts(getFunc, getFunc)
-			assert.NoError(t, err)
-			linuxOpts := linuxOpts{}
+			tc.linuxOptions.Common = commonOpts
 
 			// Change current working directory
 			//   create __tmp_files__ directory to store source-code of Linux Kernel
@@ -120,19 +116,19 @@ func TestLinux(t *testing.T) {
 				}
 			}
 			//   always copy from __tmp_files__ to tmpDir for each test
-			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", linuxVersion.String()), common.repoPath})
+			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", linuxVersion.String()), tc.linuxOptions.Common.RepoPath})
 			for _, cmd := range commands {
 				err = exec.Command(cmd[0], cmd[1:]...).Run()
 				assert.NoError(t, err)
 			}
-			err = os.Chdir(common.repoPath)
+			err = os.Chdir(tc.linuxOptions.Common.RepoPath)
 			assert.NoError(t, err)
 
 			// Copy over defconfig file into tmpDir/linux
-			defconfigPath := filepath.Join(common.repoPath, common.defconfigPath)
+			defconfigPath := filepath.Join(tc.linuxOptions.Common.RepoPath, tc.linuxOptions.Common.DefconfigPath)
 			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
 			assert.NoError(t, err)
-			//   common.repoPath = path to end user repository (in this case somewhere in /tmp)
+			//   common.RepoPath = path to end user repository (in this case somewhere in /tmp)
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			defconfigLocalPath, err := filepath.Abs(filepath.Join(
 				repoRootPath,
@@ -146,18 +142,18 @@ func TestLinux(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Artifacts
-			outputPath := filepath.Join(tmpDir, common.outputDir)
+			outputPath := filepath.Join(tmpDir, tc.linuxOptions.Common.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			artifacts := []container.Artifacts{
 				{
-					ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
+					ContainerPath: filepath.Join(ContainerWorkDir, "vmlinux"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
 					HostDir:       true,
 				},
 				{
-					ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+					ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
 					HostDir:       true,
@@ -165,7 +161,7 @@ func TestLinux(t *testing.T) {
 			}
 
 			// Try to build linux kernel
-			err = linux(ctx, client, &common, dockerfilePath, &linuxOpts, &artifacts)
+			err = linux(ctx, client, &tc.linuxOptions, dockerfilePath, &artifacts)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
