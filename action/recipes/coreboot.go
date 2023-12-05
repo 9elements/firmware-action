@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strings"
 
@@ -18,106 +19,172 @@ import (
 	"github.com/9elements/firmware-action/action/filesystem"
 )
 
-// Used to store information about a single blob
-type blobDef struct {
-	actionInput         string
-	destinationFilename string
-	kconfigKey          string
-	isDirectory         bool
+// BlobDef is used to store information about a single blob.
+// This structure is not exposed to the user, it is filled in automatically based on user input.
+type BlobDef struct {
+	// Path to the blob (either file or directory)
+	Path string `validate:"required"`
+
+	// Blobs get renamed when moved to this string
+	DestinationFilename string `validate:"required"`
+
+	// Kconfig key specifying the filepath to the blob in defconfig
+	KconfigKey string `validate:"required"`
+
+	// Is blob a directory? If blob is file, set to FALSE
+	IsDirectory bool `validate:"required,boolean"`
 }
 
-// Used to store data from githubaction.Action
-//
-//	For details see action.yml
-type corebootOpts struct {
-	blobs []blobDef
+// CorebootSpecific is used to store data specific to coreboot.
+type CorebootSpecific struct {
+	// ** List of supported blobs **
+	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
+	//
+	// Gives the (relative) path to the payload.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
+	// The Kconfig `CONFIG_PAYLOAD_FILE` will be changed to point to the same path.
+	PayloadFilePath string `json:"payload_file_path" type:"blob"`
+
+	// Gives the (relative) path to the Intel Flash descriptor binary.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/descriptor.bin`.
+	// The Kconfig `CONFIG_IFD_BIN_PATH` will be changed to point to the same path.
+	IntelIfdPath string `json:"intel_ifd_path" type:"blob"`
+
+	// Gives the (relative) path to the Intel Management engine binary.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/me.bin`.
+	// The Kconfig `CONFIG_ME_BIN_PATH` will be changed to point to the same path.
+	IntelMePath string `json:"intel_me_path" type:"blob"`
+
+	// Gives the (relative) path to the Intel Gigabit Ethernet engine binary.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/gbe.bin`.
+	// The Kconfig `CONFIG_GBE_BIN_PATH` will be changed to point to the same path.
+	IntelGbePath string `json:"intel_gbe_path" type:"blob"`
+
+	// Gives the (relative) path to the Intel FSP binary.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
+	// The Kconfig `CONFIG_FSP_FD_PATH` will be changed to point to the same path.
+	FspBinaryPath string `json:"fsp_binary_path" type:"blob"`
+
+	// Gives the (relative) path to the Intel FSP header folder.
+	// In a 'coreboot' build, the files will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Include`.
+	// The Kconfig `CONFIG_FSP_HEADER_PATH` will be changed to point to the same path.
+	FspHeaderPath string `json:"fsp_header_path" type:"blob"`
+
+	// Gives the (relative) path to the Video BIOS Table binary.
+	// In a 'coreboot' build, the files will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/vbt.bin`.
+	// The Kconfig `CONFIG_INTEL_GMA_VBT_FILE` will be changed to point to the same path.
+	VbtPath string `json:"vbt_path" type:"blob"`
+
+	// Gives the (relative) path to the Embedded Controller binary.
+	// In a 'coreboot' build, the files will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/ec.bin`.
+	// The Kconfig `CONFIG_EC_BIN_PATH` will be changed to point to the same path.
+	EcPath string `json:"ec_path" type:"blob"`
 }
 
-// commonGetOpts is used to fill corebootOpts with data from githubaction.Action
-func corebootGetOpts(getInputVar getValFunc, _ getValFunc) (corebootOpts, error) {
-	// 'allOpts' most importantly contains definitions of all possible (supported) blobs
-	allOpts := corebootOpts{
-		blobs: []blobDef{
-			{
-				// Payload
-				// docs: https://doc.coreboot.org/payloads.html
-				actionInput:         getInputVar("coreboot__payload_file_path"),
-				destinationFilename: "payload",
-				kconfigKey:          "CONFIG_PAYLOAD_FILE",
-				isDirectory:         false,
-			},
-			{
-				// Intel IFD (Intel Flash Descriptor)
-				// docs: https://doc.coreboot.org/util/ifdtool/layout.html
-				actionInput:         getInputVar("coreboot__intel_ifd_path"),
-				destinationFilename: "descriptor.bin",
-				kconfigKey:          "CONFIG_IFD_BIN_PATH",
-				isDirectory:         false,
-			},
-			{
-				// Intel ME (Intel Management Engine)
-				actionInput:         getInputVar("coreboot__intel_me_path"),
-				destinationFilename: "me.bin",
-				kconfigKey:          "CONFIG_ME_BIN_PATH",
-				isDirectory:         false,
-			},
-			{
-				// Intel GbE (Intel Gigabit Ethernet)
-				actionInput:         getInputVar("coreboot__intel_gbe_path"),
-				destinationFilename: "gbe.bin",
-				kconfigKey:          "CONFIG_GBE_BIN_PATH",
-				isDirectory:         false,
-			},
-			{
-				// Intel FSP binary (Intel Firmware Support Package)
-				actionInput:         getInputVar("coreboot__fsp_binary_path"),
-				destinationFilename: "Fsp.fd",
-				kconfigKey:          "CONFIG_FSP_FD_PATH",
-				isDirectory:         false,
-			},
-			{
-				// Intel FSP header (Intel Firmware Support Package)
-				actionInput:         getInputVar("coreboot__fsp_header_path"),
-				destinationFilename: "Include",
-				kconfigKey:          "CONFIG_FSP_HEADER_PATH",
-				isDirectory:         true,
-			},
-			{
-				// VBT (Video BIOS Table)
-				actionInput:         getInputVar("coreboot__vbt_path"),
-				destinationFilename: "vbt.bin",
-				kconfigKey:          "CONFIG_INTEL_GMA_VBT_FILE",
-				isDirectory:         false,
-			},
-			{
-				// EC (Embedded Controller)
-				actionInput:         getInputVar("coreboot__ec_path"),
-				destinationFilename: "ec.bin",
-				kconfigKey:          "CONFIG_EC_BIN_PATH",
-				isDirectory:         false,
-			},
+// CorebootOpts is used to store all data needed to build coreboot.
+type CorebootOpts struct {
+	// Uniq ID or name for this specific instance (used in 'Depends' list)
+	ID string `json:"id" validate:"required"`
+
+	// List of IDs this instance depends on
+	Depends []string `json:"depends"`
+
+	// Common options like paths etc.
+	Common CommonOpts `json:"common" validate:"required"`
+
+	// Coreboot specific options
+	Specific CorebootSpecific `json:"specific"`
+}
+
+// corebootProcessBlobs is used to fill figure out blobs from provided data.
+func corebootProcessBlobs(opts CorebootSpecific) ([]BlobDef, error) {
+	blobMap := map[string]BlobDef{
+		// Payload
+		// docs: https://doc.coreboot.org/payloads.html
+		"payload_file_path": {
+			DestinationFilename: "payload",
+			KconfigKey:          "CONFIG_PAYLOAD_FILE",
+			IsDirectory:         false,
+		},
+		// Intel IFD (Intel Flash Descriptor)
+		// docs: https://doc.coreboot.org/util/ifdtool/layout.html
+		"intel_ifd_path": {
+			DestinationFilename: "descriptor.bin",
+			KconfigKey:          "CONFIG_IFD_BIN_PATH",
+			IsDirectory:         false,
+		},
+		// Intel ME (Intel Management Engine)
+		"intel_me_path": {
+			DestinationFilename: "me.bin",
+			KconfigKey:          "CONFIG_ME_BIN_PATH",
+			IsDirectory:         false,
+		},
+		// Intel GbE (Intel Gigabit Ethernet)
+		"intel_gbe_path": {
+			DestinationFilename: "gbe.bin",
+			KconfigKey:          "CONFIG_GBE_BIN_PATH",
+			IsDirectory:         false,
+		},
+		// Intel FSP binary (Intel Firmware Support Package)
+		"fsp_binary_path": {
+			DestinationFilename: "Fsp.fd",
+			KconfigKey:          "CONFIG_FSP_FD_PATH",
+			IsDirectory:         false,
+		},
+		// Intel FSP header (Intel Firmware Support Package)
+		"fsp_header_path": {
+			DestinationFilename: "Include",
+			KconfigKey:          "CONFIG_FSP_HEADER_PATH",
+			IsDirectory:         true,
+		},
+		// VBT (Video BIOS Table)
+		"vbt_path": {
+			DestinationFilename: "vbt.bin",
+			KconfigKey:          "CONFIG_INTEL_GMA_VBT_FILE",
+			IsDirectory:         false,
+		},
+		// EC (Embedded Controller)
+		"ec_path": {
+			DestinationFilename: "ec.bin",
+			KconfigKey:          "CONFIG_EC_BIN_PATH",
+			IsDirectory:         false,
 		},
 	}
+	blobs := []BlobDef{}
 
-	// If any of blobs defined in 'allOpts' is passed into the action as input, append it to 'opts'
-	opts := corebootOpts{}
-	for blob := range allOpts.blobs {
-		if allOpts.blobs[blob].actionInput != "" {
-			opts.blobs = append(opts.blobs, allOpts.blobs[blob])
+	blob := reflect.ValueOf(opts)
+	for i := 0; i < blob.Type().NumField(); i++ {
+		t := blob.Type().Field(i)
+
+		jsonTag := t.Tag.Get("json")
+		jsonType := t.Tag.Get("type")
+		if jsonTag != "" && jsonType == "blob" {
+			newBlob := blobMap[jsonTag]
+			newBlob.Path = blob.Field(i).Interface().(string)
+			if newBlob.Path != "" {
+				blobs = append(blobs, newBlob)
+			}
 		}
 	}
-
-	return opts, nil
+	return blobs, nil
 }
 
-// coreboot builds coreboot with all blobs and stuff
-func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *corebootOpts, artifacts *[]container.Artifacts) error {
+// coreboot builds coreboot with all blobs and stuff.
+func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      common.sdkVersion,
-		MountContainerDir: common.containerWorkDir,
-		MountHostDir:      common.repoPath,
-		WorkdirContainer:  common.containerWorkDir,
+		ContainerURL:      opts.Common.SdkURL,
+		MountContainerDir: ContainerWorkDir,
+		MountHostDir:      opts.Common.RepoPath,
+		WorkdirContainer:  ContainerWorkDir,
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
@@ -125,15 +192,15 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(common.defconfigPath)
+	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 	myContainer = myContainer.WithFile(
-		filepath.Join(common.containerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, common.defconfigPath)),
+		filepath.Join(ContainerWorkDir, defconfigBasename),
+		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
 	)
 
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
@@ -162,23 +229,27 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 	// Firstly copy all the blobs into building container.
 	// Then use './util/scripts/config' script in coreboot repository to update configuration
 	//   options for said blobs (this must run inside container).
-	for blob := range opts.blobs {
+	blobs, err := corebootProcessBlobs(opts.Specific)
+	if err != nil {
+		return err
+	}
+	for blob := range blobs {
 		// Path to local file on host
 		src := filepath.Join(
 			pwd,
-			opts.blobs[blob].actionInput,
+			blobs[blob].Path,
 		)
 		// Path to file in container
 		dst := filepath.Join(
 			filepath.Join("3rdparty/blobs/mainboard", mainboardDir),
-			opts.blobs[blob].destinationFilename,
+			blobs[blob].DestinationFilename,
 		)
 
 		// Copy into container
 		if err = filesystem.CheckFileExists(src); !errors.Is(err, os.ErrExist) {
 			return err
 		}
-		if opts.blobs[blob].isDirectory {
+		if blobs[blob].IsDirectory {
 			// Directory
 			log.Printf("Copying directory '%s' to container at '%s'", src, dst)
 			myContainer = myContainer.WithExec([]string{"mkdir", "-p", dst})
@@ -202,7 +273,7 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 		buildSteps = append(
 			buildSteps,
 			// update coreboot config value related to blob to actual path of the blob
-			[]string{"./util/scripts/config", "--set-str", opts.blobs[blob].kconfigKey, dst},
+			[]string{"./util/scripts/config", "--set-str", blobs[blob].KconfigKey, dst},
 		)
 	}
 
@@ -226,7 +297,7 @@ func coreboot(ctx context.Context, client *dagger.Client, common *commonOpts, do
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("%s build failed: %w", common.target, err)
+			return fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
 

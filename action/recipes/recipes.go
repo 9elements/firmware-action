@@ -7,145 +7,91 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/url"
-	"path"
 	"path/filepath"
-	"strings"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
-	"github.com/sethvargo/go-githubactions"
 )
 
-var errRequiredOptionUndefined = errors.New("required option is undefined")
+// ErrRequiredOptionUndefined is raised when required option is empty or undefined
+var (
+	ErrRequiredOptionUndefined = errors.New("required option is undefined")
+	ErrTargetMissing           = errors.New("no target specified")
+	ErrTargetInvalid           = errors.New("unsupported target")
+)
 
-type getValFunc func(string) string
-
-// commonOpts is common to all targets
-// Used to store data from githubaction.Action
-// For details see action.yml
-type commonOpts struct {
-	target           string
-	sdkVersion       string
-	arch             string
-	repoPath         string
-	defconfigPath    string
-	containerWorkDir string
-	outputDir        string
-}
-
-// commonGetOpts is used to fill commonOpts with data from githubaction.Action
-func commonGetOpts(getInputVar getValFunc, getEnvVar getValFunc) (commonOpts, error) {
-	opts := commonOpts{
-		target:           getInputVar("target"),
-		sdkVersion:       getInputVar("sdk_version"),
-		arch:             getInputVar("architecture"),
-		repoPath:         getInputVar("repo_path"),
-		defconfigPath:    getInputVar("defconfig_path"),
-		containerWorkDir: getEnvVar("GITHUB_WORKSPACE"),
-		outputDir:        getInputVar("output"),
-	}
-
-	// Check if required options are not empty
-	missing := []string{}
-	requiredOptions := map[string]string{
-		"target":           opts.target,
-		"sdk_version":      opts.sdkVersion,
-		"repo_path":        opts.repoPath,
-		"defconfig_path":   opts.defconfigPath,
-		"containerWorkDir": opts.containerWorkDir,
-		"output":           opts.outputDir,
-	}
-	for key, val := range requiredOptions {
-		if val == "" {
-			missing = append(missing, key)
-		}
-	}
-	if len(missing) > 0 {
-		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
-	}
-
-	// Check if sdk_version is URL to a container in some container registry
-	//   (for example "docker.io/library/ubuntu:latest")
-	// If sdk_version is not a URL, assume it is a name of container and make it into URL
-	//   pointing to our container registry at "ghcr.io/9elements/firmware-action"
-	// WARNING:
-	//   For url.ParseRequestURI string "edk2-stable202105:main" is a valid URL (RFC 3986)
-	//     so checking err alone is not enough.
-	//   Valid URL should contain Fully Qualified Domain Name (FQDN) and so checking for empty
-	//     parsedUrl.Hostname seems to do the trick.
-	if parsedURL, err := url.ParseRequestURI(opts.sdkVersion); err != nil || parsedURL.Hostname() == "" {
-		// opts.sdkVersion is not URL
-		opts.sdkVersion = path.Join("ghcr.io/9elements/firmware-action", opts.sdkVersion)
-	}
-	return opts, nil
-}
+// ContainerWorkDir specifies directory in container used as work directory
+var ContainerWorkDir = "/workdir"
 
 // Execute recipe
-func Execute(ctx context.Context, client *dagger.Client, action *githubactions.Action) error {
-	common, err := commonGetOpts(action.GetInput, action.Getenv)
-	if err != nil {
-		return err
+func Execute(ctx context.Context, target string, client *dagger.Client) error {
+	common := CommonOpts{
+		SdkURL:        "https://ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		Arch:          "dummy",
+		RepoPath:      "dummy/dir/",
+		DefconfigPath: "dummy",
+		OutputDir:     "dummy/dir/",
 	}
 
-	switch common.target {
+	switch target {
 	case "coreboot":
-		opts, err := corebootGetOpts(action.GetInput, action.Getenv)
-		if err != nil {
-			return err
+		opts := CorebootOpts{
+			Common:   common,
+			Specific: CorebootSpecific{},
 		}
 		artifacts := []container.Artifacts{
 			{
-				ContainerPath: filepath.Join(common.containerWorkDir, "build", "coreboot.rom"),
+				ContainerPath: filepath.Join(ContainerWorkDir, "build", "coreboot.rom"),
 				ContainerDir:  false,
-				HostPath:      common.outputDir,
+				HostPath:      common.OutputDir,
 				HostDir:       true,
 			},
 			{
-				ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 				ContainerDir:  false,
-				HostPath:      common.outputDir,
+				HostPath:      common.OutputDir,
 				HostDir:       true,
 			},
 		}
-		return coreboot(ctx, client, &common, "", &opts, &artifacts)
+		return coreboot(ctx, client, &opts, "", &artifacts)
 	case "linux":
-		opts, err := linuxGetOpts(action.GetInput, action.Getenv)
-		if err != nil {
-			return err
+		opts := LinuxOpts{
+			Common:   common,
+			Specific: LinuxSpecific{},
 		}
 		artifacts := []container.Artifacts{
 			{
-				ContainerPath: filepath.Join(common.containerWorkDir, "vmlinux"),
+				ContainerPath: filepath.Join(ContainerWorkDir, "vmlinux"),
 				ContainerDir:  false,
-				HostPath:      common.outputDir,
+				HostPath:      common.OutputDir,
 				HostDir:       true,
 			},
 			{
-				ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 				ContainerDir:  false,
-				HostPath:      common.outputDir,
+				HostPath:      common.OutputDir,
 				HostDir:       true,
 			},
 		}
-		return linux(ctx, client, &common, "", &opts, &artifacts)
+		return linux(ctx, client, &opts, "", &artifacts)
 	case "edk2":
-		opts, err := edk2GetOpts(action.GetInput, action.Getenv)
-		if err != nil {
-			return err
+		opts := Edk2Opts{
+			Common:   common,
+			Specific: Edk2Specific{},
 		}
 		artifacts := []container.Artifacts{
 			{
-				ContainerPath: filepath.Join(common.containerWorkDir, "Build"),
+				ContainerPath: filepath.Join(ContainerWorkDir, "Build"),
 				ContainerDir:  true,
-				HostPath:      common.outputDir,
+				HostPath:      common.OutputDir,
 				HostDir:       true,
 			},
 		}
-		return edk2(ctx, client, &common, "", &opts, &artifacts)
+		return edk2(ctx, client, &opts, "", &artifacts)
 	case "":
-		return fmt.Errorf("no target specified")
+		return ErrTargetMissing
+		// return fmt.Errorf("no target specified")
 	default:
-		return fmt.Errorf("unsupported target: %s", common.target)
+		return fmt.Errorf("%w: %s", ErrTargetInvalid, target)
 	}
 }

@@ -14,8 +14,49 @@ import (
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestCorebootProcessBlobs(t *testing.T) {
+	testCases := []struct {
+		name            string
+		corebootOptions CorebootSpecific
+		expected        []BlobDef
+	}{
+		{
+			name:            "empty",
+			corebootOptions: CorebootSpecific{},
+			expected:        []BlobDef{},
+		},
+		{
+			name: "payload",
+			corebootOptions: CorebootSpecific{
+				PayloadFilePath: "dummy/path/to/payload.bin",
+			},
+			expected: []BlobDef{
+				{
+					Path:                "dummy/path/to/payload.bin",
+					DestinationFilename: "payload",
+					KconfigKey:          "CONFIG_PAYLOAD_FILE",
+					IsDirectory:         false,
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			output, err := corebootProcessBlobs(tc.corebootOptions)
+			assert.NoError(t, err)
+
+			equal := cmp.Equal(tc.expected, output)
+			if !equal {
+				fmt.Println(cmp.Diff(tc.expected, output))
+				assert.True(t, equal, "processing blob parameters failed")
+			}
+		})
+	}
+}
 
 func TestCoreboot(t *testing.T) {
 	// This test is really slow (like 100 seconds)
@@ -23,30 +64,34 @@ func TestCoreboot(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
+	common := CommonOpts{
+		Arch:          "x86",
+		DefconfigPath: "seabios_defconfig",
+		OutputDir:     "output",
+	}
+
 	testCases := []struct {
 		name            string
 		corebootVersion string
-		corebootOptions corebootOpts
+		corebootOptions CorebootOpts
 		cmds            [][]string
 		wantErr         error
 	}{
 		{
 			name:            "normal build for QEMU",
 			corebootVersion: "4.19",
-			corebootOptions: corebootOpts{},
-			wantErr:         nil,
+			corebootOptions: CorebootOpts{
+				Common: common,
+			},
+			wantErr: nil,
 		},
 		{
 			name:            "binary payload - file does not exists",
 			corebootVersion: "4.19",
-			corebootOptions: corebootOpts{
-				blobs: []blobDef{
-					{
-						actionInput:         "my_payload",
-						destinationFilename: "payload",
-						kconfigKey:          "CONFIG_PAYLOAD_FILE",
-						isDirectory:         false,
-					},
+			corebootOptions: CorebootOpts{
+				Common: common,
+				Specific: CorebootSpecific{
+					PayloadFilePath: "my_payload",
 				},
 			},
 			wantErr: os.ErrNotExist,
@@ -54,14 +99,10 @@ func TestCoreboot(t *testing.T) {
 		{
 			name:            "binary payload - file exists but empty",
 			corebootVersion: "4.19",
-			corebootOptions: corebootOpts{
-				blobs: []blobDef{
-					{
-						actionInput:         "intel_me.bin",
-						destinationFilename: "me.bin",
-						kconfigKey:          "CONFIG_ME_BIN_PATH",
-						isDirectory:         false,
-					},
+			corebootOptions: CorebootOpts{
+				Common: common,
+				Specific: CorebootSpecific{
+					IntelMePath: "intel_me.bin",
 				},
 			},
 			cmds: [][]string{
@@ -79,22 +120,8 @@ func TestCoreboot(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
-			opts := map[string]string{
-				"target":           "coreboot",
-				"sdk_version":      fmt.Sprintf("coreboot_%s:main", tc.corebootVersion),
-				"architecture":     "x86",
-				"repo_path":        filepath.Join(tmpDir, "coreboot"),
-				"defconfig_path":   "seabios_defconfig",
-				"containerWorkDir": "/coreboot",
-				"GITHUB_WORKSPACE": "/coreboot",
-				"output":           "output",
-			}
-			getFunc := func(key string) string {
-				return opts[key]
-			}
-			common, err := commonGetOpts(getFunc, getFunc)
-			assert.NoError(t, err)
-			corebootOpts := tc.corebootOptions
+			tc.corebootOptions.Common.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
+			tc.corebootOptions.Common.RepoPath = filepath.Join(tmpDir, "coreboot")
 
 			// Change current working directory
 			pwd, err := os.Getwd()
@@ -115,23 +142,23 @@ func TestCoreboot(t *testing.T) {
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			err = filesystem.CopyFile(
 				filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", tc.corebootVersion)),
-				filepath.Join(tmpDir, common.defconfigPath),
+				filepath.Join(tmpDir, tc.corebootOptions.Common.DefconfigPath),
 			)
 			assert.NoError(t, err)
 
 			// Artifacts
-			outputPath := filepath.Join(tmpDir, common.outputDir)
+			outputPath := filepath.Join(tmpDir, tc.corebootOptions.Common.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			artifacts := []container.Artifacts{
 				{
-					ContainerPath: filepath.Join(common.containerWorkDir, "build", "coreboot.rom"),
+					ContainerPath: filepath.Join(ContainerWorkDir, "build", "coreboot.rom"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
 					HostDir:       true,
 				},
 				{
-					ContainerPath: filepath.Join(common.containerWorkDir, "defconfig"),
+					ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 					ContainerDir:  false,
 					HostPath:      outputPath,
 					HostDir:       true,
@@ -144,7 +171,7 @@ func TestCoreboot(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			// Try to build coreboot
-			err = coreboot(ctx, client, &common, "", &corebootOpts, &artifacts)
+			err = coreboot(ctx, client, &tc.corebootOptions, "", &artifacts)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts

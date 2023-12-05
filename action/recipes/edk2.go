@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
@@ -16,54 +15,49 @@ import (
 
 var errUnknownArch = errors.New("unknown architecture")
 
-// Used to store data from githubaction.Action
-// For details see action.yml
-type edk2Opts struct {
-	platform    string
-	releaseType string
-	gccVersion  string
+// Edk2Specific is used to store data specific to coreboot.
+type Edk2Specific struct {
+	// Specifies the DSC to use when building EDK2
+	// Example: UefiPayloadPkg/UefiPayloadPkg.dsc
+	Platform string `json:"platform" validate:"required"`
+
+	// Specifies the build type to use when building EDK2
+	// Supported options: DEBUG, RELEASE
+	ReleaseType string `json:"release_type" validate:"required"`
 }
 
-// edk2GetOpts is used to fill edk2Opts with data from githubaction.Action
-func edk2GetOpts(getInputVar getValFunc, getEnvVar getValFunc) (edk2Opts, error) {
-	opts := edk2Opts{
-		platform:    getInputVar("edk2__platform"),
-		releaseType: getInputVar("edk2__release_type"),
-		gccVersion:  getEnvVar("USE_GCC_VERSION"),
-	}
+// Edk2Opts is used to store all data needed to build edk2.
+type Edk2Opts struct {
+	// Uniq ID or name for this specific instance (used in 'Depends' list)
+	// Example: "MyLittleEdk2"
+	ID string `json:"id" validate:"required"`
 
-	// Check if required options are not empty
-	missing := []string{}
-	requiredOptions := map[string]string{
-		"edk2__platform":     opts.platform,
-		"edk2__release_type": opts.releaseType,
-	}
-	for key, val := range requiredOptions {
-		if val == "" {
-			missing = append(missing, key)
-		}
-	}
-	if len(missing) > 0 {
-		return opts, fmt.Errorf("%w: %s", errRequiredOptionUndefined, strings.Join(missing, ", "))
-	}
+	// List of IDs this instance depends on
+	// Example: [ "MyLittleCoreboot", "MyLittleLinux"]
+	Depends []string `json:"depends"`
 
-	return opts, nil
+	// Common options like paths etc.
+	Common CommonOpts `json:"common" validate:"required"`
+
+	// Coreboot specific options
+	Specific Edk2Specific `json:"specific" validate:"required"`
 }
 
 // edk2 builds edk2
-func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, dockerfileDirectoryPath string, opts *edk2Opts, artifacts *[]container.Artifacts) error {
+func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	envVars := map[string]string{
-		"WORKSPACE":      common.containerWorkDir,
+		"WORKSPACE":      ContainerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",
 	}
 
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      common.sdkVersion,
-		MountContainerDir: common.containerWorkDir,
-		MountHostDir:      common.repoPath,
-		WorkdirContainer:  common.containerWorkDir,
+		ContainerURL:      opts.Common.SdkURL,
+		MountContainerDir: ContainerWorkDir,
+		MountHostDir:      opts.Common.RepoPath,
+		WorkdirContainer:  ContainerWorkDir,
 	}
+
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
 		return err
@@ -74,6 +68,12 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
 
+	// Get GCC version from environment variable
+	gccVersion, err := myContainer.EnvVariable(ctx, "USE_GCC_VERSION")
+	if err != nil {
+		return err
+	}
+
 	// Figure out target architectures
 	architectures := map[string]string{
 		"AARCH64": "-a AARCH64",
@@ -82,15 +82,15 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 		"IA32X64": "-a IA32 -a X64",
 		"X64":     "-a X64",
 	}
-	arch, ok := architectures[common.arch]
+	arch, ok := architectures[opts.Common.Arch]
 	if !ok {
-		return fmt.Errorf("%w: %s", errUnknownArch, common.arch)
+		return fmt.Errorf("%w: %s", errUnknownArch, opts.Common.Arch)
 	}
 
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.platform, opts.releaseType, opts.gccVersion)
-	defconfigFileArgs, err := os.ReadFile(common.defconfigPath)
+	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Specific.Platform, opts.Specific.ReleaseType, gccVersion)
+	defconfigFileArgs, err := os.ReadFile(opts.Common.DefconfigPath)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func edk2(ctx context.Context, client *dagger.Client, common *commonOpts, docker
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("%s build failed: %w", common.target, err)
+			return fmt.Errorf("edk2 build failed: %w", err)
 		}
 	}
 
