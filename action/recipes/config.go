@@ -29,7 +29,7 @@ type CommonOpts struct {
 	//   https://ghcr.io/9elements/firmware-action/coreboot_4.19:latest
 	//   https://ghcr.io/9elements/firmware-action/edk2-stable202111:latest
 	// See https://github.com/orgs/9elements/packages
-	SdkURL string `json:"sdk_url" validate:"required,url"`
+	SdkURL string `json:"sdk_url" validate:"required"`
 
 	// Specifies target architecture, such as 'x86' or 'arm64'. Currently unused for coreboot.
 	// Supported options for linux:
@@ -69,13 +69,13 @@ type CommonOpts struct {
 // Config is for storing parsed configuration file
 type Config struct {
 	// defined in coreboot.go
-	Coreboot []CorebootOpts `json:"coreboot" validate:"dive"`
+	Coreboot map[string]CorebootOpts `json:"coreboot" validate:"dive"`
 
 	// defined in linux.go
-	Linux []LinuxOpts `json:"linux" validate:"dive"`
+	Linux map[string]LinuxOpts `json:"linux" validate:"dive"`
 
 	// defined in edk2.go
-	Edk2 []Edk2Opts `json:"edk2" validate:"dive"`
+	Edk2 map[string]Edk2Opts `json:"edk2" validate:"dive"`
 }
 
 // ===========
@@ -96,30 +96,35 @@ func ValidateConfig(conf Config) error {
 }
 
 // ReadConfig is for reading and parsing JSON configuration file into Config struct
-func ReadConfig(filepath string) (*Config, error) {
+func ReadConfig(filepath string) (Config, error) {
 	// Read JSON file
 	content, err := os.ReadFile(filepath)
 	if err != nil {
 		log.Fatal("Error when opening file: ", err)
-		return nil, err
+		return Config{}, err
 	}
+
+	// Expand environment variables
+	contentStr := string(content)
+	contentStr = os.ExpandEnv(contentStr)
+	content = []byte(contentStr)
 
 	// Decode JSON
 	var payload Config
 	err = json.Unmarshal(content, &payload)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
-		return nil, err
+		return Config{}, err
 	}
 
 	// Validate config
 	err = ValidateConfig(payload)
 	if err != nil {
 		log.Fatal("Provided JSON configuration file failed validation")
-		return nil, err
+		return Config{}, err
 	}
 
-	return &payload, nil
+	return payload, nil
 }
 
 // WriteConfig is for writing Config struct into JSON configuration file

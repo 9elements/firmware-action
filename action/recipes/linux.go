@@ -26,10 +26,6 @@ type LinuxSpecific struct {
 
 // LinuxOpts is used to store all data needed to build linux
 type LinuxOpts struct {
-	// Uniq ID or name for this specific instance (used in 'Depends' list)
-	// Example: "MyLittleLinux"
-	ID string `json:"id"`
-
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
 	Depends []string `json:"depends"`

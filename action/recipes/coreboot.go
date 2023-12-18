@@ -91,9 +91,6 @@ type CorebootSpecific struct {
 
 // CorebootOpts is used to store all data needed to build coreboot.
 type CorebootOpts struct {
-	// Uniq ID or name for this specific instance (used in 'Depends' list)
-	ID string `json:"id" validate:"required"`
-
 	// List of IDs this instance depends on
 	Depends []string `json:"depends"`
 
