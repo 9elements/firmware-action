@@ -28,10 +28,6 @@ type Edk2Specific struct {
 
 // Edk2Opts is used to store all data needed to build edk2.
 type Edk2Opts struct {
-	// Uniq ID or name for this specific instance (used in 'Depends' list)
-	// Example: "MyLittleEdk2"
-	ID string `json:"id" validate:"required"`
-
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleLinux"]
 	Depends []string `json:"depends"`

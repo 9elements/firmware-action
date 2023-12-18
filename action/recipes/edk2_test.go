@@ -83,7 +83,7 @@ func TestEdk2(t *testing.T) {
 			defer os.Chdir(pwd) // nolint:errcheck
 
 			// Clone edk2 repo
-			fileInfo, err := os.Stat(tc.version)
+			_, err = os.Stat(tc.version)
 			if err != nil {
 				cmd := exec.Command("git", "clone", "--recurse-submodules", "--branch", tc.version, "--depth", "1", "https://github.com/tianocore/edk2.git", tc.version)
 				err = cmd.Run()
@@ -120,9 +120,9 @@ func TestEdk2(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Check artifacts
-			fileInfo, err = os.Stat(outputPath)
+			_, err = os.Stat(outputPath)
 			assert.NoError(t, err)
-			fileInfo, err = os.Stat(filepath.Join(outputPath, "Build"))
+			fileInfo, err := os.Stat(filepath.Join(outputPath, "Build"))
 			assert.NoError(t, err)
 			assert.True(t, fileInfo.IsDir())
 		})
