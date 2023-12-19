@@ -22,6 +22,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
       - name: Install Taskfile
         run: |
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
@@ -40,6 +44,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
       - name: Install Taskfile
         run: |
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
