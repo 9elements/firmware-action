@@ -32,6 +32,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
       - name: Clone coreboot repo
         run: |
           git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot
@@ -42,12 +46,11 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          target: coreboot
-          sdk_version: 'coreboot_${{ matrix.coreboot-version }}:main'
-          #architecture: x86	# default
-          repo_path: my_super_dooper_awesome_coreboot
-          defconfig_path: 'seabios_defconfig'
-          #output: "output"	# default
+          config: 'tests/example_config.json'
+          target: 'coreboot-example'
+          recursive: 'false'
+        env:
+          COREBOOT_VERSION: ${{ matrix.coreboot-version }}
       - name: Get artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -66,6 +69,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
       - name: Prepare linux kernel
         run: |
           # Download source files
@@ -86,12 +93,11 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          target: linux
-          sdk_version: 'linux_${{ matrix.linux-version }}:main'
-          #architecture: x86	# default
-          repo_path: 'linux-${{ matrix.linux-version }}'
-          defconfig_path: 'ci_defconfig'
-          #output: "output"	# default
+          config: 'tests/example_config.json'
+          target: 'linux-example'
+          recursive: 'false'
+        env:
+          LINUX_VERSION: ${{ matrix.linux-version }}
       - name: Get artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -110,24 +116,25 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: stable
       - name: Clone edk2 repo
         run: |
           git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2
       - name: Prepare file with build arguments
         run: |
-          echo "-t GCC5 -D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
+          echo "-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
       - name: firmware-action
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          target: edk2
-          sdk_version: '${{ matrix.edk2-version }}:main'
-          architecture: X64
-          repo_path: 'Edk2'
-          defconfig_path: 'edk2_config.cfg'
-          #output: "output"	# default
-          edk2__platform: 'UefiPayloadPkg/UefiPayloadPkg.dsc'
-          #edk2__release_type: DEBUG  # default
+          config: 'tests/example_config.json'
+          target: 'edk2-example'
+          recursive: 'false'
+        env:
+          EDK2_VERSION: ${{ matrix.edk2-version }}
       - name: Get artifacts
         uses: actions/upload-artifact@v3
         with:

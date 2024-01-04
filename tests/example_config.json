@@ -1,0 +1,55 @@
+{
+  "coreboot": {
+    "coreboot-example": {
+      "depends": null,
+      "common": {
+        "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
+        "arch": "",
+        "repo_path": "my_super_dooper_awesome_coreboot/",
+        "defconfig_path": "seabios_defconfig",
+        "output_dir": "output/"
+      },
+      "specific": {
+        "payload_file_path": "",
+        "intel_ifd_path": "",
+        "intel_me_path": "",
+        "intel_gbe_path": "",
+        "fsp_binary_path": "",
+        "fsp_header_path": "",
+        "vbt_path": "",
+        "ec_path": ""
+      }
+    }
+  },
+  "linux": {
+    "linux-example": {
+      "depends": null,
+      "common": {
+        "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
+        "arch": "x86_64",
+        "repo_path": "linux-${LINUX_VERSION}/",
+        "defconfig_path": "ci_defconfig",
+        "output_dir": "output/"
+      },
+      "specific": {
+        "gcc_version": ""
+      }
+    }
+  },
+  "edk2": {
+    "edk2-example": {
+      "depends": null,
+      "common": {
+        "sdk_url": "ghcr.io/9elements/firmware-action/${EDK2_VERSION}:main",
+        "arch": "X64",
+        "repo_path": "Edk2/",
+        "defconfig_path": "edk2_config.cfg",
+        "output_dir": "output/"
+      },
+      "specific": {
+        "platform": "UefiPayloadPkg/UefiPayloadPkg.dsc",
+        "release_type": "DEBUG"
+      }
+    }
+  }
+}
