@@ -44,7 +44,6 @@ func run(ctx context.Context) error {
 	log.Printf("Inputs:\nConfig:    %s\nTarget:    %s\nRecursive: %t\n", CLI.Config, CLI.Build.Target, CLI.Build.Recursive)
 
 	// Parse configuration file
-	// TODO: add validation
 	var myConfig recipes.Config
 	myConfig, err = recipes.ReadConfig(CLI.Config)
 	if err != nil {
