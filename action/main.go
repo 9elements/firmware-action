@@ -51,7 +51,8 @@ func run(ctx context.Context) error {
 	}
 
 	// Lets build stuff
-	return recipes.Build(ctx, CLI.Build.Target, CLI.Build.Recursive, myConfig)
+	_, err = recipes.Build(ctx, CLI.Build.Target, CLI.Build.Recursive, myConfig, recipes.Execute)
+	return err
 }
 
 func getInputsFromEnvironment() error {
