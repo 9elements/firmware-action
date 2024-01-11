@@ -1,0 +1,33 @@
+[book]
+authors = ["AtomicFS"]
+language = "en"
+multilingual = false
+src = "src"
+title = "firmware-action"
+description = "Build system for firmware images for several open source firmware solutions"
+
+[build]
+build-dir = "public"
+create-missing = false
+
+[output.html]
+mathjax-support = true
+no-section-label = true
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/9elements/firmware-action"
+git-repository-icon = "fa-git"
+# icons: https://fontawesome.com/v4/icons/
+additional-css = ["./mdbook-admonish.css"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[preprocessor.template]
+
+[preprocessor.admonish]
+after = ["template"]
+command = "mdbook-admonish"
+assets_version = "3.0.2" # do not edit: managed by `mdbook-admonish install`
+
