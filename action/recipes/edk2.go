@@ -16,6 +16,7 @@ import (
 var errUnknownArch = errors.New("unknown architecture")
 
 // Edk2Specific is used to store data specific to coreboot.
+// ANCHOR: Edk2Specific
 type Edk2Specific struct {
 	// Specifies the DSC to use when building EDK2
 	// Example: UefiPayloadPkg/UefiPayloadPkg.dsc
@@ -25,6 +26,7 @@ type Edk2Specific struct {
 	// Supported options: DEBUG, RELEASE
 	ReleaseType string `json:"release_type" validate:"required"`
 }
+// ANCHOR_END: Edk2Specific
 
 // Edk2Opts is used to store all data needed to build edk2.
 type Edk2Opts struct {

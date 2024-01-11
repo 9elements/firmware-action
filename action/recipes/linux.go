@@ -19,10 +19,12 @@ import (
 var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-compilation")
 
 // LinuxSpecific is used to store data specific to linux
+// ANCHOR: LinuxSpecific
 type LinuxSpecific struct {
 	// TODO: either use or remove
 	GccVersion string `json:"gcc_version"`
 }
+// ANCHOR_END: LinuxSpecific
 
 // LinuxOpts is used to store all data needed to build linux
 type LinuxOpts struct {

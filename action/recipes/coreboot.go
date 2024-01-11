@@ -36,6 +36,7 @@ type BlobDef struct {
 }
 
 // CorebootSpecific is used to store data specific to coreboot.
+// ANCHOR: CorebootSpecific
 type CorebootSpecific struct {
 	// ** List of supported blobs **
 	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
@@ -88,8 +89,10 @@ type CorebootSpecific struct {
 	// The Kconfig `CONFIG_EC_BIN_PATH` will be changed to point to the same path.
 	EcPath string `json:"ec_path" type:"blob"`
 }
+// ANCHOR_END: CorebootSpecific
 
 // CorebootOpts is used to store all data needed to build coreboot.
+// ANCHOR: CorebootOpts
 type CorebootOpts struct {
 	// List of IDs this instance depends on
 	Depends []string `json:"depends"`
@@ -100,6 +103,7 @@ type CorebootOpts struct {
 	// Coreboot specific options
 	Specific CorebootSpecific `json:"specific"`
 }
+// ANCHOR_END: CorebootOpts
 
 // corebootProcessBlobs is used to fill figure out blobs from provided data.
 func corebootProcessBlobs(opts CorebootSpecific) ([]BlobDef, error) {
