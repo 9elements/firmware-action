@@ -18,6 +18,7 @@ import (
 // CommonOpts is common to all targets
 // Used to store data from githubaction.Action
 // For details see action.yml
+// ANCHOR: CommonOpts
 type CommonOpts struct {
 	// Specifies the docker toolchain tag to use when building the image.
 	// This has an influence on the IASL, GCC and host GCC version that is used to build
@@ -54,6 +55,7 @@ type CommonOpts struct {
 	// Specifies the (relative) path to directory into which place the produced files.
 	OutputDir string `json:"output_dir" validate:"required,dirpath"`
 }
+// ANCHOR_END: CommonOpts
 
 // Config is for storing parsed configuration file
 type Config struct {
