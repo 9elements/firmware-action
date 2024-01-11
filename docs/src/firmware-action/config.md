@@ -118,7 +118,7 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 
 ### Specific / Coreboot
 ```go
-{{#include ../../../action/recipes/coreboot.go:CorebootSpecific}}
+{{#include ../../../action/recipes/coreboot.go:CorebootBlobs}}
 ```
 
 ### Specific / Linux
