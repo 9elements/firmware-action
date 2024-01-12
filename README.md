@@ -18,3 +18,5 @@ Motivation behind the creation is to unify building of firmware across developme
 
 Initially it was meant only as GitHub-specific action, but it should be universal thanks to [dagger](https://docs.dagger.io/).
 
+[Documentation is hosted in pages](https://9elements.github.io/firmware-action/).
+
