@@ -57,3 +57,15 @@ tasks:
       - ./bin/action-{{OS}}-amd64-{{.SEMVER}}
     env:
       INPUT_TARGET: coreboot
+
+  build-mdbook:
+    desc: Build mdBook
+    dir: docs
+    cmds:
+      - mdbook build
+
+  build-mdbook-watch:
+    desc: Build mdBook with watch
+    dir: docs
+    cmds:
+      - mdbook watch
