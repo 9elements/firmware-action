@@ -1,7 +1,7 @@
 ---
 version: '3'
 vars:
-  PROJECT: "daggerci"
+  PROJECT: 'daggerci'
 
 tasks:
   lint-pylint:
