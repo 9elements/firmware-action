@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD042 -->
 # Summary
 
 - [README.md](README.md)

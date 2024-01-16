@@ -21,7 +21,7 @@ jobs:
 To take advantage of matrix builds, it is possible to use environment variables inside the JSON configuration file.
 
 ```admonish example
-For example let's make `COREBOOT_VERSION` environment variable which will hold verion of coreboot.
+For example let's make `COREBOOT_VERSION` environment variable which will hold version of coreboot.
 
 JSON would look like this:
 ~~~json
