@@ -55,6 +55,7 @@ type CommonOpts struct {
 	// Specifies the (relative) path to directory into which place the produced files.
 	OutputDir string `json:"output_dir" validate:"required,dirpath"`
 }
+
 // ANCHOR_END: CommonOpts
 
 // Config is for storing parsed configuration file
@@ -111,7 +112,7 @@ func ReadConfig(filepath string) (Config, error) {
 	// Validate config
 	err = ValidateConfig(payload)
 	if err != nil {
-		log.Fatal("Provided JSON configuration file failed validation")
+		log.Print("Provided JSON configuration file failed validation")
 		return Config{}, err
 	}
 

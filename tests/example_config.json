@@ -38,8 +38,7 @@
       "repo_path": "Edk2/",
       "defconfig_path": "edk2_config.cfg",
       "output_dir": "output/",
-      "platform": "UefiPayloadPkg/UefiPayloadPkg.dsc",
-      "release_type": "DEBUG"
+      "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5"
     }
   }
 }
