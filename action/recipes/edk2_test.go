@@ -52,8 +52,7 @@ func TestEdk2(t *testing.T) {
 				CommonOpts:    common,
 				DefconfigPath: "defconfig",
 				Edk2Specific: Edk2Specific{
-					Platform:    "UefiPayloadPkg/UefiPayloadPkg.dsc",
-					ReleaseType: "DEBUG",
+					BuildCommand: "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
 				},
 			},
 			version:    "edk2-stable202105",

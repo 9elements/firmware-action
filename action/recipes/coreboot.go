@@ -89,6 +89,7 @@ type CorebootBlobs struct {
 	// The Kconfig `CONFIG_EC_BIN_PATH` will be changed to point to the same path.
 	EcPath string `json:"ec_path" type:"blob"`
 }
+
 // ANCHOR_END: CorebootBlobs
 
 // CorebootOpts is used to store all data needed to build coreboot.
@@ -106,6 +107,7 @@ type CorebootOpts struct {
 	// Coreboot specific options
 	Blobs CorebootBlobs `json:"blobs"`
 }
+
 // ANCHOR_END: CorebootOpts
 
 // corebootProcessBlobs is used to fill figure out blobs from provided data.

@@ -24,6 +24,7 @@ type LinuxSpecific struct {
 	// TODO: either use or remove
 	GccVersion string `json:"gcc_version"`
 }
+
 // ANCHOR_END: LinuxSpecific
 
 // LinuxOpts is used to store all data needed to build linux
