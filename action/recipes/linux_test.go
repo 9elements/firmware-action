@@ -37,6 +37,10 @@ func TestLinux(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
+	specific := LinuxSpecific{
+		DefconfigPath: "custom_defconfig",
+	}
+
 	testCases := []struct {
 		name         string
 		linuxVersion string
@@ -80,13 +84,13 @@ func TestLinux(t *testing.T) {
 			// Prepare options
 			tmpDir := t.TempDir()
 			commonOpts := CommonOpts{
-				SdkURL:        fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%s:main", linuxVersion.String()),
-				Arch:          tc.arch,
-				RepoPath:      filepath.Join(tmpDir, "linux"),
-				DefconfigPath: "custom_defconfig",
-				OutputDir:     "output",
+				SdkURL:    fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%s:main", linuxVersion.String()),
+				Arch:      tc.arch,
+				RepoPath:  filepath.Join(tmpDir, "linux"),
+				OutputDir: "output",
 			}
 			tc.linuxOptions.Common = commonOpts
+			tc.linuxOptions.Specific = specific
 
 			// Change current working directory
 			//   create __tmp_files__ directory to store source-code of Linux Kernel
@@ -125,7 +129,7 @@ func TestLinux(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Copy over defconfig file into tmpDir/linux
-			defconfigPath := filepath.Join(tc.linuxOptions.Common.RepoPath, tc.linuxOptions.Common.DefconfigPath)
+			defconfigPath := filepath.Join(tc.linuxOptions.Common.RepoPath, tc.linuxOptions.Specific.DefconfigPath)
 			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
 			assert.NoError(t, err)
 			//   common.RepoPath = path to end user repository (in this case somewhere in /tmp)

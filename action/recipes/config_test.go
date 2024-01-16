@@ -15,11 +15,13 @@ import (
 
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:          "dummy",
-		RepoPath:      "dummy/dir/",
+		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		Arch:      "dummy",
+		RepoPath:  "dummy/dir/",
+		OutputDir: "dummy/dir/",
+	}
+	specificDummy := CorebootSpecific{
 		DefconfigPath: "dummy",
-		OutputDir:     "dummy/dir/",
 	}
 
 	testCases := []struct {
@@ -54,7 +56,8 @@ func TestValidateConfig(t *testing.T) {
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
-						Common: commonDummy,
+						Common:   commonDummy,
+						Specific: specificDummy,
 					},
 				},
 			},
@@ -66,7 +69,7 @@ func TestValidateConfig(t *testing.T) {
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
 						Common:   commonDummy,
-						Specific: CorebootSpecific{},
+						Specific: specificDummy,
 					},
 				},
 			},
@@ -120,11 +123,10 @@ func TestConfigReadAndWrite(t *testing.T) {
 
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:          "dummy",
-		RepoPath:      "dummy/dir/",
-		DefconfigPath: "dummy",
-		OutputDir:     "dummy/dir/",
+		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		Arch:      "dummy",
+		RepoPath:  "dummy/dir/",
+		OutputDir: "dummy/dir/",
 	}
 
 	testCases := []struct {
@@ -188,11 +190,13 @@ func TestConfigEnvVars(t *testing.T) {
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
 						Common: CommonOpts{
-							SdkURL:        tc.url,
-							Arch:          "dummy",
-							RepoPath:      "dummy/dir/",
+							SdkURL:    tc.url,
+							Arch:      "dummy",
+							RepoPath:  "dummy/dir/",
+							OutputDir: "dummy/dir/",
+						},
+						Specific: CorebootSpecific{
 							DefconfigPath: "dummy",
-							OutputDir:     "dummy/dir/",
 						},
 					},
 				},

@@ -7,25 +7,59 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 )
 
-var errUnknownArch = errors.New("unknown architecture")
-
 // Edk2Specific is used to store data specific to coreboot.
-// ANCHOR: Edk2Specific
+/* TODO: removed because of issue #92
 type Edk2Specific struct {
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	// For EDK2 this is a one-line file containing the build arguments such as
+	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
+	//   Some arguments will be added automatically:
+	//     '-a <architecture>'
+	//     '-p <edk2__platform>'
+	//     '-b <edk2__release_type>'
+	//     '-t <GCC version>' (defined as part of docker toolchain, selected by SdkURL)
+	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
+
 	// Specifies the DSC to use when building EDK2
 	// Example: UefiPayloadPkg/UefiPayloadPkg.dsc
-	Platform string `json:"platform" validate:"required"`
+	Platform string `json:"platform" validate:"filepath"`
 
 	// Specifies the build type to use when building EDK2
 	// Supported options: DEBUG, RELEASE
 	ReleaseType string `json:"release_type" validate:"required"`
+
+	// Specifies which build command to use
+	// Examples:
+	//   "source ./edksetup.sh; build"
+	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"
+	//   "Intel/AlderLakeFspPkg/BuildFv.sh"
+	BuildCommand string `json:"build_command" validate:"required"`
 }
+*/
+// ANCHOR: Edk2Specific
+// Edk2Specific is used to store data specific to coreboot.
+type Edk2Specific struct {
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	// For EDK2 this is a one-line file containing the build arguments such as
+	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
+	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
+
+	// Specifies which build command to use
+	// GCC version is exposed in the docker container as USE_GCC_VERSION environment variable
+	// Examples:
+	//   "source ./edksetup.sh; build -t GCC5 -a IA32 -p UefiPayloadPkg/UefiPayloadPkg.dsc"
+	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"
+	//   "Intel/AlderLakeFspPkg/BuildFv.sh"
+	BuildCommand string `json:"build_command" validate:"required"`
+}
+
 // ANCHOR_END: Edk2Specific
 
 // Edk2Opts is used to store all data needed to build edk2.
@@ -67,12 +101,15 @@ func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfile
 	}
 
 	// Get GCC version from environment variable
+	/* TODO: removed because of issue #92
 	gccVersion, err := myContainer.EnvVariable(ctx, "USE_GCC_VERSION")
 	if err != nil {
 		return err
 	}
+	*/
 
 	// Figure out target architectures
+	/* TODO: removed because of issue #92
 	architectures := map[string]string{
 		"AARCH64": "-a AARCH64",
 		"ARM":     "-a ARM",
@@ -84,18 +121,28 @@ func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfile
 	if !ok {
 		return fmt.Errorf("%w: %s", errUnknownArch, opts.Common.Arch)
 	}
+	*/
 
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Specific.Platform, opts.Specific.ReleaseType, gccVersion)
-	defconfigFileArgs, err := os.ReadFile(opts.Common.DefconfigPath)
-	if err != nil {
-		return err
+	// TODO: removed because of issue #92
+	// buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Specific.Platform, opts.Specific.ReleaseType, gccVersion)
+	var defconfigFileArgs []byte
+	if opts.Specific.DefconfigPath != "" {
+		if _, err := os.Stat(opts.Specific.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
+			defconfigFileArgs, err = os.ReadFile(opts.Specific.DefconfigPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			log.Printf("Failed to read file '%s' as defconfig_path: file does not exist", opts.Specific.DefconfigPath)
+		}
 	}
 
 	// Assemble commands to build
 	buildSteps := [][]string{
-		{"bash", "-c", fmt.Sprintf("source ./edksetup.sh; build %s %s", buildArgs, string(defconfigFileArgs))},
+		//{"bash", "-c", fmt.Sprintf("source ./edksetup.sh; build %s %s", buildArgs, string(defconfigFileArgs))},
+		{"bash", "-c", fmt.Sprintf("%s %s", opts.Specific.BuildCommand, string(defconfigFileArgs))},
 	}
 
 	// Build

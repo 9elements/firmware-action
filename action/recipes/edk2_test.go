@@ -34,10 +34,9 @@ func TestEdk2(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
-		Arch:          "X64",
-		DefconfigPath: "defconfig",
-		OutputDir:     "output",
+		SdkURL:    "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
+		Arch:      "X64",
+		OutputDir: "output",
 	}
 
 	testCases := []struct {
@@ -52,8 +51,8 @@ func TestEdk2(t *testing.T) {
 			edk2Options: Edk2Opts{
 				Common: common,
 				Specific: Edk2Specific{
-					Platform:    "UefiPayloadPkg/UefiPayloadPkg.dsc",
-					ReleaseType: "DEBUG",
+					DefconfigPath: "defconfig",
+					BuildCommand:  "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
 				},
 			},
 			version:    "edk2-stable202105",
@@ -99,7 +98,7 @@ func TestEdk2(t *testing.T) {
 			defer os.Chdir(pwd) // nolint:errcheck
 
 			// Create "defconfig_path" file
-			err = os.WriteFile(tc.edk2Options.Common.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
+			err = os.WriteFile(tc.edk2Options.Specific.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
 			assert.NoError(t, err)
 
 			// Artifacts

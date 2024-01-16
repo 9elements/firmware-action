@@ -6,10 +6,10 @@
         "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
         "arch": "",
         "repo_path": "my_super_dooper_awesome_coreboot/",
-        "defconfig_path": "seabios_defconfig",
         "output_dir": "output-coreboot/"
       },
       "specific": {
+        "defconfig_path": "seabios_defconfig",
         "payload_file_path": "",
         "intel_ifd_path": "",
         "intel_me_path": "",
@@ -28,10 +28,10 @@
         "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
         "arch": "x86_64",
         "repo_path": "linux-${LINUX_VERSION}/",
-        "defconfig_path": "ci_defconfig",
         "output_dir": "output-linux/"
       },
       "specific": {
+        "defconfig_path": "ci_defconfig",
         "gcc_version": ""
       }
     }
@@ -43,12 +43,11 @@
         "sdk_url": "ghcr.io/9elements/firmware-action/${EDK2_VERSION}:main",
         "arch": "X64",
         "repo_path": "Edk2/",
-        "defconfig_path": "edk2_config.cfg",
         "output_dir": "output-edk2/"
       },
       "specific": {
-        "platform": "UefiPayloadPkg/UefiPayloadPkg.dsc",
-        "release_type": "DEBUG"
+        "defconfig_path": "edk2_config.cfg",
+        "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5"
       }
     }
   }

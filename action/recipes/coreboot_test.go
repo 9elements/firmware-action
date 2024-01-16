@@ -65,9 +65,8 @@ func TestCoreboot(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		Arch:          "x86",
-		DefconfigPath: "seabios_defconfig",
-		OutputDir:     "output",
+		Arch:      "x86",
+		OutputDir: "output",
 	}
 
 	testCases := []struct {
@@ -82,6 +81,9 @@ func TestCoreboot(t *testing.T) {
 			corebootVersion: "4.19",
 			corebootOptions: CorebootOpts{
 				Common: common,
+				Specific: CorebootSpecific{
+					DefconfigPath: "seabios_defconfig",
+				},
 			},
 			wantErr: nil,
 		},
@@ -91,6 +93,7 @@ func TestCoreboot(t *testing.T) {
 			corebootOptions: CorebootOpts{
 				Common: common,
 				Specific: CorebootSpecific{
+					DefconfigPath:   "seabios_defconfig",
 					PayloadFilePath: "my_payload",
 				},
 			},
@@ -102,7 +105,8 @@ func TestCoreboot(t *testing.T) {
 			corebootOptions: CorebootOpts{
 				Common: common,
 				Specific: CorebootSpecific{
-					IntelMePath: "intel_me.bin",
+					DefconfigPath: "seabios_defconfig",
+					IntelMePath:   "intel_me.bin",
 				},
 			},
 			cmds: [][]string{
@@ -142,7 +146,7 @@ func TestCoreboot(t *testing.T) {
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			err = filesystem.CopyFile(
 				filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", tc.corebootVersion)),
-				filepath.Join(tmpDir, tc.corebootOptions.Common.DefconfigPath),
+				filepath.Join(tmpDir, tc.corebootOptions.Specific.DefconfigPath),
 			)
 			assert.NoError(t, err)
 

@@ -38,6 +38,9 @@ type BlobDef struct {
 // CorebootSpecific is used to store data specific to coreboot.
 // ANCHOR: CorebootSpecific
 type CorebootSpecific struct {
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
+
 	// ** List of supported blobs **
 	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
 	//
@@ -89,6 +92,7 @@ type CorebootSpecific struct {
 	// The Kconfig `CONFIG_EC_BIN_PATH` will be changed to point to the same path.
 	EcPath string `json:"ec_path" type:"blob"`
 }
+
 // ANCHOR_END: CorebootSpecific
 
 // CorebootOpts is used to store all data needed to build coreboot.
@@ -103,6 +107,7 @@ type CorebootOpts struct {
 	// Coreboot specific options
 	Specific CorebootSpecific `json:"specific"`
 }
+
 // ANCHOR_END: CorebootOpts
 
 // corebootProcessBlobs is used to fill figure out blobs from provided data.
@@ -193,7 +198,7 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
+	defconfigBasename := filepath.Base(opts.Specific.DefconfigPath)
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -201,7 +206,7 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
+		client.Host().File(filepath.Join(pwd, opts.Specific.DefconfigPath)),
 	)
 
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig

@@ -21,9 +21,13 @@ var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-comp
 // LinuxSpecific is used to store data specific to linux
 // ANCHOR: LinuxSpecific
 type LinuxSpecific struct {
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
+
 	// TODO: either use or remove
 	GccVersion string `json:"gcc_version"`
 }
+
 // ANCHOR_END: LinuxSpecific
 
 // LinuxOpts is used to store all data needed to build linux
@@ -56,7 +60,7 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
+	defconfigBasename := filepath.Base(opts.Specific.DefconfigPath)
 	if strings.Contains(defconfigBasename, ".defconfig") {
 		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
 		// contains '.defconfig' string ...
@@ -77,7 +81,7 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
+		client.Host().File(filepath.Join(pwd, opts.Specific.DefconfigPath)),
 	)
 
 	// Setup environment variables in the container
