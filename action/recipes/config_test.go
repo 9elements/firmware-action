@@ -15,11 +15,10 @@ import (
 
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:          "dummy",
-		RepoPath:      "dummy/dir/",
-		DefconfigPath: "dummy",
-		OutputDir:     "dummy/dir/",
+		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		Arch:      "dummy",
+		RepoPath:  "dummy/dir/",
+		OutputDir: "dummy/dir/",
 	}
 
 	testCases := []struct {
@@ -54,7 +53,8 @@ func TestValidateConfig(t *testing.T) {
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
-						Common: commonDummy,
+						CommonOpts:    commonDummy,
+						DefconfigPath: "dummy",
 					},
 				},
 			},
@@ -65,8 +65,9 @@ func TestValidateConfig(t *testing.T) {
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
-						Common:   commonDummy,
-						Specific: CorebootSpecific{},
+						CommonOpts:    commonDummy,
+						DefconfigPath: "dummy",
+						Blobs:         CorebootBlobs{},
 					},
 				},
 			},
@@ -77,8 +78,9 @@ func TestValidateConfig(t *testing.T) {
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
-						Common:   CommonOpts{},
-						Specific: CorebootSpecific{},
+						CommonOpts:    CommonOpts{},
+						DefconfigPath: "dummy",
+						Blobs:         CorebootBlobs{},
 					},
 				},
 			},
@@ -120,11 +122,10 @@ func TestConfigReadAndWrite(t *testing.T) {
 
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:          "dummy",
-		RepoPath:      "dummy/dir/",
-		DefconfigPath: "dummy",
-		OutputDir:     "dummy/dir/",
+		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		Arch:      "dummy",
+		RepoPath:  "dummy/dir/",
+		OutputDir: "dummy/dir/",
 	}
 
 	testCases := []struct {
@@ -187,13 +188,13 @@ func TestConfigEnvVars(t *testing.T) {
 			opts := Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
-						Common: CommonOpts{
-							SdkURL:        tc.url,
-							Arch:          "dummy",
-							RepoPath:      "dummy/dir/",
-							DefconfigPath: "dummy",
-							OutputDir:     "dummy/dir/",
+						CommonOpts: CommonOpts{
+							SdkURL:    tc.url,
+							Arch:      "dummy",
+							RepoPath:  "dummy/dir/",
+							OutputDir: "dummy/dir/",
 						},
+						DefconfigPath: "dummy",
 					},
 				},
 			}
@@ -216,8 +217,8 @@ func TestConfigEnvVars(t *testing.T) {
 
 			// err = ValidateConfig(optsConverted)
 			assert.ErrorIs(t, err, tc.wantErr)
-			assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].Common.SdkURL)
-			assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].Common.RepoPath)
+			assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].SdkURL)
+			assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].RepoPath)
 		})
 	}
 }

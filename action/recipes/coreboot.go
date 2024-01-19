@@ -35,8 +35,8 @@ type BlobDef struct {
 	IsDirectory bool `validate:"required,boolean"`
 }
 
-// CorebootSpecific is used to store data specific to coreboot.
-type CorebootSpecific struct {
+// CorebootBlobs is used to store data specific to coreboot.
+type CorebootBlobs struct {
 	// ** List of supported blobs **
 	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
 	//
@@ -95,14 +95,17 @@ type CorebootOpts struct {
 	Depends []string `json:"depends"`
 
 	// Common options like paths etc.
-	Common CommonOpts `json:"common" validate:"required"`
+	CommonOpts
+
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
 
 	// Coreboot specific options
-	Specific CorebootSpecific `json:"specific"`
+	Blobs CorebootBlobs `json:"blobs"`
 }
 
 // corebootProcessBlobs is used to fill figure out blobs from provided data.
-func corebootProcessBlobs(opts CorebootSpecific) ([]BlobDef, error) {
+func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	blobMap := map[string]BlobDef{
 		// Payload
 		// docs: https://doc.coreboot.org/payloads.html
@@ -178,9 +181,9 @@ func corebootProcessBlobs(opts CorebootSpecific) ([]BlobDef, error) {
 func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      opts.Common.SdkURL,
+		ContainerURL:      opts.SdkURL,
 		MountContainerDir: ContainerWorkDir,
-		MountHostDir:      opts.Common.RepoPath,
+		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
@@ -189,7 +192,7 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
+	defconfigBasename := filepath.Base(opts.DefconfigPath)
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -197,7 +200,7 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
+		client.Host().File(filepath.Join(pwd, opts.DefconfigPath)),
 	)
 
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
@@ -226,7 +229,7 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 	// Firstly copy all the blobs into building container.
 	// Then use './util/scripts/config' script in coreboot repository to update configuration
 	//   options for said blobs (this must run inside container).
-	blobs, err := corebootProcessBlobs(opts.Specific)
+	blobs, err := corebootProcessBlobs(opts.Blobs)
 	if err != nil {
 		return err
 	}

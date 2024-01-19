@@ -34,10 +34,9 @@ func TestEdk2(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		SdkURL:        "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
-		Arch:          "X64",
-		DefconfigPath: "defconfig",
-		OutputDir:     "output",
+		SdkURL:    "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
+		Arch:      "X64",
+		OutputDir: "output",
 	}
 
 	testCases := []struct {
@@ -50,8 +49,9 @@ func TestEdk2(t *testing.T) {
 		{
 			name: "normal build",
 			edk2Options: Edk2Opts{
-				Common: common,
-				Specific: Edk2Specific{
+				CommonOpts:    common,
+				DefconfigPath: "defconfig",
+				Edk2Specific: Edk2Specific{
 					Platform:    "UefiPayloadPkg/UefiPayloadPkg.dsc",
 					ReleaseType: "DEBUG",
 				},
@@ -70,7 +70,7 @@ func TestEdk2(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
-			tc.edk2Options.Common.RepoPath = filepath.Join(tmpDir, "Edk2")
+			tc.edk2Options.RepoPath = filepath.Join(tmpDir, "Edk2")
 
 			// Change current working directory
 			//   create __tmp_files__ directory to store source-code
@@ -99,11 +99,11 @@ func TestEdk2(t *testing.T) {
 			defer os.Chdir(pwd) // nolint:errcheck
 
 			// Create "defconfig_path" file
-			err = os.WriteFile(tc.edk2Options.Common.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
+			err = os.WriteFile(tc.edk2Options.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
 			assert.NoError(t, err)
 
 			// Artifacts
-			outputPath := filepath.Join(tmpDir, tc.edk2Options.Common.OutputDir)
+			outputPath := filepath.Join(tmpDir, tc.edk2Options.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			artifacts := []container.Artifacts{
