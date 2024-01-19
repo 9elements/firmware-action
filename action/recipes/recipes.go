@@ -159,13 +159,13 @@ func Execute(ctx context.Context, target string, config Config) error {
 			{
 				ContainerPath: filepath.Join(ContainerWorkDir, "build", "coreboot.rom"),
 				ContainerDir:  false,
-				HostPath:      config.Coreboot[target].Common.OutputDir,
+				HostPath:      config.Coreboot[target].OutputDir,
 				HostDir:       true,
 			},
 			{
 				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 				ContainerDir:  false,
-				HostPath:      config.Coreboot[target].Common.OutputDir,
+				HostPath:      config.Coreboot[target].OutputDir,
 				HostDir:       true,
 			},
 		}
@@ -177,13 +177,13 @@ func Execute(ctx context.Context, target string, config Config) error {
 			{
 				ContainerPath: filepath.Join(ContainerWorkDir, "vmlinux"),
 				ContainerDir:  false,
-				HostPath:      config.Linux[target].Common.OutputDir,
+				HostPath:      config.Linux[target].OutputDir,
 				HostDir:       true,
 			},
 			{
 				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
 				ContainerDir:  false,
-				HostPath:      config.Linux[target].Common.OutputDir,
+				HostPath:      config.Linux[target].OutputDir,
 				HostDir:       true,
 			},
 		}
@@ -195,7 +195,7 @@ func Execute(ctx context.Context, target string, config Config) error {
 			{
 				ContainerPath: filepath.Join(ContainerWorkDir, "Build"),
 				ContainerDir:  true,
-				HostPath:      config.Edk2[target].Common.OutputDir,
+				HostPath:      config.Edk2[target].OutputDir,
 				HostDir:       true,
 			},
 		}

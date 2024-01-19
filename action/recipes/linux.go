@@ -31,10 +31,13 @@ type LinuxOpts struct {
 	Depends []string `json:"depends"`
 
 	// Common options like paths etc.
-	Common CommonOpts `json:"common"`
+	CommonOpts
+
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
 
 	// Coreboot specific options
-	Specific LinuxSpecific `json:"specific"`
+	LinuxSpecific
 }
 
 // linux builds linux kernel
@@ -43,9 +46,9 @@ type LinuxOpts struct {
 func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      opts.Common.SdkURL,
+		ContainerURL:      opts.SdkURL,
 		MountContainerDir: ContainerWorkDir,
-		MountHostDir:      opts.Common.RepoPath,
+		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
@@ -54,7 +57,7 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 	}
 
 	// Copy over the defconfig file
-	defconfigBasename := filepath.Base(opts.Common.DefconfigPath)
+	defconfigBasename := filepath.Base(opts.DefconfigPath)
 	if strings.Contains(defconfigBasename, ".defconfig") {
 		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
 		// contains '.defconfig' string ...
@@ -75,7 +78,7 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
-		client.Host().File(filepath.Join(pwd, opts.Common.DefconfigPath)),
+		client.Host().File(filepath.Join(pwd, opts.DefconfigPath)),
 	)
 
 	// Setup environment variables in the container
@@ -87,10 +90,10 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 		"arm64":  "aarch64-linux-gnu-",
 	}
 	envVars := map[string]string{
-		"ARCH": opts.Common.Arch,
+		"ARCH": opts.Arch,
 	}
 
-	val, ok := crossCompile[opts.Common.Arch]
+	val, ok := crossCompile[opts.Arch]
 	if !ok {
 		return errUnknownArchCrossCompile
 	}
@@ -111,7 +114,7 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 		// x86_64 reuses x86
 		{"ln", "--symbolic", "--relative", "arch/x86", "arch/x86_64"},
 		// the symlink simplifies this command
-		{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", opts.Common.Arch, defconfigBasename)},
+		{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", opts.Arch, defconfigBasename)},
 		// generate dotconfig from defconfig
 		{"make", defconfigBasename},
 		// compile

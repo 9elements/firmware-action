@@ -33,10 +33,20 @@ type Edk2Opts struct {
 	Depends []string `json:"depends"`
 
 	// Common options like paths etc.
-	Common CommonOpts `json:"common" validate:"required"`
+	CommonOpts
+
+	// Gives the (relative) path to the defconfig that should be used to build the target.
+	// For EDK2 this is a one-line file containing the build arguments such as
+	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
+	//   Some arguments will be added automatically:
+	//     '-a <architecture>'
+	//     '-p <edk2__platform>'
+	//     '-b <edk2__release_type>'
+	//     '-t <GCC version>' (defined as part of docker toolchain, selected by SdkURL)
+	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
 
 	// Coreboot specific options
-	Specific Edk2Specific `json:"specific" validate:"required"`
+	Edk2Specific `validate:"required"`
 }
 
 // edk2 builds edk2
@@ -48,9 +58,9 @@ func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfile
 
 	// Spin up container
 	containerOpts := container.SetupOpts{
-		ContainerURL:      opts.Common.SdkURL,
+		ContainerURL:      opts.SdkURL,
 		MountContainerDir: ContainerWorkDir,
-		MountHostDir:      opts.Common.RepoPath,
+		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
 	}
 
@@ -78,15 +88,15 @@ func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfile
 		"IA32X64": "-a IA32 -a X64",
 		"X64":     "-a X64",
 	}
-	arch, ok := architectures[opts.Common.Arch]
+	arch, ok := architectures[opts.Arch]
 	if !ok {
-		return fmt.Errorf("%w: %s", errUnknownArch, opts.Common.Arch)
+		return fmt.Errorf("%w: %s", errUnknownArch, opts.Arch)
 	}
 
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Specific.Platform, opts.Specific.ReleaseType, gccVersion)
-	defconfigFileArgs, err := os.ReadFile(opts.Common.DefconfigPath)
+	buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Platform, opts.ReleaseType, gccVersion)
+	defconfigFileArgs, err := os.ReadFile(opts.DefconfigPath)
 	if err != nil {
 		return err
 	}

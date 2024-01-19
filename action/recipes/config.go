@@ -51,17 +51,6 @@ type CommonOpts struct {
 	//   had been previously checked out.
 	RepoPath string `json:"repo_path" validate:"required,dirpath"`
 
-	// Gives the (relative) path to the defconfig that should be used to build the target.
-	// For coreboot and linux this is a defconfig.
-	// For EDK2 this is a one-line file containing the build arguments such as
-	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
-	//   Some arguments will be added automatically:
-	//     '-a <architecture>'
-	//     '-p <edk2__platform>'
-	//     '-b <edk2__release_type>'
-	//     '-t <GCC version>' (defined as part of docker toolchain, selected by SdkURL)
-	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
-
 	// Specifies the (relative) path to directory into which place the produced files.
 	OutputDir string `json:"output_dir" validate:"required,dirpath"`
 }

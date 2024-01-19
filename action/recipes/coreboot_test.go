@@ -21,17 +21,17 @@ import (
 func TestCorebootProcessBlobs(t *testing.T) {
 	testCases := []struct {
 		name            string
-		corebootOptions CorebootSpecific
+		corebootOptions CorebootBlobs
 		expected        []BlobDef
 	}{
 		{
 			name:            "empty",
-			corebootOptions: CorebootSpecific{},
+			corebootOptions: CorebootBlobs{},
 			expected:        []BlobDef{},
 		},
 		{
 			name: "payload",
-			corebootOptions: CorebootSpecific{
+			corebootOptions: CorebootBlobs{
 				PayloadFilePath: "dummy/path/to/payload.bin",
 			},
 			expected: []BlobDef{
@@ -65,9 +65,8 @@ func TestCoreboot(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		Arch:          "x86",
-		DefconfigPath: "seabios_defconfig",
-		OutputDir:     "output",
+		Arch:      "x86",
+		OutputDir: "output",
 	}
 
 	testCases := []struct {
@@ -81,7 +80,8 @@ func TestCoreboot(t *testing.T) {
 			name:            "normal build for QEMU",
 			corebootVersion: "4.19",
 			corebootOptions: CorebootOpts{
-				Common: common,
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
 			},
 			wantErr: nil,
 		},
@@ -89,8 +89,9 @@ func TestCoreboot(t *testing.T) {
 			name:            "binary payload - file does not exists",
 			corebootVersion: "4.19",
 			corebootOptions: CorebootOpts{
-				Common: common,
-				Specific: CorebootSpecific{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+				Blobs: CorebootBlobs{
 					PayloadFilePath: "my_payload",
 				},
 			},
@@ -100,8 +101,9 @@ func TestCoreboot(t *testing.T) {
 			name:            "binary payload - file exists but empty",
 			corebootVersion: "4.19",
 			corebootOptions: CorebootOpts{
-				Common: common,
-				Specific: CorebootSpecific{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+				Blobs: CorebootBlobs{
 					IntelMePath: "intel_me.bin",
 				},
 			},
@@ -120,8 +122,8 @@ func TestCoreboot(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
-			tc.corebootOptions.Common.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
-			tc.corebootOptions.Common.RepoPath = filepath.Join(tmpDir, "coreboot")
+			tc.corebootOptions.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
+			tc.corebootOptions.RepoPath = filepath.Join(tmpDir, "coreboot")
 
 			// Change current working directory
 			pwd, err := os.Getwd()
@@ -138,16 +140,16 @@ func TestCoreboot(t *testing.T) {
 			// Copy over defconfig file into tmpDir
 			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
 			assert.NoError(t, err)
-			//   common.repoPath = path to end user repository (in this case somewhere in /tmp)
+			//   repoPath = path to end user repository (in this case somewhere in /tmp)
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			err = filesystem.CopyFile(
 				filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", tc.corebootVersion)),
-				filepath.Join(tmpDir, tc.corebootOptions.Common.DefconfigPath),
+				filepath.Join(tmpDir, tc.corebootOptions.DefconfigPath),
 			)
 			assert.NoError(t, err)
 
 			// Artifacts
-			outputPath := filepath.Join(tmpDir, tc.corebootOptions.Common.OutputDir)
+			outputPath := filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			artifacts := []container.Artifacts{
