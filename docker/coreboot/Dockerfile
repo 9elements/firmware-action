@@ -56,9 +56,8 @@ FROM base AS toolchain
 
 # Compile coreboot toolchain
 WORKDIR $TOOLSDIR
-RUN git clone "https://review.coreboot.org/coreboot.git"
+RUN git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${COREBOOT_VERSION}"
 WORKDIR $TOOLSDIR/coreboot
-RUN git checkout "${COREBOOT_VERSION}"
 RUN make crossgcc-aarch64 CPUS="$(nproc)" && \
     make crossgcc-arm CPUS="$(nproc)" && \
     make crossgcc-i386 CPUS="$(nproc)" && \

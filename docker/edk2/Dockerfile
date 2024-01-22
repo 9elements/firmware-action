@@ -80,14 +80,22 @@ RUN apt-get update && \
 ARG INTERMEDIATE_IMAGE
 FROM ${INTERMEDIATE_IMAGE} AS toolchain
 
+# workaround to get shallow clone of specific commit
+#   https://stackoverflow.com/questions/31278902/how-to-shallow-clone-a-specific-commit-with-depth-1/43136160#43136160
 WORKDIR $TOOLSDIR
-RUN git clone --recurse-submodules https://github.com/tianocore/edk2-platforms.git Edk2Platforms && \
+RUN mkdir Edk2Platforms && \
     cd Edk2Platforms && \
-    git checkout "${EDK2_PLATFORM_COMMIT}"
-RUN git clone --recurse-submodules https://github.com/tianocore/edk2-non-osi.git Edk2NonOsi && \
+    git init && \
+    git remote add origin https://github.com/tianocore/edk2-platforms.git && \
+    git fetch --depth 1 origin "${EDK2_PLATFORM_COMMIT}" && \
+    git submodule update --init --recursive
+RUN mkdir Edk2NonOsi && \
     cd Edk2NonOsi && \
-    git checkout "${EDK2_NON_OSI_COMMIT}"
-RUN git clone --recurse-submodules https://github.com/tianocore/edk2.git --depth 2 --branch "${EDK2_VERSION}" Edk2 && \
+    git init && \
+    git remote add origin https://github.com/tianocore/edk2-non-osi.git && \
+    git fetch --depth 1 origin "${EDK2_NON_OSI_COMMIT}" && \
+    git submodule update --init --recursive
+RUN git clone --depth 1 --recurse-submodules https://github.com/tianocore/edk2.git --depth 1 --branch "${EDK2_VERSION}" Edk2 && \
     cd Edk2 && \
     make -C BaseTools/ -j "$(nproc)"
 
