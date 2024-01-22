@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 // Package main implements the core logic of running composable Dagger pipelines
+// Documentation [is hosted in GitHub pages](https://9elements.github.io/firmware-action/)
 package main
 
 import (
