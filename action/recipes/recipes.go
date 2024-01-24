@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sync"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
@@ -108,12 +109,15 @@ func Build(ctx context.Context, target string, recursive bool, config Config, ex
 
 	// Create a queue in correct order (starting with leaves)
 	queue := []string{}
+	queueMutex := &sync.Mutex{} // Mutex to ensure concurrent access to queue is safe in the callback
 	flowCallback := func(d *dag.DAG, id string, parentResults []dag.FlowResult) (interface{}, error) {
 		v, err := d.GetVertex(id)
 		if err != nil {
 			return nil, err
 		}
+		queueMutex.Lock()
 		queue = append(queue, v.(string))
+		queueMutex.Unlock()
 		return nil, nil
 	}
 	_, err = dependencyForest.DescendantsFlow(target, nil, flowCallback)
