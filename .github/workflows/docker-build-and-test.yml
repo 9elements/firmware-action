@@ -27,6 +27,7 @@ jobs:
             'coreboot_4.19',
             'coreboot_4.20.1',
             'coreboot_4.21',
+            'coreboot_4.22.01',
             'edk2-stable202008',
             'edk2-stable202105',
             'edk2-stable202111',
