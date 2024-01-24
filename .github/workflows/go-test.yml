@@ -36,7 +36,7 @@ jobs:
       - name: Run go test
         run: |
           cd action
-          go test -v -timeout 60m -shuffle=on -covermode=count -coverprofile coverage.out -run ${{ matrix.testregex }} ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -run ${{ matrix.testregex }} ./...
 
   go-test:
     # Run all remaining light tests
@@ -58,4 +58,4 @@ jobs:
       - name: Run go test
         run: |
           cd action
-          go test -v -timeout 60m -shuffle=on -covermode=count -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot)' ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot)' ./...
