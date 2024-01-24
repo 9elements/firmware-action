@@ -9,6 +9,7 @@ name: Deploy mdBook site to Pages
 
 on:
   # Runs on pushes targeting the default branch
+  release:
   push:
     branches: ['main']
 

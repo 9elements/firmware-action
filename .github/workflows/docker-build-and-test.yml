@@ -3,6 +3,7 @@
 
 name: dagger
 on:
+  release:
   pull_request:
   merge_group:
   push:
