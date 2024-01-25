@@ -75,6 +75,11 @@ type Edk2Opts struct {
 	Edk2Specific `validate:"required"`
 }
 
+// GetDepends is used to return list of dependencies
+func (opts Edk2Opts) GetDepends() []string {
+	return opts.Depends
+}
+
 // edk2 builds edk2
 func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
 	envVars := map[string]string{

@@ -70,6 +70,11 @@ type Config struct {
 	Edk2 map[string]Edk2Opts `json:"edk2" validate:"dive"`
 }
 
+// FirmwareModule interface
+type FirmwareModule interface {
+	GetDepends() []string
+}
+
 // ===========
 //  Functions
 // ===========
