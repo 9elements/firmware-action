@@ -48,10 +48,15 @@ func (opts LinuxOpts) GetDepends() []string {
 	return opts.Depends
 }
 
-// linux builds linux kernel
+// GetArtifacts returns list of wanted artifacts from container
+func (opts LinuxOpts) GetArtifacts() *[]container.Artifacts {
+	return opts.CommonOpts.GetArtifacts()
+}
+
+// buildFirmware builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
-func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
+func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -142,5 +147,5 @@ func linux(ctx context.Context, client *dagger.Client, opts *LinuxOpts, dockerfi
 	}
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, artifacts)
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

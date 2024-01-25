@@ -9,12 +9,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"slices"
 	"sync"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
 	"github.com/heimdalr/dag"
 )
 
@@ -121,54 +119,9 @@ func Execute(ctx context.Context, target string, config Config) error {
 	defer client.Close()
 
 	// Find requested target
-	if _, ok := config.Coreboot[target]; ok {
-		// Coreboot
-		opts := config.Coreboot[target]
-		artifacts := []container.Artifacts{
-			{
-				ContainerPath: filepath.Join(ContainerWorkDir, "build", "coreboot.rom"),
-				ContainerDir:  false,
-				HostPath:      config.Coreboot[target].OutputDir,
-				HostDir:       true,
-			},
-			{
-				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
-				ContainerDir:  false,
-				HostPath:      config.Coreboot[target].OutputDir,
-				HostDir:       true,
-			},
-		}
-		return coreboot(ctx, client, &opts, "", &artifacts)
-	} else if _, ok = config.Linux[target]; ok {
-		// Linux
-		opts := config.Linux[target]
-		artifacts := []container.Artifacts{
-			{
-				ContainerPath: filepath.Join(ContainerWorkDir, "vmlinux"),
-				ContainerDir:  false,
-				HostPath:      config.Linux[target].OutputDir,
-				HostDir:       true,
-			},
-			{
-				ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
-				ContainerDir:  false,
-				HostPath:      config.Linux[target].OutputDir,
-				HostDir:       true,
-			},
-		}
-		return linux(ctx, client, &opts, "", &artifacts)
-	} else if _, ok = config.Edk2[target]; ok {
-		// Edk2
-		opts := config.Edk2[target]
-		artifacts := []container.Artifacts{
-			{
-				ContainerPath: filepath.Join(ContainerWorkDir, "Build"),
-				ContainerDir:  true,
-				HostPath:      config.Edk2[target].OutputDir,
-				HostDir:       true,
-			},
-		}
-		return edk2(ctx, client, &opts, "", &artifacts)
+	modules := config.AllModules()
+	if _, ok := modules[target]; ok {
+		return modules[target].buildFirmware(ctx, client, "")
 	}
 	return ErrTargetMissing
 }

@@ -80,8 +80,13 @@ func (opts Edk2Opts) GetDepends() []string {
 	return opts.Depends
 }
 
-// edk2 builds edk2
-func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
+// GetArtifacts returns list of wanted artifacts from container
+func (opts Edk2Opts) GetArtifacts() *[]container.Artifacts {
+	return opts.CommonOpts.GetArtifacts()
+}
+
+// buildFirmware builds edk2 or Intel FSP
+func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	envVars := map[string]string{
 		"WORKSPACE":      ContainerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",
@@ -161,5 +166,5 @@ func edk2(ctx context.Context, client *dagger.Client, opts *Edk2Opts, dockerfile
 	}
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, artifacts)
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }
