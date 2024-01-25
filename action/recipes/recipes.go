@@ -50,23 +50,7 @@ func Build(ctx context.Context, target string, recursive bool, config Config, ex
 
 	// Create the forest (forest = multiple independent trees)
 	//   Add all items as vertexes into the tree
-	//   There should be better way to do this other than doing 3x the same thing
-	// -- coreboot --
-	for key, value := range config.Coreboot {
-		dependencies, err = forestAddVertex(dependencyForest, key, value, dependencies)
-		if err != nil {
-			return nil, err
-		}
-	}
-	// -- linux --
-	for key, value := range config.Linux {
-		dependencies, err = forestAddVertex(dependencyForest, key, value, dependencies)
-		if err != nil {
-			return nil, err
-		}
-	}
-	// -- edk2 --
-	for key, value := range config.Edk2 {
+	for key, value := range config.AllModules() {
 		dependencies, err = forestAddVertex(dependencyForest, key, value, dependencies)
 		if err != nil {
 			return nil, err

@@ -70,6 +70,21 @@ type Config struct {
 	Edk2 map[string]Edk2Opts `json:"edk2" validate:"dive"`
 }
 
+// AllModules method returns slice with all modules
+func (c Config) AllModules() map[string]FirmwareModule {
+	modules := make(map[string]FirmwareModule)
+	for key, value := range c.Coreboot {
+		modules[key] = value
+	}
+	for key, value := range c.Linux {
+		modules[key] = value
+	}
+	for key, value := range c.Edk2 {
+		modules[key] = value
+	}
+	return modules
+}
+
 // FirmwareModule interface
 type FirmwareModule interface {
 	GetDepends() []string
