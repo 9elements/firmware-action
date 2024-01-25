@@ -31,31 +31,12 @@ var (
 // ContainerWorkDir specifies directory in container used as work directory
 var ContainerWorkDir = "/workdir"
 
-type firmwareType interface {
-	Dep() []string
-}
-
-// Dep to get dependencies
-func (c CorebootOpts) Dep() []string {
-	return c.Depends
-}
-
-// Dep to get dependencies
-func (c LinuxOpts) Dep() []string {
-	return c.Depends
-}
-
-// Dep to get dependencies
-func (c Edk2Opts) Dep() []string {
-	return c.Depends
-}
-
-func forestAddVertex(forest *dag.DAG, key string, value firmwareType, dependencies [][]string) ([][]string, error) {
+func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependencies [][]string) ([][]string, error) {
 	err := forest.AddVertexByID(key, key)
 	if err != nil {
 		return nil, err
 	}
-	for _, dep := range value.Dep() {
+	for _, dep := range value.GetDepends() {
 		dependencies = append(dependencies, []string{key, dep})
 	}
 	return dependencies, nil

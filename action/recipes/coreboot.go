@@ -110,6 +110,11 @@ type CorebootOpts struct {
 
 // ANCHOR_END: CorebootOpts
 
+// GetDepends is used to return list of dependencies
+func (opts CorebootOpts) GetDepends() []string {
+	return opts.Depends
+}
+
 // corebootProcessBlobs is used to fill figure out blobs from provided data.
 func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	blobMap := map[string]BlobDef{

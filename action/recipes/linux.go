@@ -43,6 +43,11 @@ type LinuxOpts struct {
 	LinuxSpecific
 }
 
+// GetDepends is used to return list of dependencies
+func (opts LinuxOpts) GetDepends() []string {
+	return opts.Depends
+}
+
 // linux builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
