@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
 	"github.com/9elements/firmware-action/action/filesystem"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
@@ -67,6 +66,10 @@ func TestCoreboot(t *testing.T) {
 	common := CommonOpts{
 		Arch:      "x86",
 		OutputDir: "output",
+		DockerOutputFiles: []string{
+			"build/coreboot.rom",
+			"defconfig",
+		},
 	}
 
 	testCases := []struct {
@@ -152,20 +155,7 @@ func TestCoreboot(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
-			artifacts := []container.Artifacts{
-				{
-					ContainerPath: filepath.Join(ContainerWorkDir, "build", "coreboot.rom"),
-					ContainerDir:  false,
-					HostPath:      outputPath,
-					HostDir:       true,
-				},
-				{
-					ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
-					ContainerDir:  false,
-					HostPath:      outputPath,
-					HostDir:       true,
-				},
-			}
+			tc.corebootOptions.OutputDir = outputPath
 
 			// Prep
 			for cmd := range tc.cmds {
@@ -173,7 +163,7 @@ func TestCoreboot(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			// Try to build coreboot
-			err = coreboot(ctx, client, &tc.corebootOptions, "", &artifacts)
+			err = tc.corebootOptions.buildFirmware(ctx, client, "")
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts

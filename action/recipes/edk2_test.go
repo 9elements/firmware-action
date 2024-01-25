@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -34,9 +33,10 @@ func TestEdk2(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		SdkURL:    "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
-		Arch:      "X64",
-		OutputDir: "output",
+		SdkURL:           "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
+		Arch:             "X64",
+		OutputDir:        "output",
+		DockerOutputDirs: []string{"Build/"},
 	}
 
 	testCases := []struct {
@@ -105,17 +105,10 @@ func TestEdk2(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, tc.edk2Options.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
-			artifacts := []container.Artifacts{
-				{
-					ContainerPath: filepath.Join(ContainerWorkDir, "Build"),
-					ContainerDir:  true,
-					HostPath:      outputPath,
-					HostDir:       true,
-				},
-			}
+			tc.edk2Options.OutputDir = outputPath
 
 			// Try to build edk2
-			err = edk2(ctx, client, &tc.edk2Options, dockerfilePath, &artifacts)
+			err = tc.edk2Options.buildFirmware(ctx, client, dockerfilePath)
 			assert.NoError(t, err)
 
 			// Check artifacts

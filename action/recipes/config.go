@@ -4,10 +4,14 @@
 package recipes
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 
+	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/container"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -52,11 +56,56 @@ type CommonOpts struct {
 	//   had been previously checked out.
 	RepoPath string `json:"repo_path" validate:"required,dirpath"`
 
+	// Specifies the (relative) paths to directories where are produced files (inside Docker).
+	DockerOutputDirs []string `json:"docker_output_dirs" validate:"dive,dirpath"`
+
+	// Specifies the (relative) paths to produced files (inside Docker).
+	DockerOutputFiles []string `json:"docker_output_files" validate:"dive,filepath"`
+
 	// Specifies the (relative) path to directory into which place the produced files.
+	//   Directories listed in DockerOutputDirs and files listed in DockerOutputFiles
+	//   will be exported here.
+	// Example:
+	//   Following setting:
+	//     DockerOutputDirs = []string{"Build/"}
+	//     DockerOutputFiles = []string{"coreboot.rom", "defconfig"}
+	//     OutputDir = "myOutput"
+	//   Will result in:
+	//     myOutput/
+	//     ├── Build/
+	//     ├── coreboot.rom
+	//     └── defconfig
 	OutputDir string `json:"output_dir" validate:"required,dirpath"`
 }
 
 // ANCHOR_END: CommonOpts
+
+// GetArtifacts returns list of wanted artifacts from container
+func (opts CommonOpts) GetArtifacts() *[]container.Artifacts {
+	var artifacts []container.Artifacts
+
+	// Directories
+	for _, pathDir := range opts.DockerOutputDirs {
+		artifacts = append(artifacts, container.Artifacts{
+			ContainerPath: filepath.Join(ContainerWorkDir, pathDir),
+			ContainerDir:  true,
+			HostPath:      opts.OutputDir,
+			HostDir:       true,
+		})
+	}
+
+	// Files
+	for _, pathFile := range opts.DockerOutputFiles {
+		artifacts = append(artifacts, container.Artifacts{
+			ContainerPath: filepath.Join(ContainerWorkDir, pathFile),
+			ContainerDir:  false,
+			HostPath:      opts.OutputDir,
+			HostDir:       true,
+		})
+	}
+
+	return &artifacts
+}
 
 // Config is for storing parsed configuration file
 type Config struct {
@@ -88,6 +137,8 @@ func (c Config) AllModules() map[string]FirmwareModule {
 // FirmwareModule interface
 type FirmwareModule interface {
 	GetDepends() []string
+	GetArtifacts() *[]container.Artifacts
+	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error
 }
 
 // ===========

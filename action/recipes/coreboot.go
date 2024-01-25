@@ -115,6 +115,11 @@ func (opts CorebootOpts) GetDepends() []string {
 	return opts.Depends
 }
 
+// GetArtifacts returns list of wanted artifacts from container
+func (opts CorebootOpts) GetArtifacts() *[]container.Artifacts {
+	return opts.CommonOpts.GetArtifacts()
+}
+
 // corebootProcessBlobs is used to fill figure out blobs from provided data.
 func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	blobMap := map[string]BlobDef{
@@ -188,8 +193,8 @@ func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	return blobs, nil
 }
 
-// coreboot builds coreboot with all blobs and stuff.
-func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, dockerfileDirectoryPath string, artifacts *[]container.Artifacts) error {
+// buildFirmware builds coreboot with all blobs and stuff
+func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -311,7 +316,8 @@ func coreboot(ctx context.Context, client *dagger.Client, opts *CorebootOpts, do
 			return fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
+	log.Print(opts.CommonOpts.GetArtifacts())
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, artifacts)
+	return container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
 }

@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
 	"github.com/9elements/firmware-action/action/filesystem"
 	"github.com/Masterminds/semver"
 	"github.com/stretchr/testify/assert"
@@ -40,6 +39,10 @@ func TestLinux(t *testing.T) {
 	linuxOpts := LinuxOpts{
 		CommonOpts: CommonOpts{
 			OutputDir: "output",
+			DockerOutputFiles: []string{
+				"vmlinux",
+				"defconfig",
+			},
 		},
 		DefconfigPath: "custom_defconfig",
 	}
@@ -145,23 +148,10 @@ func TestLinux(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, myLinuxOpts.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
-			artifacts := []container.Artifacts{
-				{
-					ContainerPath: filepath.Join(ContainerWorkDir, "vmlinux"),
-					ContainerDir:  false,
-					HostPath:      outputPath,
-					HostDir:       true,
-				},
-				{
-					ContainerPath: filepath.Join(ContainerWorkDir, "defconfig"),
-					ContainerDir:  false,
-					HostPath:      outputPath,
-					HostDir:       true,
-				},
-			}
+			myLinuxOpts.OutputDir = outputPath
 
 			// Try to build linux kernel
-			err = linux(ctx, client, &myLinuxOpts, dockerfilePath, &artifacts)
+			err = myLinuxOpts.buildFirmware(ctx, client, dockerfilePath)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
