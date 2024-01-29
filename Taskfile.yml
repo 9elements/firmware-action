@@ -51,13 +51,6 @@ tasks:
     cmds:
       - godoc -http=:6060
 
-  build-coreboot:
-    desc: Run action to build coreboot
-    cmds:
-      - ./bin/action-{{OS}}-amd64-{{.SEMVER}}
-    env:
-      INPUT_TARGET: coreboot
-
   build-mdbook:
     desc: Build mdBook
     dir: docs
