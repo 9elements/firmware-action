@@ -25,10 +25,10 @@ func TestEdk2(t *testing.T) {
 	defer os.Chdir(pwd) // nolint:errcheck
 
 	// Use "" if you want to test containers from github package registry
-	// Use "../../docker/edk2" if you want to test containers built fresh from Dockerfile
+	// Use "../../container/edk2" if you want to test containers built fresh from Dockerfile
 	dockerfilePath := ""
 	if false {
-		dockerfilePath, err = filepath.Abs("../../docker/edk2")
+		dockerfilePath, err = filepath.Abs("../../container/edk2")
 		assert.NoError(t, err)
 	}
 
@@ -36,7 +36,7 @@ func TestEdk2(t *testing.T) {
 		SdkURL:           "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
 		Arch:             "X64",
 		OutputDir:        "output",
-		DockerOutputDirs: []string{"Build/"},
+		ContainerOutputDirs: []string{"Build/"},
 	}
 
 	testCases := []struct {

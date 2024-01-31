@@ -6,9 +6,9 @@
       "arch": "",
       "repo_path": "my_super_dooper_awesome_coreboot/",
       "defconfig_path": "seabios_defconfig",
-      "output_dir": "output/",
-      "docker_output_dirs": null,
-      "docker_output_files": [
+      "output_dir": "output-coreboot/",
+      "container_output_dirs": null,
+      "container_output_files": [
         "build/coreboot.rom",
         "defconfig"
       ],
@@ -31,9 +31,9 @@
       "arch": "x86_64",
       "repo_path": "linux-${LINUX_VERSION}/",
       "defconfig_path": "ci_defconfig",
-      "output_dir": "output/",
-      "docker_output_dirs": null,
-      "docker_output_files": [
+      "output_dir": "output-linux/",
+      "container_output_dirs": null,
+      "container_output_files": [
         "vmlinux",
         "defconfig"
       ],
@@ -47,11 +47,11 @@
       "arch": "X64",
       "repo_path": "Edk2/",
       "defconfig_path": "edk2_config.cfg",
-      "output_dir": "output/",
-      "docker_output_dirs": [
+      "output_dir": "output-edk2/",
+      "container_output_dirs": [
         "Build/"
       ],
-      "docker_output_files": null,
+      "container_output_files": null,
       "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5"
     }
   }

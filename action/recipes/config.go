@@ -56,19 +56,19 @@ type CommonOpts struct {
 	//   had been previously checked out.
 	RepoPath string `json:"repo_path" validate:"required,dirpath"`
 
-	// Specifies the (relative) paths to directories where are produced files (inside Docker).
-	DockerOutputDirs []string `json:"docker_output_dirs" validate:"dive,dirpath"`
+	// Specifies the (relative) paths to directories where are produced files (inside Container).
+	ContainerOutputDirs []string `json:"docker_output_dirs" validate:"dive,dirpath"`
 
-	// Specifies the (relative) paths to produced files (inside Docker).
-	DockerOutputFiles []string `json:"docker_output_files" validate:"dive,filepath"`
+	// Specifies the (relative) paths to produced files (inside Container).
+	ContainerOutputFiles []string `json:"docker_output_files" validate:"dive,filepath"`
 
 	// Specifies the (relative) path to directory into which place the produced files.
-	//   Directories listed in DockerOutputDirs and files listed in DockerOutputFiles
+	//   Directories listed in ContainerOutputDirs and files listed in ContainerOutputFiles
 	//   will be exported here.
 	// Example:
 	//   Following setting:
-	//     DockerOutputDirs = []string{"Build/"}
-	//     DockerOutputFiles = []string{"coreboot.rom", "defconfig"}
+	//     ContainerOutputDirs = []string{"Build/"}
+	//     ContainerOutputFiles = []string{"coreboot.rom", "defconfig"}
 	//     OutputDir = "myOutput"
 	//   Will result in:
 	//     myOutput/
@@ -85,7 +85,7 @@ func (opts CommonOpts) GetArtifacts() *[]container.Artifacts {
 	var artifacts []container.Artifacts
 
 	// Directories
-	for _, pathDir := range opts.DockerOutputDirs {
+	for _, pathDir := range opts.ContainerOutputDirs {
 		artifacts = append(artifacts, container.Artifacts{
 			ContainerPath: filepath.Join(ContainerWorkDir, pathDir),
 			ContainerDir:  true,
@@ -95,7 +95,7 @@ func (opts CommonOpts) GetArtifacts() *[]container.Artifacts {
 	}
 
 	// Files
-	for _, pathFile := range opts.DockerOutputFiles {
+	for _, pathFile := range opts.ContainerOutputFiles {
 		artifacts = append(artifacts, container.Artifacts{
 			ContainerPath: filepath.Join(ContainerWorkDir, pathFile),
 			ContainerDir:  false,

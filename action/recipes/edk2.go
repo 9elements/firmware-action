@@ -24,7 +24,7 @@ type Edk2Specific struct {
 	//     '-a <architecture>'
 	//     '-p <edk2__platform>'
 	//     '-b <edk2__release_type>'
-	//     '-t <GCC version>' (defined as part of docker toolchain, selected by SdkURL)
+	//     '-t <GCC version>' (defined as part of container toolchain, selected by SdkURL)
 	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
 
 	// Specifies the DSC to use when building EDK2
@@ -47,7 +47,7 @@ type Edk2Specific struct {
 // Edk2Specific is used to store data specific to coreboot.
 type Edk2Specific struct {
 	// Specifies which build command to use
-	// GCC version is exposed in the docker container as USE_GCC_VERSION environment variable
+	// GCC version is exposed in the container container as USE_GCC_VERSION environment variable
 	// Examples:
 	//   "source ./edksetup.sh; build -t GCC5 -a IA32 -p UefiPayloadPkg/UefiPayloadPkg.dsc"
 	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"
