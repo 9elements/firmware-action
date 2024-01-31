@@ -29,17 +29,17 @@ func TestLinux(t *testing.T) {
 	defer os.Chdir(pwd) // nolint:errcheck
 
 	// Use "" if you want to test containers from github package registry
-	// Use "../../docker/linux" if you want to test containers built fresh from Dockerfile
+	// Use "../../container/linux" if you want to test containers built fresh from Dockerfile
 	dockerfilePath := ""
 	if false {
-		dockerfilePath, err = filepath.Abs("../../docker/linux")
+		dockerfilePath, err = filepath.Abs("../../container/linux")
 		assert.NoError(t, err)
 	}
 
 	linuxOpts := LinuxOpts{
 		CommonOpts: CommonOpts{
 			OutputDir: "output",
-			DockerOutputFiles: []string{
+			ContainerOutputFiles: []string{
 				"vmlinux",
 				"defconfig",
 			},

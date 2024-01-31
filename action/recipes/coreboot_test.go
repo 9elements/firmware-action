@@ -66,7 +66,7 @@ func TestCoreboot(t *testing.T) {
 	common := CommonOpts{
 		Arch:      "x86",
 		OutputDir: "output",
-		DockerOutputFiles: []string{
+		ContainerOutputFiles: []string{
 			"build/coreboot.rom",
 			"defconfig",
 		},
