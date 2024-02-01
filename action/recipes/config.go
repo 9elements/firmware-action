@@ -24,7 +24,7 @@ import (
 // For details see action.yml
 // ANCHOR: CommonOpts
 type CommonOpts struct {
-	// Specifies the docker toolchain tag to use when building the image.
+	// Specifies the container toolchain tag to use when building the image.
 	// This has an influence on the IASL, GCC and host GCC version that is used to build
 	//   the target. You must match the source level and sdk_version.
 	// NOTE: Updating the sdk_version might result in different binaries using the
@@ -57,10 +57,10 @@ type CommonOpts struct {
 	RepoPath string `json:"repo_path" validate:"required,dirpath"`
 
 	// Specifies the (relative) paths to directories where are produced files (inside Container).
-	ContainerOutputDirs []string `json:"docker_output_dirs" validate:"dive,dirpath"`
+	ContainerOutputDirs []string `json:"container_output_dirs" validate:"dive,dirpath"`
 
 	// Specifies the (relative) paths to produced files (inside Container).
-	ContainerOutputFiles []string `json:"docker_output_files" validate:"dive,filepath"`
+	ContainerOutputFiles []string `json:"container_output_files" validate:"dive,filepath"`
 
 	// Specifies the (relative) path to directory into which place the produced files.
 	//   Directories listed in ContainerOutputDirs and files listed in ContainerOutputFiles
