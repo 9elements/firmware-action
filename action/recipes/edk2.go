@@ -66,6 +66,15 @@ type Edk2Opts struct {
 	// Common options like paths etc.
 	CommonOpts
 
+	// Specifies target architecture, such as 'x86' or 'arm64'. Currently unused for coreboot.
+	// Supported options:
+	//   - 'AARCH64'
+	//   - 'ARM'
+	//   - 'IA32'
+	//   - 'IA32X64'
+	//   - 'X64'
+	Arch string `json:"arch"`
+
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	// For EDK2 this is a one-line file containing the build arguments such as
 	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.

@@ -16,7 +16,6 @@ import (
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
 		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:      "dummy",
 		RepoPath:  "dummy/dir/",
 		OutputDir: "dummy/dir/",
 	}
@@ -123,7 +122,6 @@ func TestConfigReadAndWrite(t *testing.T) {
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
 		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		Arch:      "dummy",
 		RepoPath:  "dummy/dir/",
 		OutputDir: "dummy/dir/",
 	}
@@ -190,7 +188,6 @@ func TestConfigEnvVars(t *testing.T) {
 					"coreboot-A": {
 						CommonOpts: CommonOpts{
 							SdkURL:    tc.url,
-							Arch:      "dummy",
 							RepoPath:  "dummy/dir/",
 							OutputDir: "dummy/dir/",
 						},
