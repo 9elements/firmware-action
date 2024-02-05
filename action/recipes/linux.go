@@ -36,6 +36,14 @@ type LinuxOpts struct {
 	// Common options like paths etc.
 	CommonOpts
 
+	// Specifies target architecture, such as 'x86' or 'arm64'.
+	// Supported options:
+	//   - 'x86'
+	//   - 'x86_64'
+	//   - 'arm'
+	//   - 'arm64'
+	Arch string `json:"arch"`
+
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
 

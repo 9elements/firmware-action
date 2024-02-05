@@ -36,20 +36,6 @@ type CommonOpts struct {
 	// See https://github.com/orgs/9elements/packages
 	SdkURL string `json:"sdk_url" validate:"required"`
 
-	// Specifies target architecture, such as 'x86' or 'arm64'. Currently unused for coreboot.
-	// Supported options for linux:
-	//   - 'x86'
-	//   - 'x86_64'
-	//   - 'arm'
-	//   - 'arm64'
-	// Supported options for edk2:
-	//   - 'AARCH64'
-	//   - 'ARM'
-	//   - 'IA32'
-	//   - 'IA32X64'
-	//   - 'X64'
-	Arch string `json:"arch"`
-
 	// Gives the (relative) path to the target (firmware) repository.
 	// If the current repository contains the selected target, specify: '.'
 	// Otherwise the path should point to the target (firmware) repository submodule that

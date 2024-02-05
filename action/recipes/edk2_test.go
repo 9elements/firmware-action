@@ -33,9 +33,8 @@ func TestEdk2(t *testing.T) {
 	}
 
 	common := CommonOpts{
-		SdkURL:           "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
-		Arch:             "X64",
-		OutputDir:        "output",
+		SdkURL:              "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
+		OutputDir:           "output",
 		ContainerOutputDirs: []string{"Build/"},
 	}
 
