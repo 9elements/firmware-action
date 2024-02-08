@@ -82,4 +82,5 @@ RUN echo "${XGCCPATH}"
 # Copy over things from previous stage(s)
 COPY --from=toolchain $XGCCPATH/.. $XGCCPATH/..
 COPY --from=toolchain $TOOLSDIR/MEAnalyzer $TOOLSDIR/
+COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
 
