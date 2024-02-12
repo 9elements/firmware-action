@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot']
+        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,4 +58,4 @@ jobs:
       - name: Run go test
         run: |
           cd action
-          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot)' ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching)' ./...
