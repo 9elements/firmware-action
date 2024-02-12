@@ -103,6 +103,9 @@ type Config struct {
 
 	// defined in edk2.go
 	Edk2 map[string]Edk2Opts `json:"edk2" validate:"dive"`
+
+	// defined in stitching.go
+	FirmwareStitching map[string]FirmwareStitchingOpts `json:"firmware_stitching" validate:"dive"`
 }
 
 // AllModules method returns slice with all modules
@@ -115,6 +118,9 @@ func (c Config) AllModules() map[string]FirmwareModule {
 		modules[key] = value
 	}
 	for key, value := range c.Edk2 {
+		modules[key] = value
+	}
+	for key, value := range c.FirmwareStitching {
 		modules[key] = value
 	}
 	return modules
