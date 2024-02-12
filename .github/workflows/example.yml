@@ -177,3 +177,37 @@ jobs:
           name: ${{ matrix.edk2-version }}
           path: output
           retention-days: 14
+
+  # Example of building Firmware Stitching
+  build-stitching:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        coreboot-version: ['4.19']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Clone blobs repo
+        run: |
+          git clone --depth 1 https://review.coreboot.org/blobs.git stitch
+      - name: firmware-action
+        uses: ./
+        #uses: 9elements/firmware-action
+        with:
+          config: 'tests/example_config.json'
+          target: 'stitching-example'
+          recursive: 'false'
+        env:
+          COREBOOT_VERSION: ${{ matrix.coreboot-version }}
+      - name: Get artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.coreboot-version }}
+          path: output
+          retention-days: 14

@@ -54,5 +54,26 @@
       "container_output_files": null,
       "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5"
     }
+  },
+  "firmware_stitching": {
+    "stitching-example": {
+      "depends": null,
+      "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
+      "repo_path": "stitch/",
+      "container_output_dirs": null,
+      "container_output_files": [
+        "new_descriptor.bin"
+      ],
+      "output_dir": "output-stitch/",
+      "base_file_path": "stitch/mainboard/intel/emeraldlake2/descriptor.bin",
+      "platform": "",
+      "ifdtool_entries": [
+        {
+          "path": "stitch/mainboard/intel/emeraldlake2/me.bin",
+          "target_region": "ME",
+          "optional_arguments": null
+        }
+      ]
+    }
   }
 }
