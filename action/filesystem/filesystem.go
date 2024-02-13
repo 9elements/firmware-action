@@ -123,7 +123,7 @@ func MoveFile(pathSource, pathDestination string) error {
 func DirTree(root string) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(root, func(path string, info os.FileInfo, _ error) error {
 		foundItem := path
 		if info.IsDir() {
 			foundItem = fmt.Sprintf("%s/", path)
