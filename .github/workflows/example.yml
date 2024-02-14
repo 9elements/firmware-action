@@ -29,7 +29,7 @@ jobs:
         coreboot-version: ['4.19', '4.20.1', '4.21']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Go
@@ -66,7 +66,7 @@ jobs:
         linux-version: [6.1.45]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Go
@@ -113,7 +113,7 @@ jobs:
         edk2-version: ['edk2-stable202208', 'edk2-stable202211']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Go

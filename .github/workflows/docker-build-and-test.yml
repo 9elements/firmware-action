@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install python dependencies
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - name: Run dagger pipeline
