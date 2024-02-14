@@ -9,8 +9,7 @@ on:
       - 'docker/**'
   merge_group:
   push:
-    branches:
-      - main
+    branches: ['main']
 
 env:
   REGISTRY: ghcr.io
