@@ -5,6 +5,6 @@ pytest~=7.4
 pytest-benchmark~=4.0
 pytest-cov~=4.1
 pytest-flake8~=1.1
-pytest-pylint~=0.20
+pytest-pylint~=0.21
 pytest-timeout~=2.2
 PyYAML~=6.0
