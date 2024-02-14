@@ -33,7 +33,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: stable
       - name: Clone coreboot repo
@@ -70,7 +70,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: stable
       - name: Prepare linux kernel
@@ -117,7 +117,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: stable
       - name: Clone edk2 repo
