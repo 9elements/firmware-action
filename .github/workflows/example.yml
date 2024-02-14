@@ -36,9 +36,21 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
+
+      - name: Restore cached coreboot repo
+        uses: actions/cache/restore@v3
+        with:
+          path: ./my_super_dooper_awesome_coreboot
+          key: coreboot-${{ matrix.coreboot-version }}
       - name: Clone coreboot repo
         run: |
-          git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot
+          git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot || true
+      - name: Store coreboot repo in cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./my_super_dooper_awesome_coreboot
+          key: coreboot-${{ matrix.coreboot-version }}
+
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
           mv "tests/coreboot_${{ matrix.coreboot-version }}/seabios.defconfig" "seabios_defconfig"
@@ -73,12 +85,18 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
+
+      - name: Restore cached linux source
+        uses: actions/cache/restore@v3
+        with:
+          path: ./linux-${{ matrix.linux-version }}.tar.xz
+          key: linux-${{ matrix.linux-version }}
       - name: Prepare linux kernel
         run: |
           # Download source files
-          wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.xz"
+          wget --quiet --continue "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.xz"
           wget --quiet "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_MAJOR_VERSION}.x/linux-${{ matrix.linux-version }}.tar.sign"
-          unxz "linux-${{ matrix.linux-version }}.tar.xz" >/dev/null
+          unxz --keep "linux-${{ matrix.linux-version }}.tar.xz" >/dev/null
           # Verify GPG signature
           gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org
           gpg2 --verify "linux-${{ matrix.linux-version }}.tar.sign"
@@ -86,6 +104,12 @@ jobs:
           tar -xvf "linux-${{ matrix.linux-version }}.tar"
         env:
           LINUX_MAJOR_VERSION: 6
+      - name: Store linux source in cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./linux-${{ matrix.linux-version }}.tar.xz
+          key: linux-${{ matrix.linux-version }}
+
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
           mv "tests/linux_${{ matrix.linux-version }}/linux.defconfig" "ci_defconfig"
@@ -120,12 +144,24 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
+
+      - name: Restore cached edk2 repo
+        uses: actions/cache/restore@v3
+        with:
+          path: ./Edk2
+          key: edk2-${{ matrix.edk2-version }}
       - name: Clone edk2 repo
         run: |
-          git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2
+          git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2 || true
       - name: Prepare file with build arguments
         run: |
           echo "-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
+      - name: Store edk2 repo in cache
+        uses: actions/cache/save@v3
+        with:
+          path: ./Edk2
+          key: edk2-${{ matrix.edk2-version }}
+
       - name: firmware-action
         uses: ./
         #uses: 9elements/firmware-action
