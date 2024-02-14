@@ -4,20 +4,79 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+    groups:
+      github:
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 1
+    reviewers:
+      - "AtomicFS"
+    assignees:
+      - "AtomicFS"
+
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+    groups:
+      javascript:
+        update-types:
+          - "minor"
+          - "patch"
+    open-pull-requests-limit: 1
+    reviewers:
+      - "AtomicFS"
+    assignees:
+      - "AtomicFS"
+
   - package-ecosystem: pip
     directory: "/.dagger-ci/daggerci"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+    open-pull-requests-limit: 1
+    groups:
+      python:
+        update-types:
+          - "minor"
+          - "patch"
+    reviewers:
+      - "AtomicFS"
+    assignees:
+      - "AtomicFS"
+
   - package-ecosystem: docker
     directory: "/docker"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+    open-pull-requests-limit: 1
+    groups:
+      docker:
+        update-types:
+          - "minor"
+          - "patch"
+    reviewers:
+      - "AtomicFS"
+    assignees:
+      - "AtomicFS"
+
   - package-ecosystem: gomod
     directory: "/action"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "00:00"
+    open-pull-requests-limit: 1
+    groups:
+      golang:
+        update-types:
+          - "minor"
+          - "patch"
+    reviewers:
+      - "AtomicFS"
+    assignees:
+      - "AtomicFS"
