@@ -52,7 +52,7 @@ jobs:
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
       - name: Get artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coreboot-${{ matrix.coreboot-version }}
           path: output
@@ -99,7 +99,7 @@ jobs:
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
       - name: Get artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.linux-version }}
           path: output
@@ -136,7 +136,7 @@ jobs:
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
       - name: Get artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.edk2-version }}
           path: output
