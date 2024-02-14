@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install deps
         run: |
           curl -SL "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o docker-compose
