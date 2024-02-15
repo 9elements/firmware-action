@@ -28,16 +28,35 @@ concurrency:
   group: 'pages'
   cancel-in-progress: false
 
+env:
+  CARGO_TARGET_DIR: mdbook-bin
+
 jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore cached mdbook
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CARGO_TARGET_DIR }}
+          key: mdbook-${{ hashFiles('*', '**/*') }}
+          restore-keys: |
+            mdbook-
+            mdbook
       - name: Install mdBook
         run: |
           curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf -y | sh
           rustup update
+          # Cleanup cache
+          cargo install cargo-cache
+          cargo cache --autoclean
+          # Install mdbook with plugins
           cargo install \
             mdbook \
             mdbook-admonish \
@@ -46,6 +65,12 @@ jobs:
             mdbook-pagetoc \
             mdbook-template \
             mdbook-toc
+      - name: Store cached mdbook
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CARGO_TARGET_DIR }}
+          key: mdbook-${{ hashFiles('*', '**/*') }}
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
