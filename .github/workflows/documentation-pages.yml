@@ -42,7 +42,6 @@ jobs:
             mdbook \
             mdbook-admonish \
             mdbook-footnote \
-            mdbook-graphviz \
             mdbook-katex \
             mdbook-pagetoc \
             mdbook-template \
