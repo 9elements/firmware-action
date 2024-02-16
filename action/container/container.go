@@ -23,7 +23,7 @@ var (
 // SetupOpts congregates options for Setup function
 // None of the values can be empty string, and mountContainerDir cannot be '.' or '/'
 type SetupOpts struct {
-	ContainerURL      string // URL or name of docker container (name-only will try to look for containers in ghcr.io/9elements/firmware-action
+	ContainerURL      string // URL or name of docker container
 	MountHostDir      string // Directory from host to mount into container
 	MountContainerDir string // Where to mount ^^^ host directory inside container
 	WorkdirContainer  string // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
