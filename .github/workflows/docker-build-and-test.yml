@@ -45,6 +45,28 @@ jobs:
             'udk2017'
           ]
     steps:
+        # We have to use my own fork of actions/delete-package-versions at the moment
+        #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
+        # We can switch to upstream whe following PRs get merged:
+        #   - [dry-run](https://github.com/actions/delete-package-versions/pull/119/commits)
+        #   - [tags](https://github.com/actions/delete-package-versions/pull/104
+      - name: Delete old packages
+        uses: AtomicFS/delete-package-versions@main
+        with:
+          package-name: firmware-action/${{ matrix.dockerfile }}
+          package-type: container
+          min-versions-to-keep: 5
+          ignore-versions: '^(main|latest|v(\d+\.?)+)$'
+            # ignore:
+            # - main
+            # - latest
+            # - vX
+            # - vX.X
+            # - vX.X.X
+          #delete-only-untagged-versions: true
+          dry-run: false
+          ignore-versions-include-tags: true
+
       - name: Setup python
         uses: actions/setup-python@v5
         with:
