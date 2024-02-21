@@ -7,9 +7,13 @@ on:
   pull_request:
     paths:
       - 'docker/**'
-  merge_group:
   push:
     branches: ['main']
+    paths:
+      - 'docker/**'
+  schedule:
+    # Sunday midnight
+    - cron: '0 0 * * 0'
 
 env:
   REGISTRY: ghcr.io
