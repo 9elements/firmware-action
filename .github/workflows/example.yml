@@ -206,7 +206,7 @@ jobs:
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
       - name: Get artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.coreboot-version }}
           path: output
