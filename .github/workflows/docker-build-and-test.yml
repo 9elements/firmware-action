@@ -8,8 +8,15 @@ on:
     paths:
       - 'docker/**'
   merge_group:
+    paths:
+      - 'docker/**'
   push:
     branches: ['main']
+    paths:
+      - 'docker/**'
+  schedule:
+    # Sunday midnight
+    - cron: '0 0 * * 0'
 
 env:
   REGISTRY: ghcr.io
