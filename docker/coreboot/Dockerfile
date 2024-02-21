@@ -1,5 +1,6 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
+# whatever
 
 #=============
 # "base" stage with all needed build dependencies
