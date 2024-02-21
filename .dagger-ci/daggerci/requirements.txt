@@ -1,4 +1,4 @@
-anyio~=4.2
+anyio~=4.3
 dagger-io~=0.9
 prettytable~=3.10
 pytest~=8.0
