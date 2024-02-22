@@ -40,6 +40,15 @@ RUN apt-get update && \
         tzdata \
         zlib1g-dev \
     && \
+    apt-get install -y --no-install-recommends \
+        less \
+        nano \
+        openssh-server \
+        screen \
+        tmux \
+        tree \
+        vim \
+    && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     pip3 install --no-cache-dir \
         colorama==0.4.6 \
@@ -83,4 +92,9 @@ RUN echo "${XGCCPATH}"
 COPY --from=toolchain $XGCCPATH/.. $XGCCPATH/..
 COPY --from=toolchain $TOOLSDIR/MEAnalyzer $TOOLSDIR/
 COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
+
+# Prepare SSH for interactive debugging
+RUN mkdir -p /run/sshd && \
+    sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
+    sed -E "s/#PasswordAuthentication\b.*/PasswordAuthentication yes/g" -i /etc/ssh/sshd_config
 
