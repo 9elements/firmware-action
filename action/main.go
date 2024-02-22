@@ -30,8 +30,9 @@ var CLI struct {
 	Config string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file"`
 
 	Build struct {
-		Target    string `required:"" help:"Select which target to build, use ID from configuration file"`
-		Recursive bool   `help:"Build recursively with all dependencies and payloads"`
+		Target      string `required:"" help:"Select which target to build, use ID from configuration file"`
+		Recursive   bool   `help:"Build recursively with all dependencies and payloads"`
+		Interactive bool   `help:"Open interactive SSH into container if build fails"`
 	} `cmd:"build" help:"Build a target defined in configuration file."`
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file."`
@@ -42,7 +43,13 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Inputs:\nConfig:    %s\nTarget:    %s\nRecursive: %t\n", CLI.Config, CLI.Build.Target, CLI.Build.Recursive)
+	log.Printf(
+		"Inputs:\nConfig:    %s\nTarget:    %s\nRecursive: %t\nInteractive: %t\n",
+		CLI.Config,
+		CLI.Build.Target,
+		CLI.Build.Recursive,
+		CLI.Build.Interactive,
+	)
 
 	// Parse configuration file
 	var myConfig recipes.Config
@@ -52,7 +59,14 @@ func run(ctx context.Context) error {
 	}
 
 	// Lets build stuff
-	_, err = recipes.Build(ctx, CLI.Build.Target, CLI.Build.Recursive, myConfig, recipes.Execute)
+	_, err = recipes.Build(
+		ctx,
+		CLI.Build.Target,
+		CLI.Build.Recursive,
+		CLI.Build.Interactive,
+		myConfig,
+		recipes.Execute,
+	)
 	return err
 }
 
