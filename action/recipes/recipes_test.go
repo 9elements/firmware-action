@@ -11,6 +11,7 @@ import (
 )
 
 func TestExecute(t *testing.T) {
+	const interactive = false
 	ctx := context.Background()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
@@ -38,13 +39,13 @@ func TestExecute(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err = Execute(ctx, tc.target, tc.config)
+			err = Execute(ctx, tc.target, tc.config, interactive)
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
 }
 
-func executeDummy(_ context.Context, _ string, _ Config) error {
+func executeDummy(_ context.Context, _ string, _ Config, _ bool) error {
 	return nil
 }
 
@@ -150,15 +151,31 @@ func TestBuild(t *testing.T) {
 			config:    testConfigDependencyHell,
 		},
 	}
+
+	const interactive = false
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := Build(ctx, tc.target, tc.recursive, tc.config, executeDummy)
+			_, err := Build(
+				ctx,
+				tc.target,
+				tc.recursive,
+				interactive,
+				tc.config,
+				executeDummy,
+			)
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
-
+	const recursive = true
 	t.Run("recursive", func(t *testing.T) {
-		builds, err := Build(ctx, "pizza", true, testConfigDependencyHell, executeDummy)
+		builds, err := Build(
+			ctx,
+			"pizza",
+			recursive,
+			interactive,
+			testConfigDependencyHell,
+			executeDummy,
+		)
 		assert.ErrorIs(t, err, nil)
 
 		// Check for length

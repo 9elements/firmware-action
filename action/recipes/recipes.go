@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/container"
 	"github.com/heimdalr/dag"
 )
 
@@ -41,7 +42,14 @@ func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependen
 }
 
 // Build recipes, possibly recursively
-func Build(ctx context.Context, target string, recursive bool, config Config, executor func(context.Context, string, Config) error) ([]string, error) {
+func Build(
+	ctx context.Context,
+	target string,
+	recursive bool,
+	interactive bool,
+	config Config,
+	executor func(context.Context, string, Config, bool) error,
+) ([]string, error) {
 	dependencyForest := dag.NewDAG()
 	dependencies := [][]string{}
 	var err error
@@ -96,7 +104,7 @@ func Build(ctx context.Context, target string, recursive bool, config Config, ex
 		log.Printf("building '%s' recursively", target)
 		for _, item := range queue {
 			log.Printf("- building %s", item)
-			err = executor(ctx, item, config)
+			err = executor(ctx, item, config, interactive)
 			if err != nil {
 				return nil, err
 			}
@@ -106,11 +114,11 @@ func Build(ctx context.Context, target string, recursive bool, config Config, ex
 	}
 	// else build only the target
 	log.Printf("building '%s' NOT recursively", target)
-	return []string{target}, executor(ctx, target, config)
+	return []string{target}, executor(ctx, target, config, interactive)
 }
 
 // Execute a build step
-func Execute(ctx context.Context, target string, config Config) error {
+func Execute(ctx context.Context, target string, config Config, interactive bool) error {
 	// Setup dagger client
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {
@@ -121,7 +129,14 @@ func Execute(ctx context.Context, target string, config Config) error {
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
-		return modules[target].buildFirmware(ctx, client, "")
+		myContainer, err := modules[target].buildFirmware(ctx, client, "")
+		if err != nil && interactive {
+			// If error, try to open SSH
+			opts := container.NewSettingsSSH(container.WithWaitPressEnter())
+			sshErr := container.OpenSSH(ctx, client, myContainer, ContainerWorkDir, opts)
+			return errors.Join(err, sshErr)
+		}
+		return err
 	}
 	return ErrTargetMissing
 }
