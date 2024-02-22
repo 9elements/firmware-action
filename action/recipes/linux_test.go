@@ -151,7 +151,7 @@ func TestLinux(t *testing.T) {
 			myLinuxOpts.OutputDir = outputPath
 
 			// Try to build linux kernel
-			err = myLinuxOpts.buildFirmware(ctx, client, dockerfilePath)
+			_, err = myLinuxOpts.buildFirmware(ctx, client, dockerfilePath)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
