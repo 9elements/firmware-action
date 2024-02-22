@@ -95,7 +95,7 @@ func (opts Edk2Opts) GetArtifacts() *[]container.Artifacts {
 }
 
 // buildFirmware builds edk2 or Intel FSP
-func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	envVars := map[string]string{
 		"WORKSPACE":      ContainerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",
@@ -111,7 +111,8 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		return err
+		log.Print("Failed to start a container")
+		return nil, err
 	}
 
 	// Setup environment variables in the container
@@ -151,7 +152,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		if _, err := os.Stat(opts.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
 			defconfigFileArgs, err = os.ReadFile(opts.DefconfigPath)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		} else {
 			log.Printf("Failed to read file '%s' as defconfig_path: file does not exist", opts.DefconfigPath)
@@ -165,15 +166,18 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 	}
 
 	// Build
+	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
+		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("edk2 build failed: %w", err)
+			log.Print("Failed building of edk2")
+			return myContainerPrevious, fmt.Errorf("edk2 build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

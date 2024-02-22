@@ -152,21 +152,18 @@ func ifdtoolCmd(platform string, arguments []string) []string {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
-	functionSignature := "stitch.buildFirmware"
-
+func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	// Check that all files have unique filenames (they are copied into the same dir)
 	copiedFiles := map[string]string{}
 	for _, entry := range opts.IfdtoolEntries {
 		filename := filepath.Base(entry.Path)
 		if _, ok := copiedFiles[filename]; ok {
 			log.Printf(
-				"[%s] Filename conflict:\n file '%s'\n and '%s\n have the same filename",
-				functionSignature,
+				"Filename conflict:\n file '%s'\n and '%s\n have the same filename",
 				entry.Path,
 				copiedFiles[filename],
 			)
-			return os.ErrExist
+			return nil, os.ErrExist
 		}
 		copiedFiles[filename] = entry.Path
 	}
@@ -180,13 +177,15 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		return err
+		log.Print("Failed to start a container")
+		return nil, err
 	}
 
 	// Copy all the files into container
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		log.Print("Could not get working directory, should not happen")
+		return nil, err
 	}
 	newBaseFilePath := filepath.Join(ContainerWorkDir, filepath.Base(opts.BaseFilePath))
 	myContainer = myContainer.WithFile(
@@ -206,43 +205,43 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 
 	// Get the size of image (total size)
 	cmd := ifdtoolCmd(opts.Platform, []string{"--dump", opts.BaseFilePath})
-	log.Printf("[%s]$ %v", functionSignature, cmd)
+	log.Printf("cmd: %v", cmd)
+	myContainerPrevious := myContainer
 	ifdtoolStdout, err := myContainer.WithExec(cmd).Stdout(ctx)
 	if err != nil {
-		log.Printf("[%s] Failed to dump intel firmware descriptor", functionSignature)
-		return err
+		log.Print("Failed to dump intel firmware descriptor")
+		return myContainerPrevious, err
 	}
 	size, err := ExtractSizeFromString(ifdtoolStdout)
 	if err != nil {
-		log.Printf("[%s] Failed extract size from IFD", functionSignature)
-		return err
+		log.Print("Failed extract size from IFD")
+		return nil, err
 	}
 	var totalSize uint64
 	for _, i := range size {
 		totalSize += i
 	}
-	log.Printf("[%s] IFD defined size: %s B", functionSignature, humanize.Comma(int64(totalSize)))
+	log.Printf("IFD defined size: %s B", humanize.Comma(int64(totalSize)))
 
 	// Read the base file
 	baseFile, err := os.ReadFile(oldBaseFilePath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	baseFileSize := uint64(len(baseFile))
 	log.Printf(
-		"[%s] Size of '%s': %s B",
-		functionSignature,
+		"Size of '%s': %s B",
 		filepath.Base(oldBaseFilePath),
 		humanize.Comma(int64(baseFileSize)),
 	)
 	if baseFileSize > totalSize {
-		return fmt.Errorf(
-			"provided base_file '%s' is bigger (%s B) than defined in IFD (%s B): %w",
+		log.Printf(
+			"provided base_file '%s' is bigger (%s B) than defined in IFD (%s B)",
 			filepath.Base(oldBaseFilePath),
 			humanize.Comma(int64(baseFileSize)),
 			humanize.Comma(int64(totalSize)),
-			errBaseFileBiggerThanIfd,
 		)
+		return nil, errBaseFileBiggerThanIfd
 	}
 
 	// Take baseFile content and expand it to correct size
@@ -257,19 +256,18 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 
 	imageFilename := fmt.Sprintf("new_%s", filepath.Base(opts.BaseFilePath))
 	log.Printf(
-		"[%s] File '%s' is being expanded to ROM size %s B as '%s'",
-		functionSignature,
+		"File '%s' is being expanded to ROM size %s B as '%s'",
 		filepath.Base(opts.BaseFilePath),
 		humanize.Comma(int64(len(firmwareImage))),
 		imageFilename,
 	)
 	firmwareImageFile, err := os.Create(imageFilename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	_, err = firmwareImageFile.Write(firmwareImage)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	firmwareImageFile.Close()
 	myContainer = myContainer.WithFile(
@@ -280,8 +278,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	// Populate regions with ifdtool
 	for entry := range opts.IfdtoolEntries {
 		log.Printf(
-			"[%s] Injecting '%s' into '%s' region in '%s'",
-			functionSignature,
+			"Injecting '%s' into '%s' region in '%s'",
 			opts.IfdtoolEntries[entry].Path,
 			opts.IfdtoolEntries[entry].TargetRegion,
 			imageFilename,
@@ -298,24 +295,26 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 				imageFilename,
 			},
 		)
-		log.Printf("[%s]$ %v", functionSignature, cmd)
+		log.Printf("cmd: %v", cmd)
+		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
-			log.Printf("[%s] Failed to inject region", functionSignature)
-			return err
+			log.Print("Failed to inject region")
+			return myContainerPrevious, err
 		}
 
 		// ifdtool makes a new file '<filename>.new'
 		imageFilenameNew := fmt.Sprintf("%s.new", imageFilename)
 		cmd = []string{"mv", "--force", imageFilenameNew, imageFilename}
+		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
-			log.Printf("[%s] Failed to rename '%s' to '%s'", imageFilenameNew, imageFilename, functionSignature)
-			return err
+			log.Printf("Failed to rename '%s' to '%s'", imageFilenameNew, imageFilename)
+			return myContainerPrevious, err
 		}
 	}
 	log.Print(opts.CommonOpts.GetArtifacts())
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
+	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
 }
