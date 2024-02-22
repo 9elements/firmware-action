@@ -51,6 +51,15 @@ RUN apt-get update && \
         openssl \
         wget \
     && \
+    apt-get install -y --no-install-recommends \
+        less \
+        nano \
+        openssh-server \
+        screen \
+        tmux \
+        tree \
+        vim \
+    && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-${GCC_VERSION} 100 && \
@@ -58,3 +67,9 @@ RUN apt-get update && \
     update-alternatives --install /usr/bin/i686-linux-gnu-gcc    i686-linux-gnu-gcc    /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 100 && \
     gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org && \
     rm -rf /var/lib/apt/lists/*
+
+# Prepare SSH for interactive debugging
+RUN mkdir -p /run/sshd && \
+    sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
+    sed -E "s/#PasswordAuthentication\b.*/PasswordAuthentication yes/g" -i /etc/ssh/sshd_config
+
