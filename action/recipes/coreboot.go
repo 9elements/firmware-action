@@ -194,7 +194,7 @@ func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -204,7 +204,8 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		return err
+		log.Print("Failed to start a container")
+		return nil, err
 	}
 
 	// Copy over the defconfig file
@@ -212,7 +213,8 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		log.Print("Could not get working directory, should not happen")
+		return nil, err
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
@@ -222,12 +224,14 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
 	//   to extract value of 'CONFIG_MAINBOARD_DIR', there must be '.config'
 	generateDotConfigCmd := []string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"}
+	myContainerPrevious := myContainer
 	mainboardDir, err := myContainer.
 		WithExec(generateDotConfigCmd).
 		WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
 		Stdout(ctx)
 	if err != nil {
-		return err
+		log.Print("Failed to get value of MAINBOARD_DIR from .config")
+		return myContainerPrevious, err
 	}
 	//   strip newline from mainboardDir
 	mainboardDir = strings.Replace(mainboardDir, "\n", "", -1)
@@ -247,7 +251,8 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	//   options for said blobs (this must run inside container).
 	blobs, err := corebootProcessBlobs(opts.Blobs)
 	if err != nil {
-		return err
+		log.Print("Failed to process all blobs")
+		return nil, err
 	}
 	for blob := range blobs {
 		// Path to local file on host
@@ -263,7 +268,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 
 		// Copy into container
 		if err = filesystem.CheckFileExists(src); !errors.Is(err, os.ErrExist) {
-			return err
+			return nil, err
 		}
 		if blobs[blob].IsDirectory {
 			// Directory
@@ -309,15 +314,17 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 
 	// Build
 	for step := range buildSteps {
+		myContainerPrevious := myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("coreboot build failed: %w", err)
+			log.Print("Failed building of coreboot")
+			return myContainerPrevious, fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
 	log.Print(opts.CommonOpts.GetArtifacts())
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
+	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
 }

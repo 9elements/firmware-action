@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -64,7 +65,7 @@ func (opts LinuxOpts) GetArtifacts() *[]container.Artifacts {
 // buildFirmware builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
-func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -74,7 +75,8 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		return err
+		log.Print("Failed to start a container")
+		return nil, err
 	}
 
 	// Copy over the defconfig file
@@ -87,7 +89,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		//   make: *** [Makefile:704: linux.defconfig] Error 2
 		// but defconfigBasename="linux_defconfig" works fine
 		// Don't know why, just return error and let user deal with it.
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"filename '%s' specified by defconfig_path must not contain '.defconfig' in the name",
 			defconfigBasename,
 		)
@@ -95,7 +97,8 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		log.Print("Could not get working directory, should not happen")
+		return nil, err
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
@@ -116,7 +119,8 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 
 	val, ok := crossCompile[opts.Arch]
 	if !ok {
-		return errUnknownArchCrossCompile
+		log.Print("Selected unknown cross compilation target architecture")
+		return nil, errUnknownArchCrossCompile
 	}
 	if val != "" {
 		envVars["CROSS_COMPILE"] = val
@@ -145,15 +149,18 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	}
 
 	// Execute build commands
+	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
+		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			return fmt.Errorf("linux build failed: %w", err)
+			log.Print("Failed building of linux")
+			return myContainerPrevious, fmt.Errorf("linux build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }
