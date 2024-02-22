@@ -162,7 +162,7 @@ func TestCoreboot(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			// Try to build coreboot
-			err = tc.corebootOptions.buildFirmware(ctx, client, "")
+			_, err = tc.corebootOptions.buildFirmware(ctx, client, "")
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts

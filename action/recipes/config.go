@@ -130,7 +130,7 @@ func (c Config) AllModules() map[string]FirmwareModule {
 type FirmwareModule interface {
 	GetDepends() []string
 	GetArtifacts() *[]container.Artifacts
-	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error
+	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error)
 }
 
 // ===========

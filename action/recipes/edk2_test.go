@@ -107,7 +107,7 @@ func TestEdk2(t *testing.T) {
 			tc.edk2Options.OutputDir = outputPath
 
 			// Try to build edk2
-			err = tc.edk2Options.buildFirmware(ctx, client, dockerfilePath)
+			_, err = tc.edk2Options.buildFirmware(ctx, client, dockerfilePath)
 			assert.NoError(t, err)
 
 			// Check artifacts
