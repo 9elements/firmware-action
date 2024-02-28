@@ -22,6 +22,11 @@ services:
       context: coreboot
       args:
         - COREBOOT_VERSION=4.22.01
+  coreboot_24.02:
+    build:
+      context: coreboot
+      args:
+        - COREBOOT_VERSION=24.02
   #==================
   # edk2
   #==================
