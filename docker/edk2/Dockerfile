@@ -65,7 +65,11 @@ RUN dpkg --add-architecture i386 && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p "${TOOLSDIR}" && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
+    \
+    wget --quiet -O rustup.sh https://sh.rustup.rs && \
+        chmod +x ./rustup.sh && \
+        ./rustup.sh -y
 
 
 #=============
