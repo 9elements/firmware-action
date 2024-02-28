@@ -31,6 +31,7 @@ RUN apt-get update && \
         iucode-tool \
         libelf-dev \
         libncurses5-dev \
+        libnss3-dev \
         libssl-dev \
         m4 \
         nodejs \
