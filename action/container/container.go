@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -29,32 +30,71 @@ type SetupOpts struct {
 	WorkdirContainer  string // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
 }
 
+// Validate the data in struct
+func (opts SetupOpts) Validate() error {
+	// None of the directories can be empty string
+	var err error
+	if opts.MountContainerDir == "" {
+		err = errors.Join(err, errDirectoryNotSpecified)
+		slog.Error(
+			"Mountpoint path cannot be empty string",
+			slog.String("suggestion", "Specify where the host directory should be mounted in the container"),
+			slog.Any("error", err),
+		)
+	}
+	if opts.MountHostDir == "" {
+		err = errors.Join(err, errDirectoryNotSpecified)
+		slog.Error(
+			"Host directory path for mounting cannot be empty string",
+			slog.String("suggestion", "Specify which host directory will be mounted into the container"),
+			slog.Any("error", err),
+		)
+	}
+	if opts.WorkdirContainer == "" {
+		err = errors.Join(err, errDirectoryNotSpecified)
+		slog.Error(
+			"WORKDIR cannot be empty string",
+			slog.String("suggestion", "Specify working directory for the container"),
+			slog.Any("error", err),
+		)
+	}
+
+	// The mount target directory in container must not be root
+	if opts.MountContainerDir == "." || opts.MountContainerDir == "/" {
+		err = errors.Join(err, errDirectoryInvalid)
+		slog.Error(
+			"Container mountpoint cannot be '.' or '/'",
+			slog.String("suggestion", "Pick another directory, preferably absolute path"),
+			slog.Any("error", err),
+		)
+	}
+	return err
+}
+
 // Setup for setting up a Docker container via dagger
 func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	// dockerfileDirectoryPath allows to use Dockerfile and build locally,
 	//   which is handy for testing changes to said Dockerfile without the need to
 	//   have the container uploaded into package registry
 
-	// None of the directories can be empty string
-	for _, val := range []string{opts.MountContainerDir, opts.MountHostDir, opts.WorkdirContainer} {
-		if val == "" {
-			return nil, errDirectoryNotSpecified
-		}
-	}
-
-	// The mount target directory in container must not be root
-	if opts.MountContainerDir == "." || opts.MountContainerDir == "/" {
-		return nil, errDirectoryInvalid
+	err := opts.Validate()
+	if err != nil {
+		return nil, err
 	}
 
 	// Setup container either from URL or build from Dockerfile
 	var container *dagger.Container
 	if dockerfileDirectoryPath == "" {
 		// Use URL
-		fmt.Println("Container setup: URL mode")
+		slog.Info("Container setup running in URL mode")
 
 		// Make sure there is a non-empty URL or name provided
 		if opts.ContainerURL == "" {
+			slog.Error(
+				"Container setup was provided with empty URL",
+				slog.String("suggestion", "Provide URL or Dockerfile"),
+				slog.Any("error", errEmptyURL),
+			)
 			return nil, errEmptyURL
 		}
 
@@ -62,7 +102,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 		container = client.Container().From(opts.ContainerURL)
 	} else {
 		// Use Dockerfile
-		fmt.Println("Container setup: Dockerfile mode")
+		slog.Info("Container setup running in Dockerfile mode")
 
 		container = client.Container().Build(
 			client.Host().Directory(dockerfileDirectoryPath),
@@ -70,19 +110,27 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 	}
 
 	// Mount repository into the container
-	return container.
+	//   WithDirectory
+	//     Copy files from host to container
+	//     Creates directory tree if needed
+	//   WithMountedDirectory
+	//     Create a OverlayFS with bottom layer Read-Only
+	//     Directory in container must exist
+	container, err = container.
 		WithExec([]string{"mkdir", "-p", opts.MountContainerDir}).
 		WithMountedDirectory(
 			opts.MountContainerDir,
 			client.Host().Directory(opts.MountHostDir)).
 		WithWorkdir(opts.WorkdirContainer).
 		Sync(ctx)
-	// WithDirectory
-	//	Copy files from host to container
-	//	Creates directory tree if needed
-	// WithMountedDirectory
-	//	Create a OverlayFS with bottom layer Read-Only
-	//	Directory in container must exist
+	if err != nil {
+		slog.Error(
+			"Failed to spin up a container",
+			// slog.String("suggestion", "call help"),
+			slog.Any("error", err),
+		)
+	}
+	return container, err
 }
 
 // Artifacts is passes to GetArtifacts as argument, and specifies extraction of files
@@ -134,6 +182,7 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		if err != nil || !success {
 			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, err, artifact.ContainerPath, artifact.HostPath)
 		}
+		slog.Debug(fmt.Sprintf("Artifact export: %s -> %s", artifact.ContainerPath, artifact.HostPath))
 	}
 
 	return nil
