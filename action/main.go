@@ -9,24 +9,35 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"regexp"
 
 	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/9elements/firmware-action/action/logging"
 	"github.com/9elements/firmware-action/action/recipes"
 	"github.com/alecthomas/kong"
 	"github.com/sethvargo/go-githubactions"
 )
 
 func main() {
+	logging.InitLogger(slog.LevelInfo)
+
 	if err := run(context.Background()); err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"firmware-action failed",
+			slog.Any("error", err),
+		)
+		os.Exit(1)
 	}
 }
 
 // CLI (Command Line Interface) holds data from environment
 var CLI struct {
+	JSON   bool `default:"false" help:"switch to JSON stdout and stderr output"`
+	Indent bool `default:"false" help:"enable indentation for JSON output"`
+	Debug  bool `default:"false" help:"increase verbosity"`
+
 	Config string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file"`
 
 	Build struct {
@@ -39,16 +50,28 @@ var CLI struct {
 }
 
 func run(ctx context.Context) error {
-	err := getInputsFromEnvironment()
+	// Get arguments
+	mode, err := getInputsFromEnvironment()
 	if err != nil {
 		return err
 	}
-	log.Printf(
-		"Inputs:\nConfig:    %s\nTarget:    %s\nRecursive: %t\nInteractive: %t\n",
-		CLI.Config,
-		CLI.Build.Target,
-		CLI.Build.Recursive,
-		CLI.Build.Interactive,
+
+	// Properly initialize logging
+	level := slog.LevelInfo
+	if CLI.Debug {
+		level = slog.LevelDebug
+	}
+	logging.InitLogger(
+		level,
+		logging.WithJSON(CLI.JSON),
+		logging.WithIndent(CLI.Indent),
+	)
+	slog.Info(
+		fmt.Sprintf("Running in %s mode", mode),
+		slog.String("input/config", CLI.Config),
+		slog.String("input/target", CLI.Build.Target),
+		slog.Bool("input/recursive", CLI.Build.Recursive),
+		slog.Bool("input/interactive", CLI.Build.Interactive),
 	)
 
 	// Parse configuration file
@@ -70,12 +93,11 @@ func run(ctx context.Context) error {
 	return err
 }
 
-func getInputsFromEnvironment() error {
+func getInputsFromEnvironment() (string, error) {
 	// Check for GitHub
 	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
 	_, exists := os.LookupEnv("GITHUB_ACTIONS")
 	if exists {
-		log.Print("Running in GitHub mode")
 		return parseGithub()
 	}
 
@@ -86,9 +108,8 @@ func getInputsFromEnvironment() error {
 	return parseCli()
 }
 
-func parseCli() error {
+func parseCli() (string, error) {
 	// Get inputs from command line options
-	log.Print("Running in CLI mode")
 	ctx := kong.Parse(
 		&CLI,
 		kong.Description("Utility to create firmware images for several open source firmware solutions"),
@@ -97,49 +118,68 @@ func parseCli() error {
 			"config_file": "firmware-action.json",
 		},
 	)
+	mode := "CLI"
 
 	switch ctx.Command() {
 	case "build":
 		// This is handled elsewhere
-		return nil
+		return mode, nil
 
 	case "generate-config":
 		// Check if config file exists
 		err := filesystem.CheckFileExists(CLI.Config)
 		if !errors.Is(err, os.ErrNotExist) {
 			// The file exists, or is directory, or some other problem
-			log.Printf("Can't generate configuration file at: %s", CLI.Config)
-			return fmt.Errorf("%w: %s", err, CLI.Config)
+			slog.Error(
+				fmt.Sprintf("Can't generate configuration file at: %s", CLI.Config),
+				slog.Any("error", err),
+			)
+			return mode, err
 		}
 
 		// Create empty config
 		myConfig := recipes.Config{
-			Coreboot: map[string]recipes.CorebootOpts{"coreboot-example": {}},
-			Linux:    map[string]recipes.LinuxOpts{"linux-example": {}},
-			Edk2:     map[string]recipes.Edk2Opts{"edk2-example": {}},
+			Coreboot:          map[string]recipes.CorebootOpts{"coreboot-example": {}},
+			Linux:             map[string]recipes.LinuxOpts{"linux-example": {}},
+			Edk2:              map[string]recipes.Edk2Opts{"edk2-example": {}},
+			FirmwareStitching: map[string]recipes.FirmwareStitchingOpts{"stitching-example": {}},
 		}
 
 		// Convert to JSON
 		jsonString, err := json.MarshalIndent(myConfig, "", "  ")
 		if err != nil {
-			fmt.Println("Unable to convert the config struct into a JSON string")
+			slog.Error(
+				"Unable to convert the config struct into a JSON string",
+				slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+				slog.Any("error", err),
+			)
+			return mode, err
 		}
 
 		// Write to file
-		log.Printf("Generating configuration file at: %s", CLI.Config)
+		slog.Info(fmt.Sprintf("Generating configuration file at: %s", CLI.Config))
 		if err := os.WriteFile(CLI.Config, jsonString, 0o666); err != nil {
-			log.Fatal(err)
+			slog.Error(
+				"Unable to write generated configuration into file",
+				slog.Any("error", err),
+			)
+			return mode, err
 		}
-		os.Exit(0)
+		return mode, nil
 
 	default:
-		log.Fatal("Supplied unsupported command")
+		// This should not happen
+		err := errors.New("unsupported command")
+		slog.Error(
+			"Supplied unsupported command",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
+		return mode, err
 	}
-
-	return nil
 }
 
-func parseGithub() error {
+func parseGithub() (string, error) {
 	// Get inputs from GitHub environment
 	action := githubactions.New()
 	regexTrue := regexp.MustCompile(`(?i)true`)
@@ -147,6 +187,7 @@ func parseGithub() error {
 	CLI.Config = action.GetInput("config")
 	CLI.Build.Target = action.GetInput("target")
 	CLI.Build.Recursive = regexTrue.MatchString(action.GetInput("recursive"))
+	CLI.JSON = regexTrue.MatchString(action.GetInput("json"))
 
-	return nil
+	return "GitHub", nil
 }
