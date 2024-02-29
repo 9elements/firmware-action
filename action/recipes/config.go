@@ -6,14 +6,21 @@ package recipes
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/action/logging"
 	"github.com/go-playground/validator/v10"
 )
+
+// ErrVerboseJSON is raised when JSONVerboseError can't find location of problem in JSON configuration file
+var ErrVerboseJSON = errors.New("unable to pinpoint the problem in JSON file")
 
 // =================
 //  Data structures
@@ -144,56 +151,147 @@ func ValidateConfig(conf Config) error {
 
 	err := validate.Struct(conf)
 	if err != nil {
-		log.Print(err)
-		return ErrRequiredOptionUndefined
+		err = errors.Join(ErrFailedValidation, err)
+		slog.Error(
+			"Configuration file failed validation",
+			slog.String("suggestion", "Double check the used configuration file"),
+			slog.Any("error", err),
+		)
+		return err
 	}
 	return nil
 }
 
 // ReadConfig is for reading and parsing JSON configuration file into Config struct
-func ReadConfig(filepath string) (Config, error) {
+func ReadConfig(filepath string) (*Config, error) {
 	// Read JSON file
 	content, err := os.ReadFile(filepath)
 	if err != nil {
-		log.Fatal("Error when opening file: ", err)
-		return Config{}, err
+		slog.Error(
+			fmt.Sprintf("Unable to open the configuration file '%s'", filepath),
+			slog.Any("error", err),
+		)
+		return nil, err
 	}
 
 	// Expand environment variables
 	contentStr := string(content)
 	contentStr = os.ExpandEnv(contentStr)
-	content = []byte(contentStr)
 
 	// Decode JSON
+	jsonDecoder := json.NewDecoder(strings.NewReader(contentStr))
+	jsonDecoder.DisallowUnknownFields()
+	// jsonDecoder will return error when contentStr has keys not matching fields in Config struct
 	var payload Config
-	err = json.Unmarshal(content, &payload)
+	err = jsonDecoder.Decode(&payload)
 	if err != nil {
-		log.Fatal("Error during Unmarshal(): ", err)
-		return Config{}, err
+		JSONVerboseError(contentStr, err)
+		return nil, err
 	}
 
 	// Validate config
 	err = ValidateConfig(payload)
 	if err != nil {
-		log.Print("Provided JSON configuration file failed validation")
-		return Config{}, err
+		// no slog.Error because already called in ValidateConfig
+		return nil, err
 	}
 
-	return payload, nil
+	return &payload, nil
 }
 
 // WriteConfig is for writing Config struct into JSON configuration file
-func WriteConfig(filepath string, config Config) error {
+func WriteConfig(filepath string, config *Config) error {
 	// Generate JSON
 	b, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
-		log.Fatal("Unable to convert the struct to a JSON string")
+		slog.Error(
+			"Unable to convert the configuration into a JSON string",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
+		return err
 	}
 
 	// Write JSON to file
 	if err := os.WriteFile(filepath, b, 0o666); err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"Failed to write configuration into JSON file",
+			slog.Any("error", err),
+		)
+		return err
 	}
 
 	return nil
+}
+
+// JSONVerboseError is for getting more information out of json.Unmarshal() or Decoder.Decode()
+//
+//	Inspiration:
+//	- https://adrianhesketh.com/2017/03/18/getting-line-and-character-positions-from-gos-json-unmarshal-errors/
+//	Docs:
+//	- https://pkg.go.dev/encoding/json#Unmarshal
+func JSONVerboseError(jsonString string, err error) {
+	if jsonError, ok := err.(*json.SyntaxError); ok {
+		// JSON-encoded data contain a syntax error
+		line, character, _ := offsetToLineNumber(jsonString, int(jsonError.Offset))
+		slog.Error(
+			// https://pkg.go.dev/encoding/json#SyntaxError
+			fmt.Sprintf("Syntax error at line %d, character %d", line, character),
+			slog.Any("error", jsonError.Error()),
+		)
+		return
+	}
+	if jsonError, ok := err.(*json.UnmarshalTypeError); ok {
+		// JSON value is not appropriate for a given target type
+		line, character, _ := offsetToLineNumber(jsonString, int(jsonError.Offset))
+		slog.Error(
+			fmt.Sprintf(
+				"Expected type '%v', JSON contains field '%v' in struct '%s' instead (full path: %s), see line %d, character %d",
+				// https://pkg.go.dev/encoding/json#UnmarshalTypeError
+				jsonError.Type.Name(), // Go type
+				jsonError.Value,       // JSON field type
+				jsonError.Struct,      // Name of struct type containing the field
+				jsonError.Field,       // the full path from root node to the field
+				line,
+				character,
+			),
+			slog.Any("error", jsonError.Error()),
+		)
+		return
+	}
+	slog.Error(
+		"Sorry but could not pinpoint specific location of the problem in the JSON configuration file",
+		slog.Any("error", err),
+	)
+}
+
+func offsetToLineNumber(input string, offset int) (line int, character int, err error) {
+	// NOTE: I do not take into account windows line endings
+	//       I can't be bothered, the worst case is that with windows line-endings the character counter
+	//       will be off by 1, which is a sacrifice I am willing to make
+
+	if offset > len(input) || offset < 0 {
+		err = fmt.Errorf("offset is out of bounds for given string: %w", ErrVerboseJSON)
+		slog.Warn(
+			"Failed to pinpoint exact location of error in JSON configuration file",
+			slog.Any("error", err),
+		)
+		return 0, 0, err
+	}
+
+	line = 1
+	character = 0
+	for index, char := range input {
+		if char == '\n' {
+			line++
+			character = 0
+			continue
+		}
+		character++
+		if index >= offset {
+			break
+		}
+	}
+
+	return
 }

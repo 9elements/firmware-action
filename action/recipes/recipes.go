@@ -17,9 +17,9 @@ import (
 	"github.com/heimdalr/dag"
 )
 
-// ErrRequiredOptionUndefined is raised when required option is empty or undefined
+// Errors for recipes
 var (
-	ErrRequiredOptionUndefined   = errors.New("required option is undefined")
+	ErrFailedValidation          = errors.New("config failed validation")
 	ErrTargetMissing             = errors.New("no target specified")
 	ErrTargetInvalid             = errors.New("unsupported target")
 	ErrBuildFailed               = errors.New("build failed")

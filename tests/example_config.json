@@ -3,7 +3,6 @@
     "coreboot-example": {
       "depends": null,
       "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
-      "arch": "",
       "repo_path": "my_super_dooper_awesome_coreboot/",
       "defconfig_path": "seabios_defconfig",
       "output_dir": "output-coreboot/",
