@@ -75,7 +75,7 @@ func run(ctx context.Context) error {
 	)
 
 	// Parse configuration file
-	var myConfig recipes.Config
+	var myConfig *recipes.Config
 	myConfig, err = recipes.ReadConfig(CLI.Config)
 	if err != nil {
 		return err

@@ -47,8 +47,8 @@ func Build(
 	target string,
 	recursive bool,
 	interactive bool,
-	config Config,
-	executor func(context.Context, string, Config, bool) error,
+	config *Config,
+	executor func(context.Context, string, *Config, bool) error,
 ) ([]string, error) {
 	dependencyForest := dag.NewDAG()
 	dependencies := [][]string{}
@@ -118,7 +118,7 @@ func Build(
 }
 
 // Execute a build step
-func Execute(ctx context.Context, target string, config Config, interactive bool) error {
+func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
 	// Setup dagger client
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	if err != nil {

@@ -39,13 +39,13 @@ func TestExecute(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err = Execute(ctx, tc.target, tc.config, interactive)
+			err = Execute(ctx, tc.target, &tc.config, interactive)
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
 }
 
-func executeDummy(_ context.Context, _ string, _ Config, _ bool) error {
+func executeDummy(_ context.Context, _ string, _ *Config, _ bool) error {
 	return nil
 }
 
@@ -160,7 +160,7 @@ func TestBuild(t *testing.T) {
 				tc.target,
 				tc.recursive,
 				interactive,
-				tc.config,
+				&tc.config,
 				executeDummy,
 			)
 			assert.ErrorIs(t, err, tc.wantErr)
@@ -173,7 +173,7 @@ func TestBuild(t *testing.T) {
 			"pizza",
 			recursive,
 			interactive,
-			testConfigDependencyHell,
+			&testConfigDependencyHell,
 			executeDummy,
 		)
 		assert.ErrorIs(t, err, nil)
