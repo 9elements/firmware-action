@@ -38,13 +38,13 @@ func TestValidateConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "missing required coreboot opts",
+			name:    "missing required coreboot opts",
+			wantErr: ErrFailedValidation,
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {},
 				},
 			},
-			wantErr: ErrRequiredOptionUndefined,
 		},
 		{
 			name:    "required coreboot opts present",
@@ -73,7 +73,7 @@ func TestValidateConfig(t *testing.T) {
 		},
 		{
 			name:    "missing common opts",
-			wantErr: ErrRequiredOptionUndefined,
+			wantErr: ErrFailedValidation,
 			opts: Config{
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
@@ -104,7 +104,7 @@ func TestConfigReadAndWrite(t *testing.T) {
 	configFilepath := filepath.Join(tmpDir, "test.json")
 
 	// Write
-	err := WriteConfig(configFilepath, configOriginal)
+	err := WriteConfig(configFilepath, &configOriginal)
 	assert.NoError(t, err)
 
 	// Read
@@ -112,7 +112,7 @@ func TestConfigReadAndWrite(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Compare
-	equal := cmp.Equal(configOriginal, configNew)
+	equal := cmp.Equal(&configOriginal, configNew)
 	if !equal {
 		fmt.Println(cmp.Diff(configOriginal, configNew))
 		assert.True(t, equal, "written and read configuration are not equal")
@@ -206,7 +206,7 @@ func TestConfigEnvVars(t *testing.T) {
 			tmpDir := t.TempDir()
 			configFilepath := filepath.Join(tmpDir, "test.json")
 			// Write
-			err := WriteConfig(configFilepath, opts)
+			err := WriteConfig(configFilepath, &opts)
 			assert.NoError(t, err)
 			// Read
 			optsConverted, err := ReadConfig(configFilepath)
@@ -216,6 +216,87 @@ func TestConfigEnvVars(t *testing.T) {
 			assert.ErrorIs(t, err, tc.wantErr)
 			assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].SdkURL)
 			assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].RepoPath)
+		})
+	}
+}
+
+func TestOffsetToLineNumber(t *testing.T) {
+	testCases := []struct {
+		name      string
+		input     string
+		offset    int
+		line      int
+		character int
+		wantErr   error
+	}{
+		{
+			name:    "empty string",
+			input:   "",
+			offset:  1,
+			wantErr: ErrVerboseJSON,
+		},
+		{
+			name:      "1 line, offset 0",
+			input:     "dummy line",
+			offset:    0,
+			line:      1,
+			character: 1,
+			wantErr:   nil,
+		},
+		{
+			name:      "1 line, offset 1",
+			input:     "dummy line",
+			offset:    1,
+			line:      1,
+			character: 2,
+			wantErr:   nil,
+		},
+		{
+			name: "2 lines, offset in 1st line",
+			// offset:  012345 6789
+			input:     "dummy\nline",
+			offset:    1,
+			line:      1,
+			character: 2,
+			wantErr:   nil,
+		},
+		{
+			name: "2 lines, offset end of 1st line",
+			// offset:  012345 6789
+			input:     "dummy\nline",
+			offset:    4,
+			line:      1,
+			character: 5,
+			wantErr:   nil,
+		},
+		{
+			name:      "2 lines, offset in 2nd line",
+			input:     "dummy\nline",
+			offset:    7,
+			line:      2,
+			character: 2,
+			wantErr:   nil,
+		},
+		{
+			name: "2 lines, offset in 2nd line",
+			// offset:  0 1 2 3 4567
+			input:     "\n\n\n\nline",
+			offset:    7,
+			line:      5,
+			character: 4,
+			wantErr:   nil,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			line, character, err := offsetToLineNumber(tc.input, tc.offset)
+			assert.ErrorIs(t, err, tc.wantErr)
+			if err != nil {
+				// no need to continue on error
+				return
+			}
+			assert.Equal(t, tc.line, line, "line is wrong")
+			assert.Equal(t, tc.character, character, "character is wrong")
 		})
 	}
 }

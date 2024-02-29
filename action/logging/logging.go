@@ -10,6 +10,10 @@ import (
 	"runtime"
 )
 
+// ThisShouldNotHappenMessage contains a string which should be used in error message where the error justifies
+// opening an issue in issue tracker
+const ThisShouldNotHappenMessage = "this should not happen, please open an issue in issue tracker at https://github.com/9elements/firmware-action/issues"
+
 // InitLogger is used to initialize logger
 func InitLogger(level slog.Level, opts ...PrettyHandlerOption) {
 	// Deal with log level
