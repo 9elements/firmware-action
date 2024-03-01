@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"dagger.io/dagger"
@@ -111,7 +111,10 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		log.Print("Failed to start a container")
+		slog.Error(
+			"Failed to start a container",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 
@@ -155,7 +158,11 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 				return nil, err
 			}
 		} else {
-			log.Printf("Failed to read file '%s' as defconfig_path: file does not exist", opts.DefconfigPath)
+			slog.Warn(
+				fmt.Sprintf("Failed to read file '%s' as defconfig_path: file does not exist", opts.DefconfigPath),
+				slog.String("suggestion", "Double check the path for defconfig"),
+				slog.Any("error", err),
+			)
 		}
 	}
 
@@ -173,7 +180,10 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			log.Print("Failed building of edk2")
+			slog.Error(
+				"Failed to build edk2",
+				slog.Any("error", err),
+			)
 			return myContainerPrevious, fmt.Errorf("edk2 build failed: %w", err)
 		}
 	}
