@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"slices"
 	"sync"
@@ -98,12 +98,12 @@ func Build(
 	slices.Reverse(queue)
 
 	// Build each item in queue (if recursive)
-	log.Printf("building queue: %v", queue)
+	slog.Info(fmt.Sprintf("Building queue: %v", queue))
 	if recursive {
 		builds := []string{}
-		log.Printf("building '%s' recursively", target)
+		slog.Info(fmt.Sprintf("Building '%s' recursively", target))
 		for _, item := range queue {
-			log.Printf("- building %s", item)
+			slog.Info(fmt.Sprintf("Building: %s", item))
 			err = executor(ctx, item, config, interactive)
 			if err != nil {
 				return nil, err
@@ -113,7 +113,7 @@ func Build(
 		return builds, nil
 	}
 	// else build only the target
-	log.Printf("building '%s' NOT recursively", target)
+	slog.Info(fmt.Sprintf("Building '%s' NOT recursively", target))
 	return []string{target}, executor(ctx, target, config, interactive)
 }
 
