@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,6 +15,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/action/logging"
 	"github.com/dustin/go-humanize"
 )
 
@@ -158,10 +159,10 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	for _, entry := range opts.IfdtoolEntries {
 		filename := filepath.Base(entry.Path)
 		if _, ok := copiedFiles[filename]; ok {
-			log.Printf(
-				"Filename conflict:\n file '%s'\n and '%s\n have the same filename",
-				entry.Path,
-				copiedFiles[filename],
+			slog.Error(
+				fmt.Sprintf("File '%s' and '%s' have the same filename", entry.Path, copiedFiles[filename]),
+				slog.String("suggestion", "Each file must have a unique name because they get copied into single directory"),
+				slog.Any("error", os.ErrExist),
 			)
 			return nil, os.ErrExist
 		}
@@ -177,14 +178,21 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		log.Print("Failed to start a container")
+		slog.Error(
+			"Failed to start a container",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 
 	// Copy all the files into container
 	pwd, err := os.Getwd()
 	if err != nil {
-		log.Print("Could not get working directory, should not happen")
+		slog.Error(
+			"Could not get working directory, should not happen",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 	newBaseFilePath := filepath.Join(ContainerWorkDir, filepath.Base(opts.BaseFilePath))
@@ -205,23 +213,30 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 
 	// Get the size of image (total size)
 	cmd := ifdtoolCmd(opts.Platform, []string{"--dump", opts.BaseFilePath})
-	log.Printf("cmd: %v", cmd)
 	myContainerPrevious := myContainer
 	ifdtoolStdout, err := myContainer.WithExec(cmd).Stdout(ctx)
 	if err != nil {
-		log.Print("Failed to dump intel firmware descriptor")
+		slog.Error(
+			"Failed to dump Intel Firmware Descriptor (IFD)",
+			slog.Any("error", err),
+		)
 		return myContainerPrevious, err
 	}
 	size, err := ExtractSizeFromString(ifdtoolStdout)
 	if err != nil {
-		log.Print("Failed extract size from IFD")
+		slog.Error(
+			"Failed extract size from Intel Firmware Descriptor (IFD)",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 	var totalSize uint64
 	for _, i := range size {
 		totalSize += i
 	}
-	log.Printf("IFD defined size: %s B", humanize.Comma(int64(totalSize)))
+	slog.Info(
+		fmt.Sprintf("Intel Firmware Descriptor (IFD) detected size: %s B", humanize.Comma(int64(totalSize))),
+	)
 
 	// Read the base file
 	baseFile, err := os.ReadFile(oldBaseFilePath)
@@ -229,19 +244,20 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 		return nil, err
 	}
 	baseFileSize := uint64(len(baseFile))
-	log.Printf(
-		"Size of '%s': %s B",
-		filepath.Base(oldBaseFilePath),
-		humanize.Comma(int64(baseFileSize)),
+	slog.Info(
+		fmt.Sprintf("Size of '%s': %s B", filepath.Base(oldBaseFilePath), humanize.Comma(int64(baseFileSize))),
 	)
 	if baseFileSize > totalSize {
-		log.Printf(
-			"provided base_file '%s' is bigger (%s B) than defined in IFD (%s B)",
-			filepath.Base(oldBaseFilePath),
-			humanize.Comma(int64(baseFileSize)),
-			humanize.Comma(int64(totalSize)),
+		err = errBaseFileBiggerThanIfd
+		slog.Error(
+			fmt.Sprintf("Provided base_file '%s' is bigger (%s B) than defined in IFD (%s B)",
+				filepath.Base(oldBaseFilePath),
+				humanize.Comma(int64(baseFileSize)),
+				humanize.Comma(int64(totalSize)),
+			),
+			slog.Any("error", err),
 		)
-		return nil, errBaseFileBiggerThanIfd
+		return nil, err
 	}
 
 	// Take baseFile content and expand it to correct size
@@ -255,11 +271,13 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	firmwareImage = append(firmwareImage, blank[:]...)
 
 	imageFilename := fmt.Sprintf("new_%s", filepath.Base(opts.BaseFilePath))
-	log.Printf(
-		"File '%s' is being expanded to ROM size %s B as '%s'",
-		filepath.Base(opts.BaseFilePath),
-		humanize.Comma(int64(len(firmwareImage))),
-		imageFilename,
+	slog.Info(
+		fmt.Sprintf(
+			"File '%s' is being expanded to ROM size %s B as '%s'",
+			filepath.Base(opts.BaseFilePath),
+			humanize.Comma(int64(len(firmwareImage))),
+			imageFilename,
+		),
 	)
 	firmwareImageFile, err := os.Create(imageFilename)
 	if err != nil {
@@ -277,11 +295,12 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 
 	// Populate regions with ifdtool
 	for entry := range opts.IfdtoolEntries {
-		log.Printf(
-			"Injecting '%s' into '%s' region in '%s'",
-			opts.IfdtoolEntries[entry].Path,
-			opts.IfdtoolEntries[entry].TargetRegion,
-			imageFilename,
+		slog.Info(
+			fmt.Sprintf("Injecting '%s' into '%s' region in '%s'",
+				opts.IfdtoolEntries[entry].Path,
+				opts.IfdtoolEntries[entry].TargetRegion,
+				imageFilename,
+			),
 		)
 
 		// Inject binaries
@@ -295,11 +314,10 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 				imageFilename,
 			},
 		)
-		log.Printf("cmd: %v", cmd)
 		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
-			log.Print("Failed to inject region")
+			slog.Error("Failed to inject region")
 			return myContainerPrevious, err
 		}
 
@@ -309,11 +327,12 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
-			log.Printf("Failed to rename '%s' to '%s'", imageFilenameNew, imageFilename)
+			slog.Error(
+				fmt.Sprintf("Failed to rename '%s' to '%s'", imageFilenameNew, imageFilename),
+			)
 			return myContainerPrevious, err
 		}
 	}
-	log.Print(opts.CommonOpts.GetArtifacts())
 
 	// Extract artifacts
 	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
