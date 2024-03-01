@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -17,6 +17,7 @@ import (
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
 	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/9elements/firmware-action/action/logging"
 )
 
 // BlobDef is used to store information about a single blob.
@@ -204,7 +205,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		log.Print("Failed to start a container")
+		slog.Error(
+			"Failed to start a container",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 
@@ -213,7 +217,11 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
-		log.Print("Could not get working directory, should not happen")
+		slog.Error(
+			"Could not get working directory, should not happen",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 	myContainer = myContainer.WithFile(
@@ -230,7 +238,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
 		Stdout(ctx)
 	if err != nil {
-		log.Print("Failed to get value of MAINBOARD_DIR from .config")
+		slog.Error(
+			"Failed to get value of MAINBOARD_DIR from .config",
+			slog.Any("error", err),
+		)
 		return myContainerPrevious, err
 	}
 	//   strip newline from mainboardDir
@@ -251,7 +262,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	//   options for said blobs (this must run inside container).
 	blobs, err := corebootProcessBlobs(opts.Blobs)
 	if err != nil {
-		log.Print("Failed to process all blobs")
+		slog.Error(
+			"Failed to process all blobs",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 	for blob := range blobs {
@@ -272,7 +286,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		}
 		if blobs[blob].IsDirectory {
 			// Directory
-			log.Printf("Copying directory '%s' to container at '%s'", src, dst)
+			slog.Info(fmt.Sprintf("Copying directory '%s' to container at '%s'", src, dst))
 			myContainer = myContainer.WithExec([]string{"mkdir", "-p", dst})
 			// myContainer = myContainer.WithMountedDirectory(
 			// can't use WithMountedDirectory because the repo (aka working directory)
@@ -319,11 +333,13 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			log.Print("Failed building of coreboot")
+			slog.Error(
+				"Failed to build coreboot",
+				slog.Any("error", err),
+			)
 			return myContainerPrevious, fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
-	log.Print(opts.CommonOpts.GetArtifacts())
 
 	// Extract artifacts
 	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
