@@ -101,12 +101,14 @@ RUN mkdir Edk2Platforms && \
     git init && \
     git remote add origin https://github.com/tianocore/edk2-platforms.git && \
     git fetch --depth 1 origin "${EDK2_PLATFORM_COMMIT}" && \
+    git checkout "${EDK2_PLATFORM_COMMIT}" && \
     git submodule update --init --recursive
 RUN mkdir Edk2NonOsi && \
     cd Edk2NonOsi && \
     git init && \
     git remote add origin https://github.com/tianocore/edk2-non-osi.git && \
     git fetch --depth 1 origin "${EDK2_NON_OSI_COMMIT}" && \
+    git checkout "${EDK2_NON_OSI_COMMIT}" && \
     git submodule update --init --recursive
 RUN git clone --depth 1 --recurse-submodules https://github.com/tianocore/edk2.git --depth 1 --branch "${EDK2_VERSION}" Edk2 && \
     cd Edk2 && \
