@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"dagger.io/dagger"
 )
@@ -124,11 +125,26 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 		WithWorkdir(opts.WorkdirContainer).
 		Sync(ctx)
 	if err != nil {
-		slog.Error(
-			"Failed to spin up a container",
-			// slog.String("suggestion", "call help"),
-			slog.Any("error", err),
-		)
+		message := "Failed to spin up a container"
+		if errors.Is(err, context.DeadlineExceeded) {
+			slog.Error(
+				message,
+				slog.String("suggestion", "Your network configuration likely changed, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"),
+				slog.Any("error", err),
+			)
+		}
+		if strings.Contains(err.Error(), "failed to do request") && strings.Contains(err.Error(), "i/o timeout") {
+			slog.Error(
+				message,
+				slog.String("suggestion", "try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"),
+				slog.Any("error", err),
+			)
+		} else {
+			slog.Error(
+				message,
+				slog.Any("error", err),
+			)
+		}
 	}
 	return container, err
 }
