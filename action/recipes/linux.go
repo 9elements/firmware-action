@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,6 +15,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/action/logging"
 )
 
 var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-compilation")
@@ -75,7 +76,10 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {
-		log.Print("Failed to start a container")
+		slog.Error(
+			"Failed to start a container",
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 
@@ -97,7 +101,11 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
 	if err != nil {
-		log.Print("Could not get working directory, should not happen")
+		slog.Error(
+			"Could not get working directory, should not happen",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
 		return nil, err
 	}
 	myContainer = myContainer.WithFile(
@@ -119,8 +127,12 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 
 	val, ok := crossCompile[opts.Arch]
 	if !ok {
-		log.Print("Selected unknown cross compilation target architecture")
-		return nil, errUnknownArchCrossCompile
+		err = errUnknownArchCrossCompile
+		slog.Error(
+			"Selected unknown cross compilation target architecture",
+			slog.Any("error", err),
+		)
+		return nil, err
 	}
 	if val != "" {
 		envVars["CROSS_COMPILE"] = val
@@ -156,7 +168,10 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 			WithExec(buildSteps[step]).
 			Sync(ctx)
 		if err != nil {
-			log.Print("Failed building of linux")
+			slog.Error(
+				"Failed to build linux",
+				slog.Any("error", err),
+			)
 			return myContainerPrevious, fmt.Errorf("linux build failed: %w", err)
 		}
 	}
