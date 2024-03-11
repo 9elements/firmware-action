@@ -3,7 +3,6 @@
 
 name: dagger
 on:
-  release:
   pull_request:
     paths:
       - 'docker/**'
@@ -11,6 +10,7 @@ on:
     branches: ['main']
     paths:
       - 'docker/**'
+    tags: ['v*']
   schedule:
     # Sunday midnight
     - cron: '0 0 * * 0'

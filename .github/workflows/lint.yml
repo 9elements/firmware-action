@@ -3,11 +3,11 @@
 
 name: Lint
 on:
-  release:
   pull_request:
   merge_group:
   push:
     branches: ['main']
+    tags: ['v*']
 
 env:
   APPLY_FIXES: none

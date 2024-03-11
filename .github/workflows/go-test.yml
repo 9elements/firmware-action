@@ -3,11 +3,11 @@
 
 name: go test
 on:
-  release:
   pull_request:
   merge_group:
   push:
     branches: ['main']
+    tags: ['v*']
 
 permissions:
   contents: read
