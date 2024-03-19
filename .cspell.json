@@ -82,6 +82,7 @@
     "menuconfig",
     "modifyitems",
     "mountpoint",
+    "naturalsize",
     "nolint",
     "nproc",
     "nvramcui",
