@@ -69,7 +69,7 @@ RUN dpkg --add-architecture i386 && \
     \
     wget --quiet -O rustup.sh https://sh.rustup.rs && \
         chmod +x ./rustup.sh && \
-        ./rustup.sh -y
+        ./rustup.sh -y --profile minimal
 
 
 #=============
