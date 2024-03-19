@@ -1,6 +1,7 @@
 """
 The main class to abstract all actions
 """
+
 # pylint: disable=too-many-instance-attributes
 # mypy: disable-error-code="import"
 
@@ -245,17 +246,19 @@ class Orchestrator:
             self.results.add(top_element, dockerfile, "build", False, exc.message)
             return
         except dagger.QueryError as exc:
-            self.results.add(top_element, dockerfile, "build", False, exc.debug_query())  # type: ignore [no-untyped-call]
+            self.results.add(
+                top_element, dockerfile, "build", False, exc.debug_query()
+            )  # type: ignore [no-untyped-call]
             return
         self.results.add(top_element, dockerfile, "build")
 
         # add container specific labels into self.labels
-        self.labels[
-            "org.opencontainers.image.description"
-        ] = f"Container for building {dockerfile}"
-        self.labels[
-            "org.opencontainers.image.title"
-        ] = f"{self.organization}/{self.project_name}/{dockerfile}"
+        self.labels["org.opencontainers.image.description"] = (
+            f"Container for building {dockerfile}"
+        )
+        self.labels["org.opencontainers.image.title"] = (
+            f"{self.organization}/{self.project_name}/{dockerfile}"
+        )
 
         # add labels to the container
         for name, val in self.labels.items():

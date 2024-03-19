@@ -5,6 +5,7 @@ Docs: https://docs.docker.com/compose/compose-file/
 !!! This class / parser is incomplete implementation of docker-compose specification !!!
 It implements only specific functions that are needed in this specific project.
 """
+
 # mypy: disable-error-code="import"
 
 import logging

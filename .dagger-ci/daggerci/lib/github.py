@@ -1,6 +1,7 @@
 """
 Functions to deal github stuff
 """
+
 # mypy: disable-error-code="import"
 
 import re

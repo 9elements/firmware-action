@@ -1,6 +1,7 @@
 """
 Class to handle results of building, testing and publishing
 """
+
 # pylint: disable=too-many-arguments
 
 import logging
