@@ -12,6 +12,13 @@ import re
 import sys
 from typing import Any
 
+try:
+    import humanize
+except ImportError:
+    HUMANIZE_INSTALLED = False
+else:
+    HUMANIZE_INSTALLED = True
+
 import anyio
 import dagger
 from lib.docker_compose import DockerCompose, DockerComposeValidate
@@ -389,6 +396,15 @@ class Orchestrator:
             # No return here, so the execution continues normally
         finally:
             # Cleanup
+            size = os.path.getsize(tarball_file)
+            if HUMANIZE_INSTALLED:
+                logging.info(
+                    "Size of '%s' tarball is %s",
+                    tarball_file,
+                    humanize.naturalsize(int(size)),
+                )
+            else:
+                logging.info("Size of '%s' tarball is %d Bytes", tarball_file, size)
             os.remove(tarball_file)
 
     async def __publish__(
