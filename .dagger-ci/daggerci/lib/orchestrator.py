@@ -338,6 +338,7 @@ class Orchestrator:
         """
         Test / verify that the built container is functional by executing a script inside
         """
+        # pylint: disable=too-many-locals
         # Create container from tarball
         context_tarball = client.host().file(tarball_file)
         test_container = client.pipeline("test").container().import_(context_tarball)
