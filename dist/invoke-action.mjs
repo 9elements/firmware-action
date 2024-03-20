@@ -2,7 +2,7 @@ import { spawnSync } from 'child_process';
 import path from 'path';
 import process from 'process';
 
-const VERSION = '0.0.1';
+const VERSION = '0.2.0';
 
 main();
 
