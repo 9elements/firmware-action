@@ -8,8 +8,10 @@ tasks:
     desc: Template task to build a go binary
     dir: action
     cmds:
-      - GOOS={{.OS}} GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/action-{{.OS}}-amd64-{{.SEMVER}}
-      - upx -9 ../bin/action-{{.OS}}-amd64-{{.SEMVER}}
+      - GOOS={{.OS}} GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}}
+      - upx -9 ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}} || true
+        # upx works, but always fails on darwin:
+        #   CantPackException: macOS is currently not supported (try --force-macos)
     env:
       CGO_ENABLED: 0
 
