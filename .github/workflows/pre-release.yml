@@ -1,0 +1,53 @@
+---
+# Update versions and create release PR
+# Source: https://www.thisdot.co/blog/tag-and-release-your-project-with-github-actions-workflows
+
+name: pre-release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  pre-release:
+    name: version_bump
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+      - name: Install dependencies
+        run: npm install
+
+      - name: Update the npm version
+        id: update_npm_version
+        run: |
+          echo "version=$(npm version ${{ github.event.inputs.version }} --no-git-tag-version)" >> $GITHUB_OUTPUT
+      - name: Update invoke-action.mjs
+        run: |
+          sed -iE "s/const\s*VERSION\s*=\s*.*/const VERSION = '${{ steps.update_version.outputs.version }}';/g" dist/invoke-action.mjs
+      - name: Update main.go
+        run: |
+          sed -iE 's/const firmwareActionVersion = .*/const firmwareActionVersion = ${{ steps.update_version.outputs.version }}/g' action/main.go
+
+      - name: Create pull request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release/${{ steps.update_version.outputs.version }}
+          title: 'Release: ${{ steps.update_version.outputs.version }} Pull Request'
+          body: 'This pull request contains the updated package.json with the new release version'
+          assignees: 'AtomicFS'
+          reviewers: 'AtomicFS'
