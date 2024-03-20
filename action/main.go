@@ -32,6 +32,8 @@ func main() {
 	}
 }
 
+const firmwareActionVersion = "v0.2.0"
+
 // CLI (Command Line Interface) holds data from environment
 var CLI struct {
 	JSON   bool `default:"false" help:"switch to JSON stdout and stderr output"`
@@ -44,9 +46,10 @@ var CLI struct {
 		Target      string `required:"" help:"Select which target to build, use ID from configuration file"`
 		Recursive   bool   `help:"Build recursively with all dependencies and payloads"`
 		Interactive bool   `help:"Open interactive SSH into container if build fails"`
-	} `cmd:"build" help:"Build a target defined in configuration file."`
+	} `cmd:"build" help:"Build a target defined in configuration file"`
 
-	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file."`
+	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
+	Version        struct{} `cmd:"version" help:"Print version and exit"`
 }
 
 func run(ctx context.Context) error {
@@ -54,6 +57,10 @@ func run(ctx context.Context) error {
 	mode, err := getInputsFromEnvironment()
 	if err != nil {
 		return err
+	}
+	if mode == "" {
+		// Exit on "version" or "generate-config"
+		return nil
 	}
 
 	// Properly initialize logging
@@ -123,7 +130,7 @@ func parseCli() (string, error) {
 	switch ctx.Command() {
 	case "build":
 		// This is handled elsewhere
-		return mode, nil
+		return "", nil
 
 	case "generate-config":
 		// Check if config file exists
@@ -134,7 +141,7 @@ func parseCli() (string, error) {
 				fmt.Sprintf("Can't generate configuration file at: %s", CLI.Config),
 				slog.Any("error", err),
 			)
-			return mode, err
+			return "", err
 		}
 
 		// Create empty config
@@ -153,7 +160,7 @@ func parseCli() (string, error) {
 				slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 				slog.Any("error", err),
 			)
-			return mode, err
+			return "", err
 		}
 
 		// Write to file
@@ -163,9 +170,14 @@ func parseCli() (string, error) {
 				"Unable to write generated configuration into file",
 				slog.Any("error", err),
 			)
-			return mode, err
+			return "", err
 		}
-		return mode, nil
+		return "", nil
+
+	case "version":
+		// Print version and exit
+		fmt.Println(firmwareActionVersion)
+		return "", nil
 
 	default:
 		// This should not happen
