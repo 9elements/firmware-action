@@ -16,21 +16,6 @@ updates:
     assignees:
       - "AtomicFS"
 
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    groups:
-      javascript:
-        update-types:
-          - "minor"
-          - "patch"
-    reviewers:
-      - "AtomicFS"
-    assignees:
-      - "AtomicFS"
-
   - package-ecosystem: pip
     directory: "/.dagger-ci/daggerci"
     schedule:

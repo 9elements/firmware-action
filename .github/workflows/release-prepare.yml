@@ -29,27 +29,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'latest'
-      - name: Install dependencies
-        run: npm install
 
       - name: Bump the firmware-action version in NPM-related files
         id: update_npm_version
         run: |
           VERSION=$( npm version "${{ github.event.inputs.version }}" --no-git-tag-version | sed 's/v//g' )
           echo "version=${VERSION}"  >> "${GITHUB_OUTPUT}"
-      - name: Update invoke-action.mjs
-        run: |
-          sed -i -E "s/const\s*VERSION\s*=\s*.*/const VERSION = '${{ steps.update_npm_version.outputs.version }}';/g" dist/invoke-action.mjs
       - name: Update main.go
         run: |
           sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "v${{ steps.update_npm_version.outputs.version }}"/g' action/main.go
       - name: Update Taskfile.yml
         run: |
           sed -i -E "s/SEMVER: .*/SEMVER: '${{ steps.update_npm_version.outputs.version }}'/g" Taskfile.yml
+      - name: Update action.yml
+        run: |
+          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version='${{ steps.update_npm_version.outputs.version }}'/g" action.yml
 
       - name: Create pull request
         id: create_pr

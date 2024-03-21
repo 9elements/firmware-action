@@ -20,5 +20,86 @@ inputs:
     default: 'false'
 
 runs:
-  using: 'node20'
-  main: 'dist/invoke-action.mjs'
+  using: "composite"
+  steps:
+    - id: version
+      shell: bash
+      run: echo "version=v0.3.2" >> "${GITHUB_OUTPUT}"
+
+    - id: arch
+      shell: bash
+      run: |
+        if [ ${{ runner.arch }} = "X64" ]; then
+          echo "arch=x86_64" >> "${GITHUB_OUTPUT}"
+        elif [ ${{ runner.arch }} = "X86" ]; then
+          echo "arch=i386" >> "${GITHUB_OUTPUT}"
+        elif [ ${{ runner.arch }} = "ARM64" ]; then
+          echo "arch=arm64" >> "${GITHUB_OUTPUT}"
+        else
+          echo "arch=${{ runner.arch }}" >> "${GITHUB_OUTPUT}"
+        fi
+
+    - id: os
+      shell: bash
+      run: |
+        if [ ${{ runner.os }} = "macOS" ]; then
+          echo "os=Darwin" >> "${GITHUB_OUTPUT}"
+        else
+          echo "os=${{ runner.os }}" >> "${GITHUB_OUTPUT}"
+        fi
+      # Because MacOS is named Darwin in golang releaser
+
+    - id: ext
+      shell: bash
+      run: |
+        if [ ${{ runner.os }} = "Windows" ]; then
+          echo "ext=zip" >> "${GITHUB_OUTPUT}"
+        else
+          echo "ext=tar.gz" >> "${GITHUB_OUTPUT}"
+        fi
+      # Both Linux and MacOS use 'tar.gz'
+
+    - id: filename
+      shell: bash
+      run: |
+        echo "filename=firmware-action_${{ steps.os.outputs.os }}_${{ steps.arch.outputs.arch }}.${{ steps.ext.outputs.ext }}" >> "${GITHUB_OUTPUT}"
+    - id: url
+      shell: bash
+      run: |
+        echo "url=https://github.com/9elements/firmware-action/releases/download/${{ steps.version.outputs.version }}/${{ steps.filename.outputs.filename }}" >> "${GITHUB_OUTPUT}"
+
+    - id: fetch_unix
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
+        tar -xvzf "${{ steps.filename.outputs.filename }}"
+        chmod +x firmware-action
+      # chmod should not be necessary, but just to be safe
+
+    - id: fetch_windows
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "${{ steps.url.outputs.url }}" -OutFile "${{ steps.filename.outputs.filename }}"
+        Expand-Archive -Path "${{ steps.filename.outputs.filename }}" -DestinationPath .\
+
+    - name: run_unix
+      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      shell: bash
+      run: |
+        ./firmware-action
+      env:
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_RECURSIVE: ${{ inputs.recursive }}
+
+    - name: run_windows
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        .\firmware-action.exe
+      env:
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_RECURSIVE: ${{ inputs.recursive }}
