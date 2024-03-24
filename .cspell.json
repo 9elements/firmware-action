@@ -16,6 +16,7 @@
     ".ruff.toml",
     ".trivy.yaml",
     ".vscode",
+    "CHANGELOG.md",
     "Taskfile.yml",
     "docker/**",
     "docs/book.toml",
@@ -47,6 +48,7 @@
     "cbfstool",
     "clusterfuck",
     "cmds",
+    "cocogitto",
     "commitlint",
     "composefile",
     "coreboot",
@@ -64,6 +66,7 @@
     "dooper",
     "dotconfig",
     "edkii",
+    "elif",
     "emeraldlake",
     "exitcode",
     "githubaction",
@@ -94,6 +97,7 @@
     "opencontainers",
     "oxsecurity",
     "pacman",
+    "pwsh",
     "pyaload",
     "pylint",
     "pytest",
@@ -138,7 +142,8 @@
     "mypy",
     "prettytable",
     "stretchr",
-    "unxz"
+    "unxz",
+    "xvzf"
   ],
   "version": "0.2"
 }
