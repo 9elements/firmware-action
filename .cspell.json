@@ -62,6 +62,7 @@
     "dooper",
     "dotconfig",
     "edkii",
+    "elif",
     "emeraldlake",
     "exitcode",
     "githubaction",
@@ -132,7 +133,8 @@
     "mypy",
     "prettytable",
     "stretchr",
-    "unxz"
+    "unxz",
+    "xvzf"
   ],
   "version": "0.2"
 }
