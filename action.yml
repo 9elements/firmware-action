@@ -20,5 +20,46 @@ inputs:
     default: 'false'
 
 runs:
-  using: 'node20'
-  main: 'dist/invoke-action.mjs'
+  using: "composite"
+  steps:
+    - id: version
+      shell: bash
+      run: echo "version=v0.2.1" >> "${GITHUB_OUTPUT}"
+    - id: arch
+      shell: bash
+      run: |
+        if [ ${{ runner.arch }} = "X64" ]; then
+          echo "arch=x86_64" >> "${GITHUB_OUTPUT}"
+        elif [ ${{ runner.arch }} = "X86" ]; then
+          echo "arch=i386" >> "${GITHUB_OUTPUT}"
+        else
+          echo "arch=${{ runner.arch }}" >> "${GITHUB_OUTPUT}"
+        fi
+    - id: ext
+      shell: bash
+      run: |
+        if [ ${{ runner.os }} = "Windows" ]; then
+          echo "ext=zip" >> "${GITHUB_OUTPUT}"
+        else
+          echo "ext=tar.gz" >> "${GITHUB_OUTPUT}"
+        fi
+    - name: fetch in Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        wget "https://github.com/AtomicFS/firmware-action/releases/download/${{ steps.version.outputs.version }}/firmware-action_${{ runner.os }}_${{ steps.arch.outputs.arch }}.${{ steps.ext.outputs.ext }}"
+        tar -xvzf "firmware-action_${{ runner.os }}_${{ steps.arch.outputs.arch }}.${{ steps.ext.outputs.ext }}"
+    - name: fetch in Windows
+      if: runner.os == 'Windows'
+      shell: bash
+      run: |
+        echo "use Linux"
+        false
+    - name: run
+      shell: bash
+      run: |
+        ./firmware-action
+      env:
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_TARGET: ${{ inputs.target }}
+        INPUT_RECURSIVE: ${{ inputs.recursive }}
