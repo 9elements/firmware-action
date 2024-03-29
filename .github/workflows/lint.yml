@@ -29,9 +29,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Commit-Lint
-        uses: wagoid/commitlint-github-action@v5
+        uses: wagoid/commitlint-github-action@v6
         with:
-          configFile: .commitlint.config.js
+          configFile: .commitlint.config.mjs
   megalinter:
     runs-on: ubuntu-latest
     steps:
