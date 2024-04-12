@@ -130,7 +130,7 @@ func parseCli() (string, error) {
 	switch ctx.Command() {
 	case "build":
 		// This is handled elsewhere
-		return "", nil
+		return mode, nil
 
 	case "generate-config":
 		// Check if config file exists
