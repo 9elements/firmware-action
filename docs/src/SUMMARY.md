@@ -7,13 +7,15 @@
 ---
 
 - [firmware-action]()
-    - [Configuration](firmware-action/config.md)
-    - [Usage](firmware-action/usage.md)
-        - [local system](firmware-action/usage_local.md)
+    - [Get started](firmware-action/get_started.md)
+    - [TLDR; Usage](firmware-action/usage.md)
+        - [Local system](firmware-action/usage_local.md)
         - [GitHub CI](firmware-action/usage_github.md)
+    - [Configuration](firmware-action/config.md)
 
 ---
 
-- [Docker containers](docker/docker.md)
-    - [Docker compose](docker/docker-compose.md)
+- [For firmware-action developers]()
+    - [Docker containers](docker/docker.md)
+        - [Docker compose](docker/docker-compose.md)
 
