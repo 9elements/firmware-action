@@ -1,0 +1,16 @@
+{
+  "u-root": {
+    "u-root-example": {
+      "depends": null,
+      "sdk_url": "ghcr.io/9elements/firmware-action/uroot_${UROOT_VERSION}:main",
+      "repo_path": "u-root/",
+      "output_dir": "output-uroot/",
+      "container_output_dirs": null,
+      "container_output_files": ["initramfs.cpio"],
+      "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
+    }
+  }
+}

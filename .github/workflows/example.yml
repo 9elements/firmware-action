@@ -53,6 +53,7 @@ jobs:
               - 'action/**'
 
   # Example of building coreboot
+  # ANCHOR: example_build_coreboot
   build-coreboot:
     runs-on: ubuntu-latest
     needs: changes
@@ -88,7 +89,7 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__coreboot.json'
           target: 'coreboot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.action }}
@@ -100,8 +101,10 @@ jobs:
           name: coreboot-${{ matrix.coreboot-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_coreboot
 
   # Example of building Linux kernel
+  # ANCHOR: example_build_linux_kernel
   build-linux:
     runs-on: ubuntu-latest
     needs: changes
@@ -147,7 +150,7 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__linux.json'
           target: 'linux-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.action }}
@@ -159,8 +162,10 @@ jobs:
           name: ${{ matrix.linux-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_linux_kernel
 
   # Example of building EDK2
+  # ANCHOR: example_build_edk2
   build-edk2:
     runs-on: ubuntu-latest
     needs: changes
@@ -196,7 +201,7 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__edk2.json'
           target: 'edk2-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.action }}
@@ -208,8 +213,10 @@ jobs:
           name: ${{ matrix.edk2-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_edk2
 
   # Example of building Firmware Stitching
+  # ANCHOR: example_build_stitch
   build-stitching:
     runs-on: ubuntu-latest
     needs: changes
@@ -242,7 +249,7 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__firmware_stitching.json'
           target: 'stitching-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.action }}
@@ -254,8 +261,10 @@ jobs:
           name: ${{ matrix.coreboot-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_stitch
 
   # Example of building u-root
+  # ANCHOR: example_build_uroot
   build-uroot:
     runs-on: ubuntu-latest
     needs: changes
@@ -288,7 +297,7 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__uroot.json'
           target: 'u-root-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.action }}
@@ -300,6 +309,7 @@ jobs:
           name: ${{ matrix.uroot-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_uroot
 
   # Example of running on non-Linux systems
   test-operating-systems:

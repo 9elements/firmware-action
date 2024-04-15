@@ -7,7 +7,10 @@
       "defconfig_path": "seabios_defconfig",
       "output_dir": "output-coreboot/",
       "container_output_dirs": null,
-      "container_output_files": ["build/coreboot.rom", "defconfig"],
+      "container_output_files": [
+        "build/coreboot.rom",
+        "defconfig"
+      ],
       "blobs": {
         "payload_file_path": "",
         "intel_ifd_path": "",
@@ -23,22 +26,6 @@
       "input_files": null
     }
   },
-  "linux": {
-    "linux-example": {
-      "depends": null,
-      "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
-      "arch": "x86_64",
-      "repo_path": "linux-${LINUX_VERSION}/",
-      "defconfig_path": "ci_defconfig",
-      "output_dir": "output-linux/",
-      "container_output_dirs": null,
-      "container_output_files": ["vmlinux", "defconfig"],
-      "gcc_version": "",
-      "container_input_dir": "inputs/",
-      "input_dirs": null,
-      "input_files": null
-    }
-  },
   "edk2": {
     "edk2-example": {
       "depends": null,
@@ -47,7 +34,9 @@
       "repo_path": "Edk2/",
       "defconfig_path": "edk2_config.cfg",
       "output_dir": "output-edk2/",
-      "container_output_dirs": ["Build/"],
+      "container_output_dirs": [
+        "Build/"
+      ],
       "container_output_files": null,
       "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
       "container_input_dir": "inputs/",
@@ -61,7 +50,9 @@
       "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
       "repo_path": "stitch/",
       "container_output_dirs": null,
-      "container_output_files": ["new_descriptor.bin"],
+      "container_output_files": [
+        "new_descriptor.bin"
+      ],
       "output_dir": "output-stitch/",
       "base_file_path": "stitch/mainboard/intel/emeraldlake2/descriptor.bin",
       "platform": "",
@@ -77,6 +68,25 @@
       "input_files": null
     }
   },
+  "linux": {
+    "linux-example": {
+      "depends": null,
+      "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
+      "arch": "x86_64",
+      "repo_path": "linux-${LINUX_VERSION}/",
+      "defconfig_path": "ci_defconfig",
+      "output_dir": "output-linux/",
+      "container_output_dirs": null,
+      "container_output_files": [
+        "vmlinux",
+        "defconfig"
+      ],
+      "gcc_version": "",
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
+    }
+  },
   "u-root": {
     "u-root-example": {
       "depends": null,
@@ -84,8 +94,10 @@
       "repo_path": "u-root/",
       "output_dir": "output-uroot/",
       "container_output_dirs": null,
+      "container_output_files": [
+        "initramfs.cpio"
+      ],
       "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
-      "container_output_files": ["initramfs.cpio"],
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null
