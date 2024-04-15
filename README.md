@@ -11,6 +11,7 @@ At the moment it supports:
 - [coreboot](https://coreboot.org/)
 - [linux](https://www.kernel.org/)
 - [tianocore / edk2](https://www.tianocore.org/)
+- firmware stitching (populating IFD regions with binaries)
 
 This list should expand in the future (see [issue 56](https://github.com/9elements/firmware-action/issues/56)).
 
