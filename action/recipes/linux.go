@@ -20,14 +20,17 @@ import (
 
 var errUnknownArchCrossCompile = errors.New("unknown architecture for cross-compilation")
 
-// LinuxSpecific is used to store data specific to linux
 // ANCHOR: LinuxSpecific
+
+// LinuxSpecific is used to store data specific to linux
 type LinuxSpecific struct {
 	// TODO: either use or remove
 	GccVersion string `json:"gcc_version"`
 }
 
 // ANCHOR_END: LinuxSpecific
+
+// ANCHOR: LinuxOpts
 
 // LinuxOpts is used to store all data needed to build linux
 type LinuxOpts struct {
@@ -52,6 +55,8 @@ type LinuxOpts struct {
 	// Linux specific options
 	LinuxSpecific
 }
+
+// ANCHOR_END: LinuxOpts
 
 // GetDepends is used to return list of dependencies
 func (opts LinuxOpts) GetDepends() []string {

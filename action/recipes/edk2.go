@@ -43,7 +43,9 @@ type Edk2Specific struct {
 	BuildCommand string `json:"build_command" validate:"required"`
 }
 */
+
 // ANCHOR: Edk2Specific
+
 // Edk2Specific is used to store data specific to coreboot.
 type Edk2Specific struct {
 	// Specifies which build command to use
@@ -56,6 +58,8 @@ type Edk2Specific struct {
 }
 
 // ANCHOR_END: Edk2Specific
+
+// ANCHOR: Edk2Opts
 
 // Edk2Opts is used to store all data needed to build edk2.
 type Edk2Opts struct {
@@ -83,6 +87,8 @@ type Edk2Opts struct {
 	// Coreboot specific options
 	Edk2Specific `validate:"required"`
 }
+
+// ANCHOR_END: Edk2Opts
 
 // GetDepends is used to return list of dependencies
 func (opts Edk2Opts) GetDepends() []string {
