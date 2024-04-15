@@ -1,0 +1,3 @@
+[submodule "docs/src/firmware-action-example"]
+	path = docs/src/firmware-action-example
+	url = https://github.com/9elements/firmware-action-example.git
