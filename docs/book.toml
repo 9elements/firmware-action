@@ -18,11 +18,12 @@ preferred-dark-theme = "navy"
 git-repository-url = "https://github.com/9elements/firmware-action"
 git-repository-icon = "fa-git"
 # icons: https://fontawesome.com/v4/icons/
-additional-css = ["./mdbook-admonish.css"]
+additional-css = ["mdbook-admonish.css", "theme/pagetoc.css", "./mdbook-admonish.css"]
+additional-js  = ["theme/pagetoc.js"]
 
 [output.html.fold]
 enable = true
-level = 1
+level = 2
 
 [preprocessor.template]
 
@@ -32,4 +33,6 @@ command = "mdbook-admonish"
 assets_version = "3.0.2" # do not edit: managed by `mdbook-admonish install`
 
 [preprocessor.footnote]
+
+[preprocessor.pagetoc]
 

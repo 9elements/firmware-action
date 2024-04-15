@@ -18,7 +18,10 @@ jobs:
 ~~~
 ```
 
-To take advantage of matrix builds, it is possible to use environment variables inside the JSON configuration file.
+
+## Parametric builds with environment variables
+
+To take advantage of matrix builds in GitHub, it is possible to use environment variables inside the JSON configuration file.
 
 ```admonish example
 For example let's make `COREBOOT_VERSION` environment variable which will hold version of coreboot.
@@ -50,6 +53,59 @@ jobs:
           recursive: 'false'
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot_version }}
+~~~
+```
+
+
+## Examples
+
+In our repository we have multiple examples (even though rather simple ones) defined in [.github/workflows/example.yml](https://github.com/9elements/firmware-action/blob/main/.github/workflows/example.yml).
+
+```admonish example collapsible=true title="Coreboot"
+`.github/workflows/example.yml`:
+~~~yaml
+{{#include ../../../.github/workflows/example.yml:example_build_coreboot}}
+~~~
+
+`tests/example_config__coreboot.json`:
+~~~json
+{{#include ../../../tests/example_config__coreboot.json}}
+~~~
+```
+
+```admonish example collapsible=true title="Linux Kernel"
+`.github/workflows/example.yml`:
+~~~yaml
+{{#include ../../../.github/workflows/example.yml:example_build_linux_kernel}}
+~~~
+
+`tests/example_config__linux.json`:
+~~~json
+{{#include ../../../tests/example_config__linux.json}}
+~~~
+```
+
+```admonish example collapsible=true title="Edk2"
+`.github/workflows/example.yml`:
+~~~yaml
+{{#include ../../../.github/workflows/example.yml:example_build_edk2}}
+~~~
+
+`tests/example_config__edk2.json`:
+~~~json
+{{#include ../../../tests/example_config__edk2.json}}
+~~~
+```
+
+```admonish example collapsible=true title="Firmware Stitching"
+`.github/workflows/example.yml`:
+~~~yaml
+{{#include ../../../.github/workflows/example.yml:example_build_stitch}}
+~~~
+
+`tests/example_config__firmware_stitching.json`:
+~~~json
+{{#include ../../../tests/example_config__firmware_stitching.json}}
 ~~~
 ```
 
