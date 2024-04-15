@@ -36,8 +36,9 @@ type BlobDef struct {
 	IsDirectory bool `validate:"required,boolean"`
 }
 
-// CorebootBlobs is used to store data specific to coreboot.
 // ANCHOR: CorebootBlobs
+
+// CorebootBlobs is used to store data specific to coreboot.
 type CorebootBlobs struct {
 	// ** List of supported blobs **
 	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
@@ -93,8 +94,9 @@ type CorebootBlobs struct {
 
 // ANCHOR_END: CorebootBlobs
 
-// CorebootOpts is used to store all data needed to build coreboot.
 // ANCHOR: CorebootOpts
+
+// CorebootOpts is used to store all data needed to build coreboot.
 type CorebootOpts struct {
 	// List of IDs this instance depends on
 	Depends []string `json:"depends"`
