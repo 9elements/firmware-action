@@ -64,3 +64,9 @@ tasks:
     dir: docs
     cmds:
       - mdbook watch
+
+  merge-json-configs:
+    desc: Merge all json configuration files in tests directory (for Docs purposes)
+    dir: tests
+    cmds:
+      - jq -s 'reduce .[] as $item ({}; . * $item)' example_config__*.json > example_config.json

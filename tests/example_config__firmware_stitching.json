@@ -1,0 +1,24 @@
+{
+  "firmware_stitching": {
+    "stitching-example": {
+      "depends": null,
+      "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
+      "repo_path": "stitch/",
+      "container_output_dirs": null,
+      "container_output_files": ["new_descriptor.bin"],
+      "output_dir": "output-stitch/",
+      "base_file_path": "stitch/mainboard/intel/emeraldlake2/descriptor.bin",
+      "platform": "",
+      "ifdtool_entries": [
+        {
+          "path": "stitch/mainboard/intel/emeraldlake2/me.bin",
+          "target_region": "ME",
+          "optional_arguments": null
+        }
+      ],
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
+    }
+  }
+}
