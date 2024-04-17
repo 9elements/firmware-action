@@ -19,3 +19,11 @@ exception[ns] {
 	ns := data.namespaces[_]
 	startswith(ns, "builtin.dockerfile.DS013")
 }
+
+exception[ns] {
+	# Ignore: 'RUN <package-manager> update' instruction alone
+	# I prefer to have multiple separate 'apt-get install' command
+	#   to group packages by their use-case
+	ns := data.namespaces[_]
+	startswith(ns, "builtin.dockerfile.DS017")
+}
