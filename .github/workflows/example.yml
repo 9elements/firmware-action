@@ -193,9 +193,21 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
+
+      - name: Restore cached coreboot-blobs repo
+        uses: actions/cache/restore@v4
+        with:
+          path: ./stitch
+          key: coreboot-blobs-${{ matrix.coreboot-version }}
       - name: Clone blobs repo
         run: |
-          git clone --depth 1 https://review.coreboot.org/blobs.git stitch
+          git clone --depth 1 https://review.coreboot.org/blobs stitch
+      - name: Store coreboot-blobs repo in cache
+        uses: actions/cache/save@v4
+        with:
+          path: ./stitch
+          key: coreboot-blobs-${{ matrix.coreboot-version }}
+
       - name: firmware-action
         uses: ./
         #uses: 9elements/firmware-action
