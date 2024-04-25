@@ -201,7 +201,7 @@ jobs:
           key: coreboot-blobs-${{ matrix.coreboot-version }}
       - name: Clone blobs repo
         run: |
-          git clone --depth 1 https://review.coreboot.org/blobs stitch
+          git clone --depth 1 https://review.coreboot.org/blobs stitch || true
       - name: Store coreboot-blobs repo in cache
         uses: actions/cache/save@v4
         with:
