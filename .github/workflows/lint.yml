@@ -55,7 +55,7 @@ jobs:
           go-version: stable
           cache: false
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v5
         with:
           version: latest
           working-directory: action
