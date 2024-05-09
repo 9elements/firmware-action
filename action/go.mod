@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	dagger.io/dagger v0.11.2
+	dagger.io/dagger v0.11.3
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v0.9.0
 	github.com/dustin/go-humanize v1.0.1
@@ -15,7 +15,7 @@ require (
 	github.com/plus3it/gorecurcopy v0.0.1
 	github.com/sethvargo/go-githubactions v1.2.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.22.0
+	golang.org/x/crypto v0.23.0
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 )
 
@@ -40,8 +40,8 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
