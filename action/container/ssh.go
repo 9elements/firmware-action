@@ -75,7 +75,7 @@ func WithWaitPressEnter() SettingsSSH {
 		s.WaitFunc = func() {
 			<-s.TunnelReady
 			fmt.Print("Press ENTER to stop container ")
-			fmt.Scanln()
+			fmt.Scanln() // nolint:errcheck
 			s.TunnelClose <- true
 		}
 	}
