@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/9elements/firmware-action#readme",
   "devDependencies": {
-    "mega-linter-runner": "^7.11.1"
+    "mega-linter-runner": "^7.12.0"
   }
 }
