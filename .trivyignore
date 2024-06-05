@@ -1,0 +1,11 @@
+# Use WORKDIR over cd - https://avd.aquasec.com/misconfig/dockerfile/general/avd-ds-0013/
+# Against GitHub recommendations- https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#workdir
+AVD-DS-0013
+
+# Least Privilege User - https://avd.aquasec.com/misconfig/dockerfile/general/avd-ds-0002/
+# Against GitHub requirements - https://docs.github.com/en/actions/creating-actions/dockerfile-support-for-github-actions#user
+AVD-DS-0002
+
+# No Healthcheck - https://avd.aquasec.com/misconfig/dockerfile/general/avd-ds-0026/
+# I don't think that this is needed for CI/CD single-use containers
+AVD-DS-0026
