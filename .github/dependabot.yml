@@ -11,7 +11,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    open-pull-requests-limit: 1
     reviewers:
       - "AtomicFS"
     assignees:
@@ -27,7 +26,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    open-pull-requests-limit: 1
     reviewers:
       - "AtomicFS"
     assignees:
@@ -38,7 +36,6 @@ updates:
     schedule:
       interval: "daily"
       time: "00:00"
-    open-pull-requests-limit: 1
     groups:
       python:
         update-types:
@@ -54,7 +51,6 @@ updates:
     schedule:
       interval: "daily"
       time: "00:00"
-    open-pull-requests-limit: 1
     groups:
       docker:
         update-types:
@@ -70,7 +66,6 @@ updates:
     schedule:
       interval: "daily"
       time: "00:00"
-    open-pull-requests-limit: 1
     groups:
       golang:
         update-types:
