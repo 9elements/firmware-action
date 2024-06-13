@@ -23,22 +23,6 @@
       }
     }
   },
-  "linux": {
-    "linux-example": {
-      "depends": null,
-      "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
-      "arch": "x86_64",
-      "repo_path": "linux-${LINUX_VERSION}/",
-      "defconfig_path": "ci_defconfig",
-      "output_dir": "output-linux/",
-      "container_output_dirs": null,
-      "container_output_files": [
-        "vmlinux",
-        "defconfig"
-      ],
-      "gcc_version": ""
-    }
-  },
   "edk2": {
     "edk2-example": {
       "depends": null,
@@ -73,6 +57,22 @@
           "optional_arguments": null
         }
       ]
+    }
+  },
+  "linux": {
+    "linux-example": {
+      "depends": null,
+      "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
+      "arch": "x86_64",
+      "repo_path": "linux-${LINUX_VERSION}/",
+      "defconfig_path": "ci_defconfig",
+      "output_dir": "output-linux/",
+      "container_output_dirs": null,
+      "container_output_files": [
+        "vmlinux",
+        "defconfig"
+      ],
+      "gcc_version": ""
     }
   }
 }

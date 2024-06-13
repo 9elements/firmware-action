@@ -22,6 +22,7 @@ permissions:
 
 jobs:
   # Example of building coreboot
+  # ANCHOR: example_build_coreboot
   build-coreboot:
     runs-on: ubuntu-latest
     strategy:
@@ -58,7 +59,7 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__coreboot.json'
           target: 'coreboot-example'
           recursive: 'false'
         env:
@@ -69,8 +70,10 @@ jobs:
           name: coreboot-${{ matrix.coreboot-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_coreboot
 
   # Example of building Linux kernel
+  # ANCHOR: example_build_linux_kernel
   build-linux:
     runs-on: ubuntu-latest
     strategy:
@@ -117,7 +120,7 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__linux.json'
           target: 'linux-example'
           recursive: 'false'
         env:
@@ -128,8 +131,10 @@ jobs:
           name: ${{ matrix.linux-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_linux_kernel
 
   # Example of building EDK2
+  # ANCHOR: example_build_edk2
   build-edk2:
     runs-on: ubuntu-latest
     strategy:
@@ -166,7 +171,7 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__edk2.json'
           target: 'edk2-example'
           recursive: 'false'
         env:
@@ -177,8 +182,10 @@ jobs:
           name: ${{ matrix.edk2-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_edk2
 
   # Example of building Firmware Stitching
+  # ANCHOR: example_build_stitch
   build-stitching:
     runs-on: ubuntu-latest
     strategy:
@@ -212,7 +219,7 @@ jobs:
         uses: ./
         #uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config.json'
+          config: 'tests/example_config__firmware_stitching.json'
           target: 'stitching-example'
           recursive: 'false'
         env:
@@ -223,3 +230,4 @@ jobs:
           name: ${{ matrix.coreboot-version }}
           path: output
           retention-days: 14
+  # ANCHOR_END: example_build_stitch
