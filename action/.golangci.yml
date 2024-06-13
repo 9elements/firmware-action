@@ -11,7 +11,7 @@ linters-settings:
     attr-only: true
     # Enforce using methods that accept a context.
     # Default: false
-    context-only: true
+    context: true
     # Enforce using static values for log messages.
     # Default: false
     static-msg: true
