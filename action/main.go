@@ -84,6 +84,7 @@ func run(ctx context.Context) error {
 
 	// Check if submodules were initialized
 	// If they are uninitialized, just print warning to the user, ignore all errors
+	// Docs: https://git-scm.com/docs/git-submodule#Documentation/git-submodule.txt-status--cached--recursive--ltpathgt82308203
 	pwd, err := os.Getwd()
 	if err != nil {
 		return err
