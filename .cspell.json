@@ -112,7 +112,8 @@
     "uefi",
     "vmlinux",
     "wagoid",
-    "workdir"
+    "workdir",
+    "worktree"
   ],
   "ignoreWords": [
     "Eeuo",
