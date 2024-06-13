@@ -17,6 +17,7 @@ import (
 	"github.com/9elements/firmware-action/action/logging"
 	"github.com/9elements/firmware-action/action/recipes"
 	"github.com/alecthomas/kong"
+	"github.com/go-git/go-git/v5"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -80,6 +81,39 @@ func run(ctx context.Context) error {
 		slog.Bool("input/recursive", CLI.Build.Recursive),
 		slog.Bool("input/interactive", CLI.Build.Interactive),
 	)
+
+	// Check if submodules were initialized
+	// If they are uninitialized, just print warning to the user, ignore all errors
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	repo, err := git.PlainOpen(pwd)
+	if err == nil {
+		worktree, err := repo.Worktree()
+		if err != nil {
+			goto submodule_out
+		}
+		submodules, err := worktree.Submodules()
+		if err != nil {
+			goto submodule_out
+		}
+		status, err := submodules.Status()
+		if err != nil {
+			goto submodule_out
+		}
+		pattern := regexp.MustCompile(`(?m)^\-.*`)
+		matches := pattern.FindAllString(status.String(), -1)
+		for _, v := range matches {
+			patterSub := regexp.MustCompile(`^\-[\d\w]* `)
+			slog.Warn(
+				"Git submodule seems to be uninitialized",
+				slog.String("suggestion", "run 'git submodule update --init --recursive'"),
+				slog.String("offending_submodule", patterSub.ReplaceAllString(v, "")),
+			)
+		}
+	}
+submodule_out:
 
 	// Parse configuration file
 	var myConfig *recipes.Config
