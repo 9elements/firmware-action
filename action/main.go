@@ -97,6 +97,9 @@ func run(ctx context.Context) error {
 		myConfig,
 		recipes.Execute,
 	)
+	if err == nil {
+		slog.Info("Build finished successfully")
+	}
 	return err
 }
 
