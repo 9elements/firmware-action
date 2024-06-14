@@ -10,7 +10,7 @@ on:
     branches: ['main']
     paths:
       - 'docker/**'
-    tags: ['v*']
+  release:
   schedule:
     # Sunday midnight
     - cron: '0 0 * * 0'
