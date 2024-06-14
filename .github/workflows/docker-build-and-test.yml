@@ -14,6 +14,7 @@ on:
   schedule:
     # Sunday midnight
     - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -45,18 +46,24 @@ jobs:
             'udk2017'
           ]
     steps:
-        # We have to use my own fork of actions/delete-package-versions at the moment
-        #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
-        # We can switch to upstream whe following PRs get merged:
-        #   - [dry-run](https://github.com/actions/delete-package-versions/pull/119/commits)
-        #   - [tags](https://github.com/actions/delete-package-versions/pull/104
+      # We have to use my own fork of actions/delete-package-versions at the moment
+      #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
+      # We can switch to upstream whe following PRs get merged:
+      #   - [dry-run](https://github.com/actions/delete-package-versions/pull/119/commits)
+      #   - [tags](https://github.com/actions/delete-package-versions/pull/104
       - name: Delete old packages
         uses: AtomicFS/delete-package-versions@main
+        continue-on-error:
+          true
+          # we have continue-on-error because when I make a fork of this repo to debug something,
+          # the Docker containers would not build because this step fails to fetch existing containers
+          # (in fresh fork there are none)
         with:
           package-name: firmware-action/${{ matrix.dockerfile }}
           package-type: container
           min-versions-to-keep: 5
-          ignore-versions: '^(main|latest|v(\d+\.?)+)$'
+          ignore-versions:
+            '^(main|latest|v(\d+\.?)+)$'
             # ignore:
             # - main
             # - latest
