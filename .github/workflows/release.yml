@@ -16,11 +16,13 @@ on:
       - closed
 
 permissions:
-  contents: write  # To create a new release
+  contents: read
 
 jobs:
-  release:
+  release-golang:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # To create a new release
     if: startsWith(github.event.pull_request.title, 'Release:') && github.event.pull_request.merged == true
     steps:
       - name: Checkout code
@@ -64,5 +66,41 @@ jobs:
           version: latest
           workdir: action
           args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-docker:
+    # There is a depth limit on workflows triggered by workflows to avoid infinite loops.
+    # This release workflow is triggered by merging a Pull Request made by release-prepare workflow.
+    #
+    # In addition the Docker build cannot really happen because of the `paths` filter in `on.push` event config.
+    # I do not want to change that because then we would build Docker containers all the time, which is long and unnecessary.
+    #
+    # And unfortunately a workflow cannot easily trigger another (Docker container builds) because of other GitHub limits.
+    # However it is possible to use API to trigger a workflow. That is what this job is for.
+    #
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+      packages: write
+    steps:
+      - name: Trigger dagger workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'docker-build-and-test.yml',
+                ref: context.ref,
+              })
+              console.log(result);
+            } catch(error) {
+              console.error(error);
+              core.setFailed(error);
+            }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
