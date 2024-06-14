@@ -19,7 +19,7 @@ on:
           - patch
 
 permissions:
-  contents: write      # To push new branch
+  contents: write # To push new branch
   pull-requests: write # To create a pull request
 
 jobs:
