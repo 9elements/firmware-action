@@ -141,6 +141,12 @@ type makeFile struct {
 }
 
 func (base makeFile) MakeMe() error {
+	log.Printf("Path:       %s", base.Path)
+	log.Printf("Content:    %s", base.Content)
+	log.Printf("SourcePath: %s", base.SourcePath)
+	pwd, _ := os.Getwd()	// nolint:errcheck
+	log.Printf("PWD:        %s", pwd)
+
 	// If file does not exist, make it
 	if _, err := os.Stat(base.Path); os.IsNotExist(err) {
 		if base.Content != "" {
@@ -159,9 +165,11 @@ func (base makeFile) MakeMe() error {
 				log.Printf("[Mock MakeMe] file '%s' does not exists", base.SourcePath)
 				return os.ErrNotExist
 			}
+			log.Print("Success")
 			return filesystem.CopyFile(base.SourcePath, base.Path)
 		}
 	}
+	log.Print("Success")
 	return nil
 }
 
@@ -170,6 +178,11 @@ func TestStitching(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+	defer os.Chdir(pwd) // nolint:errcheck
+
+	// Define common variables and values
 	baseFileName := "base.img"
 	common := CommonOpts{
 		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
@@ -219,6 +232,108 @@ func TestStitching(t *testing.T) {
 			// this magic value was obtained by doing all steps manually
 			wantErr: nil,
 		},
+		// Test behavior of IgnoreIfMissing on IfdtoolEntry
+		{
+			name: "   file and no ignore",
+			stitchingOpts: FirmwareStitchingOpts{
+				CommonOpts:   common,
+				BaseFilePath: baseFileName,
+				IfdtoolEntries: []IfdtoolEntry{
+					{
+						Path:         "me.bin",
+						TargetRegion: "ME",
+					},
+				},
+			},
+
+			files: []makeFile{
+				{
+					Path:       baseFileName,
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+				},
+				{
+					Path:       "me.bin",
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/me.bin",
+				},
+			},
+			expectedSha256: "a09cf57dae3062b18ae84f6695a22c5e1e61e3a84a9c9de69af40a0e54b658d4",
+			// Should stitch the files without complains
+			// this magic value was obtained by doing all steps manually
+			wantErr: nil,
+		},
+		{
+			name: "   file and    ignore",
+			stitchingOpts: FirmwareStitchingOpts{
+				CommonOpts:   common,
+				BaseFilePath: baseFileName,
+				IfdtoolEntries: []IfdtoolEntry{
+					{
+						Path:            "me.bin",
+						TargetRegion:    "ME",
+						IgnoreIfMissing: true,
+					},
+				},
+			},
+			files: []makeFile{
+				{
+					Path:       baseFileName,
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+				},
+				{
+					Path:       "me.bin",
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/me.bin",
+				},
+			},
+			expectedSha256: "a09cf57dae3062b18ae84f6695a22c5e1e61e3a84a9c9de69af40a0e54b658d4",
+			// Should stitch the files without complains
+			// this magic value was obtained by doing all steps manually
+			wantErr: nil,
+		},
+		{
+			name: "no file and no ignore",
+			stitchingOpts: FirmwareStitchingOpts{
+				CommonOpts:   common,
+				BaseFilePath: baseFileName,
+				IfdtoolEntries: []IfdtoolEntry{
+					{
+						Path:         "me.bin",
+						TargetRegion: "ME",
+					},
+				},
+			},
+			files: []makeFile{
+				{
+					Path:       baseFileName,
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+				},
+			},
+			// Should complain about missing file
+			wantErr: os.ErrNotExist,
+		},
+		{
+			name: "no file and    ignore",
+			stitchingOpts: FirmwareStitchingOpts{
+				CommonOpts:   common,
+				BaseFilePath: baseFileName,
+				IfdtoolEntries: []IfdtoolEntry{
+					{
+						Path:            "me.bin",
+						TargetRegion:    "ME",
+						IgnoreIfMissing: true,
+					},
+				},
+			},
+			files: []makeFile{
+				{
+					Path:       baseFileName,
+					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+				},
+			},
+			expectedSha256: "5c8283b8c668e6735afe3b4209dce64924f7d5f5da771d51b05d37d52dc48331",
+			// The image file should only inflate to 16MB (filled with 0xFF) but not change in content
+			// this magic value was obtained by running sha256sum on original file
+			wantErr: nil,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -234,11 +349,8 @@ func TestStitching(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Change current working directory
-			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
-			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			assert.NoError(t, os.Chdir(tmpDir)) // just to make sure
+			defer os.Chdir(pwd)                 // nolint:errcheck
 
 			// Move files
 			for i := range tc.files {
