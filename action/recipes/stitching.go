@@ -42,6 +42,14 @@ type IfdtoolEntry struct {
 	//   `--platform adl`
 	// For supported options see `ifdtool --help`
 	OptionalArguments []string `json:"optional_arguments"`
+
+	// Ignore entry if the file is missing
+	IgnoreIfMissing bool `json:"ignore_if_missing" type:"boolean"`
+
+	// For internal use only - whether or not the blob should be injected
+	// Firstly it is checked if the blob file exists, if not a if `IgnoreIfMissing` is set to `true`,
+	//   then `Skip` is set to `true` to remove need for additional repetitive checks later in program
+	Skip bool
 }
 
 // ANCHOR_END: IfdtoolEntry
@@ -203,12 +211,33 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	oldBaseFilePath := opts.BaseFilePath
 	opts.BaseFilePath = newBaseFilePath
 	for entry := range opts.IfdtoolEntries {
-		newPath := filepath.Join(ContainerWorkDir, filepath.Base(opts.IfdtoolEntries[entry].Path))
-		myContainer = myContainer.WithFile(
-			newPath,
-			client.Host().File(filepath.Join(pwd, opts.IfdtoolEntries[entry].Path)),
-		)
-		opts.IfdtoolEntries[entry].Path = newPath
+		containerPath := filepath.Join(ContainerWorkDir, filepath.Base(opts.IfdtoolEntries[entry].Path))
+		hostPath := filepath.Join(pwd, opts.IfdtoolEntries[entry].Path)
+		hostFile := client.Host().File(hostPath)
+
+		// Check if the file exists on host filesystem
+		_, err := os.Stat(hostPath)
+		if err == nil {
+			myContainer = myContainer.WithFile(
+				containerPath,
+				hostFile,
+			)
+			opts.IfdtoolEntries[entry].Path = containerPath
+		} else if opts.IfdtoolEntries[entry].IgnoreIfMissing {
+			// We can ignore this missing file
+			opts.IfdtoolEntries[entry].Skip = true
+			slog.Warn(
+				fmt.Sprintf("Can't copy file '%s' - does not exists, ignoring because 'ignore_if_missing' is set", opts.IfdtoolEntries[entry].Path),
+			)
+		} else {
+			// We cannot ignore this missing file
+			slog.Error(
+				fmt.Sprintf("Can't copy file '%s' - does not exists", opts.IfdtoolEntries[entry].Path),
+				slog.String("suggestion", "Double check provided path to file"),
+				slog.Any("error", err),
+			)
+			return nil, err
+		}
 	}
 
 	// Get the size of image (total size)
@@ -303,6 +332,14 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			),
 		)
 
+		// Check if file exists, and if missing file can be ignored
+		if opts.IfdtoolEntries[entry].Skip {
+			slog.Warn(
+				fmt.Sprintf("Can't inject file '%s' - does not exists, ignoring because 'ignore_if_missing' is set", opts.IfdtoolEntries[entry].Path),
+			)
+			continue
+		}
+
 		// Inject binaries
 		cmd := ifdtoolCmd(
 			opts.Platform,
@@ -321,7 +358,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			return myContainerPrevious, err
 		}
 
-		// ifdtool makes a new file '<filename>.new'
+		// ifdtool makes a new file '<filename>.new', so let's rename back to original name
 		imageFilenameNew := fmt.Sprintf("%s.new", imageFilename)
 		cmd = []string{"mv", "--force", imageFilenameNew, imageFilename}
 		myContainerPrevious = myContainer
