@@ -21,13 +21,17 @@
     "docker/**",
     "docs/book.toml",
     "docs/mdbook-admonish.css",
+    "docs/theme/index.hbs",
+    "docs/theme/pagetoc.css",
+    "docs/theme/pagetoc.js",
     "go.mod",
     "go.sum",
     "megalinter",
     "package-lock.json",
     "pyproject.toml",
     "report",
-    "requirements.txt"
+    "requirements.txt",
+    "tests/**"
   ],
   "language": "en",
   "noConfigSearch": true,
