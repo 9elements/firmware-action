@@ -161,6 +161,7 @@ func OpenSSH(
 		fmt.Println("problem getting address")
 		return errors.Join(err, errAddr)
 	}
+	fmt.Println("Container was reverted back into a state before failed command was executed")
 	fmt.Printf("Connect into the container with:\n  ssh root@%s -p %s -o PreferredAuthentications=password\n", opts.IPv4, opts.Port)
 	fmt.Printf("Password is:\n  %s\n", opts.Password)
 	fmt.Println("SSH up and running")
