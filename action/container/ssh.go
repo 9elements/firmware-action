@@ -142,6 +142,7 @@ func OpenSSH(
 		WithExec([]string{"bash", "-c", fmt.Sprintf("echo 'cd %s' >> /root/.bashrc", workdir)}).
 		WithExec([]string{"/usr/sbin/sshd", "-D"})
 
+	// ANCHOR: ContainerAsService
 	// Convert container to service with exposed SSH port
 	const sshPort = 22
 	sshServiceDoc := container.WithExposedPort(sshPort).AsService()
@@ -153,6 +154,7 @@ func OpenSSH(
 		return err
 	}
 	defer sshServiceTunnel.Stop(ctx) // nolint:errcheck
+	// ANCHOR_END: ContainerAsService
 
 	// Get and print instructions on how to connect
 	sshAddress, err := sshServiceTunnel.Endpoint(ctx)
