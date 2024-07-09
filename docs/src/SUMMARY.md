@@ -14,6 +14,7 @@
         - [Get firmware-action](firmware-action/get_started/04_get_firmware_action.md)
         - [Run firmware-action locally](firmware-action/get_started/05_run_firmware_action.md)
         - [Run firmware-action in CI](firmware-action/get_started/06_run_in_ci.md)
+    - [Interactive mode](firmware-action/interactive.md)
     - [TLDR; Usage](firmware-action/usage.md)
         - [Local system](firmware-action/usage_local.md)
         - [GitHub CI](firmware-action/usage_github.md)
