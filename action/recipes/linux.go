@@ -49,7 +49,7 @@ type LinuxOpts struct {
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
 
-	// Coreboot specific options
+	// Linux specific options
 	LinuxSpecific
 }
 
