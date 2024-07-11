@@ -109,3 +109,8 @@ services:
       context: linux
       args:
         - LINUX_VERSION=6.1.45
+  linux_6.9.9:
+    build:
+      context: linux
+      args:
+        - LINUX_VERSION=6.9.9
