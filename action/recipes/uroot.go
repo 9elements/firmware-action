@@ -64,8 +64,6 @@ func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 
 	// Assemble commands to build
 	buildSteps := [][]string{
-		// build u-root executable
-		{"go", "build"},
 		// run user-defined build command
 		{"bash", "-c", opts.BuildCommand},
 	}

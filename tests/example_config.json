@@ -85,7 +85,7 @@
       "container_output_files": [
         "initramfs.cpio"
       ],
-      "build_command": "GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*"
+      "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*"
     }
   }
 }
