@@ -14,6 +14,10 @@ task build-go-binary
 ```
 
 
+## Arch Linux AUR
+For Arch Linux there is also a [AUR package](https://aur.archlinux.org/packages/firmware-action) available.
+
+
 ## Run
 ```
 ./firmware-action build --config=<path-to-JSON-config> --target=<my-target>
