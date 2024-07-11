@@ -111,6 +111,7 @@
     "testregex",
     "textfile",
     "tianocore",
+    "tinyconfig",
     "uefi",
     "uroot",
     "vmlinux",
