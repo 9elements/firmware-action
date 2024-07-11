@@ -1,0 +1,91 @@
+// SPDX-License-Identifier: MIT
+
+// Package recipes / uroot
+package recipes
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+
+	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/container"
+)
+
+// URootSpecific is used to store data specific to u-root
+// ANCHOR: URootSpecific
+type URootSpecific struct {
+	// Specifies build command to use
+	BuildCommand string `json:"build_command" validate:"required"`
+}
+
+// ANCHOR_END: URootSpecific
+
+// URootOpts is used to store all data needed to build u-root
+type URootOpts struct {
+	// List of IDs this instance depends on
+	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
+	Depends []string `json:"depends"`
+
+	// Common options like paths etc.
+	CommonOpts
+
+	// u-root specific options
+	URootSpecific
+}
+
+// GetDepends is used to return list of dependencies
+func (opts URootOpts) GetDepends() []string {
+	return opts.Depends
+}
+
+// GetArtifacts returns list of wanted artifacts from container
+func (opts URootOpts) GetArtifacts() *[]container.Artifacts {
+	return opts.CommonOpts.GetArtifacts()
+}
+
+// buildFirmware builds u-root
+func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+	// Spin up container
+	containerOpts := container.SetupOpts{
+		ContainerURL:      opts.SdkURL,
+		MountContainerDir: ContainerWorkDir,
+		MountHostDir:      opts.RepoPath,
+		WorkdirContainer:  ContainerWorkDir,
+	}
+	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
+	if err != nil {
+		slog.Error(
+			"Failed to start a container",
+			slog.Any("error", err),
+		)
+		return nil, err
+	}
+
+	// Assemble commands to build
+	buildSteps := [][]string{
+		// build u-root executable
+		{"go", "build"},
+		// run user-defined build command
+		{"bash", "-c", opts.BuildCommand},
+	}
+
+	// Execute build commands
+	var myContainerPrevious *dagger.Container
+	for step := range buildSteps {
+		myContainerPrevious = myContainer
+		myContainer, err = myContainer.
+			WithExec(buildSteps[step]).
+			Sync(ctx)
+		if err != nil {
+			slog.Error(
+				"Failed to build u-root",
+				slog.Any("error", err),
+			)
+			return myContainerPrevious, fmt.Errorf("u-root build failed: %w", err)
+		}
+	}
+
+	// Extract artifacts
+	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+}

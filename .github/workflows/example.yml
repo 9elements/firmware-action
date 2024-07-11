@@ -225,3 +225,47 @@ jobs:
           name: ${{ matrix.coreboot-version }}
           path: output
           retention-days: 14
+
+  # Example of building u-root
+  build-uroot:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        uroot-version: ['v0.14.0']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Restore cached u-root repo
+        uses: actions/cache/restore@v4
+        with:
+          path: ./u-root
+          key: u-root-${{ matrix.uroot-version }}
+      - name: Clone blobs repo
+        run: |
+          git clone --depth 1 --branch ${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
+      - name: Store u-root repo in cache
+        uses: actions/cache/save@v4
+        with:
+          path: ./u-root
+          key: u-root-${{ matrix.uroot-version }}
+
+      - name: firmware-action
+        uses: ./
+        #uses: 9elements/firmware-action
+        with:
+          config: 'tests/example_config.json'
+          target: 'u-root-example'
+          recursive: 'false'
+      - name: Get artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.uroot-version }}
+          path: output
+          retention-days: 14

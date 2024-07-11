@@ -113,6 +113,9 @@ type Config struct {
 
 	// defined in stitching.go
 	FirmwareStitching map[string]FirmwareStitchingOpts `json:"firmware_stitching" validate:"dive"`
+
+	// defined in uroot.go
+	URoot map[string]URootOpts `json:"u-root" validate:"dive"`
 }
 
 // AllModules method returns slice with all modules
@@ -128,6 +131,9 @@ func (c Config) AllModules() map[string]FirmwareModule {
 		modules[key] = value
 	}
 	for key, value := range c.FirmwareStitching {
+		modules[key] = value
+	}
+	for key, value := range c.URoot {
 		modules[key] = value
 	}
 	return modules
