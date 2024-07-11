@@ -86,7 +86,7 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
       - name: Run dagger pipeline
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]]; then
+          if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"
             python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }} --publish
           else
