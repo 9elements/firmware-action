@@ -144,7 +144,7 @@ func (base makeFile) MakeMe() error {
 	log.Printf("Path:       %s", base.Path)
 	log.Printf("Content:    %s", base.Content)
 	log.Printf("SourcePath: %s", base.SourcePath)
-	pwd, _ := os.Getwd()	// nolint:errcheck
+	pwd, _ := os.Getwd() // nolint:errcheck
 	log.Printf("PWD:        %s", pwd)
 
 	// If file does not exist, make it
