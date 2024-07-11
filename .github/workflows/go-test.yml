@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching']
+        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot']
     steps:
       - name: Checkout
         uses: actions/checkout@v4

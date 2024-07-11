@@ -74,5 +74,18 @@
         }
       ]
     }
+  },
+  "u-root": {
+    "u-root-example": {
+      "depends": null,
+      "sdk_url": "golang:latest",
+      "repo_path": "u-root/",
+      "output_dir": "output-uroot/",
+      "container_output_dirs": null,
+      "container_output_files": [
+        "initramfs.cpio"
+      ],
+      "build_command": "GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*"
+    }
   }
 }
