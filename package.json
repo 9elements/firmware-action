@@ -1,6 +1,6 @@
 {
   "name": "firmware-action",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more",
   "main": "dist/invoke-action.mjs",
   "scripts": {
