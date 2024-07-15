@@ -1,0 +1,7 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://aur.archlinux.org/packages/.*"
+    }
+  ]
+}
