@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.4
 
 require (
-	dagger.io/dagger v0.11.9
+	dagger.io/dagger v0.12.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v0.9.0
 	github.com/dustin/go-humanize v1.0.1
@@ -22,7 +22,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/99designs/gqlgen v0.17.44 // indirect
+	github.com/99designs/gqlgen v0.17.49 // indirect
 	github.com/Khan/genqlient v0.7.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
@@ -50,7 +50,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
-	github.com/sosodev/duration v1.2.0 // indirect
+	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.16 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/otel v1.27.0 // indirect
@@ -65,12 +65,12 @@ require (
 	go.opentelemetry.io/otel/sdk/log v0.3.0 // indirect
 	go.opentelemetry.io/otel/trace v1.27.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
-	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	golang.org/x/tools v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240520151616-dc85e6b867a5 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240515191416-fc5f0ca64291 // indirect
 	google.golang.org/grpc v1.64.1 // indirect
