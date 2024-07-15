@@ -239,7 +239,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        uroot-version: ['v0.14.0']
+        uroot-version: ['0.14.0']
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -257,9 +257,9 @@ jobs:
         with:
           path: ./u-root
           key: u-root-${{ matrix.uroot-version }}
-      - name: Clone blobs repo
+      - name: Clone u-root repo
         run: |
-          git clone --depth 1 --branch ${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
+          git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
       - name: Store u-root repo in cache
         uses: actions/cache/save@v4
         with:
@@ -273,6 +273,8 @@ jobs:
           config: 'tests/example_config.json'
           target: 'u-root-example'
           recursive: 'false'
+        env:
+          UROOT_VERSION: ${{ matrix.uroot-version }}
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
