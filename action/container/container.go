@@ -167,7 +167,6 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		}
 
 		// Get reference to artifacts directory in the container
-		var success bool
 		var err error
 
 		if artifact.HostDir {
@@ -184,10 +183,10 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 			output := container.Directory(artifact.ContainerPath)
 			// host side
 			dirName := filepath.Base(artifact.ContainerPath)
-			success, err = output.Export(ctx, filepath.Join(artifact.HostPath, dirName))
+			_, err = output.Export(ctx, filepath.Join(artifact.HostPath, dirName))
 		} else {
 			output := container.File(artifact.ContainerPath)
-			success, err = output.Export(
+			_, err = output.Export(
 				ctx,
 				artifact.HostPath,
 				dagger.FileExportOpts{AllowParentDirPath: true},
@@ -195,7 +194,7 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		}
 
 		// Copy contents of containers artifacts directory to host
-		if err != nil || !success {
+		if err != nil {
 			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, err, artifact.ContainerPath, artifact.HostPath)
 		}
 		slog.Debug(fmt.Sprintf("Artifact export: %s -> %s", artifact.ContainerPath, artifact.HostPath))
