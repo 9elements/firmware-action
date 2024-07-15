@@ -44,21 +44,21 @@ func TestURoot(t *testing.T) {
 	}{
 		{
 			name:          "normal build v0.14 in v1.x",
-			uRootVersion:  "v0.14.0",
+			uRootVersion:  "0.14.0",
 			golangVersion: "1",
 			arch:          "amd64",
 			wantErr:       nil,
 		},
 		{
 			name:          "normal build v0.13.1 in v1.x",
-			uRootVersion:  "v0.13.1",
+			uRootVersion:  "0.13.1",
 			golangVersion: "1",
 			arch:          "amd64",
 			wantErr:       nil,
 		},
 		{
 			name:          "normal build v0.12 in v1.x",
-			uRootVersion:  "v0.12.0",
+			uRootVersion:  "0.12.0",
 			golangVersion: "1",
 			arch:          "amd64",
 			wantErr:       nil,
@@ -87,7 +87,7 @@ func TestURoot(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Clone coreboot repo
-			cmd := exec.Command("git", "clone", "--branch", tc.uRootVersion, "--depth", "1", "https://github.com/u-root/u-root.git")
+			cmd := exec.Command("git", "clone", "--branch", fmt.Sprintf("v%s", tc.uRootVersion), "--depth", "1", "https://github.com/u-root/u-root.git")
 			err = cmd.Run()
 			assert.NoError(t, err)
 
