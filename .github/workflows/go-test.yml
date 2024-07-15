@@ -21,6 +21,8 @@ jobs:
     strategy:
       matrix:
         testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot']
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +45,8 @@ jobs:
   go-test:
     # Run all remaining light tests
     runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4

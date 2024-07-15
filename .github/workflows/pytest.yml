@@ -17,6 +17,8 @@ permissions:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Install Taskfile
         run: |

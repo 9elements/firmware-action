@@ -25,6 +25,8 @@ permissions:
 jobs:
   commit-lint:
     runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,6 +38,8 @@ jobs:
           configFile: .commitlint.config.mjs
   megalinter:
     runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,6 +52,8 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
   golangci-lint:
     runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
