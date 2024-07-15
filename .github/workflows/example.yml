@@ -29,6 +29,8 @@ jobs:
     strategy:
       matrix:
         coreboot-version: ['4.19', '4.20.1', '4.21', '24.02']
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,6 +80,8 @@ jobs:
     strategy:
       matrix:
         linux-version: [6.1.45]
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -137,6 +141,8 @@ jobs:
     strategy:
       matrix:
         edk2-version: ['edk2-stable202208', 'edk2-stable202211']
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -186,6 +192,8 @@ jobs:
     strategy:
       matrix:
         coreboot-version: ['4.19']
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -232,6 +240,8 @@ jobs:
     strategy:
       matrix:
         uroot-version: ['v0.14.0']
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v4
