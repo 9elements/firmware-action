@@ -46,7 +46,8 @@ jobs:
             'edk2-stable202211',
             'linux_6.1.45',
             'linux_6.9.9',
-            'udk2017'
+            'udk2017',
+            'uroot_0.14.0'
           ]
     steps:
       # We have to use my own fork of actions/delete-package-versions at the moment

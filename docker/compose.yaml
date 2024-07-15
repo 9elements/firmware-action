@@ -114,3 +114,12 @@ services:
       context: linux
       args:
         - LINUX_VERSION=6.9.9
+  #==================
+  # u-root
+  #==================
+  uroot_0.14.0:
+    build:
+      context: uroot
+      args:
+        - GO_VERSION=1.22
+        - UROOT_VERSION=0.14.0
