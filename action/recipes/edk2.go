@@ -107,6 +107,9 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		MountContainerDir: ContainerWorkDir,
 		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
+		ContainerInputDir: opts.ContainerInputDir,
+		InputDirs:         opts.InputDirs,
+		InputFiles:        opts.InputFiles,
 	}
 
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)

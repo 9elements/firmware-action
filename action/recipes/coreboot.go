@@ -202,6 +202,9 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		MountContainerDir: ContainerWorkDir,
 		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
+		ContainerInputDir: opts.ContainerInputDir,
+		InputDirs:         opts.InputDirs,
+		InputFiles:        opts.InputFiles,
 	}
 	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
 	if err != nil {

@@ -63,12 +63,47 @@ type CommonOpts struct {
 	//     ContainerOutputDirs = []string{"Build/"}
 	//     ContainerOutputFiles = []string{"coreboot.rom", "defconfig"}
 	//     OutputDir = "myOutput"
-	//   Will result in:
+	//   Will result in following structure being copied out of the container:
 	//     myOutput/
 	//     ├── Build/
 	//     ├── coreboot.rom
 	//     └── defconfig
 	OutputDir string `json:"output_dir" validate:"required,dirpath"`
+
+	// Specifies the (relative) paths to directories which should be copied into the container.
+	InputDirs []string `json:"input_dirs" validate:"dive,dirpath"`
+
+	// Specifies the (relative) paths to file which should be copied into the container.
+	InputFiles []string `json:"input_files" validate:"dive,filepath"`
+
+	// Specifies the path to directory where to place input files and directories inside container.
+	//   Directories listed in ContainerInputDirs and files listed in ContainerInputFiles
+	//   will be copied there.
+	// Example:
+	//   Following setting:
+	//     InputDirs = []string{"config-files/"}
+	//     InputFiles = []string{"README.md", "Taskfile.yml"}
+	//     ContainerInputDir = "myInput"
+	//   Will result in following structure being copied into the container:
+	//     myInput/
+	//     ├── config-files/
+	//     ├── README.md
+	//     └── Taskfile.yml
+	ContainerInputDir string `json:"container_input_dir" validate:"dirpath"`
+
+	// Overview:
+	//
+	// | Configuration option   | Direction            |
+	// |:-----------------------|:--------------------:|
+	// | RepoPath               | Host  --> Container  |
+	// |                        |                      |
+	// | ContainerOutputDirs    | Host <--  Container  |
+	// | ContainerOutputFiles   | Host <--  Container  |
+	// | OutputDir              | Host <--  Container  |
+	// |                        |                      |
+	// | InputDirs              | Host  --> Container  |
+	// | InputFiles             | Host  --> Container  |
+	// | ContainerInputDir      | Host  --> Container  |
 }
 
 // ANCHOR_END: CommonOpts
