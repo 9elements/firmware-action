@@ -76,7 +76,7 @@ func TestURoot(t *testing.T) {
 
 			myURootOpts := URootOpts
 			myURootOpts.SdkURL = fmt.Sprintf("golang:%s", tc.golangVersion)
-			myURootOpts.BuildCommand = fmt.Sprintf("go build; GOARCH=%s ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*", tc.arch)
+			myURootOpts.BuildCommand = fmt.Sprintf("go build; GOARCH=%s ./u-root -o initramfs.cpio core boot", tc.arch)
 			myURootOpts.RepoPath = filepath.Join(tmpDir, "u-root")
 
 			// Change current working directory
