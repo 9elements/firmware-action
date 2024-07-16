@@ -15,9 +15,10 @@ import (
 
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		RepoPath:  "dummy/dir/",
-		OutputDir: "dummy/dir/",
+		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		RepoPath:          "dummy/dir/",
+		OutputDir:         "dummy/dir/",
+		ContainerInputDir: "inputs/",
 	}
 
 	testCases := []struct {
@@ -121,9 +122,10 @@ func TestConfigReadAndWrite(t *testing.T) {
 
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:    "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		RepoPath:  "dummy/dir/",
-		OutputDir: "dummy/dir/",
+		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		RepoPath:          "dummy/dir/",
+		OutputDir:         "dummy/dir/",
+		ContainerInputDir: "inputs/",
 	}
 
 	testCases := []struct {
@@ -187,9 +189,10 @@ func TestConfigEnvVars(t *testing.T) {
 				Coreboot: map[string]CorebootOpts{
 					"coreboot-A": {
 						CommonOpts: CommonOpts{
-							SdkURL:    tc.url,
-							RepoPath:  "dummy/dir/",
-							OutputDir: "dummy/dir/",
+							SdkURL:            tc.url,
+							RepoPath:          "dummy/dir/",
+							OutputDir:         "dummy/dir/",
+							ContainerInputDir: "inputs/",
 						},
 						DefconfigPath: "dummy",
 					},

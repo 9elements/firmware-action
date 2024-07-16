@@ -31,20 +31,20 @@ func TestSetup(t *testing.T) {
 		name          string
 		opts          SetupOpts
 		wantErr       error
-		lsContains    string
-		lsNotContains string
+		lsContains    []string
+		lsNotContains []string
 	}{
 		{
 			name: "empty URL",
 			opts: SetupOpts{
 				ContainerURL:      "",
 				MountContainerDir: "/src",
-				MountHostDir:      ".",
+				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  "/src",
 			},
 			wantErr:       errEmptyURL,
-			lsContains:    "",
-			lsNotContains: "",
+			lsContains:    []string{},
+			lsNotContains: []string{},
 		},
 		{
 			name: "empty directory strings",
@@ -55,48 +55,107 @@ func TestSetup(t *testing.T) {
 				WorkdirContainer:  "",
 			},
 			wantErr:       errDirectoryNotSpecified,
-			lsContains:    "",
-			lsNotContains: "",
+			lsContains:    []string{},
+			lsNotContains: []string{},
 		},
 		{
 			name: "invalid directory strings: .",
 			opts: SetupOpts{
 				ContainerURL:      "ubuntu:latest",
 				MountContainerDir: ".",
-				MountHostDir:      ".",
+				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  ".",
 			},
 			wantErr:       errDirectoryInvalid,
-			lsContains:    "",
-			lsNotContains: "",
+			lsContains:    []string{},
+			lsNotContains: []string{},
 		},
 		{
 			name: "invalid directory strings: /",
 			opts: SetupOpts{
 				ContainerURL:      "ubuntu:latest",
 				MountContainerDir: "/",
-				MountHostDir:      ".",
+				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  ".",
 			},
 			wantErr:       errDirectoryInvalid,
-			lsContains:    "",
-			lsNotContains: "",
+			lsContains:    []string{},
+			lsNotContains: []string{},
+		},
+		{
+			name: "InputFiles without InputDir",
+			opts: SetupOpts{
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: "/src",
+				MountHostDir:      t.TempDir(),
+				WorkdirContainer:  "/src",
+				InputFiles:        []string{"test.img"},
+			},
+			wantErr:       errDirectoryNotSpecified,
+			lsContains:    []string{},
+			lsNotContains: []string{},
+		},
+		{
+			name: "InputFiles without InputDir",
+			opts: SetupOpts{
+				ContainerURL:      "ubuntu:latest",
+				MountContainerDir: "/src",
+				MountHostDir:      t.TempDir(),
+				WorkdirContainer:  "/src",
+				InputDirs:         []string{"test/"},
+			},
+			wantErr:       errDirectoryNotSpecified,
+			lsContains:    []string{},
+			lsNotContains: []string{},
 		},
 		{
 			name: "valid inputs",
 			opts: SetupOpts{
 				ContainerURL:      "ubuntu:latest",
 				MountContainerDir: "/src",
-				MountHostDir:      ".",
+				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  "/src",
+				InputDirs: []string{
+					"test-dir/",
+				},
+				InputFiles: []string{
+					"test-file.img",
+					"test-file.txt",
+				},
+				ContainerInputDir: "inputs",
 			},
-			wantErr:       nil,
-			lsContains:    "container_test.go",
-			lsNotContains: "tmp",
+			wantErr: nil,
+			lsContains: []string{
+				"inputs",
+			},
+			lsNotContains: []string{
+				"tmp",
+			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Create test files
+			pwd, err := os.Getwd()
+			defer os.Chdir(pwd) // nolint:errcheck
+			assert.NoError(t, err)
+			tmpDir := t.TempDir()
+			err = os.Chdir(tmpDir)
+			assert.NoError(t, err)
+
+			// Create InputFiles
+			for _, val := range tc.opts.InputFiles {
+				f, err := os.Create(filepath.Join(tmpDir, val))
+				assert.NoError(t, err)
+				f.Close()
+			}
+			// Create InputDirs
+			for _, val := range tc.opts.InputDirs {
+				err = os.Mkdir(filepath.Join(tmpDir, val), os.ModePerm)
+				assert.NoError(t, err)
+			}
+
+			// Spin up container
 			container, err := Setup(ctx, client, &tc.opts, "")
 			assert.ErrorIs(t, err, tc.wantErr)
 			if err != nil {
@@ -111,9 +170,11 @@ func TestSetup(t *testing.T) {
 
 			// Check the directory contents
 			ls := strings.Split(stdout, "\n")
-			assert.True(t, slices.Contains(ls, tc.lsContains))
-			if tc.lsNotContains != "" {
-				assert.True(t, !slices.Contains(ls, tc.lsNotContains))
+			for _, val := range tc.lsContains {
+				assert.True(t, slices.Contains(ls, val))
+			}
+			for _, val := range tc.lsNotContains {
+				assert.True(t, !slices.Contains(ls, val))
 			}
 		})
 	}

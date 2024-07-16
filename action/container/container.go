@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/action/logging"
 )
 
 var (
@@ -25,10 +26,13 @@ var (
 // SetupOpts congregates options for Setup function
 // None of the values can be empty string, and mountContainerDir cannot be '.' or '/'
 type SetupOpts struct {
-	ContainerURL      string // URL or name of docker container
-	MountHostDir      string // Directory from host to mount into container
-	MountContainerDir string // Where to mount ^^^ host directory inside container
-	WorkdirContainer  string // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
+	ContainerURL      string   // URL or name of docker container
+	MountHostDir      string   // Directory from host to mount into container
+	MountContainerDir string   // Where to mount ^^^ host directory inside container
+	WorkdirContainer  string   // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
+	ContainerInputDir string   // Directory for input files
+	InputDirs         []string // List of directories to copy into container
+	InputFiles        []string // List of files to copy into container
 }
 
 // Validate the data in struct
@@ -66,6 +70,16 @@ func (opts SetupOpts) Validate() error {
 		slog.Error(
 			"Container mountpoint cannot be '.' or '/'",
 			slog.String("suggestion", "Pick another directory, preferably absolute path"),
+			slog.Any("error", err),
+		)
+	}
+
+	// If any input file or directory specified, inputDir must be defined
+	if (len(opts.InputDirs) > 0 || len(opts.InputFiles) > 0) && opts.ContainerInputDir == "" {
+		err = errors.Join(err, errDirectoryNotSpecified)
+		slog.Error(
+			"Container InputDir cannot be empty string when using InputFiles and/or InputDirs",
+			slog.String("suggestion", "Specify directory for input files and directories"),
 			slog.Any("error", err),
 		)
 	}
@@ -117,13 +131,47 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 	//   WithMountedDirectory
 	//     Create a OverlayFS with bottom layer Read-Only
 	//     Directory in container must exist
-	container, err = container.
+	container = container.
 		WithExec([]string{"mkdir", "-p", opts.MountContainerDir}).
 		WithMountedDirectory(
 			opts.MountContainerDir,
 			client.Host().Directory(opts.MountHostDir)).
-		WithWorkdir(opts.WorkdirContainer).
-		Sync(ctx)
+		WithWorkdir(opts.WorkdirContainer)
+
+	// Get current working directory
+	pwd, err := os.Getwd()
+	if err != nil {
+		slog.Error(
+			"Could not get working directory, should not happen",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
+		return nil, err
+	}
+
+	// Make input directory
+	inputDirPath := filepath.Join(opts.WorkdirContainer, opts.ContainerInputDir)
+	container = container.WithExec([]string{"mkdir", "-p", inputDirPath})
+
+	// Mount input directories into the container
+	for _, val := range opts.InputDirs {
+		container = container.
+			WithMountedDirectory(
+				filepath.Join(inputDirPath, filepath.Base(val)),
+				client.Host().Directory(filepath.Join(pwd, val)),
+			)
+	}
+
+	// Copy over input files
+	for _, val := range opts.InputFiles {
+		container = container.
+			WithFile(
+				filepath.Join(inputDirPath, filepath.Base(val)),
+				client.Host().File(filepath.Join(pwd, val)),
+			)
+	}
+
+	container, err = container.Sync(ctx)
 	if err != nil {
 		message := "Failed to spin up a container"
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -146,6 +194,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 			)
 		}
 	}
+
 	return container, err
 }
 

@@ -17,7 +17,10 @@
         "fsp_header_path": "",
         "vbt_path": "",
         "ec_path": ""
-      }
+      },
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
     }
   },
   "linux": {
@@ -30,7 +33,10 @@
       "output_dir": "output-linux/",
       "container_output_dirs": null,
       "container_output_files": ["vmlinux", "defconfig"],
-      "gcc_version": ""
+      "gcc_version": "",
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
     }
   },
   "edk2": {
@@ -43,7 +49,10 @@
       "output_dir": "output-edk2/",
       "container_output_dirs": ["Build/"],
       "container_output_files": null,
-      "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5"
+      "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
     }
   },
   "firmware_stitching": {
@@ -62,7 +71,10 @@
           "target_region": "ME",
           "optional_arguments": null
         }
-      ]
+      ],
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
     }
   },
   "u-root": {
@@ -73,7 +85,10 @@
       "output_dir": "output-uroot/",
       "container_output_dirs": null,
       "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
-      "container_output_files": ["initramfs.cpio"]
+      "container_output_files": ["initramfs.cpio"],
+      "container_input_dir": "inputs/",
+      "input_dirs": null,
+      "input_files": null
     }
   }
 }
