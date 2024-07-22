@@ -197,7 +197,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	pwd, err := os.Getwd()
 	if err != nil {
 		slog.Error(
-			"Could not get working directory, should not happen",
+			"Could not get working directory",
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
