@@ -153,10 +153,12 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 	inputDirPath := filepath.Join(opts.WorkdirContainer, opts.ContainerInputDir)
 	container = container.WithExec([]string{"mkdir", "-p", inputDirPath})
 
-	// Mount input directories into the container
+	// Copy input directories into the container
+	// We cannot do nested WithMountedDirectory, it silently breaks
 	for _, val := range opts.InputDirs {
 		container = container.
-			WithMountedDirectory(
+			WithExec([]string{"mkdir", "-p", filepath.Join(inputDirPath, filepath.Base(val))}).
+			WithDirectory(
 				filepath.Join(inputDirPath, filepath.Base(val)),
 				client.Host().Directory(filepath.Join(pwd, val)),
 			)
