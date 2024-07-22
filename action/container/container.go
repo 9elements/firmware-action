@@ -142,7 +142,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 	pwd, err := os.Getwd()
 	if err != nil {
 		slog.Error(
-			"Could not get working directory, should not happen",
+			"Could not get working directory",
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
