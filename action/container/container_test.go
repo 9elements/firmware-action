@@ -5,15 +5,14 @@ package container
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/filesystem"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slices"
 )
 
 func TestSetup(t *testing.T) {
@@ -28,11 +27,12 @@ func TestSetup(t *testing.T) {
 	defer client.Close()
 
 	testCases := []struct {
-		name          string
-		opts          SetupOpts
-		wantErr       error
-		lsContains    []string
-		lsNotContains []string
+		name              string
+		opts              SetupOpts
+		wantErr           error
+		TestFiles         []string
+		TestDirs          []string
+		InputDirsPopulate []string
 	}{
 		{
 			name: "empty URL",
@@ -42,9 +42,10 @@ func TestSetup(t *testing.T) {
 				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  "/src",
 			},
-			wantErr:       errEmptyURL,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errEmptyURL,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "empty directory strings",
@@ -54,9 +55,10 @@ func TestSetup(t *testing.T) {
 				MountHostDir:      "",
 				WorkdirContainer:  "",
 			},
-			wantErr:       errDirectoryNotSpecified,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errDirectoryNotSpecified,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "invalid directory strings: .",
@@ -66,9 +68,10 @@ func TestSetup(t *testing.T) {
 				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  ".",
 			},
-			wantErr:       errDirectoryInvalid,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errDirectoryInvalid,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "invalid directory strings: /",
@@ -78,9 +81,10 @@ func TestSetup(t *testing.T) {
 				MountHostDir:      t.TempDir(),
 				WorkdirContainer:  ".",
 			},
-			wantErr:       errDirectoryInvalid,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errDirectoryInvalid,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "InputFiles without InputDir",
@@ -91,9 +95,10 @@ func TestSetup(t *testing.T) {
 				WorkdirContainer:  "/src",
 				InputFiles:        []string{"test.img"},
 			},
-			wantErr:       errDirectoryNotSpecified,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errDirectoryNotSpecified,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "InputFiles without InputDir",
@@ -104,9 +109,10 @@ func TestSetup(t *testing.T) {
 				WorkdirContainer:  "/src",
 				InputDirs:         []string{"test/"},
 			},
-			wantErr:       errDirectoryNotSpecified,
-			lsContains:    []string{},
-			lsNotContains: []string{},
+			wantErr:           errDirectoryNotSpecified,
+			TestDirs:          []string{},
+			TestFiles:         []string{},
+			InputDirsPopulate: []string{},
 		},
 		{
 			name: "valid inputs",
@@ -125,11 +131,16 @@ func TestSetup(t *testing.T) {
 				ContainerInputDir: "inputs",
 			},
 			wantErr: nil,
-			lsContains: []string{
+			TestDirs: []string{
 				"inputs",
 			},
-			lsNotContains: []string{
-				"tmp",
+			TestFiles: []string{
+				"inputs/test-file.img",
+				"inputs/test-file.txt",
+				"inputs/test-dir/test-in-dir-file.txt",
+			},
+			InputDirsPopulate: []string{
+				"test-dir/test-in-dir-file.txt",
 			},
 		},
 	}
@@ -143,16 +154,25 @@ func TestSetup(t *testing.T) {
 			err = os.Chdir(tmpDir)
 			assert.NoError(t, err)
 
+			// Create InputDirs
+			for _, val := range tc.opts.InputDirs {
+				err = os.MkdirAll(filepath.Join(tmpDir, val), os.ModePerm)
+				assert.NoError(t, err)
+			}
 			// Create InputFiles
 			for _, val := range tc.opts.InputFiles {
 				f, err := os.Create(filepath.Join(tmpDir, val))
 				assert.NoError(t, err)
 				f.Close()
 			}
-			// Create InputDirs
-			for _, val := range tc.opts.InputDirs {
-				err = os.Mkdir(filepath.Join(tmpDir, val), os.ModePerm)
+			// Populate InputDirs
+			for _, val := range tc.InputDirsPopulate {
+				err = os.MkdirAll(filepath.Join(tmpDir, filepath.Dir(val)), os.ModePerm)
 				assert.NoError(t, err)
+
+				f, err := os.Create(filepath.Join(tmpDir, val))
+				assert.NoError(t, err)
+				f.Close()
 			}
 
 			// Spin up container
@@ -163,18 +183,16 @@ func TestSetup(t *testing.T) {
 				return
 			}
 
-			// Get contents of current working directory in the container
-			stdout, err := container.WithExec([]string{"ls", "."}).
-				Stdout(ctx)
-			assert.NoError(t, err)
-
 			// Check the directory contents
-			ls := strings.Split(stdout, "\n")
-			for _, val := range tc.lsContains {
-				assert.True(t, slices.Contains(ls, val))
+			for _, val := range tc.TestDirs {
+				_, err = container.WithExec([]string{"bash", "-c", fmt.Sprintf("[ -d %s ]", val)}).
+					Sync(ctx)
+				assert.NoError(t, err, fmt.Sprintf("Directory '%s' does not exists", val))
 			}
-			for _, val := range tc.lsNotContains {
-				assert.True(t, !slices.Contains(ls, val))
+			for _, val := range tc.TestFiles {
+				_, err = container.WithExec([]string{"bash", "-c", fmt.Sprintf("[ -f %s ]", val)}).
+					Sync(ctx)
+				assert.NoError(t, err, fmt.Sprintf("File '%s' does not exists", val))
 			}
 		})
 	}
