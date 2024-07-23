@@ -2,7 +2,6 @@
 name: 'Compile open firmware solution'
 description: |
   Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
-  The generated files will be placed in $GITHUB_WORKSPACE/build/
 author: '9elements'
 inputs:
   config:
