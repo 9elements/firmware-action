@@ -36,10 +36,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
 
       - name: Restore cached coreboot repo
         uses: actions/cache/restore@v4
@@ -87,10 +83,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
 
       - name: Restore cached linux source
         uses: actions/cache/restore@v4
@@ -148,10 +140,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
 
       - name: Restore cached edk2 repo
         uses: actions/cache/restore@v4
@@ -199,10 +187,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
 
       - name: Restore cached coreboot-blobs repo
         uses: actions/cache/restore@v4
@@ -247,10 +231,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
 
       - name: Restore cached u-root repo
         uses: actions/cache/restore@v4
