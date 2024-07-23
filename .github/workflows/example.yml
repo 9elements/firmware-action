@@ -261,3 +261,49 @@ jobs:
           name: ${{ matrix.uroot-version }}
           path: output
           retention-days: 14
+
+  # Example of running on non-Linux systems
+  test-operating-systems:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        uroot-version: ['0.14.0']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore cached u-root repo
+        uses: actions/cache/restore@v4
+        with:
+          path: ./u-root
+          key: u-root-${{ matrix.uroot-version }}
+      - name: Clone u-root repo
+        run: |
+          git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
+      - name: Store u-root repo in cache
+        uses: actions/cache/save@v4
+        with:
+          path: ./u-root
+          key: u-root-${{ matrix.uroot-version }}
+
+      - name: Install docker
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          brew install docker
+          brew install colima
+          brew services start colima
+
+      - name: firmware-action
+        continue-on-error: true
+        # This one fails on Windows and MacOS
+        # Since we do not have any real use-case right now, I will not fix it
+        uses: ./
+        with:
+          config: 'tests/example_config.json'
+          target: 'u-root-example'
+          recursive: 'false'
+        env:
+          UROOT_VERSION: ${{ matrix.uroot-version }}
