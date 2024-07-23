@@ -1,0 +1,5 @@
+tag_prefix = "v"
+skip_untracked = true
+
+[changelog]
+path = "CHANGELOG.md"
