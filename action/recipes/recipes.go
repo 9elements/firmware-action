@@ -19,12 +19,13 @@ import (
 
 // Errors for recipes
 var (
-	ErrFailedValidation          = errors.New("config failed validation")
-	ErrTargetMissing             = errors.New("no target specified")
-	ErrTargetInvalid             = errors.New("unsupported target")
 	ErrBuildFailed               = errors.New("build failed")
+	ErrBuildSkipped              = errors.New("build skipped")
 	ErrDependencyTreeUndefDep    = errors.New("module has invalid dependency")
 	ErrDependencyTreeUnderTarget = errors.New("target not found in dependency tree")
+	ErrFailedValidation          = errors.New("config failed validation")
+	ErrTargetInvalid             = errors.New("unsupported target")
+	ErrTargetMissing             = errors.New("no target specified")
 )
 
 // ContainerWorkDir specifies directory in container used as work directory
@@ -129,6 +130,15 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
+		// Check if output artifacts already exist
+		for _, artifact := range *modules[target].GetArtifacts() {
+			if _, err := os.Stat(artifact.HostPath); err == nil {
+				slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
+				return ErrBuildSkipped
+			}
+		}
+
+		// Build module
 		myContainer, err := modules[target].buildFirmware(ctx, client, "")
 		if err != nil && interactive {
 			// If error, try to open SSH

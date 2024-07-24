@@ -132,8 +132,9 @@ submodule_out:
 		myConfig,
 		recipes.Execute,
 	)
-	if err == nil {
+	if err == nil || errors.Is(err, recipes.ErrBuildSkipped) {
 		slog.Info("Build finished successfully")
+		return nil
 	}
 	return err
 }
