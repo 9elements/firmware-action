@@ -45,6 +45,47 @@ func TestExecute(t *testing.T) {
 	}
 }
 
+func TestExecuteSkip(t *testing.T) {
+	const interactive = false
+	ctx := context.Background()
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	assert.NoError(t, err)
+	defer client.Close()
+
+	// Change current working directory
+	pwd, err := os.Getwd()
+	defer os.Chdir(pwd) // nolint:errcheck
+	assert.NoError(t, err)
+	tmpDir := t.TempDir()
+	err = os.Chdir(tmpDir)
+	assert.NoError(t, err)
+
+	// Create configuration
+	const target = "dummy"
+	const outputDir = "output-coreboot"
+	myConfig := Config{
+		Coreboot: map[string]CorebootOpts{
+			target: {
+				CommonOpts: CommonOpts{
+					OutputDir: outputDir,
+					ContainerOutputFiles: []string{
+						"build/coreboot.rom",
+						"defconfig",
+					},
+				},
+			},
+		},
+	}
+
+	// Create the output directory
+	err = os.Mkdir(outputDir, os.ModePerm)
+	assert.NoError(t, err)
+
+	// Since there is now existing output directory, it should skip the build
+	err = Execute(ctx, target, &myConfig, interactive)
+	assert.ErrorIs(t, err, ErrBuildSkipped)
+}
+
 func executeDummy(_ context.Context, _ string, _ *Config, _ bool) error {
 	return nil
 }
