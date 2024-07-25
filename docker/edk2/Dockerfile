@@ -42,6 +42,7 @@ RUN dpkg --add-architecture i386 && \
         gcc-${GCC_VERSION} \
         ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
+        imagemagick \
         iucode-tool \
         nasm \
         nodejs \
