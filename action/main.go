@@ -124,7 +124,7 @@ submodule_out:
 	}
 
 	// Lets build stuff
-	_, err = recipes.Build(
+	results, err := recipes.Build(
 		ctx,
 		CLI.Build.Target,
 		CLI.Build.Recursive,
@@ -132,9 +132,24 @@ submodule_out:
 		myConfig,
 		recipes.Execute,
 	)
-	if err == nil || errors.Is(err, recipes.ErrBuildSkipped) {
+
+	// Print overview
+	summary := "Build summary:"
+	for _, item := range results {
+		result := ""
+		if item.BuildResult == nil {
+			result = "Success"
+		} else if errors.Is(item.BuildResult, recipes.ErrBuildSkipped) {
+			result = "Skipped"
+		} else {
+			result = "Fail"
+		}
+		summary = fmt.Sprintf("%s\n%s: %s", summary, item.Name, result)
+	}
+	slog.Info(summary)
+
+	if err == nil {
 		slog.Info("Build finished successfully")
-		return nil
 	}
 	return err
 }

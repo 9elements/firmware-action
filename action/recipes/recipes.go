@@ -42,6 +42,12 @@ func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependen
 	return dependencies, nil
 }
 
+// BuildResults contains target name and result of its build
+type BuildResults struct {
+	Name        string
+	BuildResult error
+}
+
 // Build recipes, possibly recursively
 func Build(
 	ctx context.Context,
@@ -50,7 +56,7 @@ func Build(
 	interactive bool,
 	config *Config,
 	executor func(context.Context, string, *Config, bool) error,
-) ([]string, error) {
+) ([]BuildResults, error) {
 	dependencyForest := dag.NewDAG()
 	dependencies := [][]string{}
 	var err error
@@ -100,22 +106,36 @@ func Build(
 
 	// Build each item in queue (if recursive)
 	slog.Info(fmt.Sprintf("Building queue: %v", queue))
+	builds := []BuildResults{}
 	if recursive {
-		builds := []string{}
 		slog.Info(fmt.Sprintf("Building '%s' recursively", target))
 		for _, item := range queue {
 			slog.Info(fmt.Sprintf("Building: %s", item))
+
 			err = executor(ctx, item, config, interactive)
-			if err != nil {
-				return nil, err
+			builds = append(builds, BuildResults{item, err})
+
+			if err != nil && !errors.Is(err, ErrBuildSkipped) {
+				break
 			}
-			builds = append(builds, item)
 		}
-		return builds, nil
+	} else {
+		// else build only the target
+		slog.Info(fmt.Sprintf("Building '%s' NOT recursively", target))
+
+		err = executor(ctx, target, config, interactive)
+		builds = append(builds, BuildResults{target, err})
 	}
-	// else build only the target
-	slog.Info(fmt.Sprintf("Building '%s' NOT recursively", target))
-	return []string{target}, executor(ctx, target, config, interactive)
+
+	// Check results
+	err = nil
+	for _, item := range builds {
+		if item.BuildResult != nil && !errors.Is(item.BuildResult, ErrBuildSkipped) {
+			err = item.BuildResult
+		}
+	}
+
+	return builds, err
 }
 
 // Execute a build step
