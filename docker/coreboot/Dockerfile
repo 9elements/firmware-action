@@ -21,24 +21,31 @@ ENV BUILDGCC_OPTIONS=-m
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+        acpica-tools \
         bc \
         bison \
+        bsdmainutils \
         build-essential \
         curl \
         flex \
         git \
         gnat \
+        imagemagick \
         iucode-tool \
         libelf-dev \
         libncurses5-dev \
         libnss3-dev \
         libssl-dev \
         m4 \
+        nasm \
         nodejs \
+        openssh-client \
         pkgconf \
         python-is-python3 \
         python3-pip \
+        qemu-system-x86 \
         tzdata \
+        uuid-dev \
         zlib1g-dev \
     && \
     apt-get install -y --no-install-recommends \
