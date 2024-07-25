@@ -225,10 +225,10 @@ func TestBuild(t *testing.T) {
 		// Go though 'builds' and check if for each builds, the dependencies are already complete
 		done := []string{}
 		for _, item := range builds {
-			for _, i := range testConfigDependencyHell.Coreboot[item].Depends {
+			for _, i := range testConfigDependencyHell.Coreboot[item.Name].Depends {
 				assert.Contains(t, done, i)
 			}
-			done = append(done, item)
+			done = append(done, item.Name)
 		}
 	})
 }
