@@ -45,7 +45,7 @@ func TestExecute(t *testing.T) {
 	}
 }
 
-func TestExecuteSkip(t *testing.T) {
+func TestExecuteSkipAndMissing(t *testing.T) {
 	const interactive = false
 	ctx := context.Background()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
@@ -63,9 +63,12 @@ func TestExecuteSkip(t *testing.T) {
 	// Create configuration
 	const target = "dummy"
 	const outputDir = "output-coreboot"
+	const depends = "pre-dummy"
+	const outputDir2 = "output-coreboot2"
 	myConfig := Config{
 		Coreboot: map[string]CorebootOpts{
 			target: {
+				Depends: []string{depends},
 				CommonOpts: CommonOpts{
 					OutputDir: outputDir,
 					ContainerOutputFiles: []string{
@@ -74,8 +77,22 @@ func TestExecuteSkip(t *testing.T) {
 					},
 				},
 			},
+			depends: {
+				CommonOpts: CommonOpts{
+					OutputDir: outputDir2,
+					ContainerOutputFiles: []string{
+						"build/coreboot.rom",
+						"defconfig",
+					},
+				},
+			},
 		},
 	}
+
+	// Files from the 2nd modules are missing
+	// This should fail since the 2nd module is in Depends
+	err = Execute(ctx, target, &myConfig, interactive)
+	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
 
 	// Create the output directory
 	err = os.Mkdir(outputDir, os.ModePerm)
