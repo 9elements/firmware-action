@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"slices"
 	"sync"
 
@@ -23,6 +24,7 @@ var (
 	ErrBuildSkipped              = errors.New("build skipped")
 	ErrDependencyTreeUndefDep    = errors.New("module has invalid dependency")
 	ErrDependencyTreeUnderTarget = errors.New("target not found in dependency tree")
+	ErrDependencyOutputMissing   = errors.New("output of one or more dependencies is missing")
 	ErrFailedValidation          = errors.New("config failed validation")
 	ErrTargetInvalid             = errors.New("unsupported target")
 	ErrTargetMissing             = errors.New("no target specified")
@@ -155,6 +157,26 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 			if _, err := os.Stat(artifact.HostPath); err == nil {
 				slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
 				return ErrBuildSkipped
+			}
+		}
+
+		// Check if all outputs of required modules exist
+		for _, prerequisite := range modules[target].GetDepends() {
+			outputDir := modules[prerequisite].GetOutputDir()
+			paths := modules[prerequisite].GetContainerOutputDirs()
+			paths = append(paths, modules[prerequisite].GetContainerOutputFiles()...)
+
+			for _, path := range paths {
+				finalPath := filepath.Join(outputDir, filepath.Base(path))
+				slog.Info(finalPath)
+				if _, err := os.Stat(finalPath); os.IsNotExist(err) {
+					slog.Error(
+						"Missing output files and/or directories from one or more required module(s) defined in 'Depends'",
+						slog.String("suggestion", "build needed modules or use '--recursive' build"),
+						slog.Any("error", errors.Join(err, ErrDependencyOutputMissing)),
+					)
+					return ErrDependencyOutputMissing
+				}
 			}
 		}
 

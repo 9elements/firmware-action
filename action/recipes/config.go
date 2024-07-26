@@ -100,6 +100,21 @@ func (opts CommonOpts) GetArtifacts() *[]container.Artifacts {
 	return &artifacts
 }
 
+// GetContainerOutputDirs returns list of output directories
+func (opts CommonOpts) GetContainerOutputDirs() []string {
+	return opts.ContainerOutputDirs
+}
+
+// GetContainerOutputFiles returns list of output directories
+func (opts CommonOpts) GetContainerOutputFiles() []string {
+	return opts.ContainerOutputFiles
+}
+
+// GetOutputDir returns output directory
+func (opts CommonOpts) GetOutputDir() string {
+	return opts.OutputDir
+}
+
 // Config is for storing parsed configuration file
 type Config struct {
 	// defined in coreboot.go
@@ -143,6 +158,9 @@ func (c Config) AllModules() map[string]FirmwareModule {
 type FirmwareModule interface {
 	GetDepends() []string
 	GetArtifacts() *[]container.Artifacts
+	GetContainerOutputDirs() []string
+	GetContainerOutputFiles() []string
+	GetOutputDir() string
 	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error)
 }
 
