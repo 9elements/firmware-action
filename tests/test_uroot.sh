@@ -9,4 +9,3 @@ cd u-root
 # Make
 go build
 ./u-root core boot
-

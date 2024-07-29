@@ -76,7 +76,6 @@ jobs:
             # - vX
             # - vX.X
             # - vX.X.X
-          #delete-only-untagged-versions: true
           dry-run: false
           ignore-versions-include-tags: true
 

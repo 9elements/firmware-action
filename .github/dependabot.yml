@@ -1,62 +1,62 @@
 ---
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "daily"
-      time: "00:00"
+      interval: 'daily'
+      time: '00:00'
     groups:
       github:
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
     reviewers:
-      - "AtomicFS"
+      - 'AtomicFS'
     assignees:
-      - "AtomicFS"
+      - 'AtomicFS'
 
   - package-ecosystem: pip
-    directory: "/.dagger-ci/daggerci"
+    directory: '/.dagger-ci/daggerci'
     schedule:
-      interval: "daily"
-      time: "00:00"
+      interval: 'daily'
+      time: '00:00'
     groups:
       python:
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
     reviewers:
-      - "AtomicFS"
+      - 'AtomicFS'
     assignees:
-      - "AtomicFS"
+      - 'AtomicFS'
 
   - package-ecosystem: docker
-    directory: "/docker"
+    directory: '/docker'
     schedule:
-      interval: "daily"
-      time: "00:00"
+      interval: 'daily'
+      time: '00:00'
     groups:
       docker:
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
     reviewers:
-      - "AtomicFS"
+      - 'AtomicFS'
     assignees:
-      - "AtomicFS"
+      - 'AtomicFS'
 
   - package-ecosystem: gomod
-    directory: "/action"
+    directory: '/action'
     schedule:
-      interval: "daily"
-      time: "00:00"
+      interval: 'daily'
+      time: '00:00'
     groups:
       golang:
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
     reviewers:
-      - "AtomicFS"
+      - 'AtomicFS'
     assignees:
-      - "AtomicFS"
+      - 'AtomicFS'
