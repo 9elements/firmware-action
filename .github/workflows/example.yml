@@ -60,7 +60,7 @@ jobs:
           mv "tests/coreboot_${{ matrix.coreboot-version }}/seabios.defconfig" "seabios_defconfig"
       - name: firmware-action
         uses: ./
-        #uses: 9elements/firmware-action
+        # uses: 9elements/firmware-action
         with:
           config: 'tests/example_config.json'
           target: 'coreboot-example'
@@ -117,7 +117,7 @@ jobs:
           mv "tests/linux_${{ matrix.linux-version }}/linux.defconfig" "ci_defconfig"
       - name: firmware-action
         uses: ./
-        #uses: 9elements/firmware-action
+        # uses: 9elements/firmware-action
         with:
           config: 'tests/example_config.json'
           target: 'linux-example'
@@ -164,7 +164,7 @@ jobs:
 
       - name: firmware-action
         uses: ./
-        #uses: 9elements/firmware-action
+        # uses: 9elements/firmware-action
         with:
           config: 'tests/example_config.json'
           target: 'edk2-example'
@@ -208,7 +208,7 @@ jobs:
 
       - name: firmware-action
         uses: ./
-        #uses: 9elements/firmware-action
+        # uses: 9elements/firmware-action
         with:
           config: 'tests/example_config.json'
           target: 'stitching-example'
@@ -252,7 +252,7 @@ jobs:
 
       - name: firmware-action
         uses: ./
-        #uses: 9elements/firmware-action
+        # uses: 9elements/firmware-action
         with:
           config: 'tests/example_config.json'
           target: 'u-root-example'

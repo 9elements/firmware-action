@@ -10,8 +10,8 @@ tasks:
     cmds:
       - GOOS={{.OS}} GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}}
       - upx -9 ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}} || true
-        # upx works, but always fails on darwin:
-        #   CantPackException: macOS is currently not supported (try --force-macos)
+      # upx works, but always fails on darwin:
+      #   CantPackException: macOS is currently not supported (try --force-macos)
     env:
       CGO_ENABLED: 0
 
