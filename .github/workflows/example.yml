@@ -31,9 +31,27 @@ permissions:
   contents: read
 
 jobs:
+  # Change detection in action golang code
+  changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      action: ${{ steps.filter.outputs.action }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            action:
+              - 'action/**'
+
   # Example of building coreboot
   build-coreboot:
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       matrix:
         coreboot-version: ['4.19', '4.20.1', '4.21', '24.02']
@@ -69,6 +87,7 @@ jobs:
           config: 'tests/example_config.json'
           target: 'coreboot-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
       - name: Get artifacts
@@ -81,6 +100,7 @@ jobs:
   # Example of building Linux kernel
   build-linux:
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       matrix:
         linux-version: [6.1.45]
@@ -126,6 +146,7 @@ jobs:
           config: 'tests/example_config.json'
           target: 'linux-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
       - name: Get artifacts
@@ -138,6 +159,7 @@ jobs:
   # Example of building EDK2
   build-edk2:
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       matrix:
         edk2-version: ['edk2-stable202208', 'edk2-stable202211']
@@ -173,6 +195,7 @@ jobs:
           config: 'tests/example_config.json'
           target: 'edk2-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
       - name: Get artifacts
@@ -185,6 +208,7 @@ jobs:
   # Example of building Firmware Stitching
   build-stitching:
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       matrix:
         coreboot-version: ['4.19']
@@ -217,6 +241,7 @@ jobs:
           config: 'tests/example_config.json'
           target: 'stitching-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
       - name: Get artifacts
@@ -229,6 +254,7 @@ jobs:
   # Example of building u-root
   build-uroot:
     runs-on: ubuntu-latest
+    needs: changes
     strategy:
       matrix:
         uroot-version: ['0.14.0']
@@ -261,6 +287,7 @@ jobs:
           config: 'tests/example_config.json'
           target: 'u-root-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
       - name: Get artifacts
@@ -277,6 +304,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         uroot-version: ['0.14.0']
     runs-on: ${{ matrix.os }}
+    needs: changes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -313,5 +341,6 @@ jobs:
           config: 'tests/example_config.json'
           target: 'u-root-example'
           recursive: 'false'
+          compile: ${{ needs.changes.outputs.action }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}

@@ -17,6 +17,11 @@ inputs:
       Build target recursively, with all of its dependencies.
     required: false
     default: 'false'
+  compile:
+    description: |
+      Compile the action from source instead of downloading pre-compiled binary from releases.
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -67,21 +72,39 @@ runs:
       run: |
         echo "url=https://github.com/9elements/firmware-action/releases/download/${{ steps.version.outputs.version }}/${{ steps.filename.outputs.filename }}" >> "${GITHUB_OUTPUT}"
 
+    - name: setup_go
+      if: ${{ inputs.compile }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
+
     - id: fetch_unix
-      if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
+      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && ! inputs.compile }}
       shell: bash
       run: |
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
         tar -xvzf "${{ steps.filename.outputs.filename }}"
         chmod +x firmware-action
       # chmod should not be necessary, but just to be safe
+    - name: compile_unix
+      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile }}
+      shell: bash
+      working-directory: ./action
+      run: |
+        go build -ldflags="-s -w" -o ../firmware-action
 
     - id: fetch_windows
-      if: ${{ runner.os == 'Windows' }}
+      if: ${{ runner.os == 'Windows' && ! inputs.compile }}
       shell: pwsh
       run: |
         Invoke-WebRequest -Uri "${{ steps.url.outputs.url }}" -OutFile "${{ steps.filename.outputs.filename }}"
         Expand-Archive -Path "${{ steps.filename.outputs.filename }}" -DestinationPath .\
+    - name: compile_windows
+      if: ${{ runner.os == 'Windows' && inputs.compile }}
+      shell: pwsh
+      working-directory: ./action
+      run: |
+        go build -ldflags="-s -w" -o ../firmware-action.exe
 
     - name: run_unix
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
