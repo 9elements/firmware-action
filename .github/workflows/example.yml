@@ -4,6 +4,10 @@
 name: example
 on:
   pull_request:
+    paths:
+      - '.github/workflows/example.yml'
+      - 'docker/**'
+      - 'tests/**'
   pull_request_review:
     types: ['submitted']
   merge_group:
