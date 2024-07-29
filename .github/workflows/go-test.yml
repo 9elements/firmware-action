@@ -1,7 +1,7 @@
 ---
 # Test built docker images by building simple projects inside them
 
-name: go test
+name: go-test
 on:
   pull_request:
   pull_request_review:
@@ -10,6 +10,9 @@ on:
   push:
     branches: ['main']
     tags: ['v*']
+    paths:
+      - '.github/workflows/go-test.yml'
+      - 'action/**'
 
 permissions:
   contents: read
