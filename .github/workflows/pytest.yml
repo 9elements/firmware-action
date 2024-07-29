@@ -4,6 +4,9 @@
 name: pytest
 on:
   pull_request:
+    paths:
+      - '.dagger-ci/**'
+      - '.github/workflows/pytest.yml'
   pull_request_review:
     types: ['submitted']
   merge_group:
