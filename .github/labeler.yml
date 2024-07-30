@@ -1,0 +1,100 @@
+bugfix:
+  - head-branch:
+      - '^fix'
+dependencies:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '.dagger-ci/daggerci/requirements.txt'
+              - 'action/go.mod'
+              - 'action/go.sum'
+docker:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'Dockerfile'
+              - 'compose.yaml'
+              - 'docker/**'
+              - 'docs/src/docker/**'
+documentation:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '*.md'
+              - 'docs/**'
+      - head-branch:
+          - '^docs'
+github_actions:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '.github/workflows/**'
+              - 'action.yml'
+      - head-branch:
+          - '^ci'
+go:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '*.go'
+              - 'action/.golangci.yml'
+              - 'action/.goreleaser.yaml'
+              - 'action/go.mod'
+              - 'action/go.sum'
+module/coreboot:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'action/recipes/coreboot*'
+              - 'docker/coreboot/**'
+module/edk2:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'action/recipes/edk2*'
+              - 'docker/edk2/**'
+module/linux:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'action/recipes/linux*'
+              - 'docker/linux/**'
+module/stitching:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'action/recipes/stitching*'
+module/u-root:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'action/recipes/uroot*'
+              - 'docker/uroot/**'
+python:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '*.py'
+              - '.dagger-ci/**'
+testing:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+              - '.checkov.yml'
+              - '.commitlint.config.mjs'
+              - '.cspell.json'
+              - '.dagger-ci/daggerci/tests/**'
+              - '.hadolint.yaml'
+              - '.markdown-link-check.json'
+              - '.markdownlint.json'
+              - '.mega-linter.yml'
+              - '.trivy.yaml'
+              - 'action/**/*_test.go'
+              - 'tests/**'
+      - head-branch:
+          - '^test'
+feature:
+  - any:
+      - head-branch:
+          - '^feat'
+          - '^feature'
