@@ -33,7 +33,7 @@ func main() {
 	}
 }
 
-const firmwareActionVersion = "v0.3.2"
+const firmwareActionVersion = "v0.4.0"
 
 // CLI (Command Line Interface) holds data from environment
 var CLI struct {
