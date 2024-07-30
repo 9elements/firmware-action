@@ -1,7 +1,7 @@
 ---
 version: '3'
 vars:
-  SEMVER: 'v0.4.0'
+  SEMVER: 'v0.3.3'
 
 tasks:
   build-go-binary:
