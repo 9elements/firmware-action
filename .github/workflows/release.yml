@@ -33,12 +33,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'latest'
-      - name: Install dependencies
-        run: npm install
 
       - name: Set up Git
         run: |
@@ -49,7 +43,8 @@ jobs:
         run: |
           git branch --show-current
           git pull
-          echo "version=v$(npm pkg get version | tr -d '\"')" >> "${GITHUB_OUTPUT}"
+          echo "version=$(grep 'const firmwareActionVersion' < action/main.go | sed -E 's/.*= "//g' | sed 's/"//g')" >> "${GITHUB_OUTPUT}"
+          # Can't really use cocogitto here
 
       - name: Create tag
         run: |
