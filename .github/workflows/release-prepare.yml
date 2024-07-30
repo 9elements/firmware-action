@@ -45,7 +45,7 @@ jobs:
           echo "version=${VERSION}"  >> "${GITHUB_OUTPUT}"
       - name: Update main.go
         run: |
-          sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "v${{ steps.update_version.outputs.version }}"/g' action/main.go
+          sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "${{ steps.update_version.outputs.version }}"/g' action/main.go
       - name: Update Taskfile.yml
         run: |
           sed -i -E "s/SEMVER: .*/SEMVER: '${{ steps.update_version.outputs.version }}'/g" Taskfile.yml
