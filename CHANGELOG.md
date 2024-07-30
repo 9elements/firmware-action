@@ -1,4 +1,4 @@
-## Unreleased (1162f25..32c8c6d)
+## Unreleased (1162f25..73097e7)
 #### Bug Fixes
 - **(action)** broken InputDirs - (4ae3cba) - AtomicFS
 - **(action)** simplify u-root test - (ed3f45c) - AtomicFS
@@ -11,6 +11,8 @@
 - **(lint)** fix frequent markdown-link-check fail with AUR link - (9d230a6) - AtomicFS
 - **(megalinter)** fix spelling - (76e263d) - AtomicFS
 - **(megalinter)** fix spelling - (cce075b) - AtomicFS
+- **(release)** remove leftover javascript stuff - (73097e7) - AtomicFS
+- **(release)** typo - (6b9959f) - AtomicFS
 - **(release)** release-prepare missing tags and history - (32c8c6d) - AtomicFS
 #### Build system
 - **(deps)** bump github.com/heimdalr/dag in /action in the golang group - (fd61b56) - dependabot[bot]
@@ -42,6 +44,7 @@
 - **(test)** add examples for non-Linux systems - (7292ac9) - AtomicFS
 - add CHANGELOG.md - (bc0cb58) - AtomicFS
 #### Miscellaneous Chores
+- **(action)** bump version to v0.4.0 - (a7dcfe3) - AtomicFS
 - **(daggerci)** megalinter fix - (955747d) - AtomicFS
 - should not happen duplicate - (72ccaf2) - AtomicFS
 - fix cosmetic issues - (a2dc60c) - AtomicFS
