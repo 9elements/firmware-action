@@ -40,7 +40,11 @@ jobs:
     outputs:
       action: ${{ steps.filter.outputs.action }}
     steps:
-      # For pull requests it's not necessary to checkout the code
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
