@@ -21,6 +21,21 @@ permissions:
   contents: read
 
 jobs:
+  # Status check for all jobs below
+  # This is to allow SKIPPED be considered as SUCCESS
+  status-check-go-test:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - go-test-resource-hogs
+      - go-test
+    steps:
+      - name: Check status
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: ${{ toJSON(needs) }}
+          jobs: ${{ toJSON(needs) }}
+
   go-test-resource-hogs:
     # Run tests that take up a lot of system resources separately
     runs-on: ubuntu-latest
