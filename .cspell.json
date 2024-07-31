@@ -89,6 +89,7 @@
     "logdir",
     "mainboard",
     "mainboarddir",
+    "markdownlint",
     "megalinter",
     "menuconfig",
     "modifyitems",
