@@ -1,5 +1,8 @@
 # Interactive mode
 
+```admonish debugging
+Dagger [since v0.12](https://dagger.io/blog/dagger-0-12) supports new built-in interactive debugging. We are already planning to re-write `firmware-action` to use this new feature instead of the `ssh` solution we are currently using. For more details see issue [269](https://github.com/9elements/firmware-action/issues/269).
+```
 
 ```admonish note title="A little bit of backstory"
 While I was playing around with firmware-action I found early on that debugging what is going on inside the docker container is rather lengthy and annoying process. This was the moment when the idea of some interactive option was born.
