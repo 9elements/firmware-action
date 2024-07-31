@@ -1,0 +1,5 @@
+# Documentation at:
+#   https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Assign the entire repository (default ownership)
+*	@MDr164 @AtomicFS
