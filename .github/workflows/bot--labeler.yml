@@ -1,6 +1,6 @@
 ---
 # Docs: https://github.com/actions/labeler
-name: 'Pull Request Labeler'
+name: 'labeler'
 
 on:
   - pull_request_target
