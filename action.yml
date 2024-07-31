@@ -73,13 +73,13 @@ runs:
         echo "url=https://github.com/9elements/firmware-action/releases/download/${{ steps.version.outputs.version }}/${{ steps.filename.outputs.filename }}" >> "${GITHUB_OUTPUT}"
 
     - name: setup_go
-      if: ${{ inputs.compile }}
+      if: ${{ inputs.compile == 'true' }}
       uses: actions/setup-go@v5
       with:
         go-version: stable
 
     - id: fetch_unix
-      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && ! inputs.compile }}
+      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
       run: |
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
@@ -87,20 +87,20 @@ runs:
         chmod +x firmware-action
       # chmod should not be necessary, but just to be safe
     - name: compile_unix
-      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile }}
+      if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'true' }}
       shell: bash
       working-directory: ./action
       run: |
         go build -ldflags="-s -w" -o ../firmware-action
 
     - id: fetch_windows
-      if: ${{ runner.os == 'Windows' && ! inputs.compile }}
+      if: ${{ runner.os == 'Windows' && inputs.compile == 'false' }}
       shell: pwsh
       run: |
         Invoke-WebRequest -Uri "${{ steps.url.outputs.url }}" -OutFile "${{ steps.filename.outputs.filename }}"
         Expand-Archive -Path "${{ steps.filename.outputs.filename }}" -DestinationPath .\
     - name: compile_windows
-      if: ${{ runner.os == 'Windows' && inputs.compile }}
+      if: ${{ runner.os == 'Windows' && inputs.compile == 'true' }}
       shell: pwsh
       working-directory: ./action
       run: |
