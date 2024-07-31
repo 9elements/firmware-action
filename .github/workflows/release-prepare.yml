@@ -33,26 +33,34 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Get cocogitto
-        run: |
-          cargo install --locked cocogitto
+      # Automatically determinate the next release version from Conventional Commits since the latest tag
+      - name: Get next version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: main
 
       # Bump version
       - name: Bump the firmware-action version
         id: update_version
         run: |
-          VERSION=$( cog bump --dry-run "--${{ github.event.inputs.version }}" 2>/dev/null | grep -E '^v' )
+          VERSION=$( cog bump --dry-run "--${{ steps.semver.outputs.next }}" 2>/dev/null | grep -E '^v' )
           echo "version=${VERSION}"  >> "${GITHUB_OUTPUT}"
       - name: Update main.go
         run: |
-          sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "${{ steps.update_version.outputs.version }}"/g' action/main.go
+          sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "${{ steps.semver.outputs.next }}"/g' action/main.go
       - name: Update Taskfile.yml
         run: |
-          sed -i -E "s/SEMVER: .*/SEMVER: '${{ steps.update_version.outputs.version }}'/g" Taskfile.yml
+          sed -i -E "s/SEMVER: .*/SEMVER: '${{ steps.semver.outputs.next }}'/g" Taskfile.yml
       - name: Update action.yml
         run: |
-          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version=${{ steps.update_version.outputs.version }}/g" action.yml
+          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version=${{ steps.semver.outputs.next }}/g" action.yml
 
+      # Changelog
+      - name: Get cocogitto
+        run: |
+          cargo install --locked cocogitto
       - name: Update changelog
         run: |
           cog changelog > CHANGELOG.md
@@ -62,9 +70,9 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: release/${{ steps.update_version.outputs.version }}
-          commit-message: 'chore(action): bump version to ${{ steps.update_version.outputs.version }}'
-          title: 'Release: ${{ steps.update_version.outputs.version }} Pull Request'
+          branch: release/${{ steps.semver.outputs.next }}
+          commit-message: 'chore(action): bump version to ${{ steps.semver.outputs.next }}'
+          title: 'Release: ${{ steps.semver.outputs.next }} Pull Request'
           body: 'Prepare for next release'
           assignees: 'AtomicFS'
           reviewers: 'AtomicFS'
