@@ -51,7 +51,7 @@ jobs:
           sed -i -E "s/SEMVER: .*/SEMVER: '${{ steps.update_version.outputs.version }}'/g" Taskfile.yml
       - name: Update action.yml
         run: |
-          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version='${{ steps.update_version.outputs.version }}'/g" action.yml
+          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version=${{ steps.update_version.outputs.version }}/g" action.yml
 
       - name: Update changelog
         run: |
