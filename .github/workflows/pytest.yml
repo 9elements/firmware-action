@@ -21,6 +21,20 @@ permissions:
   contents: read
 
 jobs:
+  # Status check for all jobs below
+  # This is to allow SKIPPED be considered as SUCCESS
+  status-check-pytest:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - pytest
+    steps:
+      - name: Check status
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: ${{ toJSON(needs) }}
+          jobs: ${{ toJSON(needs) }}
+
   pytest:
     runs-on: ubuntu-latest
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}

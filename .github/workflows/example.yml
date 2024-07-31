@@ -31,6 +31,25 @@ permissions:
   contents: read
 
 jobs:
+  # Status check for all jobs below
+  # This is to allow SKIPPED be considered as SUCCESS
+  status-check-example:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - build-coreboot
+      - build-linux
+      - build-edk2
+      - build-stitching
+      - build-uroot
+      - test-operating-systems
+    steps:
+      - name: Check status
+        uses: re-actors/alls-green@release/v1
+        with:
+          allowed-skips: ${{ toJSON(needs) }}
+          jobs: ${{ toJSON(needs) }}
+
   # Change detection in action golang code
   changes:
     runs-on: ubuntu-latest
