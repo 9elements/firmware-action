@@ -4,18 +4,12 @@
 name: pytest
 on:
   pull_request:
-    paths:
-      - '.dagger-ci/**'
-      - '.github/workflows/pytest.yml'
   pull_request_review:
     types: ['submitted']
   merge_group:
   push:
     branches: ['main']
     tags: ['v*']
-    paths:
-      - '.dagger-ci/**'
-      - '.github/workflows/pytest.yml'
 
 permissions:
   contents: read
@@ -35,9 +29,31 @@ jobs:
           allowed-skips: ${{ toJSON(needs) }}
           jobs: ${{ toJSON(needs) }}
 
+  # Check we jobs should be ran or skipped
+  skip-check:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      changes: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            changes:
+              - '.dagger-ci/**'
+              - '.github/workflows/pytest.yml'
+
   pytest:
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
+    needs: skip-check
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Install Taskfile
