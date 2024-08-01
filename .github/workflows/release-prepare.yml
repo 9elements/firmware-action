@@ -5,18 +5,7 @@
 # For detailed description see "release.yml"
 
 name: release-prepare
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version bump'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
+on: workflow_dispatch
 
 permissions:
   contents: write # To push new branch
