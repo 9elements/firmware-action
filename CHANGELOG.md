@@ -1,4 +1,34 @@
-## Unreleased (1162f25..73097e7)
+## Unreleased (77403bf..6bdd189)
+#### Bug Fixes
+- **(action)** remove unnecessary apostrophes - (f715557) - AtomicFS
+- **(action)** if statement using compile input - (77403bf) - AtomicFS
+- **(ci)** consolidate multiple jobs into few status checks - (6bdd189) - AtomicFS
+- **(ci)** jobs are canceled on submitted review - (28516b9) - AtomicFS
+- **(lint)** fix broken matching in .editorconfig - (6bc13d3) - AtomicFS
+- **(lint)** fixes according to megalinter - (fd42f59) - AtomicFS
+- **(megalinter)** fix spelling - (61587d4) - AtomicFS
+- **(megalinter)** exclude mdbook theme from linting - (744824c) - AtomicFS
+- **(release)** forgot to remove the old version bumper - (a3ab36c) - AtomicFS
+#### Documentation
+- **(action)** cleanup anchors in recipes - (fdbaa04) - AtomicFS
+- add CODEOWNERS file - (0f2a143) - AtomicFS
+- remove google analytics from mdbook - (eab70ac) - AtomicFS
+- add note about interactive mode - (220baf9) - AtomicFS
+- add note about Arch Linux AUR package - (9bc4ff3) - AtomicFS
+- add notes about interactive mode - (a857531) - AtomicFS
+- add more docs - (5737270) - AtomicFS
+- add firmware-action-example as submodule - (3f9f888) - AtomicFS
+- split example_config files for more clarity - (499bf53) - AtomicFS
+- update README.md - (137915e) - AtomicFS
+#### Features
+- **(ci)** add labeler bot - (d88ba9f) - AtomicFS
+- **(release)** automatically determinate the next version - (2306d2d) - AtomicFS
+#### Miscellaneous Chores
+- rename labeler workflow - (be50b25) - AtomicFS
+
+- - -
+
+## v0.4.0 - 2024-08-01
 #### Bug Fixes
 - **(action)** broken InputDirs - (4ae3cba) - AtomicFS
 - **(action)** simplify u-root test - (ed3f45c) - AtomicFS
@@ -44,6 +74,7 @@
 - **(test)** add examples for non-Linux systems - (7292ac9) - AtomicFS
 - add CHANGELOG.md - (bc0cb58) - AtomicFS
 #### Miscellaneous Chores
+- **(action)** bump version to v0.4.0 - (676c7b6) - AtomicFS
 - **(action)** bump version to v0.4.0 - (a7dcfe3) - AtomicFS
 - **(daggerci)** megalinter fix - (955747d) - AtomicFS
 - should not happen duplicate - (72ccaf2) - AtomicFS
@@ -51,7 +82,7 @@
 
 - - -
 
-## v0.3.2 - 2024-07-30
+## v0.3.2 - 2024-08-01
 #### Features
 - **(action)** allow multi-module workspaces for u-root - (f54803d) - AtomicFS
 #### Miscellaneous Chores
@@ -59,7 +90,7 @@
 
 - - -
 
-## v0.3.1 - 2024-07-30
+## v0.3.1 - 2024-08-01
 #### Bug Fixes
 - **(again)** build docker containers on release - (2d33a7e) - AtomicFS
 #### Miscellaneous Chores
@@ -67,7 +98,7 @@
 
 - - -
 
-## v0.3.0 - 2024-07-30
+## v0.3.0 - 2024-08-01
 #### Bug Fixes
 - **(megalinter)** fix spelling - (99a6247) - AtomicFS
 - **(typo)** typo - (a5d9fb5) - AtomicFS
@@ -93,7 +124,7 @@
 
 - - -
 
-## v0.2.1 - 2024-07-30
+## v0.2.1 - 2024-08-01
 #### Bug Fixes
 - **(action)** fix issue 195 - (d8bc51a) - AtomicFS
 - **(action)** fix bin filename in Taskfile.yml - (5b20be4) - AtomicFS
@@ -175,7 +206,7 @@
 
 - - -
 
-## v0.2.0 - 2024-07-30
+## v0.2.0 - 2024-08-01
 #### Build system
 - **(deps)** bump the golang group in /action with 1 update - (d7e9dc8) - dependabot[bot]
 - **(deps)** update pytest-timeout requirement in /.dagger-ci/daggerci - (11045e2) - dependabot[bot]
@@ -190,7 +221,7 @@
 
 - - -
 
-## v0.1.2 - 2024-07-30
+## v0.1.2 - 2024-08-01
 #### Bug Fixes
 - **(commitlint)** add config increasing max line length - (38a005e) - AtomicFS
 - **(docker)** edk2 repositories were missing files - (4cf4603) - AtomicFS
@@ -240,13 +271,13 @@
 
 - - -
 
-## v0.1.1 - 2024-07-30
+## v0.1.1 - 2024-08-01
 #### Bug Fixes
 - **(action)** naming mistake in JSON config - (58ebf67) - AtomicFS
 
 - - -
 
-## v0.1.0 - 2024-07-30
+## v0.1.0 - 2024-08-01
 #### Bug Fixes
 - **(docker)** add cleanup commands - (b26acf4) - AtomicFS
 - guard queue with mutex in recipes.go - (b160e01) - Marvin Drees
@@ -268,7 +299,7 @@
 
 - - -
 
-## v0.0.1 - 2024-07-30
+## v0.0.1 - 2024-08-01
 #### Bug Fixes
 - **(Dockerfile)** add --no-cache-dir - (c116873) - Patrick Rudolph
 - **(Dockerfile)** add user to fix linter - (ebca447) - Patrick Rudolph
