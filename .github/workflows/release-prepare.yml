@@ -42,11 +42,6 @@ jobs:
           branch: main
 
       # Bump version
-      - name: Bump the firmware-action version
-        id: update_version
-        run: |
-          VERSION=$( cog bump --dry-run "--${{ steps.semver.outputs.next }}" 2>/dev/null | grep -E '^v' )
-          echo "version=${VERSION}"  >> "${GITHUB_OUTPUT}"
       - name: Update main.go
         run: |
           sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "${{ steps.semver.outputs.next }}"/g' action/main.go
