@@ -87,6 +87,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup docker-compose
+        uses: KengoTODA/actions-setup-docker-compose@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Validate compose file
         run: docker-compose -f docker/compose.yaml config
 
