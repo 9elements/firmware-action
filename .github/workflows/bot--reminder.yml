@@ -1,0 +1,20 @@
+---
+# Docs: https://github.com/agrc/create-reminder-action
+name: 'reminder'
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for reminders
+        uses: agrc/create-reminder-action@v1
