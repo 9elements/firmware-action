@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.4
 
 require (
-	dagger.io/dagger v0.12.3
+	dagger.io/dagger v0.12.4
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v0.9.0
 	github.com/dustin/go-humanize v1.0.1
@@ -17,7 +17,6 @@ require (
 	github.com/sethvargo/go-githubactions v1.2.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.25.0
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 )
 
 require (
@@ -65,6 +64,7 @@ require (
 	go.opentelemetry.io/otel/sdk/log v0.3.0 // indirect
 	go.opentelemetry.io/otel/trace v1.27.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
+	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
 	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
