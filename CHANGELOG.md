@@ -1,4 +1,24 @@
-## Unreleased (77403bf..6bdd189)
+## Unreleased (2b42c43..3659a03)
+#### Bug Fixes
+- **(ci)** consolidate jobs - (a9e6b0d) - AtomicFS
+- **(dagger)** missing docker-compose - (6b41c2e) - AtomicFS
+- **(megalinter)** fix spelling - (61c2c1e) - AtomicFS
+- **(megalinter)** fix spelling - (d614b25) - AtomicFS
+#### Build system
+- **(deps)** bump oxsecurity/megalinter from 7 to 8 - (e7e593a) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /action in the golang group - (602dff8) - dependabot[bot]
+- **(deps)** update prettytable requirement in /.dagger-ci/daggerci - (bf69e65) - dependabot[bot]
+- **(deps)** bump golang.org/x/crypto in /action in the golang group - (6752a89) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /action in the golang group - (f69338a) - dependabot[bot]
+#### Features
+- **(ci)** add reminder bot - (b3615d5) - AtomicFS
+- **(docker)** build coreboot cross-compilers for all platforms - (3659a03) - AtomicFS
+#### Miscellaneous Chores
+- **(action)** remove unnecessary input - (2b42c43) - AtomicFS
+
+- - -
+
+## v0.5.0 - 2024-08-26
 #### Bug Fixes
 - **(action)** remove unnecessary apostrophes - (f715557) - AtomicFS
 - **(action)** if statement using compile input - (77403bf) - AtomicFS
@@ -24,11 +44,12 @@
 - **(ci)** add labeler bot - (d88ba9f) - AtomicFS
 - **(release)** automatically determinate the next version - (2306d2d) - AtomicFS
 #### Miscellaneous Chores
+- **(action)** bump version to v0.5.0 - (1dc275f) - AtomicFS
 - rename labeler workflow - (be50b25) - AtomicFS
 
 - - -
 
-## v0.4.0 - 2024-08-01
+## v0.4.0 - 2024-08-26
 #### Bug Fixes
 - **(action)** broken InputDirs - (4ae3cba) - AtomicFS
 - **(action)** simplify u-root test - (ed3f45c) - AtomicFS
@@ -82,7 +103,7 @@
 
 - - -
 
-## v0.3.2 - 2024-08-01
+## v0.3.2 - 2024-08-26
 #### Features
 - **(action)** allow multi-module workspaces for u-root - (f54803d) - AtomicFS
 #### Miscellaneous Chores
@@ -90,7 +111,7 @@
 
 - - -
 
-## v0.3.1 - 2024-08-01
+## v0.3.1 - 2024-08-26
 #### Bug Fixes
 - **(again)** build docker containers on release - (2d33a7e) - AtomicFS
 #### Miscellaneous Chores
@@ -98,7 +119,7 @@
 
 - - -
 
-## v0.3.0 - 2024-08-01
+## v0.3.0 - 2024-08-26
 #### Bug Fixes
 - **(megalinter)** fix spelling - (99a6247) - AtomicFS
 - **(typo)** typo - (a5d9fb5) - AtomicFS
@@ -124,7 +145,7 @@
 
 - - -
 
-## v0.2.1 - 2024-08-01
+## v0.2.1 - 2024-08-26
 #### Bug Fixes
 - **(action)** fix issue 195 - (d8bc51a) - AtomicFS
 - **(action)** fix bin filename in Taskfile.yml - (5b20be4) - AtomicFS
@@ -206,7 +227,7 @@
 
 - - -
 
-## v0.2.0 - 2024-08-01
+## v0.2.0 - 2024-08-26
 #### Build system
 - **(deps)** bump the golang group in /action with 1 update - (d7e9dc8) - dependabot[bot]
 - **(deps)** update pytest-timeout requirement in /.dagger-ci/daggerci - (11045e2) - dependabot[bot]
@@ -221,7 +242,7 @@
 
 - - -
 
-## v0.1.2 - 2024-08-01
+## v0.1.2 - 2024-08-26
 #### Bug Fixes
 - **(commitlint)** add config increasing max line length - (38a005e) - AtomicFS
 - **(docker)** edk2 repositories were missing files - (4cf4603) - AtomicFS
@@ -271,13 +292,13 @@
 
 - - -
 
-## v0.1.1 - 2024-08-01
+## v0.1.1 - 2024-08-26
 #### Bug Fixes
 - **(action)** naming mistake in JSON config - (58ebf67) - AtomicFS
 
 - - -
 
-## v0.1.0 - 2024-08-01
+## v0.1.0 - 2024-08-26
 #### Bug Fixes
 - **(docker)** add cleanup commands - (b26acf4) - AtomicFS
 - guard queue with mutex in recipes.go - (b160e01) - Marvin Drees
@@ -299,7 +320,7 @@
 
 - - -
 
-## v0.0.1 - 2024-08-01
+## v0.0.1 - 2024-08-26
 #### Bug Fixes
 - **(Dockerfile)** add --no-cache-dir - (c116873) - Patrick Rudolph
 - **(Dockerfile)** add user to fix linter - (ebca447) - Patrick Rudolph
