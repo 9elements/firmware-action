@@ -28,7 +28,7 @@ runs:
   steps:
     - id: version
       shell: bash
-      run: echo "version=v0.6.0" >> "${GITHUB_OUTPUT}"
+      run: echo "version=v0.6.1" >> "${GITHUB_OUTPUT}"
 
     - id: arch
       shell: bash
