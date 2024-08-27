@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -102,7 +103,16 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		// but defconfigBasename="linux_defconfig" works fine
 		// Don't know why, just return error and let user deal with it.
 		return nil, fmt.Errorf(
-			"filename '%s' specified by defconfig_path must not contain '.defconfig' in the name",
+			"filename '%s' specified by defconfig_path must not contain '.defconfig'",
+			defconfigBasename,
+		)
+	}
+	defconfigRegex := regexp.MustCompile(`.*defconfig$`)
+	if !defconfigRegex.MatchString(defconfigBasename) {
+		// 'make $defconfigBasename' will fail for Linux kernel if the file
+		// does not end with 'defconfig'
+		return nil, fmt.Errorf(
+			"filename '%s' specified by defconfig_path must end with 'defconfig'",
 			defconfigBasename,
 		)
 	}
