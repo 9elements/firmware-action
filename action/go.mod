@@ -14,7 +14,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/heimdalr/dag v1.5.0
 	github.com/plus3it/gorecurcopy v0.0.1
-	github.com/sethvargo/go-githubactions v1.2.0
+	github.com/sethvargo/go-githubactions v1.3.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.26.0
 )
