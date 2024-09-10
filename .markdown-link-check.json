@@ -2,6 +2,9 @@
   "ignorePatterns": [
     {
       "pattern": "^https://aur.archlinux.org/packages/.*"
+    },
+    {
+      "pattern": "^https://review.coreboot.org/.*"
     }
   ]
 }
