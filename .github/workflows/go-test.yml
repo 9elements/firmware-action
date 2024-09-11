@@ -67,9 +67,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Install Taskfile
-        run: |
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
       - name: Install go dependencies
         run: |
           cd action
@@ -92,9 +89,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Install Taskfile
-        run: |
-          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
       - name: Install go dependencies
         run: |
           cd action
