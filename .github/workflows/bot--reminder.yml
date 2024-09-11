@@ -3,8 +3,6 @@
 name: 'reminder'
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
   issue_comment:
     types: [created, edited]
 
@@ -13,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  stale:
+  reminder:
     runs-on: ubuntu-latest
     steps:
       - name: Check for reminders
