@@ -8,7 +8,7 @@ tasks:
     desc: Template task to build a go binary
     dir: action
     cmds:
-      - go build -ldflags="-s -w" -o ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}}
+      - go build -ldflags="-s -w" -o ../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
     env:
       CGO_ENABLED: 0
 
