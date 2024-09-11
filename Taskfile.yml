@@ -8,22 +8,9 @@ tasks:
     desc: Template task to build a go binary
     dir: action
     cmds:
-      - GOOS={{.OS}} GOARCH=amd64 go build -ldflags="-s -w" -o ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}}
-      - upx -9 ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}} || true
-      # upx works, but always fails on darwin:
-      #   CantPackException: macOS is currently not supported (try --force-macos)
+      - go build -ldflags="-s -w" -o ../bin/firmware-action-{{.OS}}-amd64-{{.SEMVER}}
     env:
       CGO_ENABLED: 0
-
-  deploy-binaries:
-    desc: Compile action binaries
-    cmds:
-      - task: build-go-binary
-        vars: { OS: 'linux' } # yamllint disable-line
-      - task: build-go-binary
-        vars: { OS: 'darwin' } # yamllint disable-line
-      - task: build-go-binary
-        vars: { OS: 'windows' } # yamllint disable-line
 
   lint:
     desc: Run the linters
