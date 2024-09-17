@@ -341,7 +341,7 @@ class Orchestrator:
         # pylint: disable=too-many-locals
         # Create container from tarball
         context_tarball = client.host().file(tarball_file)
-        test_container = client.pipeline("test").container().import_(context_tarball)
+        test_container = client.container().import_(context_tarball)
 
         # Make sure that container has environment variable "VERIFICATION_TEST"
         verification_test = await test_container.env_variable("VERIFICATION_TEST")
