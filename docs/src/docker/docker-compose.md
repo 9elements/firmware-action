@@ -76,3 +76,11 @@ The path to said shell script is stored in environment variable `VERIFICATION_TE
 
 In addition, there might be `VERIFICATION_TEST_*` variables. These are used inside the test script and are rather use-case specific, however often used to store which version of firmware is being tested.
 
+
+## Adding new container
+
+- (optional) Add new `Dockerfile` into `docker` directory
+- Add new entry in `docker/compose.yaml`
+- Add new entry into strategy matrix in `.github/workflows/docker-build-and-test.yml`
+- (optional) Add new strategy matrix in `.github/workflows/example.yml` examples
+    - this requires adding new configuration file in `tests` directory
