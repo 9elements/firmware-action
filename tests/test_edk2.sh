@@ -54,5 +54,5 @@ fi
 if [ "${VERIFICATION_TEST_EDK2_VERSION}" == "UDK2017" ]; then
 	OvmfPkg/build.sh -a X64
 else
-	build -D BOOTLOADER=COREBOOT -a IA32 -a X64 -t GCC5 -b DEBUG -p "${PAYLOAD}"
+	build -D BOOTLOADER=COREBOOT -a IA32 -a X64 -t GCC5 -b DEBUG -p "${PAYLOAD}" -D BUILD_ARCH=X64
 fi

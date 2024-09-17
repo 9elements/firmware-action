@@ -101,6 +101,15 @@ services:
         - EDK2_PLATFORM_COMMIT=b36fe8bc9b6812e9b4ec360a2ab513a0437d4132
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
+  edk2-stable202408:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202408
+        - SOURCE_IMAGE=buildpack-deps:noble
+        - EDK2_PLATFORM_COMMIT=8676e88233d41323ed3b3a9087288e83cc87ebf7
+        - EDK2_NON_OSI_COMMIT=4e36179c55f49a73fe4805baa2b5f9fdd0a07a67
+        - INTERMEDIATE_IMAGE=universalpayload
   #==================
   # linux
   #==================
