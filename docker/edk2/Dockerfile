@@ -9,6 +9,7 @@ ARG INTERMEDIATE_IMAGE=base
 FROM ${SOURCE_IMAGE} AS base
 
 ARG EDK2_VERSION=edk2-stable202008
+ARG EDK2_VERSION_COMMIT=06dc822d045c2bb42e497487935485302486e151
 ARG EDK2_PLATFORM_COMMIT=7093026e924291b9e9f6f5211a052c6a761a4704
 ARG EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
 
@@ -111,8 +112,13 @@ RUN mkdir Edk2NonOsi && \
     git fetch --depth 1 origin "${EDK2_NON_OSI_COMMIT}" && \
     git checkout "${EDK2_NON_OSI_COMMIT}" && \
     git submodule update --init --recursive
-RUN git clone --depth 1 --recurse-submodules https://github.com/tianocore/edk2.git --depth 1 --branch "${EDK2_VERSION}" Edk2 && \
+RUN mkdir Edk2 && \
     cd Edk2 && \
+    git init && \
+    git remote add origin https://github.com/tianocore/edk2.git && \
+    git fetch --depth 1 origin "${EDK2_VERSION_COMMIT}" && \
+    git checkout "${EDK2_VERSION_COMMIT}" && \
+    git submodule update --init --recursive && \
     make -C BaseTools/ -j "$(nproc)"
 
 
