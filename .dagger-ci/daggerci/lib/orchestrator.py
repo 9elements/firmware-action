@@ -204,9 +204,7 @@ class Orchestrator:
                             dockerfile,
                         )
                 else:
-                    await self.__build_test_publish__(
-                        client, top_element=top_element, dockerfile=dockerfile
-                    )
+                    await self.__build_test_publish__(client, top_element, dockerfile)
 
         return self.results
 
@@ -250,9 +248,11 @@ class Orchestrator:
                 dockerfile_args=dockerfile_args,
             )
         except dagger.ExecError as exc:
+            logging.error("Dagger execution error")
             self.results.add(top_element, dockerfile, "build", False, exc.message)
             return
         except dagger.QueryError as exc:
+            logging.error("Dagger query error, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes")
             self.results.add(
                 top_element, dockerfile, "build", False, exc.debug_query()
             )  # type: ignore [no-untyped-call]
@@ -277,6 +277,7 @@ class Orchestrator:
 
         # export as tarball
         if not await built_docker.export(tarball_file):
+            logging.error("Failed to export docker container as tarball")
             self.results.add(
                 top_element,
                 dockerfile,

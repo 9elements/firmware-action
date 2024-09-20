@@ -93,14 +93,8 @@ def fixture_dockerfile():
     return textwrap.dedent(
         """\
         FROM ubuntu:22.04 AS base
-        ARG TARGETARCH=amd64
-        ARG COREBOOT_VERSION=4.19
-        RUN apt-get update && \\
-            apt-get install -y --no-install-recommends \\
-                bc nano git \\
-            && \\
-            rm -rf /var/lib/apt/lists/*\
-            """
+        ARG TARGETARCH=amd64\
+        """
     )
 
 
@@ -147,7 +141,7 @@ def dockerfile_broken():
         """\
         FROM ubuntu:22.04 AS base
         RUN false\
-            """
+        """
     )
 
 
