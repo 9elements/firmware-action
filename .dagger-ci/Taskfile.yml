@@ -90,6 +90,13 @@ tasks:
   #    NEW
   # ===========
 
+  build:udk2017:
+    desc: Build udk2017 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'udk2017'
+
   build:edk2-stable202302:
     desc: Build edk2-stable202302 container
     cmds:
