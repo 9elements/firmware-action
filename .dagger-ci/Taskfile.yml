@@ -86,6 +86,52 @@ tasks:
         vars:
           DOCKERFILE: 'edk2-stable202211'
 
+  # ===========
+  #    NEW
+  # ===========
+
+  build:edk2-stable202302:
+    desc: Build edk2-stable202302 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202302'
+
+  build:edk2-stable202305:
+    desc: Build edk2-stable202305 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202305'
+
+  build:edk2-stable202308:
+    desc: Build edk2-stable202308 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202308'
+
+  build:edk2-stable202311:
+    desc: Build edk2-stable202311 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202311'
+
+  build:edk2-stable202402:
+    desc: Build edk2-stable202402 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202402'
+
+  build:edk2-stable202405:
+    desc: Build edk2-stable202405 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202405'
+
   build:edk2-stable202408:
     desc: Build edk2-stable202408 container
     cmds:
