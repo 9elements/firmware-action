@@ -126,6 +126,80 @@ services:
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
+  edk2-stable202302:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202302
+        - EDK2_VERSION_COMMIT=f80f052277c88a67c55e107b550f504eeea947d3
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=0d558830c3afe01d49b7b75f25b816cc3a7e61dc
+        - EDK2_NON_OSI_COMMIT=74d4da60a4f0fd75f8ca487296960c84d4ac03b9
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
+  edk2-stable202305:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202305
+        - EDK2_VERSION_COMMIT=ba91d0292e593df8528b66f99c1b0b14fadc8e16
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=1c81be538ae2cbf6f3644c6efde0fd3d887eb8cf
+        - EDK2_NON_OSI_COMMIT=f0bb00937ad6bfdf92d9c7fea9f7277c160d82e9
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
+  # Since edk2-stable202305 the GCC_VERSION should be more flexible
+  # https://github.com/tianocore/edk2/commit/0fc07b1c6a491fa1e81daed6cfc2ec33c8cac973
+  edk2-stable202308:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202308
+        - EDK2_VERSION_COMMIT=819cfc6b42a68790a23509e4fcc58ceb70e1965e
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=fc22c0e6970924ab77c1cbb7127bf71f233a995a
+        - EDK2_NON_OSI_COMMIT=8c09bd0955338db38813e0d8ae1faa634f545f73
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=12
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
+  edk2-stable202311:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202311
+        - EDK2_VERSION_COMMIT=8736b8fdca85e02933cdb0a13309de14c9799ece
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=0114e8b071fc136c13b27e90b0079cb2d20781dc
+        - EDK2_NON_OSI_COMMIT=1f4d7849f2344aa770f4de5224188654ae5b0e50
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=12
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
+  edk2-stable202402:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202402
+        - EDK2_VERSION_COMMIT=edc6681206c1a8791981a2f911d2fb8b3d2f5768
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=6feac9be9c7e3a13965d17a0b3faa6b619295533
+        - EDK2_NON_OSI_COMMIT=1768928be7451a4a8ba43a9acd16ab30582b9511
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=12
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
+  edk2-stable202405:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202405
+        - EDK2_VERSION_COMMIT=3e722403cd16388a0e4044e705a2b34c841d76ca
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=f067b0d92de47af0ae3c441dc5f8377f83412c59
+        - EDK2_NON_OSI_COMMIT=2edcaa51f3911b87073a70207b1fbbd815d5740c
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=12
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202408.01:
     build:
       context: edk2
