@@ -157,6 +157,16 @@ services:
         - EDK2_PLATFORM_COMMIT=6feac9be9c7e3a13965d17a0b3faa6b619295533
         - EDK2_NON_OSI_COMMIT=1768928be7451a4a8ba43a9acd16ab30582b9511
         - INTERMEDIATE_IMAGE=universalpayload
+  edk2-stable202405:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202405
+        - EDK2_VERSION_COMMIT=3e722403cd16388a0e4044e705a2b34c841d76ca
+        - SOURCE_IMAGE=buildpack-deps:jammy
+        - EDK2_PLATFORM_COMMIT=f067b0d92de47af0ae3c441dc5f8377f83412c59
+        - EDK2_NON_OSI_COMMIT=2edcaa51f3911b87073a70207b1fbbd815d5740c
+        - INTERMEDIATE_IMAGE=universalpayload
   edk2-stable202408:
     build:
       context: edk2
