@@ -47,6 +47,7 @@ async def test__orchestrator__broken_dockerfile(
 
 @pytest.mark.slow
 @pytest.mark.anyio
+@pytest.mark.skip(reason="testing currently causes running out of disk space")
 async def test__orchestrator__missing_env_var(tmpdir, create_orchestrator, dockerfile):
     """
     Try to execute test inside docker container, but there is no
@@ -59,6 +60,7 @@ async def test__orchestrator__missing_env_var(tmpdir, create_orchestrator, docke
 
 @pytest.mark.slow
 @pytest.mark.anyio
+@pytest.mark.skip(reason="testing currently causes running out of disk space")
 async def test__orchestrator__run_test_script_fail(
     tmpdir, create_orchestrator, dockerfile_dummy_tests_fail
 ):
@@ -87,6 +89,7 @@ async def test__orchestrator__run_test_script_fail(
 
 @pytest.mark.slow
 @pytest.mark.anyio
+@pytest.mark.skip(reason="testing currently causes running out of disk space")
 async def test__orchestrator__run_test_script_success(
     tmpdir, create_orchestrator, dockerfile_dummy_tests_success
 ):
@@ -116,6 +119,7 @@ async def test__orchestrator__run_test_script_success(
 
 @pytest.mark.slow
 @pytest.mark.anyio
+@pytest.mark.skip(reason="testing currently causes running out of disk space")
 async def test__orchestrator__multi_comprehensive_build(
     tmpdir,
     create_orchestrator,
