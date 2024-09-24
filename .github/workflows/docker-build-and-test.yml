@@ -29,6 +29,7 @@ jobs:
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     strategy:
       matrix:
         dockerfile:
@@ -100,6 +101,8 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
       - name: Run dagger pipeline
+        # If building coreboot use 120 minutes timeout, otherwise 15 minutes
+        timeout-minutes: ${{ startsWith(matrix.dockerfile, 'coreboot_') && 120 || 15 }}
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"
