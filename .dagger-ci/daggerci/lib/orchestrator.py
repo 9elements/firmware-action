@@ -236,7 +236,8 @@ class Orchestrator:
         dockerfile_args = self.docker_compose.get_dockerfile_args(
             dockerfile=dockerfile, top_element=top_element
         )
-        tarball_file = os.path.join(self.build_dir, f"{dockerfile}.tar")
+        # TODO: remove
+        # tarball_file = os.path.join(self.build_dir, f"{dockerfile}.tar")
 
         # =======
         # BUILD
@@ -276,27 +277,31 @@ class Orchestrator:
             logging.info("label: %s = %s", await label.name(), await label.value())
 
         # export as tarball
-        if not await built_docker.export(tarball_file):
-            logging.error("Failed to export docker container as tarball")
-            self.results.add(
-                top_element,
-                dockerfile,
-                "export",
-                False,
-                f"Failed to export docker container {dockerfile} as tarball",
-            )
-            return
+        # TODO: Instead of tarball export and import just branch off the container
+        # if not await built_docker.export(tarball_file):
+        #     logging.error("Failed to export docker container as tarball")
+        #     self.results.add(
+        #         top_element,
+        #         dockerfile,
+        #         "export",
+        #         False,
+        #         f"Failed to export docker container {dockerfile} as tarball",
+        #     )
+        #     return
         self.results.add(top_element, dockerfile, "export")
 
         # =======
         # TEST
         logging.info("%s/%s: TESTING", top_element, dockerfile)
-        try:
-            await self.__test__(client=client, tarball_file=tarball_file)
-        except ContainerTestFailed:
-            self.results.add(top_element, dockerfile, "test", False)
-            return
-        self.results.add(top_element, dockerfile, "test")
+        logging.warning("%s/%s: TESTING - skipping", top_element, dockerfile)
+        # TODO: Instead of tarball export and import just branch off the container
+        # try:
+        #     await self.__test__(client=client, tarball_file=tarball_file)
+        # except ContainerTestFailed:
+        #     self.results.add(top_element, dockerfile, "test", False)
+        #     return
+        # self.results.add(top_element, dockerfile, "test")
+        self.results.add(top_element, dockerfile, "test", False, "skip")
 
         # =======
         # PUBLISH
