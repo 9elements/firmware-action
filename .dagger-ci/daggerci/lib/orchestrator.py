@@ -8,6 +8,7 @@ The main class to abstract all actions
 import datetime
 import logging
 import os
+import platform
 import re
 import sys
 from typing import Any
@@ -39,6 +40,40 @@ class ContainerTestFailed(Exception):
     """
     Test executed inside built container failed
     """
+
+
+def get_current_arch() -> str:
+    """
+    Get CPU architecture of current machine
+    Examples: 'amd64' or 'arm64'
+    """
+    # Docs: https://docs.python.org/3/library/platform.html#platform.machine
+    current_arch = platform.machine().lower()
+    arch_dict = {
+        "x86_64": "amd64",
+        "aarch64": "arm64",
+    }
+    return arch_dict[current_arch]
+
+
+def get_current_platform() -> str:
+    """
+    Get platform string of current machine
+    Examples: 'linux/amd64' or 'windows/arm64'
+    """
+    # Figure out Operating System, aka Platform
+    # Docs: https://docs.python.org/3/library/sys.html#sys.platform
+    current_platform = sys.platform.lower()
+    platform_dict = {
+        "win32": "windows",
+        "cygwin": "windows",
+    }
+
+    # Figure out CPU
+    current_arch = get_current_arch()
+
+    # pylint: disable=consider-using-f-string
+    return "{}/{}".format(platform_dict[current_platform], current_arch)
 
 
 class Orchestrator:
@@ -233,25 +268,15 @@ class Orchestrator:
         # =======
         # BUILD
         logging.info("%s/%s: BUILDING", top_element, dockerfile)
-        try:
-            built_docker = await self.__build__(
-                client=client,
-                dockerfile_dir=dockerfile_dir,
-                dockerfile_args=dockerfile_args,
-            )
-        except dagger.ExecError as exc:
-            logging.error("Dagger execution error")
-            self.results.add(top_element, dockerfile, "build", False, exc.message)
+        variants = await self.__build__(
+            client=client,
+            dockerfile=dockerfile,
+            dockerfile_dir=dockerfile_dir,
+            dockerfile_args=dockerfile_args,
+            top_element=top_element,
+        )
+        if not variants:
             return
-        except dagger.QueryError as exc:
-            logging.error(
-                "Dagger query error, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"
-            )
-            self.results.add(
-                top_element, dockerfile, "build", False, exc.debug_query()
-            )  # type: ignore [no-untyped-call]
-            return
-        self.results.add(top_element, dockerfile, "build")
 
         # add container specific labels into self.labels
         self.labels["org.opencontainers.image.description"] = (
@@ -262,12 +287,14 @@ class Orchestrator:
         )
 
         # add labels to the container
-        for name, val in self.labels.items():
-            built_docker = await built_docker.with_label(name=name, value=val)
+        for key, _ in variants.items():
+            for name, val in self.labels.items():
+                variants[key] = await variants[key].with_label(name=name, value=val)
 
         logging.info("Docker container labels:")
-        for label in await built_docker.labels():
-            logging.info("label: %s = %s", await label.name(), await label.value())
+        for key, _ in variants.items():
+            for label in await variants[key].labels():
+                logging.info("label: %s = %s", await label.name(), await label.value())
 
         # =======
         # TEST
@@ -275,13 +302,15 @@ class Orchestrator:
         try:
             await self.__test__(
                 client=client,
-                test_container=built_docker,
+                test_container=variants[get_current_arch()],
                 test_container_name=dockerfile,
             )
         except ContainerTestFailed:
-            self.results.add(top_element, dockerfile, "test", False)
+            self.results.add(
+                top_element, dockerfile, f"test {get_current_arch()}", False
+            )
             return
-        self.results.add(top_element, dockerfile, "test")
+        self.results.add(top_element, dockerfile, f"test {get_current_arch()}")
 
         # =======
         # PUBLISH
@@ -294,7 +323,7 @@ class Orchestrator:
             # pylint: enable=attribute-defined-outside-init
             try:
                 await self.__publish__(
-                    container=built_docker,
+                    variants=list(variants.values()),
                     dockerfile=dockerfile,
                     top_element=top_element,
                 )
@@ -307,18 +336,66 @@ class Orchestrator:
             self.results.add(top_element, dockerfile, "publish", False, "skip")
 
     async def __build__(
-        self, client: dagger.Client, dockerfile_dir: str, dockerfile_args: list[Any]
-    ) -> dagger.Container:
+        self,
+        client: dagger.Client,
+        dockerfile: str,
+        dockerfile_dir: str,
+        dockerfile_args: list[Any],
+        top_element: str,
+    ) -> dict[str, dagger.Container]:
         # dockerfile_args: list[dagger.api.gen.BuildArg]) -> dagger.Container:
         # For some reason I get
         #   "AttributeError: module 'dagger' has no attribute 'api'"
+
+        # pylint: disable=too-many-arguments
         """
         Does the actual building of docker container
         """
+
+        # Initially I wanted to use our existing setup to build all wanted platforms, but unfortunately
+        #   there are issues with native emulation when building tool-chains for coreboot and edk2.
+        # For that reason we cannot build the multi-arch container as shown in cookbook as is
+        #   https://docs.dagger.io/cookbook/#build-multi-arch-image
+        # We have to compile the toolchains separately on the architecture for which the toolchain
+        #   is intended to run on, and then copy it into the container. This requires changes to the Dockerfile
+        #   and it means that building container locally will be much more complicated.
+
+        platforms = [
+            "amd64",
+            "arm64",
+        ]
         context_dir = client.host().directory(dockerfile_dir)
-        return await context_dir.docker_build(  # type: ignore [no-any-return]
-            build_args=dockerfile_args
-        )
+        platform_variants = {}
+
+        for p in platforms:
+            try:
+                logging.info("** building platform: %s", p)
+                container = await context_dir.docker_build(  # type: ignore [no-any-return]
+                    platform=dagger.Platform("linux/"+p),
+                    build_args=dockerfile_args + [dagger.BuildArg("TARGETARCH", p)],
+                )
+                platform_variants[p] = container
+            except dagger.ExecError as exc:
+                logging.error("Dagger execution error")
+                self.results.add(
+                    top_element, dockerfile, f"build {p}", False, exc.message
+                )
+                return {}
+            except dagger.QueryError as exc:
+                logging.error(
+                    "Dagger query error, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"
+                )
+                self.results.add(
+                    top_element,
+                    dockerfile,
+                    f"build {p}",
+                    False,
+                    exc.debug_query(),
+                )  # type: ignore [no-untyped-call]
+                return {}
+            self.results.add(top_element, dockerfile, f"build {p}")
+
+        return platform_variants
 
     async def __test__(
         self,
@@ -384,18 +461,27 @@ class Orchestrator:
         # No return here, so the execution continues normally
 
     async def __publish__(
-        self, container: dagger.Container, dockerfile: str, top_element: str
+        self,
+        variants: list[dagger.Container],
+        dockerfile: str,
+        top_element: str,
     ) -> None:
         """
         Publish the built container to container registry
         """
+
+        # Get the first container and use it as base
+        container = variants.pop(1)
+
         for tag in self.tags:
             image_ref = await container.with_registry_auth(
                 address=str(self.container_registry),
                 username=str(self.container_registry_username),
                 secret=self.secret_token,
             ).publish(
-                f"{self.container_registry}/{self.organization}/{self.project_name}/{dockerfile}:{tag}"
+                f"{self.container_registry}/{self.organization}/{self.project_name}/{dockerfile}:{tag}",
+                # add remaining containers:
+                platform_variants=variants,
             )
             logging.info(
                 "%s/%s: Published image to: %s", top_element, dockerfile, image_ref
