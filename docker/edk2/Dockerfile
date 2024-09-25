@@ -33,7 +33,10 @@ ENV TOOLSDIR=/tools
 ENV WORKSPACE_CORE=$TOOLSDIR/Edk2
 ENV WORKSPACE=$TOOLSDIR/Edk2
 
-RUN dpkg --add-architecture i386 && \
+RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
+    if [ "${arch}" = 'amd64' ]; then \
+        dpkg --add-architecture i386; \
+    fi; \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ${PYTHON_PACKAGES} \
@@ -44,19 +47,22 @@ RUN dpkg --add-architecture i386 && \
         flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
-        ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
         imagemagick \
-        iucode-tool \
         nasm \
         nodejs \
         openssh-client \
         qemu-system-x86 \
         uuid-dev \
         wine-stable \
-        wine32 \
         wine64 \
     && \
+    if [ "${arch}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            ${GCC_CROSS_COMPILER_PACKAGES} \
+            iucode-tool \
+            wine32; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
@@ -69,9 +75,11 @@ RUN dpkg --add-architecture i386 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p "${TOOLSDIR}" && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
-    \
+    if [ "${arch}" = 'amd64' ]; then \
+        update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
+        update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
+        update-alternatives --install /usr/local/bin/python python /usr/bin/python3; \
+    fi; \
     wget --quiet -O rustup.sh https://sh.rustup.rs && \
         chmod +x ./rustup.sh && \
         ./rustup.sh -y --profile minimal
@@ -86,8 +94,12 @@ RUN apt-get update && \
         clang \
         llvm \
         lld \
-        gcc-multilib \
     && \
+    arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
+    if [ "${arch}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            gcc-multilib; \
+    fi; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
