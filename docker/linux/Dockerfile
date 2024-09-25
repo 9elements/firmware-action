@@ -35,9 +35,6 @@ RUN apt-get update && \
         g++-${GCC_VERSION} \
         gawk \
         gcc-${GCC_VERSION} \
-        gcc-${GCC_VERSION}-aarch64-linux-gnu \
-        gcc-${GCC_VERSION}-arm-linux-gnueabi \
-        gcc-${GCC_VERSION}-i686-linux-gnu \
         git \
         gnupg2 \
         libelf-dev \
@@ -52,6 +49,13 @@ RUN apt-get update && \
         wget \
         zstd \
     && \
+    arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
+    if [ "${arch}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            gcc-${GCC_VERSION}-aarch64-linux-gnu \
+            gcc-${GCC_VERSION}-arm-linux-gnueabi \
+            gcc-${GCC_VERSION}-i686-linux-gnu; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
@@ -63,9 +67,11 @@ RUN apt-get update && \
     && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/bin/arm-linux-gnueabi-gcc arm-linux-gnueabi-gcc /usr/bin/arm-linux-gnueabi-gcc-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/bin/i686-linux-gnu-gcc    i686-linux-gnu-gcc    /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 100 && \
+    if [ "${arch}" = 'amd64' ]; then \
+        update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-${GCC_VERSION} 100 && \
+        update-alternatives --install /usr/bin/arm-linux-gnueabi-gcc arm-linux-gnueabi-gcc /usr/bin/arm-linux-gnueabi-gcc-${GCC_VERSION} 100 && \
+        update-alternatives --install /usr/bin/i686-linux-gnu-gcc    i686-linux-gnu-gcc    /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 100; \
+    fi; \
     gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org && \
     rm -rf /var/lib/apt/lists/*
 
