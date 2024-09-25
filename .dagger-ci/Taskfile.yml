@@ -90,6 +90,13 @@ tasks:
   #    NEW
   # ===========
 
+  build:uroot_0.14.0:
+    desc: Build uroot_0.14.0 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'uroot_0.14.0'
+
   build:udk2017:
     desc: Build udk2017 container
     cmds:
