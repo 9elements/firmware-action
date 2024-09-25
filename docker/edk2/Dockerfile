@@ -3,10 +3,13 @@
 
 ARG SOURCE_IMAGE=buildpack-deps:focal
 ARG INTERMEDIATE_IMAGE=base
+ARG TARGETARCH=amd64
 
 #=============
 # "base" stage with all needed build dependencies
 FROM ${SOURCE_IMAGE} AS base
+
+ARG TARGETARCH
 
 ARG EDK2_VERSION=edk2-stable202008
 ARG EDK2_VERSION_COMMIT=06dc822d045c2bb42e497487935485302486e151
@@ -33,7 +36,9 @@ ENV TOOLSDIR=/tools
 ENV WORKSPACE_CORE=$TOOLSDIR/Edk2
 ENV WORKSPACE=$TOOLSDIR/Edk2
 
-RUN dpkg --add-architecture i386 && \
+RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
+        dpkg --add-architecture i386; \
+    fi; \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ${PYTHON_PACKAGES} \
@@ -44,19 +49,23 @@ RUN dpkg --add-architecture i386 && \
         flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
-        ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
         imagemagick \
-        iucode-tool \
         nasm \
         nodejs \
         openssh-client \
         qemu-system-x86 \
         uuid-dev \
         wine-stable \
-        wine32 \
         wine64 \
     && \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            ${GCC_CROSS_COMPILER_PACKAGES} \
+            iucode-tool \
+            wine32 \
+        ; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
@@ -71,7 +80,7 @@ RUN dpkg --add-architecture i386 && \
     mkdir -p "${TOOLSDIR}" && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
-    \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/python3 100 && \
     wget --quiet -O rustup.sh https://sh.rustup.rs && \
         chmod +x ./rustup.sh && \
         ./rustup.sh -y --profile minimal
@@ -80,14 +89,19 @@ RUN dpkg --add-architecture i386 && \
 #=============
 # Dependencies needed for universal payload
 FROM base AS universalpayload
+ARG TARGETARCH
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         clang \
         llvm \
         lld \
-        gcc-multilib \
     && \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            gcc-multilib \
+        ; \
+    fi; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
