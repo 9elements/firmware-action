@@ -38,7 +38,10 @@ RUN dpkg --add-architecture i386 && \
     apt-get install -y --no-install-recommends \
         ${PYTHON_PACKAGES} \
         acpica-tools \
+        bison \
         bsdmainutils \
+        build-essential \
+        flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
         ${GCC_CROSS_COMPILER_PACKAGES} \
