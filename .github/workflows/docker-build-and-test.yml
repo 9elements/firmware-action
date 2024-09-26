@@ -8,12 +8,14 @@ on:
       - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
+      - 'tests/**'
   push:
     branches: ['main']
     paths:
       - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
+      - 'tests/**'
   release:
   schedule:
     # Sunday midnight
