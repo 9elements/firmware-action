@@ -120,16 +120,49 @@ services:
   #==================
   # linux
   #==================
+  # Linux releases:  https://en.wikipedia.org/wiki/Linux_kernel_version_history
+  #                  https://endoflife.date/linux
+  # GCC releases:    https://gcc.gnu.org/releases.html
   linux_6.1.45:
+    # 2022-12
+    # LTS
     build:
       context: linux
       args:
         - LINUX_VERSION=6.1.45
-  linux_6.9.9:
+        - GCC_VERSION=11
+  linux_6.1.111:
+    # 2022-12
+    # LTS
     build:
       context: linux
       args:
+        - LINUX_VERSION=6.1.111
+        - GCC_VERSION=11
+  linux_6.6.52:
+    # 2023-10
+    # LTS
+    build:
+      context: linux
+      args:
+        - LINUX_VERSION=6.6.52
+        - GCC_VERSION=12
+  linux_6.9.9:
+    # 2024-05
+    build:
+      context: linux
+      args:
+        - SOURCE_IMAGE=ubuntu:noble
         - LINUX_VERSION=6.9.9
+        - GCC_VERSION=13
+  linux_6.11:
+    # 2024-09
+    build:
+      context: linux
+      args:
+        - SOURCE_IMAGE=ubuntu:noble
+        - LINUX_VERSION=6.11
+        - GCC_VERSION=14
   #==================
   # u-root
   #==================

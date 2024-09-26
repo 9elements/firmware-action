@@ -53,7 +53,10 @@ jobs:
             'edk2-stable202211',
             'edk2-stable202408',
             'linux_6.1.45',
+            'linux_6.1.111',
+            'linux_6.6.52',
             'linux_6.9.9',
+            'linux_6.11',
             'udk2017',
             'uroot_0.14.0'
           ]
