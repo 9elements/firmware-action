@@ -150,7 +150,7 @@ jobs:
       - skip-check
     strategy:
       matrix:
-        linux-version: [6.1.45]
+        linux-version: ['6.1.45', '6.1.111', '6.6.52', '6.9.9', '6.11']
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
