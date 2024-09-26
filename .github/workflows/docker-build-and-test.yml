@@ -5,11 +5,13 @@ name: dagger
 on:
   pull_request:
     paths:
+      - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
   push:
     branches: ['main']
     paths:
+      - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
   release:
