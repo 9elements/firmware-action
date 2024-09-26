@@ -121,6 +121,7 @@ jobs:
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
           mv "tests/coreboot_${{ matrix.coreboot-version }}/seabios.defconfig" "seabios_defconfig"
+
       - name: firmware-action
         uses: ./
         # uses: 9elements/firmware-action
@@ -131,6 +132,7 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
+
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -184,6 +186,7 @@ jobs:
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
           mv "tests/linux_${{ matrix.linux-version }}/linux.defconfig" "ci_defconfig"
+
       - name: firmware-action
         uses: ./
         # uses: 9elements/firmware-action
@@ -194,6 +197,7 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
+
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -237,6 +241,23 @@ jobs:
           path: ./Edk2
           key: edk2-${{ matrix.edk2-version }}
 
+      - name: Get versions of edk2
+        id: edk2_versions
+        run: |
+          echo "ver_current=$( echo ${{ matrix.edk2-version }} | tr -cd '0-9' )" >> "${GITHUB_OUTPUT}"
+          echo "ver_breaking=$( echo 'edk2-stable202305' | tr -cd '0-9' )" >> "${GITHUB_OUTPUT}"
+
+      - name: Use GCC5 for old edk2
+        id: gcc_toolchain
+        # GCC5 is deprecated since edk2-stable202305
+        # For more information see https://github.com/9elements/firmware-action/issues/340
+        run: |
+          if [[ ! ${{ steps.edk2_versions.outputs.ver_current }} < ${{ steps.edk2_versions.outputs.ver_breaking }} ]]; then
+            echo "gcc_toolchain_version=GCC" >> "${GITHUB_OUTPUT}"
+          else
+            echo "gcc_toolchain_version=GCC5" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: firmware-action
         uses: ./
         # uses: 9elements/firmware-action
@@ -247,6 +268,8 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
+          GCC_TOOLCHAIN_VERSION: ${{ steps.gcc_toolchain.outputs.gcc_toolchain_version }}
+
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -297,6 +320,7 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
+
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -347,6 +371,7 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
+
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
