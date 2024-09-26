@@ -12,13 +12,6 @@ import re
 import sys
 from typing import Any
 
-try:
-    import humanize
-except ImportError:
-    HUMANIZE_INSTALLED = False
-else:
-    HUMANIZE_INSTALLED = True
-
 import anyio
 import dagger
 from lib.docker_compose import DockerCompose, DockerComposeValidate
@@ -236,8 +229,6 @@ class Orchestrator:
         dockerfile_args = self.docker_compose.get_dockerfile_args(
             dockerfile=dockerfile, top_element=top_element
         )
-        # TODO: remove
-        # tarball_file = os.path.join(self.build_dir, f"{dockerfile}.tar")
 
         # =======
         # BUILD
@@ -253,7 +244,9 @@ class Orchestrator:
             self.results.add(top_element, dockerfile, "build", False, exc.message)
             return
         except dagger.QueryError as exc:
-            logging.error("Dagger query error, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes")
+            logging.error(
+                "Dagger query error, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"
+            )
             self.results.add(
                 top_element, dockerfile, "build", False, exc.debug_query()
             )  # type: ignore [no-untyped-call]
@@ -276,32 +269,19 @@ class Orchestrator:
         for label in await built_docker.labels():
             logging.info("label: %s = %s", await label.name(), await label.value())
 
-        # export as tarball
-        # TODO: Instead of tarball export and import just branch off the container
-        # if not await built_docker.export(tarball_file):
-        #     logging.error("Failed to export docker container as tarball")
-        #     self.results.add(
-        #         top_element,
-        #         dockerfile,
-        #         "export",
-        #         False,
-        #         f"Failed to export docker container {dockerfile} as tarball",
-        #     )
-        #     return
-        self.results.add(top_element, dockerfile, "export")
-
         # =======
         # TEST
         logging.info("%s/%s: TESTING", top_element, dockerfile)
-        logging.warning("%s/%s: TESTING - skipping", top_element, dockerfile)
-        # TODO: Instead of tarball export and import just branch off the container
-        # try:
-        #     await self.__test__(client=client, tarball_file=tarball_file)
-        # except ContainerTestFailed:
-        #     self.results.add(top_element, dockerfile, "test", False)
-        #     return
-        # self.results.add(top_element, dockerfile, "test")
-        self.results.add(top_element, dockerfile, "test", False, "skip")
+        try:
+            await self.__test__(
+                client=client,
+                test_container=built_docker,
+                test_container_name=dockerfile,
+            )
+        except ContainerTestFailed:
+            self.results.add(top_element, dockerfile, "test", False)
+            return
+        self.results.add(top_element, dockerfile, "test")
 
         # =======
         # PUBLISH
@@ -340,14 +320,16 @@ class Orchestrator:
             build_args=dockerfile_args
         )
 
-    async def __test__(self, client: dagger.Client, tarball_file: str) -> None:
+    async def __test__(
+        self,
+        client: dagger.Client,
+        test_container: dagger.Container,
+        test_container_name: str,
+    ) -> None:
         """
         Test / verify that the built container is functional by executing a script inside
         """
         # pylint: disable=too-many-locals
-        # Create container from tarball
-        context_tarball = client.host().file(tarball_file)
-        test_container = client.container().import_(context_tarball)
 
         # Make sure that container has environment variable "VERIFICATION_TEST"
         verification_test = await test_container.env_variable("VERIFICATION_TEST")
@@ -365,54 +347,41 @@ class Orchestrator:
 
         # Execute test
         context_test_dir = client.host().directory(test_dir)
-        container_name = os.path.basename(tarball_file)
         try:
             test_container = test_container.with_directory(
                 "tests", context_test_dir
             ).with_exec(
                 [verification_test],
-                redirect_stdout=f"{container_name}_stdout.log",
-                redirect_stderr=f"{container_name}_stderr.log",
+                redirect_stdout=f"{test_container_name}_stdout.log",
+                redirect_stderr=f"{test_container_name}_stderr.log",
             )
             test_container = await test_container.sync()
         except dagger.ExecError as ex:
             # When command in '.with_exec()' fails, exception is raised
             #   said exception contains STDERR and STDOUT
             for std_streams in [
-                [f"{container_name}_stdout.log", ex.stdout],
-                [f"{container_name}_stderr.log", ex.stderr],
+                [f"{test_container_name}_stdout.log", ex.stdout],
+                [f"{test_container_name}_stderr.log", ex.stderr],
             ]:
                 with open(
                     os.path.join(self.logdir, std_streams[0]), "w", encoding="utf-8"
                 ) as logfile:
                     logfile.write(std_streams[1])
-            logging.error("Test on %s failed", container_name)
+            logging.error("Test on %s failed", test_container_name)
             raise ContainerTestFailed(ex.message)  # pylint: disable=raise-missing-from
             # This return will execute after 'finally' completes
             #   see: https://git.sr.ht/~atomicfs/dotfiles/tree/master/item/Templates/python-except-finally-example.py
-        else:
-            # When command in '.with_exec()' succeeds, STDERR and STDOUT are automatically
-            #   redirected into text files, which must be extracted from the container
-            for std_log in [
-                f"{container_name}_stdout.log",
-                f"{container_name}_stderr.log",
-            ]:
-                await test_container.file(std_log).export(
-                    os.path.join(self.logdir, std_log)
-                )
-            # No return here, so the execution continues normally
-        finally:
-            # Cleanup
-            size = os.path.getsize(tarball_file)
-            if HUMANIZE_INSTALLED:
-                logging.info(
-                    "Size of '%s' tarball is %s",
-                    tarball_file,
-                    humanize.naturalsize(int(size)),
-                )
-            else:
-                logging.info("Size of '%s' tarball is %d Bytes", tarball_file, size)
-            os.remove(tarball_file)
+
+        # When command in '.with_exec()' succeeds, STDERR and STDOUT are automatically
+        #   redirected into text files, which must be extracted from the container
+        for std_log in [
+            f"{test_container_name}_stdout.log",
+            f"{test_container_name}_stderr.log",
+        ]:
+            await test_container.file(std_log).export(
+                os.path.join(self.logdir, std_log)
+            )
+        # No return here, so the execution continues normally
 
     async def __publish__(
         self, container: dagger.Container, dockerfile: str, top_element: str
