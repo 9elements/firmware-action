@@ -19,7 +19,8 @@ ENV TOOLSDIR=/tools
 # Use coreboot mirror
 ENV BUILDGCC_OPTIONS=-m
 
-RUN apt-get update && \
+RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         acpica-tools \
         bc \
@@ -31,7 +32,6 @@ RUN apt-get update && \
         git \
         gnat \
         imagemagick \
-        iucode-tool \
         libelf-dev \
         libncurses5-dev \
         libnss3-dev \
@@ -48,6 +48,10 @@ RUN apt-get update && \
         uuid-dev \
         zlib1g-dev \
     && \
+    if [ "${arch}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            iucode-tool; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
