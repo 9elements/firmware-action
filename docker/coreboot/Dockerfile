@@ -1,12 +1,15 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
+ARG TARGETARCH=amd64
+
 #=============
 # "base" stage with all needed build dependencies
 ARG SOURCE_IMAGE=ubuntu:jammy
 FROM ${SOURCE_IMAGE} AS base
 
-ARG TARGETARCH=amd64
+ARG TARGETARCH
+
 ARG COREBOOT_VERSION=4.19
 ARG CONTEXT=coreboot
 
@@ -32,7 +35,6 @@ RUN apt-get update && \
         git \
         gnat \
         imagemagick \
-        iucode-tool \
         libelf-dev \
         libncurses5-dev \
         libnss3-dev \
@@ -49,6 +51,10 @@ RUN apt-get update && \
         uuid-dev \
         zlib1g-dev \
     && \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            iucode-tool; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
