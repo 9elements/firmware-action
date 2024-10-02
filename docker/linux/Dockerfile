@@ -50,6 +50,7 @@ RUN apt-get update && \
         nodejs \
         openssl \
         wget \
+        zstd \
     && \
     apt-get install -y --no-install-recommends \
         less \
