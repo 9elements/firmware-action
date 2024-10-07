@@ -18,8 +18,8 @@ on:
       - 'tests/**'
   release:
   schedule:
-    # Sunday midnight
-    - cron: '0 0 * * 0'
+    # First day of the month at midnight
+    - cron: '0 0 1 * 0'
   workflow_dispatch:
 
 env:
