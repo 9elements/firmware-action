@@ -181,11 +181,15 @@ jobs:
           key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-utils
 
       # Upload toolchains and utils as artifacts
+      - name: Tar toolchain to prevent permission loss
+        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+        run: |
+          tar -cvf coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc.tar coreboot/util/crossgcc/xgcc
       - name: Upload toolchain
         uses: actions/upload-artifact@v4.4.3
         with:
           name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc
-          path: coreboot/util/crossgcc/xgcc
+          path: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc.tar
           retention-days: 7
           include-hidden-files: true
           compression-level: 9
@@ -205,7 +209,7 @@ jobs:
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     needs:
       - get-matrix
       - build-coreboot-toolchains
@@ -252,6 +256,62 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get coreboot version
+        id: version
+        run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+
+      #=================================
+      # Download artifacts for coreboot
+      #=================================
+
+      - name: Download coreboot toolchains for amd64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-xgcc
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-amd64
+      - name: Un-tar toolchain to prevent permission loss
+        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          tar -xvf coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-xgcc.tar
+          rm coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-xgcc.tar
+
+      - name: Download coreboot toolchains for arm64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-xgcc
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-arm64
+      - name: Un-tar toolchain to prevent permission loss
+        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          tar -xvf coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-xgcc.tar
+          rm coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-xgcc.tar
+
+      - name: Download coreboot utils for amd64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-utils
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-amd64
+      - name: Fix permissions on utilities
+        run: chmod +x -R docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-amd64
+
+      - name: Download coreboot utils for arm64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-utils
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-arm64
+      - name: Fix permissions on utilities
+        run: chmod +x -R docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-arm64
+
+      #============================
+      # Build the docker container
+      #============================
+
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1
         env:
@@ -264,8 +324,7 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
       - name: Run dagger pipeline
-        # If building coreboot use 120 minutes timeout, otherwise 15 minutes
-        timeout-minutes: ${{ startsWith(matrix.dockerfile, 'coreboot_') && 120 || 15 }}
+        timeout-minutes: 60
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"
