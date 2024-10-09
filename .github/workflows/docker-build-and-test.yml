@@ -76,6 +76,7 @@ jobs:
   #=====================
 
   build-coreboot-toolchains:
+    timeout-minutes: 80
     needs:
       - get-matrix-coreboot
     strategy:
@@ -156,6 +157,7 @@ jobs:
   #=====================
 
   # build-edk2-toolchains:
+  # TODO
 
 
   #===================
@@ -165,7 +167,7 @@ jobs:
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     needs:
       - get-matrix
       - build-coreboot-toolchains
@@ -209,6 +211,55 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Find out coreboot version
+        id: version
+        run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test(".*_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+
+
+      #=================================
+      # Download artifacts for coreboot
+      #=================================
+
+      - name: Download toolchains for x86
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+          path: coreboot/xgcc-x86
+
+      - name: Download toolchains for arm64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-xgcc
+          path: coreboot/xgcc-arm64
+
+      - name: Download utils for x86
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+          path: coreboot/utils-x86
+
+      - name: Download utils for arm64
+        uses: actions/download-artifact@v4
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        with:
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-utils
+          path: coreboot/utisl-arm64
+
+
+      #=============================
+      # Download artifacts for edk2
+      #=============================
+
+        # TODO
+
+
+      #============================
+      # Build the docker container
+      #============================
+
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1
         env:
@@ -221,8 +272,7 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
       - name: Run dagger pipeline
-        # If building coreboot use 120 minutes timeout, otherwise 15 minutes
-        timeout-minutes: ${{ startsWith(matrix.dockerfile, 'coreboot_') && 120 || 15 }}
+        timeout-minutes: 30
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"
