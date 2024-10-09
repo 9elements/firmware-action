@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ['x86', 'arm64']
+        arch: ['amd64', 'arm64']
         dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     steps:
@@ -110,7 +110,7 @@ jobs:
           key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-utils
 
       - name: Install dependencies
-        if: steps.cache-toolchains.outputs.cache-hit != 'true' && matrix.arch == 'x86'
+        if: steps.cache-toolchains.outputs.cache-hit != 'true' && matrix.arch == 'amd64'
         run: |
           sudo apt-get update
           sudo apt-get install -y bison build-essential curl flex git gnat libncurses-dev libssl-dev zlib1g-dev pkgconf
@@ -220,33 +220,33 @@ jobs:
       # Download artifacts for coreboot
       #=================================
 
-      - name: Download toolchains for x86
+      - name: Download toolchains for amd64
         uses: actions/download-artifact@v4
         if: startsWith(matrix.dockerfile, 'coreboot')
         with:
-          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
-          path: coreboot/xgcc-x86
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-xgcc
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-amd64
 
       - name: Download toolchains for arm64
         uses: actions/download-artifact@v4
         if: startsWith(matrix.dockerfile, 'coreboot')
         with:
           name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-xgcc
-          path: coreboot/xgcc-arm64
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-arm64
 
-      - name: Download utils for x86
+      - name: Download utils for amd64
         uses: actions/download-artifact@v4
         if: startsWith(matrix.dockerfile, 'coreboot')
         with:
-          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
-          path: coreboot/utils-x86
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-amd64-utils
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-amd64
 
       - name: Download utils for arm64
         uses: actions/download-artifact@v4
         if: startsWith(matrix.dockerfile, 'coreboot')
         with:
           name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-arm64-utils
-          path: coreboot/utisl-arm64
+          path: docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utisl-arm64
 
 
       #=============================
