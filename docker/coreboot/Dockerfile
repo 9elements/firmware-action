@@ -11,11 +11,12 @@ FROM ${SOURCE_IMAGE} AS base
 ARG TARGETARCH
 
 ARG COREBOOT_VERSION=4.19
+ENV COREBOOT_VERSION=${COREBOOT_VERSION}
 ARG CONTEXT=coreboot
 
 # Verification test
 ENV VERIFICATION_TEST=./tests/test_${CONTEXT}.sh
-ENV VERIFICATION_TEST_COREBOOT_VERSION=$COREBOOT_VERSION
+ENV VERIFICATION_TEST_COREBOOT_VERSION=${COREBOOT_VERSION}
 
 ENV DEBIAN_FRONTEND=noninteractive
 # Directory for coreboot toolchain, MEAnalyser etc.
@@ -68,37 +69,13 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p "${TOOLSDIR}"
 
-
-#=============
-# "toolchain" stage to build the coreboot toolchain
-FROM base AS toolchain
-
-# Compile coreboot toolchain
-WORKDIR $TOOLSDIR
-RUN git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${COREBOOT_VERSION}"
-WORKDIR $TOOLSDIR/coreboot
-RUN make crossgcc CPUS="$(nproc)"
-WORKDIR $TOOLSDIR/coreboot
-RUN make -C util/ifdtool install && \
-    make -C util/cbfstool install
-
-# Install MEAnalyser
-WORKDIR $TOOLSDIR
-RUN git clone https://github.com/platomav/MEAnalyzer.git
-
-
-#=============
-# "final" stage is the actual product with everything included
-FROM base AS final
-
 # Let coreboot know the toolchain path
-ENV XGCCPATH=$TOOLSDIR/coreboot/util/crossgcc/xgcc/bin/
-RUN echo "${XGCCPATH}"
+ENV XGCCPATH=${TOOLSDIR}/coreboot/util/crossgcc/xgcc/bin/
 
-# Copy over things from previous stage(s)
-COPY --from=toolchain $XGCCPATH/.. $XGCCPATH/..
-COPY --from=toolchain $TOOLSDIR/MEAnalyzer $TOOLSDIR/
-COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
+# Add pre-compiled coreboot toolchain and utils
+COPY coreboot-${COREBOOT_VERSION}/xgcc-${TARGETARCH} ${TOOLSDIR}/coreboot/util/crossgcc/xgcc
+COPY coreboot-${COREBOOT_VERSION}/utils-${TARGETARCH}/* /usr/local/bin/
+RUN git clone --depth 1 https://github.com/platomav/MEAnalyzer.git ${TOOLSDIR}/MEAnalyzer/
 
 # Prepare SSH for interactive debugging
 RUN mkdir -p /run/sshd && \
