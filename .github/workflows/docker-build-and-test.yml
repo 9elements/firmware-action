@@ -118,6 +118,7 @@ jobs:
             sudo \
             tzdata \
             uuid-dev \
+            wget \
             zlib1g-dev
         env:
           DEBIAN_FRONTEND: noninteractive
