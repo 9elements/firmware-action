@@ -3,6 +3,7 @@
 
 ARG SOURCE_IMAGE=buildpack-deps:focal
 ARG INTERMEDIATE_IMAGE=base
+ARG TARGETARCH=amd64
 
 #=============
 # "base" stage with all needed build dependencies
@@ -33,8 +34,7 @@ ENV TOOLSDIR=/tools
 ENV WORKSPACE_CORE=$TOOLSDIR/Edk2
 ENV WORKSPACE=$TOOLSDIR/Edk2
 
-RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
-    if [ "${arch}" = 'amd64' ]; then \
+RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         dpkg --add-architecture i386; \
     fi; \
     apt-get update && \
@@ -57,7 +57,7 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
         wine-stable \
         wine64 \
     && \
-    if [ "${arch}" = 'amd64' ]; then \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
             ${GCC_CROSS_COMPILER_PACKAGES} \
             iucode-tool \
@@ -75,7 +75,7 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p "${TOOLSDIR}" && \
-    if [ "${arch}" = 'amd64' ]; then \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
         update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
         update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
         update-alternatives --install /usr/local/bin/python python /usr/bin/python3; \
@@ -87,6 +87,7 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
 
 #=============
 # Dependencies needed for universal payload
+ARG TARGETARCH
 FROM base AS universalpayload
 
 RUN apt-get update && \
@@ -95,8 +96,7 @@ RUN apt-get update && \
         llvm \
         lld \
     && \
-    arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
-    if [ "${arch}" = 'amd64' ]; then \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
             gcc-multilib; \
     fi; \

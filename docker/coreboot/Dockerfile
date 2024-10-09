@@ -1,11 +1,12 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
+ARG TARGETARCH=amd64
+
 #=============
 # "base" stage with all needed build dependencies
 FROM ubuntu:jammy AS base
 
-ARG TARGETARCH=amd64
 ARG COREBOOT_VERSION=4.19
 ARG CONTEXT=coreboot
 
@@ -19,8 +20,7 @@ ENV TOOLSDIR=/tools
 # Use coreboot mirror
 ENV BUILDGCC_OPTIONS=-m
 
-RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         acpica-tools \
         bc \
@@ -48,7 +48,7 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
         uuid-dev \
         zlib1g-dev \
     && \
-    if [ "${arch}" = 'amd64' ]; then \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
             iucode-tool; \
     fi; \
@@ -73,6 +73,7 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
 
 #=============
 # "toolchain" stage to build the coreboot toolchain
+ARG TARGETARCH
 FROM base AS toolchain
 
 WORKDIR $TOOLSDIR
