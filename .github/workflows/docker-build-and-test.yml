@@ -30,6 +30,10 @@ permissions:
   packages: write
 
 jobs:
+  #=============================
+  # Dynamically generate matrix
+  #=============================
+
   get-matrix:
     runs-on: ubuntu-latest
     steps:
@@ -66,15 +70,104 @@ jobs:
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
-  # build-coreboot-toolchains:
+
+  #=====================
+  # Coreboot toolchains
+  #=====================
+
+  build-coreboot-toolchains:
+    needs:
+      - get-matrix-coreboot
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['x86', 'arm64']
+        dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
+    steps:
+      - name: Find out coreboot version
+        id: version
+        run: |
+          yq '.services.["{{ matrix.dockerfile }}"].build.args[] | select(startswith("COREBOOT_VERSION"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+      - name: Clone coreboot
+        run: |
+          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "{{ steps.version.outputs.COREBOOT_VERSION }}"
+
+      # toolchains and utils are cached so that we do not have to re-compile all the time
+      - name: Restore cached toolchains
+        id: cache-toolchains
+        uses: actions/cache/restore@v4
+        with:
+          path: coreboot/util/crossgcc/xgcc/bin
+          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+      - name: Restore cached utils
+        id: cache-utils
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin
+          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+
+      - name: Install dependencies
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          apt-get update
+          apt-get install -y bison build-essential curl flex git gnat libncurses-dev libssl-dev zlib1g-dev pkgconf
+
+      - name: Build coreboot toolchains and utilities
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          cd coreboot
+          make crossgcc CPUS="$(nproc)"
+          make -C util/ifdtool install
+          make -C util/cbfstool install
+
+      # Store toolchains and utils in cache
+      - name: Cache toolchains
+        uses: actions/cache/save@v4
+        with:
+          path: coreboot/util/crossgcc/xgcc/bin
+          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+      - name: Cache utils
+        uses: actions/cache/save@v4
+        with:
+          path: /usr/local/bin
+          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+
+      # Upload toolchains and utils as artifacts
+      - name: Upload toolchain
+        uses: actions/upload-artifact@v4
+        with:
+          name: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+          path: coreboot/util/crossgcc/xgcc/bin
+          retention-days: 30
+          include-hidden-files: true
+      - name: Upload utils
+        uses: actions/upload-artifact@v4
+        with:
+          name: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+          path: /usr/local/bin
+          retention-days: 30
+          include-hidden-files: true
+
+
+  #=====================
+  # Coreboot toolchains
+  #=====================
 
   # build-edk2-toolchains:
+
+
+  #===================
+  # Docker containers
+  #===================
 
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    needs: ['get-matrix']
+    needs:
+      - get-matrix
+      - build-coreboot-toolchains
     strategy:
       fail-fast: false
       matrix:
