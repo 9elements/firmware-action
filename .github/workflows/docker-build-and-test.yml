@@ -102,6 +102,7 @@ jobs:
             git \
             gnat \
             imagemagick \
+            jq \
             libelf-dev \
             libncurses5-dev \
             libnss3-dev \
@@ -116,8 +117,10 @@ jobs:
             qemu-system-x86 \
             tzdata \
             uuid-dev \
-            yq \
             zlib1g-dev
+      - name: Get yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${{ matrix.arch }}
       - name: Configure tzdata
         run: dpkg-reconfigure --frontend noninteractive tzdata
       - name: Install dependencies (amd64)
