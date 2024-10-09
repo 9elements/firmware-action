@@ -7,36 +7,43 @@ services:
       context: coreboot
       args:
         - COREBOOT_VERSION=4.19
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_4.20.1:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=4.20.1
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_4.21:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=4.21
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_4.22.01:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=4.22.01
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_24.02:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=24.02
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_24.02.01:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=24.02.01
+        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_24.05:
     build:
       context: coreboot
       args:
         - COREBOOT_VERSION=24.05
+        - SOURCE_IMAGE=ubuntu:jammy
   #==================
   # edk2
   #==================
@@ -58,6 +65,9 @@ services:
     build:
       context: edk2
       args:
+        - EDK2_VERSION=edk2-stable202008
+        - EDK2_VERSION_COMMIT=06dc822d045c2bb42e497487935485302486e151
+        - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=7093026e924291b9e9f6f5211a052c6a761a4704
         - EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
   edk2-stable202105:
@@ -66,6 +76,7 @@ services:
       args:
         - EDK2_VERSION=edk2-stable202105
         - EDK2_VERSION_COMMIT=e1999b264f1f9d7230edf2448f757c73da567832
+        - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=442dfd5da6475dfa844894bf88284b959b1210b8
         - EDK2_NON_OSI_COMMIT=9c509e9b00cc8f68a0c2293436d0572d3e4a40ce
   edk2-stable202111:
@@ -74,6 +85,7 @@ services:
       args:
         - EDK2_VERSION=edk2-stable202111
         - EDK2_VERSION_COMMIT=bb1bba3d776733c41dbfa2d1dc0fe234819a79f2
+        - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=41dacdf4fb36b350bd199adeb9036b7d44b3d243
         - EDK2_NON_OSI_COMMIT=eef5e03e52f41492ff7af1a7985bc5eda8d7a448
   # Building UniversalPayload from this point on is likely ???
@@ -131,6 +143,7 @@ services:
       args:
         - LINUX_VERSION=6.1.45
         - GCC_VERSION=11
+        - SOURCE_IMAGE=ubuntu:jammy
   linux_6.1.111:
     # 2022-12
     # LTS
@@ -139,6 +152,7 @@ services:
       args:
         - LINUX_VERSION=6.1.111
         - GCC_VERSION=11
+        - SOURCE_IMAGE=ubuntu:jammy
   linux_6.6.52:
     # 2023-10
     # LTS
@@ -147,22 +161,23 @@ services:
       args:
         - LINUX_VERSION=6.6.52
         - GCC_VERSION=12
+        - SOURCE_IMAGE=ubuntu:jammy
   linux_6.9.9:
     # 2024-05
     build:
       context: linux
       args:
-        - SOURCE_IMAGE=ubuntu:noble
         - LINUX_VERSION=6.9.9
         - GCC_VERSION=13
+        - SOURCE_IMAGE=ubuntu:noble
   linux_6.11:
     # 2024-09
     build:
       context: linux
       args:
-        - SOURCE_IMAGE=ubuntu:noble
         - LINUX_VERSION=6.11
         - GCC_VERSION=14
+        - SOURCE_IMAGE=ubuntu:noble
   #==================
   # u-root
   #==================

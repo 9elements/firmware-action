@@ -3,7 +3,8 @@
 
 #=============
 # "base" stage with all needed build dependencies
-FROM ubuntu:jammy AS base
+ARG SOURCE_IMAGE=ubuntu:jammy
+FROM ${SOURCE_IMAGE} AS base
 
 ARG TARGETARCH=amd64
 ARG COREBOOT_VERSION=4.19
