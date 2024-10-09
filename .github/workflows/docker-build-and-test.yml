@@ -125,6 +125,7 @@ jobs:
       - name: Get yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${{ matrix.arch }}
+          sudo chmod 755 /usr/local/bin/yq
       - name: Configure tzdata
         run: dpkg-reconfigure --frontend noninteractive tzdata
       - name: Install dependencies (amd64)
