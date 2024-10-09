@@ -75,17 +75,13 @@ RUN arch="$(dpkg --print-architecture)" && arch="${arch##*-}"; \
 # "toolchain" stage to build the coreboot toolchain
 FROM base AS toolchain
 
-# Compile coreboot toolchain
 WORKDIR $TOOLSDIR
-RUN git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${COREBOOT_VERSION}"
-WORKDIR $TOOLSDIR/coreboot
-RUN make crossgcc CPUS="$(nproc)"
-WORKDIR $TOOLSDIR/coreboot
-RUN make -C util/ifdtool install && \
-    make -C util/cbfstool install
+
+# Add pre-compiled coreboot toolchain and utils
+COPY coreboot-${COREBOOT_VERSION}/xgcc-${TARGETARCH} coreboot/util/crossgcc/xgcc/bin
+COPY coreboot-${COREBOOT_VERSION}/utils-${TARGETARCH} /usr/local/bin
 
 # Install MEAnalyser
-WORKDIR $TOOLSDIR
 RUN git clone https://github.com/platomav/MEAnalyzer.git
 
 
