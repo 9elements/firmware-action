@@ -30,36 +30,61 @@ permissions:
   packages: write
 
 jobs:
+  #=============================
+  # Dynamically generate matrix
+  #=============================
+
+  get-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: get-matrix
+        id: get-matrix
+        run: |
+          # Disable SC2046: Quote this to prevent word splitting
+          # I can't quote this, just look at it
+          # shellcheck disable=SC2046
+          echo matrix=$( yq '.services | keys[]' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
+
+  get-matrix-coreboot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: get-matrix
+        id: get-matrix
+        run: |
+          # shellcheck disable=SC2046
+          echo matrix=$( yq '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
+
+  get-matrix-edk2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: get-matrix
+        id: get-matrix
+        run: |
+          # shellcheck disable=SC2046
+          echo matrix=$( yq '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
+
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    needs:
+      - get-matrix
     strategy:
+      fail-fast: false
       matrix:
-        dockerfile:
-          [
-            'coreboot_4.19',
-            'coreboot_4.20.1',
-            'coreboot_4.21',
-            'coreboot_4.22.01',
-            'coreboot_24.02',
-            'coreboot_24.02.01',
-            'coreboot_24.05',
-            'edk2-stable202008',
-            'edk2-stable202105',
-            'edk2-stable202111',
-            'edk2-stable202205',
-            'edk2-stable202208',
-            'edk2-stable202211',
-            'edk2-stable202408',
-            'linux_6.1.45',
-            'linux_6.1.111',
-            'linux_6.6.52',
-            'linux_6.9.9',
-            'linux_6.11',
-            'udk2017',
-            'uroot_0.14.0'
-          ]
+        dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
     steps:
       # We have to use my own fork of actions/delete-package-versions at the moment
       #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
