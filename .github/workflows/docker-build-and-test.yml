@@ -167,6 +167,8 @@ jobs:
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:jammy
     timeout-minutes: 60
     needs:
       - get-matrix
