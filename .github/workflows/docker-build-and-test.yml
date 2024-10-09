@@ -255,7 +255,7 @@ jobs:
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     needs:
       - get-matrix
       - build-coreboot-toolchains
@@ -302,6 +302,95 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get coreboot version
+        id: version
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+      - name: Clone coreboot
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+      - name: Get coreboot commit hash
+        id: coreboot-hash
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          cd coreboot
+          COREBOOT_HASH="$( git rev-parse --short HEAD )"
+          echo "${COREBOOT_HASH}"
+          echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
+      - name: Artefact and cache key
+        id: cache-key
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}"
+          echo "CACHE_KEY=${CACHE_KEY}"
+          echo "CACHE_KEY=${CACHE_KEY}" >> "${GITHUB_OUTPUT}"
+
+      #=================================
+      # Download artifacts for coreboot
+      #=================================
+
+      - name: Download coreboot toolchains from current run (if possible)
+        id: artifacts-toolchains-current
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
+          name_is_regexp: true
+          if_no_artifact_found: warn
+          run_id: ${{ github.event.workflow_run.id }}
+        # It is possible that current run did not produce any artifacts (to save bandwidth on self-hosted runners)
+        # In which case we have to look for artifacts in older runs
+      - name: Download coreboot toolchains from older run
+        if: startsWith(matrix.dockerfile, 'coreboot') && steps.artifacts-toolchains-current.outputs.found_artifact != 'true'
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
+          name_is_regexp: true
+          search_artifacts: true
+
+      - name: Prepare toolchains
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          mkdir -p docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
+          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-xgcc/*.tar; do
+            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
+            echo "extracting ${f} -> ${{ steps.version.outputs.COREBOOT_VERSION }} / ${ARCH}"
+            mkdir -p "${f}.dir/"
+            tar -xf "${f}" -C "${f}.dir/"
+            mv "${f}.dir/coreboot/util/crossgcc/${ARCH}-xgcc" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-${ARCH}"
+          done
+      - name: Prepare utils
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-utils; do
+            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
+            echo "${f} -> ${{ steps.version.outputs.COREBOOT_VERSION }} / ${ARCH}"
+            chmod +rx "${f}"/*
+            mv "${f}" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-${ARCH}"
+          done
+
+      - name: Debug list artifacts
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/
+      - name: Debug list xgcc (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-*
+      - name: Debug list xgcc/bin (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-*/bin
+      - name: Debug list utils (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-*
+
+      #============================
+      # Build the docker container
+      #============================
+
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1
         env:
@@ -314,8 +403,7 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
       - name: Run dagger pipeline
-        # If building coreboot use 120 minutes timeout, otherwise 15 minutes
-        timeout-minutes: ${{ startsWith(matrix.dockerfile, 'coreboot_') && 120 || 15 }}
+        timeout-minutes: 60
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"
