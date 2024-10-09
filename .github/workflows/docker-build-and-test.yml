@@ -54,7 +54,7 @@ jobs:
       - name: get-matrix
         id: get-matrix
         run: |
-          echo matrix=$( yq '.services | keys[] | select(. | startswith("coreboot")' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
@@ -66,7 +66,7 @@ jobs:
       - name: get-matrix
         id: get-matrix
         run: |
-          echo matrix=$( yq '.services | keys[] | select(. | test("(e|u)dk2.*")' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
@@ -85,13 +85,14 @@ jobs:
         dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Find out coreboot version
         id: version
-        run: |
-          yq '.services.["{{ matrix.dockerfile }}"].build.args[] | select(startswith("COREBOOT_VERSION"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+        run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+
       - name: Clone coreboot
-        run: |
-          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "{{ steps.version.outputs.COREBOOT_VERSION }}"
+        run: git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
 
       # toolchains and utils are cached so that we do not have to re-compile all the time
       - name: Restore cached toolchains
@@ -99,19 +100,19 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: coreboot/util/crossgcc/xgcc/bin
-          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc
       - name: Restore cached utils
         id: cache-utils
         uses: actions/cache/restore@v4
         with:
           path: /usr/local/bin
-          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-utils
 
       - name: Install dependencies
-        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        if: steps.cache-toolchains.outputs.cache-hit != 'true' && matrix.arch == 'x86'
         run: |
-          apt-get update
-          apt-get install -y bison build-essential curl flex git gnat libncurses-dev libssl-dev zlib1g-dev pkgconf
+          sudo apt-get update
+          sudo apt-get install -y bison build-essential curl flex git gnat libncurses-dev libssl-dev zlib1g-dev pkgconf
 
       - name: Build coreboot toolchains and utilities
         if: steps.cache-toolchains.outputs.cache-hit != 'true'
@@ -126,25 +127,25 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: coreboot/util/crossgcc/xgcc/bin
-          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc
       - name: Cache utils
         uses: actions/cache/save@v4
         with:
           path: /usr/local/bin
-          key: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-utils
 
       # Upload toolchains and utils as artifacts
       - name: Upload toolchain
         uses: actions/upload-artifact@v4
         with:
-          name: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-xgcc
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-xgcc
           path: coreboot/util/crossgcc/xgcc/bin
           retention-days: 30
           include-hidden-files: true
       - name: Upload utils
         uses: actions/upload-artifact@v4
         with:
-          name: coreboot-{{ steps.version.outputs.COREBOOT_VERSION }}-x86-utils
+          name: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ matrix.arch }}-utils
           path: /usr/local/bin
           retention-days: 30
           include-hidden-files: true
