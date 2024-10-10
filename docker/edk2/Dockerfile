@@ -49,6 +49,7 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
+        ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
         imagemagick \
         nasm \
@@ -61,7 +62,6 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
     && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
-            ${GCC_CROSS_COMPILER_PACKAGES} \
             iucode-tool \
             wine32 \
         ; \
