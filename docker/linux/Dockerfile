@@ -63,11 +63,9 @@ RUN apt-get update && \
     && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
-    if [ "${TARGETARCH}" = 'amd64' ]; then \
-        update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-${GCC_VERSION} 100 && \
-        update-alternatives --install /usr/bin/arm-linux-gnueabi-gcc arm-linux-gnueabi-gcc /usr/bin/arm-linux-gnueabi-gcc-${GCC_VERSION} 100 && \
-        update-alternatives --install /usr/bin/i686-linux-gnu-gcc    i686-linux-gnu-gcc    /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 100; \
-    fi; \
+    update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-${GCC_VERSION} 100 && \
+    update-alternatives --install /usr/bin/arm-linux-gnueabi-gcc arm-linux-gnueabi-gcc /usr/bin/arm-linux-gnueabi-gcc-${GCC_VERSION} 100 && \
+    update-alternatives --install /usr/bin/i686-linux-gnu-gcc    i686-linux-gnu-gcc    /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 100; \
     gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org && \
     rm -rf /var/lib/apt/lists/*
 
