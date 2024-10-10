@@ -41,8 +41,14 @@ async def test__orchestrator__broken_dockerfile(
     result = await my_orchestrator.build_test_publish()
     assert "services" in result.results
     assert "coreboot_4.19" in result.results["services"]
-    assert "build" in result.results["services"]["coreboot_4.19"]
-    assert result.results["services"]["coreboot_4.19"]["build"] is False
+
+    # because of multi-platform nature we have to be flexible
+    build_found = False
+    for key, _ in result.results["services"]["coreboot_4.19"].items():
+        if re.match("build .*", key) and not re.match(".*_msg$", key):
+            build_found = True
+            assert result.results["services"]["coreboot_4.19"][key] is False
+    assert build_found
 
 
 @pytest.mark.slow
@@ -148,7 +154,7 @@ async def test__orchestrator__multi_comprehensive_build(
             None,
             "branch1",
             None,
-            ["sha12ab", "branch1"],
+            ["sha12ab", "branch1", "linux/amd64"],
         ),
         (
             "sha12ab",
@@ -156,7 +162,7 @@ async def test__orchestrator__multi_comprehensive_build(
             "v1.0",
             "master",
             None,
-            ["sha12ab", "v1.0", "master", "latest"],
+            ["sha12ab", "v1.0", "master", "latest", "linux/amd64"],
         ),
         (
             "sha12ab",
@@ -164,7 +170,7 @@ async def test__orchestrator__multi_comprehensive_build(
             "v1.1.0-3-11dd3b9",
             "branch1",
             None,
-            ["sha12ab", "branch1"],
+            ["sha12ab", "branch1", "linux/amd64"],
         ),
         (
             "sha12ab",
@@ -172,7 +178,7 @@ async def test__orchestrator__multi_comprehensive_build(
             "v1.1.0-3-11dd3b9",
             "branch1",
             "34",
-            ["sha12ab", "branch1", "pull_request_34"],
+            ["sha12ab", "branch1", "pull_request_34", "linux/amd64"],
         ),
         (
             "sha12ab",
@@ -180,7 +186,7 @@ async def test__orchestrator__multi_comprehensive_build(
             "v1.1.0-3-11dd3b9",
             "feature/new-stuff",
             "34",
-            ["sha12ab", "feature_new_stuff", "pull_request_34"],
+            ["sha12ab", "feature_new_stuff", "pull_request_34", "linux/amd64"],
         ),
     ],
 )

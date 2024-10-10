@@ -1,11 +1,12 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
+ARG TARGETARCH=amd64
+
 #=============
 # "base" stage with all needed build dependencies
 FROM ubuntu:jammy AS base
 
-ARG TARGETARCH=amd64
 ARG COREBOOT_VERSION=4.19
 ARG CONTEXT=coreboot
 
@@ -31,7 +32,6 @@ RUN apt-get update && \
         git \
         gnat \
         imagemagick \
-        iucode-tool \
         libelf-dev \
         libncurses5-dev \
         libnss3-dev \
@@ -48,6 +48,10 @@ RUN apt-get update && \
         uuid-dev \
         zlib1g-dev \
     && \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            iucode-tool; \
+    fi; \
     apt-get install -y --no-install-recommends \
         less \
         nano \
@@ -69,19 +73,16 @@ RUN apt-get update && \
 
 #=============
 # "toolchain" stage to build the coreboot toolchain
+ARG TARGETARCH
 FROM base AS toolchain
 
-# Compile coreboot toolchain
 WORKDIR $TOOLSDIR
-RUN git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${COREBOOT_VERSION}"
-WORKDIR $TOOLSDIR/coreboot
-RUN make crossgcc CPUS="$(nproc)"
-WORKDIR $TOOLSDIR/coreboot
-RUN make -C util/ifdtool install && \
-    make -C util/cbfstool install
+
+# Add pre-compiled coreboot toolchain and utils
+COPY coreboot-${COREBOOT_VERSION}/xgcc-${TARGETARCH} coreboot/util/crossgcc/xgcc/bin
+COPY coreboot-${COREBOOT_VERSION}/utils-${TARGETARCH} /usr/local/bin
 
 # Install MEAnalyser
-WORKDIR $TOOLSDIR
 RUN git clone https://github.com/platomav/MEAnalyzer.git
 
 

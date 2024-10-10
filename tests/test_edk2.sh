@@ -56,8 +56,8 @@ if [ "${VERIFICATION_TEST_EDK2_VERSION}" == "UDK2017" ]; then
 else
 	# GCC5 is deprecated since edk2-stable202305
 	# For more information see https://github.com/9elements/firmware-action/issues/340
-	CURRENT_VERSION=$( echo "${VERIFICATION_TEST_EDK2_VERSION}" | tr -cd '0-9' )
-	if [ "${CURRENT_VERSION}" -ge "$( echo 'edk2-stable202305' | tr -cd '0-9' )" ]; then
+	CURRENT_VERSION=$(echo "${VERIFICATION_TEST_EDK2_VERSION}" | tr -cd '0-9')
+	if [ "${CURRENT_VERSION}" -ge "$(echo 'edk2-stable202305' | tr -cd '0-9')" ]; then
 		echo "edk2-stable202305 or newer"
 		build -D BOOTLOADER=COREBOOT -a IA32 -a X64 -t GCC -b DEBUG -p "${PAYLOAD}" -D BUILD_ARCH=X64
 	else

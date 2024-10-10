@@ -58,6 +58,7 @@ services:
     build:
       context: edk2
       args:
+        - EDK2_VERSION=edk2-stable202008
         - EDK2_PLATFORM_COMMIT=7093026e924291b9e9f6f5211a052c6a761a4704
         - EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
   edk2-stable202105:
