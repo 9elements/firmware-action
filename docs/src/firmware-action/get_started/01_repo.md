@@ -5,12 +5,12 @@ Start a new repository in GitHub and the clone it.
 
 ## Add coreboot as submodule
 
-~~~admonish tip
+```admonish tip
 Add git submodule with:
-```
-git submodule add <repo> <path>
-```
 ~~~
+git submodule add <repo> <path>
+~~~
+```
 
 Add [coreboot repository](https://review.coreboot.org/admin/repos/coreboot,general) as a submodule:
 ```bash
@@ -32,7 +32,7 @@ Recursively initialize submodules.
 git submodule update --init --recursive
 ```
 
-~~~admonish warning
+```admonish warning
 Recursively initializing all submodules in coreboot will take a moment.
-~~~
+```
 

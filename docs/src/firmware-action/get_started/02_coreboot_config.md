@@ -1,4 +1,4 @@
-## Create a coreboot configuration file
+# Create a coreboot configuration file
 
 Now we need to create a configuration file for coreboot.
 
