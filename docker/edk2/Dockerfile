@@ -22,7 +22,8 @@ ARG USE_GCC_VERSION=5
 ENV USE_GCC_VERSION=$USE_GCC_VERSION
 
 ARG PYTHON_PACKAGES=python-is-python3 python2 python3
-ARG GCC_CROSS_COMPILER_PACKAGES=gcc-${GCC_VERSION}-aarch64-linux-gnu gcc-${GCC_VERSION}-arm-linux-gnueabi gcc-${GCC_VERSION}-i686-linux-gnu
+ARG GCC_CROSS_COMPILER_PACKAGES_ARM=gcc-${GCC_VERSION}-aarch64-linux-gnu gcc-${GCC_VERSION}-arm-linux-gnueabi
+ARG GCC_CROSS_COMPILER_PACKAGES_X86=gcc-${GCC_VERSION}-i686-linux-gnu
 
 ARG CONTEXT=edk2
 
@@ -49,7 +50,6 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
-        ${GCC_CROSS_COMPILER_PACKAGES} \
         git \
         imagemagick \
         nasm \
@@ -62,8 +62,14 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
     && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
+            ${GCC_CROSS_COMPILER_PACKAGES_ARM} \
             iucode-tool \
             wine32 \
+        ; \
+    fi; \
+    if [ "${TARGETARCH}" = 'arm64' ]; then \
+        apt-get install -y --no-install-recommends \
+            ${GCC_CROSS_COMPILER_PACKAGES_X86} \
         ; \
     fi; \
     apt-get install -y --no-install-recommends \
