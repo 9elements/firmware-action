@@ -113,6 +113,7 @@
     "seabios",
     "setenv",
     "sethvargo",
+    "shellcheck",
     "skipframes",
     "sloglint",
     "startswith",
