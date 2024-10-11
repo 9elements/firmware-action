@@ -7,3 +7,4 @@ megalinter-reports
 node_modules
 action/recipes/__tmp_files__/
 output-*/
+docker/coreboot/coreboot-*
