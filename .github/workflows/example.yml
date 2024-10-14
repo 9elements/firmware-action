@@ -106,12 +106,14 @@ jobs:
 
       - name: Restore cached coreboot repo
         uses: actions/cache/restore@v4
+        id: cache-repo
         with:
           path: ./my_super_dooper_awesome_coreboot
           key: coreboot-${{ matrix.coreboot-version }}
       - name: Clone coreboot repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
-          git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot || true
+          git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot
       - name: Store coreboot repo in cache
         uses: actions/cache/save@v4
         with:
@@ -226,12 +228,14 @@ jobs:
 
       - name: Restore cached edk2 repo
         uses: actions/cache/restore@v4
+        id: cache-repo
         with:
           path: ./Edk2
           key: edk2-${{ matrix.edk2-version }}
       - name: Clone edk2 repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
-          git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2 || true
+          git clone --recurse-submodules --branch "${{ matrix.edk2-version }}" --depth 1 https://github.com/tianocore/edk2.git Edk2
       - name: Prepare file with build arguments
         run: |
           echo "-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
@@ -298,12 +302,14 @@ jobs:
 
       - name: Restore cached coreboot-blobs repo
         uses: actions/cache/restore@v4
+        id: cache-repo
         with:
           path: ./stitch
           key: coreboot-blobs-${{ matrix.coreboot-version }}
       - name: Clone blobs repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
-          git clone --depth 1 https://review.coreboot.org/blobs stitch || true
+          git clone --depth 1 https://review.coreboot.org/blobs stitch
       - name: Store coreboot-blobs repo in cache
         uses: actions/cache/save@v4
         with:
@@ -349,10 +355,12 @@ jobs:
 
       - name: Restore cached u-root repo
         uses: actions/cache/restore@v4
+        id: cache-repo
         with:
           path: ./u-root
           key: u-root-${{ matrix.uroot-version }}
       - name: Clone u-root repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
       - name: Store u-root repo in cache
@@ -400,12 +408,14 @@ jobs:
 
       - name: Restore cached u-root repo
         uses: actions/cache/restore@v4
+        id: cache-repo
         with:
           path: ./u-root
           key: u-root-${{ matrix.uroot-version }}
       - name: Clone u-root repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
-          git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
+          git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git
       - name: Store u-root repo in cache
         uses: actions/cache/save@v4
         with:
