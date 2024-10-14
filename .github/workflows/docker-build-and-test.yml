@@ -27,7 +27,6 @@ env:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   #=============================
@@ -84,16 +83,205 @@ jobs:
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
+  #=====================
+  # Coreboot toolchains
+  #=====================
+
+  build-coreboot-toolchains:
+    timeout-minutes: 120
+    needs:
+      - get-matrix-coreboot
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['amd64', 'arm64']
+        dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
+    container:
+      # At the time of writing (2024-10) we cannot use ubuntu:noble as it is broken
+      image: ubuntu:jammy
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      # Use coreboot mirrors
+      BUILDGCC_OPTIONS: -m
+    steps:
+      - name: Install dependencies for CI
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            git \
+            jq \
+            sudo \
+            tzdata \
+            upx-ucl \
+            wget
+          update-ca-certificates
+      - name: Get yq
+        # the --no-check-certificate is needed because GitHub
+        run: |
+          wget -q --no-check-certificate -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${{ matrix.arch }}
+          chmod 755 /usr/local/bin/yq
+      - name: Configure tzdata
+        run: |
+          dpkg-reconfigure --frontend noninteractive tzdata
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get coreboot version
+        id: version
+        run: |
+          yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+
+      - name: Clone coreboot
+        run: |
+          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+
+      - name: Get coreboot commit hash
+        id: coreboot-hash
+        run: |
+          cd coreboot
+          COREBOOT_HASH="$( git rev-parse --short HEAD )"
+          echo "${COREBOOT_HASH}"
+          echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
+      - name: Artefact and cache key
+        id: cache-key
+        run: |
+          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
+          echo "${CACHE_KEY}"
+          echo "CACHE_KEY=${CACHE_KEY}" >> "${GITHUB_OUTPUT}"
+
+      - name: Restore cached toolchains
+        id: cache-toolchains
+        uses: actions/cache/restore@v4
+        with:
+          path: coreboot/util/crossgcc/xgcc
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+      - name: Restore cached utils
+        id: cache-utils
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+
+      - name: Debug list crossgcc
+        if: steps.cache-toolchains.outputs.cache-hit == 'true'
+        run: |
+          ls -a1lh coreboot/util/crossgcc/xgcc
+      - name: Debug list utils
+        if: steps.cache-utils.outputs.cache-hit == 'true'
+        run: |
+          ls -a1lh /usr/local/bin
+
+      - name: Install dependencies if needed
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            acpica-tools \
+            bc \
+            bison \
+            bsdmainutils \
+            build-essential \
+            flex \
+            gnat \
+            imagemagick \
+            libelf-dev \
+            libncurses5-dev \
+            libnss3-dev \
+            libssl-dev \
+            m4 \
+            nasm \
+            openssh-client \
+            pkgconf \
+            python-is-python3 \
+            python3-pip \
+            qemu-system-x86 \
+            upx-ucl \
+            uuid-dev \
+            zlib1g-dev
+      - name: Install dependencies if needed (amd64)
+        if: matrix.arch == 'amd64' && steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            iucode-tool
+
+      - name: Build coreboot toolchains
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          cd coreboot
+          make crossgcc CPUS="$(nproc)"
+      - name: Build coreboot utils
+        if: steps.cache-utils.outputs.cache-hit != 'true'
+        run: |
+          cd coreboot
+          make -C util/ifdtool install
+          make -C util/cbfstool install
+      - name: Compress toolchain binaries
+        # This step should shrink the size of single toolchain from 1.5 GB down to around 700 MB
+        # I think it is save to compress all binaries except libraries, hence the '-wholename'
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          cd coreboot/util/crossgcc/xgcc
+          # shellcheck disable=SC2016
+          find . -type f -wholename '*/bin/*' -exec bash -c 'upx-ucl -9 "$1"' shell {} \; || true
+
+      # Store toolchains and utils in cache
+      - name: Cache toolchains
+        uses: actions/cache/save@v4
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        with:
+          path: coreboot/util/crossgcc/xgcc
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+      - name: Cache utils
+        uses: actions/cache/save@v4
+        if: steps.cache-utils.outputs.cache-hit != 'true'
+        with:
+          path: /usr/local/bin
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+
+      # Upload toolchains and utils as artifacts
+      - name: Tar toolchain to prevent permission loss
+        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+        run: |
+          if [ ! -f "coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar" ]; then
+            mv coreboot/util/crossgcc/xgcc coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+            tar -cf ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+          fi
+      - name: Upload toolchain
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+          path: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar
+          retention-days: 30
+          include-hidden-files: true
+          compression-level: 9
+      - name: Upload utils
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+          path: /usr/local/bin
+          retention-days: 30
+          include-hidden-files: true
+          compression-level: 9
+
+  #=========================
+  # Build Docker containers
+  #=========================
+
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs:
       - get-matrix
+      - build-coreboot-toolchains
     strategy:
       fail-fast: false
       matrix:
         dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
+    permissions:
+      contents: read
+      packages: write
     steps:
       # We have to use my own fork of actions/delete-package-versions at the moment
       #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
