@@ -144,7 +144,7 @@ services:
       args:
         - LINUX_VERSION=6.1.45
         - GCC_VERSION=11
-        - SOURCE_IMAGE=ubuntu:jammy
+        - SOURCE_IMAGE=ubuntu:noble
   linux_6.1.111:
     # 2022-12
     # LTS
@@ -153,7 +153,7 @@ services:
       args:
         - LINUX_VERSION=6.1.111
         - GCC_VERSION=11
-        - SOURCE_IMAGE=ubuntu:jammy
+        - SOURCE_IMAGE=ubuntu:noble
   linux_6.6.52:
     # 2023-10
     # LTS
@@ -162,7 +162,7 @@ services:
       args:
         - LINUX_VERSION=6.6.52
         - GCC_VERSION=12
-        - SOURCE_IMAGE=ubuntu:jammy
+        - SOURCE_IMAGE=ubuntu:noble
   linux_6.9.9:
     # 2024-05
     build:
