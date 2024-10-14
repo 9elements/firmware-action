@@ -96,6 +96,10 @@ COPY --from=toolchain $XGCCPATH/.. $XGCCPATH/..
 COPY --from=toolchain $TOOLSDIR/MEAnalyzer $TOOLSDIR/
 COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
 
+RUN ls -a1lh $XGCCPATH/..
+RUN ls -a1lh $TOOLSDIR/
+RUN ls -a1lh /usr/local/bin/
+
 # Prepare SSH for interactive debugging
 RUN mkdir -p /run/sshd && \
     sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \

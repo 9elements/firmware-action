@@ -153,6 +153,8 @@ FROM ${INTERMEDIATE_IMAGE} AS final
 
 COPY --from=toolchain $TOOLSDIR $TOOLSDIR
 
+RUN ls -a1lh $TOOLSDIR
+
 # Prepare SSH for interactive debugging
 RUN mkdir -p /run/sshd && \
     sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
