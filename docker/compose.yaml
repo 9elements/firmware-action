@@ -71,6 +71,7 @@ services:
         - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=7093026e924291b9e9f6f5211a052c6a761a4704
         - EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
+        - GCC_VERSION=9
   edk2-stable202105:
     build:
       context: edk2
@@ -80,6 +81,7 @@ services:
         - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=442dfd5da6475dfa844894bf88284b959b1210b8
         - EDK2_NON_OSI_COMMIT=9c509e9b00cc8f68a0c2293436d0572d3e4a40ce
+        - GCC_VERSION=9
   edk2-stable202111:
     build:
       context: edk2
@@ -89,6 +91,7 @@ services:
         - SOURCE_IMAGE=buildpack-deps:focal
         - EDK2_PLATFORM_COMMIT=41dacdf4fb36b350bd199adeb9036b7d44b3d243
         - EDK2_NON_OSI_COMMIT=eef5e03e52f41492ff7af1a7985bc5eda8d7a448
+        - GCC_VERSION=9
   # Building UniversalPayload from this point on is likely ???
   edk2-stable202205:
     build:
@@ -100,6 +103,7 @@ services:
         - EDK2_PLATFORM_COMMIT=f427247a8d415c2d514ee49c4d0cde94a9b8ea89
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
   edk2-stable202208:
     build:
       context: edk2
@@ -110,6 +114,7 @@ services:
         - EDK2_PLATFORM_COMMIT=3c3b1168017073c2bb2d97336c5929ebae805be1
         - EDK2_NON_OSI_COMMIT=61662e8596dd9a64e3372f9a3ba6622d2628607c
         - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
   edk2-stable202211:
     build:
       context: edk2
@@ -120,6 +125,7 @@ services:
         - EDK2_PLATFORM_COMMIT=b36fe8bc9b6812e9b4ec360a2ab513a0437d4132
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
   edk2-stable202408:
     build:
       context: edk2
@@ -130,6 +136,7 @@ services:
         - EDK2_PLATFORM_COMMIT=8676e88233d41323ed3b3a9087288e83cc87ebf7
         - EDK2_NON_OSI_COMMIT=4e36179c55f49a73fe4805baa2b5f9fdd0a07a67
         - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=9
   #==================
   # linux
   #==================
