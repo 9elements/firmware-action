@@ -65,11 +65,6 @@ RUN apt-get update && \
         vim \
     && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
-    pip3 install --no-cache-dir \
-        colorama==0.4.6 \
-        crccheck==1.3.0 \
-        pltable==1.0.2 \
-    && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p "${TOOLSDIR}"
 
