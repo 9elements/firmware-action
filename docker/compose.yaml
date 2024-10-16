@@ -60,7 +60,7 @@ services:
         - USE_GCC_VERSION=48
         - PYTHON_PACKAGES=python
         - GCC_CROSS_COMPILER_PACKAGES_ARM=gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi gcc-i686-linux-gnu
-        - GCC_CROSS_COMPILER_PACKAGES_X86= gcc-i686-linux-gnu
+        - GCC_CROSS_COMPILER_PACKAGES_X86=gcc-i686-linux-gnu
       # NonOSI wasn't used in 2017
   edk2-stable202008:
     build:
