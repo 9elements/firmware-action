@@ -67,22 +67,6 @@ jobs:
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
-  get-matrix-edk2:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: get-matrix
-        id: get-matrix
-        run: |
-          # shellcheck disable=SC2046
-          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
-      - name: Check
-        run: |
-          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
-    outputs:
-      matrix: ${{ steps.get-matrix.outputs.matrix }}
-
   #=====================
   # Coreboot toolchains
   #=====================
