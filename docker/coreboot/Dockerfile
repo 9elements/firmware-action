@@ -72,18 +72,15 @@ RUN apt-get update && \
 #=============
 # "toolchain" stage to build the coreboot toolchain
 FROM base AS toolchain
+ARG TARGETARCH
 
-# Compile coreboot toolchain
 WORKDIR $TOOLSDIR
-RUN git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${COREBOOT_VERSION}"
-WORKDIR $TOOLSDIR/coreboot
-RUN make crossgcc CPUS="$(nproc)"
-WORKDIR $TOOLSDIR/coreboot
-RUN make -C util/ifdtool install && \
-    make -C util/cbfstool install
+
+# Add pre-compiled coreboot toolchain and utils
+COPY coreboot-${COREBOOT_VERSION}/xgcc-${TARGETARCH}/* $TOOLSDIR/coreboot/util/crossgcc/xgcc/
+COPY coreboot-${COREBOOT_VERSION}/utils-${TARGETARCH}/* /usr/local/bin/
 
 # Install MEAnalyser
-WORKDIR $TOOLSDIR
 RUN git clone https://github.com/platomav/MEAnalyzer.git
 
 
@@ -93,12 +90,15 @@ FROM base AS final
 
 # Let coreboot know the toolchain path
 ENV XGCCPATH=$TOOLSDIR/coreboot/util/crossgcc/xgcc/bin/
-RUN echo "${XGCCPATH}"
 
 # Copy over things from previous stage(s)
 COPY --from=toolchain $XGCCPATH/.. $XGCCPATH/..
 COPY --from=toolchain $TOOLSDIR/MEAnalyzer $TOOLSDIR/
 COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
+
+RUN ls -a1lh $XGCCPATH/..
+RUN ls -a1lh $TOOLSDIR/
+RUN ls -a1lh /usr/local/bin/
 
 # Prepare SSH for interactive debugging
 RUN mkdir -p /run/sshd && \
