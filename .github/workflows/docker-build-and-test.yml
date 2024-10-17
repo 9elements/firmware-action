@@ -45,7 +45,10 @@ jobs:
           # Disable SC2046: Quote this to prevent word splitting
           # I can't quote this, just look at it
           # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[]' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[]' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+      - name: Check
+        run: |
+          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
@@ -58,7 +61,10 @@ jobs:
         id: get-matrix
         run: |
           # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+      - name: Check
+        run: |
+          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
@@ -71,7 +77,10 @@ jobs:
         id: get-matrix
         run: |
           # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+      - name: Check
+        run: |
+          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
