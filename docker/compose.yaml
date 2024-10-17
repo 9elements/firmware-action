@@ -72,6 +72,7 @@ services:
         - EDK2_PLATFORM_COMMIT=7093026e924291b9e9f6f5211a052c6a761a4704
         - EDK2_NON_OSI_COMMIT=4f88718028316aee31cb577f7127d5706255722d
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202105:
     build:
       context: edk2
@@ -82,6 +83,7 @@ services:
         - EDK2_PLATFORM_COMMIT=442dfd5da6475dfa844894bf88284b959b1210b8
         - EDK2_NON_OSI_COMMIT=9c509e9b00cc8f68a0c2293436d0572d3e4a40ce
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202111:
     build:
       context: edk2
@@ -92,6 +94,7 @@ services:
         - EDK2_PLATFORM_COMMIT=41dacdf4fb36b350bd199adeb9036b7d44b3d243
         - EDK2_NON_OSI_COMMIT=eef5e03e52f41492ff7af1a7985bc5eda8d7a448
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   # Building UniversalPayload from this point on is likely ???
   edk2-stable202205:
     build:
@@ -104,6 +107,7 @@ services:
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202208:
     build:
       context: edk2
@@ -115,6 +119,7 @@ services:
         - EDK2_NON_OSI_COMMIT=61662e8596dd9a64e3372f9a3ba6622d2628607c
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202211:
     build:
       context: edk2
@@ -126,6 +131,7 @@ services:
         - EDK2_NON_OSI_COMMIT=6996a45d7f4014fd4aa0f1eb4cbe97d8a3c5957a
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python2 python3
   edk2-stable202408:
     build:
       context: edk2
@@ -137,6 +143,7 @@ services:
         - EDK2_NON_OSI_COMMIT=4e36179c55f49a73fe4805baa2b5f9fdd0a07a67
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
+        - PYTHON_PACKAGES=python-is-python3 python3
   #==================
   # linux
   #==================
