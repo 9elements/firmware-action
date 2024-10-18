@@ -116,6 +116,7 @@ jobs:
           git clone --branch "${{ matrix.coreboot-version }}" --depth 1 https://review.coreboot.org/coreboot my_super_dooper_awesome_coreboot
       - name: Store coreboot repo in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./my_super_dooper_awesome_coreboot
           key: coreboot-${{ matrix.coreboot-version }}
@@ -162,6 +163,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore cached linux source
+        id: cache-repo
         uses: actions/cache/restore@v4
         with:
           path: ./linux-${{ matrix.linux-version }}.tar.xz
@@ -181,6 +183,7 @@ jobs:
           LINUX_MAJOR_VERSION: 6
       - name: Store linux source in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./linux-${{ matrix.linux-version }}.tar.xz
           key: linux-${{ matrix.linux-version }}
@@ -241,6 +244,7 @@ jobs:
           echo "-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE" > "edk2_config.cfg"
       - name: Store edk2 repo in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./Edk2
           key: edk2-${{ matrix.edk2-version }}
@@ -312,6 +316,7 @@ jobs:
           git clone --depth 1 https://review.coreboot.org/blobs stitch
       - name: Store coreboot-blobs repo in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./stitch
           key: coreboot-blobs-${{ matrix.coreboot-version }}
@@ -365,6 +370,7 @@ jobs:
           git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git || true
       - name: Store u-root repo in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./u-root
           key: u-root-${{ matrix.uroot-version }}
@@ -418,6 +424,7 @@ jobs:
           git clone --depth 1 --branch v${{ matrix.uroot-version }} https://github.com/u-root/u-root.git
       - name: Store u-root repo in cache
         uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./u-root
           key: u-root-${{ matrix.uroot-version }}
