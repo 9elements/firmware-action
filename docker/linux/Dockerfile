@@ -8,6 +8,7 @@ ARG TARGETARCH=amd64
 # "base" stage with all needed build dependencies
 FROM ${SOURCE_IMAGE} AS base
 
+ARG TARGETARCH
 ARG LINUX_VERSION=6.1.45
 ARG CONTEXT=linux
 
@@ -35,7 +36,6 @@ RUN apt-get update && \
         g++-${GCC_VERSION} \
         gawk \
         gcc-${GCC_VERSION} \
-        gcc-${GCC_VERSION}-aarch64-linux-gnu \
         gcc-${GCC_VERSION}-arm-linux-gnueabi \
         gcc-${GCC_VERSION}-i686-linux-gnu \
         git \
@@ -52,6 +52,10 @@ RUN apt-get update && \
         wget \
         zstd \
     && \
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        apt-get install -y --no-install-recommends \
+            gcc-${GCC_VERSION}-aarch64-linux-gnu; \
+    fi && \
     apt-get install -y --no-install-recommends \
         less \
         nano \

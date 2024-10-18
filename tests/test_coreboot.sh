@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
+trap cleanup SIGINT SIGTERM ERR EXIT INT
+
+cleanup() {
+	trap - SIGINT SIGTERM ERR EXIT INT
+
+	echo "** DEBUG **"
+	set -x
+	ls -a1lh "${XGCCPATH}"
+}
 
 # Environment variables
 export BUILD_TIMELESS=1
