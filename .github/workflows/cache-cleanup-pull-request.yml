@@ -1,0 +1,32 @@
+---
+# Docs: https://github.com/OpenGrabeso/clean-cache
+#
+# As we are using caches more and more, we are getting over the GitHubs 10 GB limit.
+# Unfortunately GitHub does does not have very smart cache eviction policy
+# Docs: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
+#
+# Each pre-compiled coreboot toolchain takes up around 500 MB.
+# The most space at the time of writing is taken up by coreboot toolchains. At the time of writing we
+#   have 7 coreboot versions, each for x86 and arm64, resulting in 7*2*500=7 GB.
+# Thankfully the coreboot toolchains are not re-built that often, but they do take almost 1 hour to build - hence
+#   caching is a good idea.
+# To make sure that the toolchains remain available as long as possible, we should start manually cleaning up the
+#   cache - making the eviction logic smarter.
+
+name: cache cleanup pull request
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  cache-cleanup-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clean cache for the closed/merged PR
+        uses: opengrabeso/clean-cache@v1
