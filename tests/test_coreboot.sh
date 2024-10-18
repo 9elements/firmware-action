@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
+trap cleanup SIGINT SIGTERM ERR EXIT INT
+
+cleanup() {
+	trap - SIGINT SIGTERM ERR EXIT INT
+
+	echo "** DEBUG **"
+	set -x
+	ls -a1lh "/usr/local/bin"
+	ls -a1lh "${XGCCPATH}/.."
+	ls -a1lh "${XGCCPATH}"
+	readelf -h "${XGCCPATH}/nasm"
+}
 
 # Environment variables
 export BUILD_TIMELESS=1
