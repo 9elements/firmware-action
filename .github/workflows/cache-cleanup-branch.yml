@@ -1,0 +1,21 @@
+---
+# Docs: https://github.com/OpenGrabeso/clean-cache
+# Keep only most recent cache while working on a branch
+name: cache cleanup branch
+on:
+  push:
+    branches: ['**']
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  cache-cleanup-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: opengrabeso/clean-cache@v1
+        with:
+          post: true
+          keep: 1
