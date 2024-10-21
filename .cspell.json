@@ -46,6 +46,7 @@
     "NOTSET",
     "REPOPATH",
     "TARGETARCH",
+    "TOOLSDIR",
     "Taskfile",
     "acpica",
     "addinivalue",

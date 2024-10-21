@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
@@ -123,10 +124,13 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 	}
 
 	// Assemble commands to build
-	buildSteps := [][]string{
-		//{"bash", "-c", fmt.Sprintf("source ./edksetup.sh; build %s %s", buildArgs, string(defconfigFileArgs))},
-		{"bash", "-c", fmt.Sprintf("%s %s", opts.BuildCommand, string(defconfigFileArgs))},
+	buildSteps := [][]string{}
+	if !(runtime.GOARCH == "386" || runtime.GOARCH == "amd64") {
+		// On all non-x86 architectures we have to also build the BaseTools
+		// Docs: https://go.dev/doc/install/source#environment
+		buildSteps = append(buildSteps, []string{"bash", "-c", "cd ${TOOLSDIR}/Edk2/; make -C BaseTools/ -j $(nproc)"})
 	}
+	buildSteps = append(buildSteps, []string{"bash", "-c", fmt.Sprintf("%s %s", opts.BuildCommand, string(defconfigFileArgs))})
 
 	// Build
 	var myContainerPrevious *dagger.Container
