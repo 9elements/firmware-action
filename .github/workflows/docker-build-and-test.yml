@@ -103,10 +103,10 @@ jobs:
       - get-matrix-coreboot
       - check-rate-limit
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         arch: ['amd64', 'arm64']
-        dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
+        dockerfile: ['coreboot_4.19']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     container:
       # At the time of writing (2024-10) we cannot use ubuntu:noble as it is broken
@@ -196,6 +196,7 @@ jobs:
           if_no_artifact_found: warn
           search_artifacts: true
           path: coreboot/util/crossgcc/xgcc-tar/
+          workflow_conclusion: ""
       - name: Un-tar toolchains
         if: steps.artifacts-toolchains.outputs.found_artifact == 'true'
         run: |
@@ -320,9 +321,9 @@ jobs:
       - get-matrix
       - build-coreboot-toolchains
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
+        dockerfile: ['coreboot_4.19']
     permissions:
       contents: read
       packages: write
@@ -397,6 +398,8 @@ jobs:
         with:
           name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
           name_is_regexp: true
+          search_artifacts: true
+          workflow_conclusion: ""
 
       - name: Prepare toolchains
         if: startsWith(matrix.dockerfile, 'coreboot')
