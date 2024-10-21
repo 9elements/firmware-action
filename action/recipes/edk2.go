@@ -14,39 +14,11 @@ import (
 	"github.com/9elements/firmware-action/action/container"
 )
 
-// Edk2Specific is used to store data specific to coreboot.
-/* TODO: removed because of issue #92
-type Edk2Specific struct {
-	// Gives the (relative) path to the defconfig that should be used to build the target.
-	// For EDK2 this is a one-line file containing the build arguments such as
-	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
-	//   Some arguments will be added automatically:
-	//     '-a <architecture>'
-	//     '-p <edk2__platform>'
-	//     '-b <edk2__release_type>'
-	//     '-t <GCC version>' (defined as part of container toolchain, selected by SdkURL)
-	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
-
-	// Specifies the DSC to use when building EDK2
-	// Example: UefiPayloadPkg/UefiPayloadPkg.dsc
-	Platform string `json:"platform" validate:"filepath"`
-
-	// Specifies the build type to use when building EDK2
-	// Supported options: DEBUG, RELEASE
-	ReleaseType string `json:"release_type" validate:"required"`
-
-	// Specifies which build command to use
-	// Examples:
-	//   "source ./edksetup.sh; build"
-	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"
-	//   "Intel/AlderLakeFspPkg/BuildFv.sh"
-	BuildCommand string `json:"build_command" validate:"required"`
-}
-*/
-
 // ANCHOR: Edk2Specific
 
 // Edk2Specific is used to store data specific to coreboot.
+//
+//	simplified because of issue #92
 type Edk2Specific struct {
 	// Specifies which build command to use
 	// GCC version is exposed in the container container as USE_GCC_VERSION environment variable
@@ -132,33 +104,8 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
 
-	// Get GCC version from environment variable
-	/* TODO: removed because of issue #92
-	gccVersion, err := myContainer.EnvVariable(ctx, "USE_GCC_VERSION")
-	if err != nil {
-		return err
-	}
-	*/
-
-	// Figure out target architectures
-	/* TODO: removed because of issue #92
-	architectures := map[string]string{
-		"AARCH64": "-a AARCH64",
-		"ARM":     "-a ARM",
-		"IA32":    "-a IA32",
-		"IA32X64": "-a IA32 -a X64",
-		"X64":     "-a X64",
-	}
-	arch, ok := architectures[opts.Arch]
-	if !ok {
-		return fmt.Errorf("%w: %s", errUnknownArch, opts.Arch)
-	}
-	*/
-
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
-	// NOTE: removed because of issue #92
-	// buildArgs := fmt.Sprintf("%s -p %s -b %s -t GCC%s", arch, opts.Specific.Platform, opts.Specific.ReleaseType, gccVersion)
 	var defconfigFileArgs []byte
 	if opts.DefconfigPath != "" {
 		if _, err := os.Stat(opts.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
