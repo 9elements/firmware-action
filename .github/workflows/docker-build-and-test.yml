@@ -89,38 +89,18 @@ jobs:
       # Use coreboot mirrors
       BUILDGCC_OPTIONS: -m
     steps:
-      - name: Install dependencies
+      - name: Install dependencies for CI
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-            acpica-tools \
-            bc \
-            bison \
-            bsdmainutils \
-            build-essential \
+            ca-certificates \
             curl \
-            flex \
             git \
-            gnat \
-            imagemagick \
             jq \
-            libelf-dev \
-            libncurses5-dev \
-            libnss3-dev \
-            libssl-dev \
-            m4 \
-            nasm \
-            nodejs \
-            openssh-client \
-            pkgconf \
-            python-is-python3 \
-            python3-pip \
-            qemu-system-x86 \
             sudo \
             tzdata \
-            uuid-dev \
-            wget \
-            zlib1g-dev
+            wget
+          update-ca-certificates
       - name: Get yq
         # the --no-check-certificate is needed because GitHub
         run: |
@@ -129,11 +109,6 @@ jobs:
       - name: Configure tzdata
         run: |
           dpkg-reconfigure --frontend noninteractive tzdata
-      - name: Install dependencies (amd64)
-        if: matrix.arch == 'amd64'
-        run: |
-          apt-get install -y --no-install-recommends \
-            iucode-tool
       - name: Checkout
         uses: actions/checkout@v4
       - name: Get coreboot version
@@ -223,6 +198,38 @@ jobs:
         if: steps.cache-toolchains.outputs.cache-hit == 'true' || steps.artifacts-toolchains.outputs.found_artifact == 'true'
         run: |
           ls -a1lh /usr/local/bin
+
+      - name: Install dependencies if needed
+        if: steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            acpica-tools \
+            bc \
+            bison \
+            bsdmainutils \
+            build-essential \
+            flex \
+            gnat \
+            imagemagick \
+            libelf-dev \
+            libncurses5-dev \
+            libnss3-dev \
+            libssl-dev \
+            m4 \
+            nasm \
+            openssh-client \
+            pkgconf \
+            python-is-python3 \
+            python3-pip \
+            qemu-system-x86 \
+            upx-ucl \
+            uuid-dev \
+            zlib1g-dev
+      - name: Install dependencies if needed (amd64)
+        if: matrix.arch == 'amd64' && steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            iucode-tool
 
       - name: Build coreboot toolchains
         if: steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
