@@ -72,7 +72,7 @@ jobs:
   #=====================
 
   build-coreboot-toolchains:
-    timeout-minutes: 120
+    timeout-minutes: 80
     needs:
       - get-matrix-coreboot
     strategy:
@@ -99,7 +99,6 @@ jobs:
             jq \
             sudo \
             tzdata \
-            upx-ucl \
             wget
           update-ca-certificates
       - name: Get yq
@@ -237,19 +236,8 @@ jobs:
         run: |
           cd coreboot
           make crossgcc CPUS="$(nproc)"
-      - name: Compress toolchain binaries
-        # This step should shrink the size of single toolchain from 1.5 GB down to around 700 MB
-        if: steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
-        run: |
-          cd coreboot/util/crossgcc/xgcc
-          find . -type f -exec bash -c 'upx-ucl -9 "$1"' shell {} \; || true
-      - name: Build coreboot utilities
-        if: steps.cache-utils.outputs.cache-hit != 'true' && steps.artifacts-utils.outputs.found_artifact != 'true'
-        run: |
-          cd coreboot
           make -C util/ifdtool install
           make -C util/cbfstool install
-
       # Store toolchains and utils in cache
       - name: Cache toolchains
         uses: actions/cache/save@v4
