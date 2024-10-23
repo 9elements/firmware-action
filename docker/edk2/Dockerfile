@@ -142,7 +142,9 @@ RUN mkdir Edk2 && \
     git fetch --depth 1 origin "${EDK2_VERSION_COMMIT}" && \
     git checkout "${EDK2_VERSION_COMMIT}" && \
     git submodule update --init --recursive && \
-    make -C BaseTools/ -j "$(nproc)"
+    if [ "${TARGETARCH}" = 'amd64' ]; then \
+        make -C BaseTools/ -j "$(nproc)"; \
+    fi;
 
 
 #=============

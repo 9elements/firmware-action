@@ -27,7 +27,6 @@ env:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   #=============================
@@ -45,7 +44,10 @@ jobs:
           # Disable SC2046: Quote this to prevent word splitting
           # I can't quote this, just look at it
           # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[]' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[]' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+      - name: Check
+        run: |
+          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
@@ -58,33 +60,273 @@ jobs:
         id: get-matrix
         run: |
           # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+          echo matrix=$( yq --input-format yaml --output-format json '.services | keys[] | select(. | test("coreboot.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
+      - name: Check
+        run: |
+          jq . <<< '${{ steps.get-matrix.outputs.matrix }}'
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
-  get-matrix-edk2:
+  check-rate-limit:
     runs-on: ubuntu-latest
     steps:
+      - name: Get rate limit
+        id: limit
+        run: |
+          limit="$( gh api -X GET /rate_limit | jq -c )"
+          echo "limit=${limit}" >> "${GITHUB_OUTPUT}"
+          echo remaining=$( echo ${limit} | jq '.["rate"].remaining' ) >> "${GITHUB_OUTPUT}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Debug limit
+        run: |
+          echo ${{ steps.limit.outputs.limit }}
+      - name: Debug remaining
+        run: |
+          echo ${{ steps.limit.outputs.remaining }}
+      - name: Check if under limit
+        run: |
+          if [ "${{ steps.limit.outputs.remaining }}" -gt "100" ];
+            then echo "Remaining limit OK";
+          else
+            echo "Remaining limit too low";
+            false
+          fi
+
+  #=====================
+  # Coreboot toolchains
+  #=====================
+
+  build-coreboot-toolchains:
+    timeout-minutes: 80
+    needs:
+      - get-matrix-coreboot
+      - check-rate-limit
+    strategy:
+      fail-fast: true
+      matrix:
+        arch: ['amd64', 'arm64']
+        dockerfile: ['coreboot_4.19']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
+    container:
+      # At the time of writing (2024-10) we cannot use ubuntu:noble as it is broken
+      image: ubuntu:jammy
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      # Use coreboot mirrors
+      BUILDGCC_OPTIONS: -m
+    steps:
+      - name: Install dependencies for CI
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates \
+            curl \
+            git \
+            jq \
+            sudo \
+            tzdata \
+            wget
+          update-ca-certificates
+      - name: Get yq
+        # the --no-check-certificate is needed because GitHub
+        run: |
+          wget -q --no-check-certificate -O /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${{ matrix.arch }}
+          chmod 755 /usr/local/bin/yq
+      - name: Configure tzdata
+        run: |
+          dpkg-reconfigure --frontend noninteractive tzdata
       - name: Checkout
         uses: actions/checkout@v4
-      - name: get-matrix
-        id: get-matrix
+      - name: Get coreboot version
+        id: version
         run: |
-          # shellcheck disable=SC2046
-          echo matrix=$( yq '.services | keys[] | select(. | test("(e|u)dk2.*"))' docker/compose.yaml | sed 's/"//g' | jq -Rs 'split("\n") | del(.[-1])' | jq -c ) >> "${GITHUB_OUTPUT}"
-    outputs:
-      matrix: ${{ steps.get-matrix.outputs.matrix }}
+          yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+
+      - name: Clone coreboot
+        run: |
+          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+
+      - name: Get coreboot commit hash
+        id: coreboot-hash
+        run: |
+          cd coreboot
+          COREBOOT_HASH="$( git rev-parse --short HEAD )"
+          echo "${COREBOOT_HASH}"
+          echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
+      - name: Artefact and cache key
+        id: cache-key
+        run: |
+          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
+          echo "${CACHE_KEY}"
+          echo "CACHE_KEY=${CACHE_KEY}" >> "${GITHUB_OUTPUT}"
+
+      # Here comes the fun part ...
+      # Since we are running this also on self-hosted runner, we do not want it to eat up all of the internet bandwidth.
+      # To do this we rely on artifacts being our main storage to save the compiled toolchains.
+      # Since the coreboot tags (releases) should never change, then we can keep re-using the same toolchains over and
+      #   over again without any problem.
+      # First - we check if artifacts for this coreboot commit hash exist or not.
+      #   If artifacts DO exist, then skip the rest of the job
+      #   If artifacts DO NOT exist, then build the toolchain and upload
+      # Artifacts have limited life-span, but caches do not, as long as they are used. So to bridge avoid compiling
+      #   the toolchains when last artifacts expire, we will keep cache alive.
+
+      - name: Restore cached toolchains
+        id: cache-toolchains
+        uses: actions/cache/restore@v4
+        with:
+          path: coreboot/util/crossgcc/xgcc
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+      - name: Restore cached utils
+        id: cache-utils
+        uses: actions/cache/restore@v4
+        with:
+          path: /usr/local/bin
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+
+      - name: Check / fetch toolchain artifacts
+        id: artifacts-toolchains
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+          dry_run: ${{ steps.cache-toolchains.outputs.cache-hit }}
+          # If cache does exist, do not download artifacts
+          # If cache does not exist, download artifacts
+          if_no_artifact_found: warn
+          search_artifacts: true
+          path: coreboot/util/crossgcc/xgcc-tar/
+          workflow_conclusion: ""
+      - name: Un-tar toolchains
+        if: steps.artifacts-toolchains.outputs.found_artifact == 'true'
+        run: |
+          if [ -f "coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar" ]; then
+            echo "un-tar"
+            tar -xvf coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar -C coreboot/util/crossgcc/
+            mv coreboot/util/crossgcc/${{ matrix.arch }}-xgcc coreboot/util/crossgcc/xgcc
+          else
+            echo "file not found"
+          fi
+      - name: Check / fetch utils artifacts
+        id: artifacts-utils
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+          dry_run: ${{ steps.cache-utils.outputs.cache-hit }}
+          # If cache does exist, do not download artifacts
+          # If cache does not exist, download artifacts
+          if_no_artifact_found: warn
+          path: /usr/local/bin
+
+      - name: Debug list crossgcc
+        if: steps.cache-toolchains.outputs.cache-hit == 'true' || steps.artifacts-toolchains.outputs.found_artifact == 'true'
+        run: |
+          ls -a1lh coreboot/util/crossgcc/xgcc
+      - name: Debug list utils
+        if: steps.cache-toolchains.outputs.cache-hit == 'true' || steps.artifacts-toolchains.outputs.found_artifact == 'true'
+        run: |
+          ls -a1lh /usr/local/bin
+
+      - name: Install dependencies if needed
+        if: steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            acpica-tools \
+            bc \
+            bison \
+            bsdmainutils \
+            build-essential \
+            flex \
+            gnat \
+            imagemagick \
+            libelf-dev \
+            libncurses5-dev \
+            libnss3-dev \
+            libssl-dev \
+            m4 \
+            nasm \
+            openssh-client \
+            pkgconf \
+            python-is-python3 \
+            python3-pip \
+            qemu-system-x86 \
+            upx-ucl \
+            uuid-dev \
+            zlib1g-dev
+      - name: Install dependencies if needed (amd64)
+        if: matrix.arch == 'amd64' && steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        run: |
+          apt-get install -y --no-install-recommends \
+            iucode-tool
+
+      - name: Build coreboot toolchains
+        if: steps.cache-toolchains.outputs.cache-hit != 'true' && steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        run: |
+          cd coreboot
+          make crossgcc CPUS="$(nproc)"
+          make -C util/ifdtool install
+          make -C util/cbfstool install
+      # Store toolchains and utils in cache
+      - name: Cache toolchains
+        uses: actions/cache/save@v4
+        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        with:
+          path: coreboot/util/crossgcc/xgcc
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+      - name: Cache utils
+        uses: actions/cache/save@v4
+        if: steps.cache-utils.outputs.cache-hit != 'true'
+        with:
+          path: /usr/local/bin
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+
+      # Upload toolchains and utils as artifacts
+      - name: Tar toolchain to prevent permission loss
+        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+        run: |
+          if [ ! -f "coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar" ]; then
+            mv coreboot/util/crossgcc/xgcc coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+            tar -cvf ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+          fi
+      - name: Upload toolchain
+        uses: actions/upload-artifact@v4.4.3
+        if: steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
+          path: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar
+          retention-days: 7
+          # TODO: change to 90
+          include-hidden-files: true
+          compression-level: 9
+      - name: Upload utils
+        uses: actions/upload-artifact@v4.4.3
+        if: steps.artifacts-utils.outputs.found_artifact != 'true'
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+          path: /usr/local/bin
+          retention-days: 7
+          # TODO: change to 90
+          include-hidden-files: true
+          compression-level: 9
+
+  #=========================
+  # Build Docker containers
+  #=========================
 
   build:
     name: build_test_publish
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
     needs:
       - get-matrix
+      - build-coreboot-toolchains
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
+        dockerfile: ['coreboot_4.19']
+    permissions:
+      contents: read
+      packages: write
     steps:
       # We have to use my own fork of actions/delete-package-versions at the moment
       #   to have access to 'dry-run' and 'ignore-versions-include-tags' features
@@ -121,6 +363,86 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get coreboot version
+        id: version
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
+      - name: Clone coreboot
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+      - name: Get coreboot commit hash
+        id: coreboot-hash
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          cd coreboot
+          COREBOOT_HASH="$( git rev-parse --short HEAD )"
+          echo "${COREBOOT_HASH}"
+          echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
+      - name: Artefact and cache key
+        id: cache-key
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}"
+          echo "CACHE_KEY=${CACHE_KEY}"
+          echo "CACHE_KEY=${CACHE_KEY}">> "${GITHUB_OUTPUT}"
+
+      #=================================
+      # Download artifacts for coreboot
+      #=================================
+
+      - name: Download coreboot toolchains for amd64
+        id: artifacts-toolchains
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
+          name_is_regexp: true
+          search_artifacts: true
+          workflow_conclusion: ""
+
+      - name: Prepare toolchains
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          mkdir -p docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
+          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-xgcc/*.tar; do
+            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
+            echo "extracting ${f} -> ${{ steps.version.outputs.COREBOOT_VERSION }} / ${ARCH}"
+            mkdir -p "${f}.dir/"
+            tar -xf "${f}" -C "${f}.dir/"
+            mv "${f}.dir/coreboot/util/crossgcc/${ARCH}-xgcc" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-${ARCH}"
+          done
+      - name: Prepare utils
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-utils; do
+            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
+            echo "${f} -> ${ARCH}"
+            chmod +x "${f}"/*
+            mv "${f}" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-${ARCH}"
+          done
+
+      - name: Debug list artifacts
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/
+      - name: Debug list xgcc (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-*
+      - name: Debug list xgcc/bin (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-*/bin
+      - name: Debug list utils (amd64)
+        if: startsWith(matrix.dockerfile, 'coreboot')
+        run: |
+          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-*
+
+      #============================
+      # Build the docker container
+      #============================
+
       - name: Setup docker-compose
         uses: KengoTODA/actions-setup-docker-compose@v1
         env:
@@ -133,8 +455,7 @@ jobs:
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
       - name: Run dagger pipeline
-        # If building coreboot use 120 minutes timeout, otherwise 15 minutes
-        timeout-minutes: ${{ startsWith(matrix.dockerfile, 'coreboot_') && 120 || 15 }}
+        timeout-minutes: 60
         run: |
           if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
             echo "Enable publishing"

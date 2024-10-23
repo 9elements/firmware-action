@@ -2,6 +2,7 @@
 version: '3'
 vars:
   PROJECT: 'daggerci'
+  PYTHON_VENV: 'venvdagger'
 
 tasks:
   lint-pylint:
@@ -27,3 +28,148 @@ tasks:
     dir: daggerci
     cmds:
       - python -m pytest --cov --cov-report=term-missing --cov-report=html --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --runslow {{.CLI_ARGS}}
+
+
+  test-venv:
+    desc: Run tests in virtual environment
+    deps: [setup-python-venv]
+    cmds:
+      - bash -c "
+        source {{.PYTHON_VENV}}/bin/activate;
+        cd daggerci;
+        python -m pytest --cov --cov-report=term-missing --cov-report=html --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --runslow {{.CLI_ARGS}};
+        "
+
+  setup-python-venv:
+    desc: Setup python virtual environment
+    internal: true
+    cmds:
+      - python -m venv {{.PYTHON_VENV}}
+      - bash -c "
+        source {{.PYTHON_VENV}}/bin/activate;
+        pip install -r ./daggerci/requirements.txt;
+        "
+    sources:
+      - ./daggerci/requirements.txt
+    generates:
+      - ./{{.PYTHON_VENV}}/pyvenv.cfg
+
+  build:
+    desc: Build docker container
+    internal: true
+    deps: [setup-python-venv]
+    cmds:
+      - bash -c "
+        source {{.PYTHON_VENV}}/bin/activate;
+        cd ..;
+        python .dagger-ci/daggerci/main.py -d {{.DOCKERFILE}};
+        "
+
+  build:coreboot_24.05:
+    desc: Build coreboot_24.05 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'coreboot_24.05'
+
+  build:coreboot_4.19:
+    desc: Build coreboot_4.19 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'coreboot_4.19'
+
+  build:coreboot_4.21:
+    desc: Build coreboot_4.21 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'coreboot_4.21'
+
+  build:linux_6.9.9:
+    desc: Build linux_6.9.9 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'linux_6.9.9'
+
+  build:linux_6.1.45:
+    desc: Build linux_6.1.45 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'linux_6.1.45'
+
+  build:edk2-stable202211:
+    desc: Build edk2-stable202211 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202211'
+
+  # ===========
+  #    NEW
+  # ===========
+
+  build:uroot_0.14.0:
+    desc: Build uroot_0.14.0 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'uroot_0.14.0'
+
+  build:udk2017:
+    desc: Build udk2017 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'udk2017'
+
+  build:edk2-stable202302:
+    desc: Build edk2-stable202302 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202302'
+
+  build:edk2-stable202305:
+    desc: Build edk2-stable202305 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202305'
+
+  build:edk2-stable202308:
+    desc: Build edk2-stable202308 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202308'
+
+  build:edk2-stable202311:
+    desc: Build edk2-stable202311 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202311'
+
+  build:edk2-stable202402:
+    desc: Build edk2-stable202402 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202402'
+
+  build:edk2-stable202405:
+    desc: Build edk2-stable202405 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202405'
+
+  build:edk2-stable202408:
+    desc: Build edk2-stable202408 container
+    cmds:
+      - task: build
+        vars:
+          DOCKERFILE: 'edk2-stable202408'
