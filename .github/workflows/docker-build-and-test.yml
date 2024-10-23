@@ -67,6 +67,32 @@ jobs:
     outputs:
       matrix: ${{ steps.get-matrix.outputs.matrix }}
 
+  check-rate-limit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get rate limit
+        id: limit
+        run: |
+          limit="$( gh api -X GET /rate_limit | jq -c )"
+          echo "limit=${limit}" >> "${GITHUB_OUTPUT}"
+          echo remaining=$( echo ${limit} | jq '.["rate"].remaining' ) >> "${GITHUB_OUTPUT}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Debug limit
+        run: |
+          echo ${{ steps.limit.outputs.limit }}
+      - name: Debug remaining
+        run: |
+          echo ${{ steps.limit.outputs.remaining }}
+      - name: Check if under limit
+        run: |
+          if [ "${{ steps.limit.outputs.remaining }}" -gt "100" ];
+            then echo "Remaining limit OK";
+          else
+            echo "Remaining limit too low";
+            false
+          fi
+
   #=====================
   # Coreboot toolchains
   #=====================
@@ -75,6 +101,7 @@ jobs:
     timeout-minutes: 80
     needs:
       - get-matrix-coreboot
+      - check-rate-limit
     strategy:
       fail-fast: false
       matrix:
