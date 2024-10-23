@@ -247,11 +247,12 @@ jobs:
 
       # Upload toolchains and utils as artifacts
       - name: Tar toolchain to prevent permission loss
-        if: steps.artifacts-toolchains.outputs.found_artifact != 'true'
         # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
         run: |
-          mv coreboot/util/crossgcc/xgcc coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
-          tar -cvf ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+          if [ ! -f "coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar" ]; then
+            mv coreboot/util/crossgcc/xgcc coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+            tar -cvf ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
+          fi
       - name: Upload toolchain
         uses: actions/upload-artifact@v4.4.3
         if: steps.artifacts-toolchains.outputs.found_artifact != 'true'
@@ -264,7 +265,7 @@ jobs:
           compression-level: 9
       - name: Upload utils
         uses: actions/upload-artifact@v4.4.3
-        if: steps.artifacts-toolchains.outputs.found_artifact != 'true'
+        if: steps.artifacts-utils.outputs.found_artifact != 'true'
         with:
           name: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
           path: /usr/local/bin
