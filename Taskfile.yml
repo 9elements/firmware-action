@@ -3,6 +3,12 @@ version: '3'
 vars:
   SEMVER: 'v0.6.1'
 
+includes:
+  containers:
+    taskfile: ./.dagger-ci/Taskfile.yml
+    dir: ./.dagger-ci
+    optional: true
+
 tasks:
   build-go-binary:
     desc: Template task to build a go binary
