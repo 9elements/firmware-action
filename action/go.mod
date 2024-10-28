@@ -1,6 +1,9 @@
 module github.com/9elements/firmware-action/action
 
-go 1.22
+go 1.22.5
+
+toolchain go1.23.2
+
 require (
 	dagger.io/dagger v0.13.6
 	github.com/Masterminds/semver v1.5.0
