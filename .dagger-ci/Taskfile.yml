@@ -2,6 +2,7 @@
 version: '3'
 vars:
   PROJECT: 'daggerci'
+  PYTHON_VENV: 'venvdagger'
 
 tasks:
   lint-pylint:
@@ -27,3 +28,27 @@ tasks:
     dir: daggerci
     cmds:
       - python -m pytest --cov --cov-report=term-missing --cov-report=html --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --runslow {{.CLI_ARGS}}
+
+  setup-python-venv:
+    desc: Setup python virtual environment
+    internal: true
+    cmds:
+      - python -m venv {{.PYTHON_VENV}}
+      - bash -c "
+        source {{.PYTHON_VENV}}/bin/activate;
+        pip install -r ./daggerci/requirements.txt;
+        "
+    sources:
+      - ./daggerci/requirements.txt
+    generates:
+      - ./{{.PYTHON_VENV}}/pyvenv.cfg
+
+  test-venv:
+    desc: Run tests in virtual environment
+    deps: [setup-python-venv]
+    cmds:
+      - bash -c "
+        source {{.PYTHON_VENV}}/bin/activate;
+        cd daggerci;
+        python -m pytest --cov --cov-report=term-missing --cov-report=html --log-cli-level NOTSET --show-capture no --log-cli-level=INFO --runslow {{.CLI_ARGS}};
+        "
