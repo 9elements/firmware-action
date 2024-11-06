@@ -206,6 +206,7 @@ jobs:
           compile: ${{ needs.changes.outputs.action }}
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
+          SYSTEM_ARCH: ${{ matrix.arch }}
 
       - name: Get artifacts
         uses: actions/upload-artifact@v4
