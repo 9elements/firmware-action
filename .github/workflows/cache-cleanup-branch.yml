@@ -15,7 +15,8 @@ jobs:
   cache-cleanup-branch:
     runs-on: ubuntu-latest
     steps:
-      - uses: opengrabeso/clean-cache@v1
+      - name: Clean cache for each branch
+        uses: opengrabeso/clean-cache@v1
         with:
           post: true
           keep: 1
