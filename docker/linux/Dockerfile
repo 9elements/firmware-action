@@ -56,6 +56,10 @@ RUN apt-get update && \
         apt-get install -y --no-install-recommends \
             gcc-${GCC_VERSION}-aarch64-linux-gnu; \
     fi && \
+    if [ "${TARGETARCH}" = 'arm64' ]; then \
+        apt-get install -y --no-install-recommends \
+            gcc-${GCC_VERSION}-x86-64-linux-gnu; \
+    fi && \
     apt-get install -y --no-install-recommends \
         less \
         nano \
