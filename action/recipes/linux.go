@@ -44,8 +44,8 @@ type LinuxOpts struct {
 
 	// Specifies target architecture, such as 'x86' or 'arm64'.
 	// Supported options:
-	//   - 'x86'
-	//   - 'x86_64'
+	//   - 'i386'
+	//   - 'amd64'
 	//   - 'arm'
 	//   - 'arm64'
 	Arch string `json:"arch"`
@@ -134,26 +134,29 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	// Setup environment variables in the container
 	//   Handle cross-compilation: Map architecture to cross-compiler
 	crossCompile := map[string]string{
-		"x86":    "i686-linux-gnu-",
-		"x86_64": "",
-		"arm":    "arm-linux-gnueabi-",
-		"arm64":  "aarch64-linux-gnu-",
+		"i386":  "i686-linux-gnu-",
+		"amd64": "x86-64-linux-gnu-",
+		"arm":   "arm-linux-gnueabi-",
+		"arm64": "aarch64-linux-gnu-",
 	}
 	envVars := map[string]string{
-		"ARCH": opts.Arch,
+		"ARCH": NormalizeArchitectureForLinux(opts.Arch),
 	}
 
-	val, ok := crossCompile[opts.Arch]
-	if !ok {
-		err = errUnknownArchCrossCompile
-		slog.Error(
-			"Selected unknown cross compilation target architecture",
-			slog.Any("error", err),
-		)
-		return nil, err
-	}
-	if val != "" {
-		envVars["CROSS_COMPILE"] = val
+	// Check if cross-compilation is needed
+	if NormalizeArchitecture(runtime.GOARCH) != NormalizeArchitecture(opts.Arch) {
+		val, ok := crossCompile[opts.Arch]
+		if !ok {
+			err = errUnknownArchCrossCompile
+			slog.Error(
+				"Selected unknown cross compilation target architecture",
+				slog.Any("error", err),
+			)
+			return nil, err
+		}
+		if val != "" {
+			envVars["CROSS_COMPILE"] = val
+		}
 	}
 
 	for key, value := range envVars {
