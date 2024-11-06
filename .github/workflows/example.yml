@@ -89,13 +89,15 @@ jobs:
   # Example of building coreboot
   # ANCHOR: example_build_coreboot
   build-coreboot:
-    runs-on: ubuntu-latest
     needs:
       - changes
       - skip-check
     strategy:
+      fail-fast: false
       matrix:
         coreboot-version: ['4.19', '4.20.1', '4.21', '24.02']
+        arch: ['amd64', 'arm64']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -147,13 +149,15 @@ jobs:
   # Example of building Linux kernel
   # ANCHOR: example_build_linux_kernel
   build-linux:
-    runs-on: ubuntu-latest
     needs:
       - changes
       - skip-check
     strategy:
+      fail-fast: false
       matrix:
         linux-version: ['6.1.45', '6.1.111', '6.6.52', '6.9.9', '6.11']
+        arch: ['amd64', 'arm64']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -219,8 +223,10 @@ jobs:
       - changes
       - skip-check
     strategy:
+      fail-fast: false
       matrix:
         edk2-version: ['edk2-stable202208', 'edk2-stable202211']
+    # TODO
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -289,13 +295,15 @@ jobs:
   # Example of building Firmware Stitching
   # ANCHOR: example_build_stitch
   build-stitching:
-    runs-on: ubuntu-latest
     needs:
       - changes
       - skip-check
     strategy:
+      fail-fast: false
       matrix:
         coreboot-version: ['4.19']
+        arch: ['amd64', 'arm64']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -343,13 +351,15 @@ jobs:
   # Example of building u-root
   # ANCHOR: example_build_uroot
   build-uroot:
-    runs-on: ubuntu-latest
     needs:
       - changes
       - skip-check
     strategy:
+      fail-fast: false
       matrix:
         uroot-version: ['0.14.0']
+        arch: ['amd64', 'arm64']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -397,6 +407,7 @@ jobs:
   # Example of running on non-Linux systems
   test-operating-systems:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         uroot-version: ['0.14.0']
