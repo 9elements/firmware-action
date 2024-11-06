@@ -34,7 +34,7 @@ runs:
       shell: bash
       run: |
         if [ ${{ runner.arch }} = "X64" ]; then
-          echo "arch=x86_64" >> "${GITHUB_OUTPUT}"
+          echo "arch=amd64" >> "${GITHUB_OUTPUT}"
         elif [ ${{ runner.arch }} = "X86" ]; then
           echo "arch=i386" >> "${GITHUB_OUTPUT}"
         elif [ ${{ runner.arch }} = "ARM64" ]; then
