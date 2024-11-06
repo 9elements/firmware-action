@@ -192,3 +192,45 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 	}
 	return ErrTargetMissing
 }
+
+// NormalizeArchitecture will translate various architecture strings into expected format
+func NormalizeArchitecture(arch string) string {
+	archMap := map[string]string{
+		// x86 32-bit
+		"IA-32":  "i386", // Intel
+		"IA32":   "i386", // Intel
+		"i686":   "i386", // common on Linux
+		"386":    "i386", // GOARCH
+		"x86":    "i386", // common on Windows
+		"x86-32": "i386", // rare
+		"x86_32": "i386", // rare
+		// x86 64-bit
+		"AMD64":  "amd64",
+		"x64":    "amd64", // common on Windows
+		"x86-64": "amd64",
+		"x86_64": "amd64",
+	}
+	result, ok := archMap[arch]
+	if result != "" && ok {
+		return result
+	}
+	// fallback
+	return arch
+}
+
+// NormalizeArchitectureForLinux will translate various architecture strings into format expected by Linux
+func NormalizeArchitectureForLinux(arch string) string {
+	normalArch := NormalizeArchitecture(arch)
+	archMap := map[string]string{
+		// x86 32-bit
+		"i386": "x86",
+		// x86 64-bit
+		"amd64": "x86_64",
+	}
+	result, ok := archMap[normalArch]
+	if result != "" && ok {
+		return result
+	}
+	// fallback
+	return arch
+}

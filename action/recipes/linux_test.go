@@ -56,13 +56,13 @@ func TestLinux(t *testing.T) {
 		{
 			name:         "normal build for x86 64bit",
 			linuxVersion: "6.1.45",
-			arch:         "x86_64",
+			arch:         "amd64",
 			wantErr:      nil,
 		},
 		{
 			name:         "normal build for x86 32bit",
 			linuxVersion: "6.1.45",
-			arch:         "x86",
+			arch:         "i386",
 			wantErr:      nil,
 		},
 		{
