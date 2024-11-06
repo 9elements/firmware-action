@@ -72,7 +72,7 @@
     "linux-example": {
       "depends": null,
       "sdk_url": "ghcr.io/9elements/firmware-action/linux_${LINUX_VERSION}:main",
-      "arch": "amd64",
+      "arch": "${SYSTEM_ARCH}",
       "repo_path": "linux-${LINUX_VERSION}/",
       "defconfig_path": "ci_defconfig",
       "output_dir": "output-linux/",
