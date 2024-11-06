@@ -140,7 +140,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coreboot-${{ matrix.coreboot-version }}
-          path: output
+          path: output-coreboot
           retention-days: 14
   # ANCHOR_END: example_build_coreboot
 
@@ -207,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.linux-version }}
-          path: output
+          path: output-linux
           retention-days: 14
   # ANCHOR_END: example_build_linux_kernel
 
@@ -282,7 +282,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.edk2-version }}
-          path: output
+          path: output-edk2
           retention-days: 14
   # ANCHOR_END: example_build_edk2
 
@@ -336,7 +336,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.coreboot-version }}
-          path: output
+          path: output-stitch
           retention-days: 14
   # ANCHOR_END: example_build_stitch
 
@@ -390,7 +390,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.uroot-version }}
-          path: output
+          path: output-uroot
           retention-days: 14
   # ANCHOR_END: example_build_uroot
 
