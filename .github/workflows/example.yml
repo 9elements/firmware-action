@@ -101,6 +101,10 @@ jobs:
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -161,6 +165,10 @@ jobs:
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -231,6 +239,10 @@ jobs:
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -308,6 +320,10 @@ jobs:
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -364,6 +380,10 @@ jobs:
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
       - name: Checkout
         uses: actions/checkout@v4
         with:
