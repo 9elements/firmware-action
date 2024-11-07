@@ -132,12 +132,12 @@ services:
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
-  edk2-stable202408:
+  edk2-stable202408.01:
     build:
       context: edk2
       args:
-        - EDK2_VERSION=edk2-stable202408
-        - EDK2_VERSION_COMMIT=b158dad150bf02879668f72ce306445250838201
+        - EDK2_VERSION=edk2-stable202408.01
+        - EDK2_VERSION_COMMIT=4dfdca63a93497203f197ec98ba20e2327e4afe4
         - SOURCE_IMAGE=buildpack-deps:noble
         - EDK2_PLATFORM_COMMIT=8676e88233d41323ed3b3a9087288e83cc87ebf7
         - EDK2_NON_OSI_COMMIT=4e36179c55f49a73fe4805baa2b5f9fdd0a07a67
