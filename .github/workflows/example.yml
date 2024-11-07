@@ -206,7 +206,7 @@ jobs:
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.linux-version }}
+          name: linux-${{ matrix.linux-version }}
           path: output-linux
           retention-days: 14
   # ANCHOR_END: example_build_linux_kernel
@@ -335,7 +335,7 @@ jobs:
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.coreboot-version }}
+          name: stitch-${{ matrix.coreboot-version }}
           path: output-stitch
           retention-days: 14
   # ANCHOR_END: example_build_stitch
@@ -389,7 +389,7 @@ jobs:
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.uroot-version }}
+          name: uroot-${{ matrix.uroot-version }}
           path: output-uroot
           retention-days: 14
   # ANCHOR_END: example_build_uroot
