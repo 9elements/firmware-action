@@ -1,0 +1,40 @@
+---
+# Auto-merging
+name: 'auto-merge'
+
+on:
+  - pull_request
+
+permissions: read-all
+
+jobs:
+  # Enable auto-merge on all pull requests by default
+  enable-auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable pull request auto-merge
+        run: |
+          gh pr merge --auto "${{ github.event.pull_request.number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # If PR is made by dependabot, automatically approve the PR
+  # Linting and all checks will still have to pass in order for the PR to be merged
+  auto-approve-dependabot:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Auto approve dependabot pull requests
+        if: github.actor == 'dependabot[bot]'
+        run: |
+          gh pr review "${{ github.event.pull_request.number }}" --approve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
