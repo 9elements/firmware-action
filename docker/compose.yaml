@@ -26,12 +26,6 @@ services:
       args:
         - COREBOOT_VERSION=4.22.01
         - SOURCE_IMAGE=ubuntu:jammy
-  coreboot_24.02:
-    build:
-      context: coreboot
-      args:
-        - COREBOOT_VERSION=24.02
-        - SOURCE_IMAGE=ubuntu:jammy
   coreboot_24.02.01:
     build:
       context: coreboot
