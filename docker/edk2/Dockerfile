@@ -147,7 +147,11 @@ RUN mkdir Edk2 && \
     git remote add origin https://github.com/tianocore/edk2.git && \
     git fetch --depth 1 origin "${EDK2_VERSION_COMMIT}" && \
     git checkout "${EDK2_VERSION_COMMIT}" && \
-    git submodule update --init --recursive --depth 1 && \
+    if [ "${EDK2_VERSION}" = 'edk2-stable202008' ]; then \
+        git submodule update --init --recursive; \
+    else \
+        git submodule update --init --recursive --depth 1; \
+    fi && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
         make -C BaseTools/ -j "$(nproc)"; \
     fi;
