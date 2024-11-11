@@ -5,7 +5,7 @@ go 1.22.5
 toolchain go1.23.2
 
 require (
-	dagger.io/dagger v0.13.7
+	dagger.io/dagger v0.14.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.4.0
 	github.com/dustin/go-humanize v1.0.1
