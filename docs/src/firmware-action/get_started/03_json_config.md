@@ -9,11 +9,11 @@ This configuration file is for firmware-action, so that it knows what to do and 
 ~~~
 
 ```admonish info
-Field `repo_path` is pointing to the location of our coreboot submodule.
+Field `repo_path` is pointing to the location of our coreboot submodule which we added in previous step [Repository](01_repo.md).
 ```
 
 ```admonish info
-Field `defconfig_path` is pointing to the location of coreboot's configuration file.
+Field `defconfig_path` is pointing to the location of coreboot's configuration file which we created in previous step [coreboot configuration](02_coreboot_config.md).
 ```
 
 ```admonish info

@@ -6,9 +6,22 @@
 
 `firmware-action` will firstly download `registry.dagger.io/engine` container needed for dagger and start it.
 
-Then it will proceed to download `coreboot` container (specified by `sdk_url` in JSON config), copy into it specified files and then start compilation.
+Then it will proceed to download `coreboot` container {{footnote: The used container is specified by `sdk_url` in the firmware-action configuration file.}}, copy into it specified files and then start compilation.
 
-If compilation is successful, a new directory `output-coreboot/` will be created (as specified by `output_dir` in JSON config) which will contain files (specified by `container_output_files` in JSON config) and possibly also directories (specified by `container_output_dirs` in JSON config).
+If compilation is successful, a new directory `output-coreboot/` will be created {{footnote: Output directory is specified by `output_dir` in firmware-action configuration file.}} which will contain files {{footnote: Output files are specified by `container_output_files` in firmware-action configuration file.}} and possibly also directories {{footnote: Directories to output are specified by `container_output_dirs` in firmware-action configuration file.}}.
+
+Your working directory should look something like this:
+```
+.
+|-- coreboot/
+|   `-- ...
+|-- firmware-action.json
+|-- output-coreboot/
+|   |-- coreboot.rom
+|   `-- defconfig
+`-- seabios_defconfig
+```
+
 
 ```admonish info
 `container_output_dirs` and `container_output_files` are lists of directories and files to be extracted from the container once compilation finished successfully.

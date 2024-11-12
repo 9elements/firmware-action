@@ -1,28 +1,24 @@
 # Interactive mode
 
-```admonish debugging
-Dagger [since v0.12](https://dagger.io/blog/dagger-0-12) supports new built-in interactive debugging. We are already planning to re-write `firmware-action` to use this new feature instead of the `ssh` solution we are currently using. For more details see issue [269](https://github.com/9elements/firmware-action/issues/269).
-```
-
 ```admonish note title="A little bit of backstory"
 While I was playing around with firmware-action I found early on that debugging what is going on inside the docker container is rather lengthy and annoying process. This was the moment when the idea of some interactive option was born.
 ```
 
-```admonish bug title="Issue [#109](https://github.com/9elements/firmware-action/issues/109)"
-```
+```admonish bug title="Issue [#269](https://github.com/9elements/firmware-action/issues/269)"
+Dagger [since v0.12](https://dagger.io/blog/dagger-0-12) supports new built-in interactive debugging.
 
-```admonish done title="Pull request [#147](https://github.com/9elements/firmware-action/pull/147)"
+We are already planning to re-write `firmware-action` to use this new feature instead of the `ssh` solution we are currently using. For more details see issue [269](https://github.com/9elements/firmware-action/issues/269).
 ```
 
 On build failure open `ssh` server in the container and let user connect into it to debug the problem. To enable this feature user has to pass argument `--interactive`. User can ssh into the container with a randomly generated password.
 
-The container will keep running until user presses `ENTER` key.
+The container will keep running until user presses `ENTER` key in the terminal with firmware-action running.
 
 
 ```admonish attention
 The container is launched in the interactive mode before the failed command was started.
 
-This reverting is out of technical necessity.
+This reverting behavior is out of technical necessity.
 ```
 
 ```admonish note
