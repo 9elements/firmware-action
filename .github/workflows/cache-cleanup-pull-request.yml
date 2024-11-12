@@ -30,5 +30,6 @@ jobs:
     steps:
       - name: Clean cache for the closed/merged PR
         uses: opengrabeso/clean-cache@v1
+        continue-on-error: true
         with:
           keep: 1
