@@ -15,4 +15,5 @@ The code from this example is available in [firmware-action-example](https://git
 
 - installed [Docker](https://wiki.archlinux.org/title/Docker)
 - installed git
+- installed [taskfile](https://taskfile.dev/) (optional)
 
