@@ -371,7 +371,7 @@ class Orchestrator:
             try:
                 logging.info("** building platform: %s", p)
                 container = await context_dir.docker_build(  # type: ignore [no-any-return]
-                    platform=dagger.Platform("linux/"+p),
+                    platform=dagger.Platform("linux/" + p),
                     build_args=dockerfile_args + [dagger.BuildArg("TARGETARCH", p)],
                 )
                 platform_variants[p] = container
