@@ -73,19 +73,35 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      action: ${{ steps.filter.outputs.action }}
+      compile: ${{ steps.compile.outputs.compile }}
     if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dorny/paths-filter@v3
+      - name: Get latest release
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: ${{ github.ref }}
+      - name: Filter
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             action:
               - 'action/**'
+      - name: Compile
+        id: compile
+        # Require compilation if changes in action code or if breaking changes since last release
+        run: |
+          if [ "${{ steps.semver.outputs.bump }}" == "major" ] || [ "${{ steps.filter.outputs.action }}" == "true" ]; then
+            echo "compile=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "compile=false" >> "${GITHUB_OUTPUT}"
+          fi
 
   # Example of building coreboot
   # ANCHOR: example_build_coreboot
@@ -139,7 +155,7 @@ jobs:
           config: 'tests/example_config__coreboot.json'
           target: 'coreboot-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
 
@@ -212,7 +228,7 @@ jobs:
           config: 'tests/example_config__linux.json'
           target: 'linux-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
           SYSTEM_ARCH: ${{ matrix.arch }}
@@ -293,7 +309,7 @@ jobs:
           config: 'tests/example_config__edk2.json'
           target: 'edk2-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
           GCC_TOOLCHAIN_VERSION: ${{ steps.gcc_toolchain.outputs.gcc_toolchain_version }}
@@ -354,7 +370,7 @@ jobs:
           config: 'tests/example_config__firmware_stitching.json'
           target: 'stitching-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
 
@@ -414,7 +430,7 @@ jobs:
           config: 'tests/example_config__uroot.json'
           target: 'u-root-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
 
@@ -478,6 +494,6 @@ jobs:
           config: 'tests/example_config.json'
           target: 'u-root-example'
           recursive: 'false'
-          compile: ${{ needs.changes.outputs.action }}
+          compile: ${{ needs.changes.outputs.compile }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
