@@ -136,7 +136,7 @@ services:
         - EDK2_PLATFORM_COMMIT=8676e88233d41323ed3b3a9087288e83cc87ebf7
         - EDK2_NON_OSI_COMMIT=4e36179c55f49a73fe4805baa2b5f9fdd0a07a67
         - INTERMEDIATE_IMAGE=universalpayload
-        - GCC_VERSION=9
+        - GCC_VERSION=13
         - PYTHON_PACKAGES=python-is-python3 python3
   #==================
   # linux
