@@ -63,6 +63,7 @@ jobs:
               - '.github/workflows/example.yml'
               - 'docker/**'
               - 'tests/**'
+              - 'action.yml'
 
   # Change detection in action golang code
   changes:
