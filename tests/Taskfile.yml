@@ -1,0 +1,58 @@
+---
+version: '3'
+vars:
+  WORKDIR: '.example_runs'
+
+tasks:
+  #=======
+  # LINUX
+  #=======
+  linux-fetch:
+    desc: Fetch Linux source code
+    internal: true
+    dir: '{{.WORKDIR}}'
+    vars:
+      LINUX_MAJOR_VERSION:
+        sh: echo '{{.LINUX_VERSION}}' | sed -E 's/\..*//g'
+    cmds:
+      # Download source files
+      - wget --quiet --continue "https://cdn.kernel.org/pub/linux/kernel/v{{.LINUX_MAJOR_VERSION}}.x/linux-{{.LINUX_VERSION}}.tar.xz"
+      - wget --quiet --continue "https://cdn.kernel.org/pub/linux/kernel/v{{.LINUX_MAJOR_VERSION}}.x/linux-{{.LINUX_VERSION}}.tar.sign"
+      - unxz --keep "linux-{{.LINUX_VERSION}}.tar.xz" >/dev/null
+      # Verify GPG signature
+      - gpg2 --locate-keys torvalds@kernel.org gregkh@kernel.org
+      - gpg2 --verify "linux-{{.LINUX_VERSION}}.tar.sign"
+      # Extract
+      - tar -xvf "linux-{{.LINUX_VERSION}}.tar"
+    requires:
+      vars: [LINUX_VERSION]
+    status:
+      - test -d 'linux-{{.LINUX_VERSION}}'
+
+  linux-run:
+    desc: Run firmware-action
+    dir: '{{.WORKDIR}}'
+    internal: true
+    cmds:
+      - cp -f "../tests/linux_{{.LINUX_VERSION}}/linux.defconfig" "ci_defconfig"
+      - ../bin/firmware-action-linux-amd64-{{.SEMVER}} build --config="../tests/example_config__linux.json" --target=linux-example
+    env:
+      LINUX_VERSION: '{{.LINUX_VERSION}}'
+      SYSTEM_ARCH: 'amd64'
+    requires:
+      vars: [LINUX_VERSION]
+
+  linux-*:
+    desc: Run example
+    deps:
+      - task: :build-go-binary
+    vars:
+      VARIANT: '{{index .MATCH 0}}'
+    cmds:
+      - mkdir -p '{{.WORKDIR}}'
+      - task: linux-fetch
+        vars:
+          LINUX_VERSION: '{{.VARIANT}}'
+      - task: linux-run
+        vars:
+          LINUX_VERSION: '{{.VARIANT}}'

@@ -8,6 +8,11 @@ includes:
     taskfile: ./.dagger-ci/Taskfile.yml
     dir: ./.dagger-ci
     optional: true
+  examples:
+    taskfile: ./tests/Taskfile.yml
+    optional: true
+    vars:
+      SEMVER: '{{.SEMVER}}'
 
 tasks:
   build-go-binary:
