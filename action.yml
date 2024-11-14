@@ -31,10 +31,14 @@ runs:
       run: echo "version=v0.6.1" >> "${GITHUB_OUTPUT}"
 
     - id: arch
+      # This ARCH is used to fetch correct executable of firmware-action
+      # GoReleaser uses 'x86_64' instead of 'amd64'
       shell: bash
       run: |
         if [ ${{ runner.arch }} = "X64" ]; then
-          echo "arch=amd64" >> "${GITHUB_OUTPUT}"
+          echo "arch=x86_64" >> "${GITHUB_OUTPUT}"
+        if [ ${{ runner.arch }} = "amd64" ]; then
+          echo "arch=x86_64" >> "${GITHUB_OUTPUT}"
         elif [ ${{ runner.arch }} = "X86" ]; then
           echo "arch=i386" >> "${GITHUB_OUTPUT}"
         elif [ ${{ runner.arch }} = "ARM64" ]; then
