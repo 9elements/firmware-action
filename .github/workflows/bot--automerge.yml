@@ -3,7 +3,8 @@
 name: 'auto-merge'
 
 on:
-  - pull_request
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions: read-all
 
@@ -14,6 +15,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
