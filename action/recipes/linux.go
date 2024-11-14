@@ -150,6 +150,8 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 			err = errUnknownArchCrossCompile
 			slog.Error(
 				"Selected unknown cross compilation target architecture",
+				slog.String("system_architecture", runtime.GOARCH),
+				slog.String("target_architecture", opts.Arch),
 				slog.Any("error", err),
 			)
 			return nil, err
