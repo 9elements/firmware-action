@@ -342,56 +342,32 @@ jobs:
           COREBOOT_HASH="$( git rev-parse --short HEAD )"
           echo "${COREBOOT_HASH}"
           echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
-      - name: Artefact and cache key
-        id: cache-key
-        if: startsWith(matrix.dockerfile, 'coreboot')
-        run: |
-          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}"
-          echo "CACHE_KEY=${CACHE_KEY}"
-          echo "CACHE_KEY=${CACHE_KEY}" >> "${GITHUB_OUTPUT}"
 
       #=================================
       # Download artifacts for coreboot
       #=================================
 
-      - name: Download coreboot toolchains from current run (if possible)
-        id: artifacts-toolchains-current
+      - name: Download coreboot toolchains from firmware-action-toolchains repository
+        id: firmware-action-toolchains
         if: startsWith(matrix.dockerfile, 'coreboot')
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
-          name_is_regexp: true
-          if_no_artifact_found: warn
-          run_id: ${{ github.event.workflow_run.id }}
-        # It is possible that current run did not produce any artifacts (to save bandwidth on self-hosted runners)
-        # In which case we have to look for artifacts in older runs
-      - name: Download coreboot toolchains from older run
-        if: startsWith(matrix.dockerfile, 'coreboot') && steps.artifacts-toolchains-current.outputs.found_artifact != 'true'
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-.*
-          name_is_regexp: true
-          search_artifacts: true
+        run: |
+          for arch in "amd64" "arm64"; do
+            wget --continue --no-verbose --tries=3 "https://github.com/9elements/firmware-action-toolchains/raw/refs/heads/main/coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${arch}-xgcc.tar"
+            wget --continue --no-verbose --tries=3 "https://github.com/9elements/firmware-action-toolchains/raw/refs/heads/main/coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${arch}-xgcc.tar.sha256"
+            sha256sum -c "${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${arch}-xgcc.tar.sha256";
+          done
 
       - name: Prepare toolchains
         if: startsWith(matrix.dockerfile, 'coreboot')
         run: |
           mkdir -p docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
-          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-xgcc/*.tar; do
-            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
+          for f in ${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-*-xgcc.tar; do
+            ARCH=$( basename "${f}" | sed -E 's/[a-z0-9]{8}-([a-z0-9_-]*)-xgcc.*/\1/g' )
             echo "extracting ${f} -> ${{ steps.version.outputs.COREBOOT_VERSION }} / ${ARCH}"
             mkdir -p "${f}.dir/"
             tar -xf "${f}" -C "${f}.dir/"
             mv "${f}.dir/coreboot/util/crossgcc/${ARCH}-xgcc" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-${ARCH}"
-          done
-      - name: Prepare utils
-        if: startsWith(matrix.dockerfile, 'coreboot')
-        run: |
-          for f in ${{ steps.cache-key.outputs.CACHE_KEY }}-*-utils; do
-            ARCH=$( basename "${f}" | sed -E 's/coreboot\-[0-9\.]+\-[a-z0-9]+\-([a-z0-9]+)\-.*/\1/g' )
-            echo "${f} -> ${{ steps.version.outputs.COREBOOT_VERSION }} / ${ARCH}"
-            chmod +rx "${f}"/*
-            mv "${f}" "docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-${ARCH}"
+            rm -rf "${f}"
           done
 
       - name: Debug list artifacts
@@ -406,10 +382,6 @@ jobs:
         if: startsWith(matrix.dockerfile, 'coreboot')
         run: |
           ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/xgcc-*/bin
-      - name: Debug list utils (amd64)
-        if: startsWith(matrix.dockerfile, 'coreboot')
-        run: |
-          ls -a1lh docker/coreboot/coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}/utils-*
 
       #============================
       # Build the docker container
