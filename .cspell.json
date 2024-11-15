@@ -51,6 +51,7 @@
     "acpica",
     "addinivalue",
     "addoption",
+    "automerge",
     "autopep",
     "blkio",
     "bsdmainutils",
