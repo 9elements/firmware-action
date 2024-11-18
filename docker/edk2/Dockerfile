@@ -146,7 +146,16 @@ RUN mkdir Edk2 && \
     git init && \
     git remote add origin https://github.com/tianocore/edk2.git && \
     git fetch --depth 1 origin "${EDK2_VERSION_COMMIT}" && \
-    git checkout "${EDK2_VERSION_COMMIT}" && \
+    git checkout "${EDK2_VERSION_COMMIT}"
+
+# Back-porting patch 4dfdca63a9 which fixed submodules
+COPY patches $TOOLSDIR/Edk2/.firmware-action-patches
+ENV PATCH_FILE=.firmware-action-patches/${EDK2_VERSION}-zeex-subhook.patch
+ENV CACHEBUSTER=18:24
+RUN cd Edk2 && \
+    if [ -f "${PATCH_FILE}" ]; then \
+        git apply "${PATCH_FILE}"; \
+    fi && \
     if [ "${EDK2_VERSION}" = 'edk2-stable202008' ]; then \
         git submodule update --init --recursive; \
     else \
@@ -155,6 +164,10 @@ RUN mkdir Edk2 && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
         make -C BaseTools/ -j "$(nproc)"; \
     fi;
+
+# For some reason edk2-stable202008 fails to clone all of the git submodules when shallow recursive init is used
+# So to fix this we need to add IF ELSE statement to not use shallow clone on git submodules for edk2-stable202008
+# Shame on you ekd2, shame on you
 
 
 #=============
