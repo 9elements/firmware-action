@@ -39,8 +39,18 @@ fi
 # Try to build edk2
 #==========================
 
-git clone --recurse-submodules --branch "${VERIFICATION_TEST_EDK2_VERSION}" --depth 1 https://github.com/tianocore/edk2.git Edk2
+git clone --branch "${VERIFICATION_TEST_EDK2_VERSION}" --depth 1 https://github.com/tianocore/edk2.git Edk2
 cd Edk2
+PATCH_FILE=../tests/edk2-patches/${VERIFICATION_TEST_EDK2_VERSION}-zeex-subhook.patch
+if [ -f "${PATCH_FILE}" ]; then
+	git apply "${PATCH_FILE}"
+fi
+if [ "${VERIFICATION_TEST_EDK2_VERSION}" = 'edk2-stable202008' ]; then
+	git submodule update --init --recursive
+else
+	git submodule update --init --recursive --depth 1
+fi
+
 # shellcheck disable=SC1091 # file does not exist before the test
 source ./edksetup.sh
 

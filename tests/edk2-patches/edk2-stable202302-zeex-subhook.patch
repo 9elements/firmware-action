@@ -1,0 +1,64 @@
+From 172e9c284c05b7af34075b690b46b2ff87dd59c9 Mon Sep 17 00:00:00 2001
+From: Michael D Kinney <michael.d.kinney@intel.com>
+Date: Mon, 4 Nov 2024 10:02:59 -0800
+Subject: [PATCH] UnitTestFrameworkPkg: Use TianoCore mirror of subhook
+ submodule
+
+Change subhook url from https://github.com/Zeex/subhook to
+https://github.com/tianocore/edk2-subhook because old url is
+no longer available.
+
+Also align .gitmodules file to use consistent LF line endings.
+
+Signed-off-by: Michael D Kinney <michael.d.kinney@intel.com>
+---
+ .gitmodules | 17 ++++++++++++++++-
+ ReadMe.rst  |  1 +
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/.gitmodules b/.gitmodules
+index 8011a88d9d..6d29190a14 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -16,10 +16,25 @@
+ [submodule "BaseTools/Source/C/BrotliCompress/brotli"]
+ 	path = BaseTools/Source/C/BrotliCompress/brotli
+ 	url = https://github.com/google/brotli
+-	ignore = untracked
++	ignore = untracked
+ [submodule "RedfishPkg/Library/JsonLib/jansson"]
+ 	path = RedfishPkg/Library/JsonLib/jansson
+ 	url = https://github.com/akheron/jansson
+ [submodule "UnitTestFrameworkPkg/Library/GoogleTestLib/googletest"]
+ 	path = UnitTestFrameworkPkg/Library/GoogleTestLib/googletest
+ 	url = https://github.com/google/googletest.git
++[submodule "UnitTestFrameworkPkg/Library/SubhookLib/subhook"]
++	path = UnitTestFrameworkPkg/Library/SubhookLib/subhook
++	url = https://github.com/tianocore/edk2-subhook.git
++[submodule "MdePkg/Library/BaseFdtLib/libfdt"]
++	path = MdePkg/Library/BaseFdtLib/libfdt
++	url = https://github.com/devicetree-org/pylibfdt.git
++[submodule "MdePkg/Library/MipiSysTLib/mipisyst"]
++	path = MdePkg/Library/MipiSysTLib/mipisyst
++	url = https://github.com/MIPI-Alliance/public-mipi-sys-t.git
++[submodule "CryptoPkg/Library/MbedTlsLib/mbedtls"]
++	path = CryptoPkg/Library/MbedTlsLib/mbedtls
++	url = https://github.com/ARMmbed/mbedtls
++[submodule "SecurityPkg/DeviceSecurity/SpdmLib/libspdm"]
++	path = SecurityPkg/DeviceSecurity/SpdmLib/libspdm
++	url = https://github.com/DMTF/libspdm.git
+diff --git a/ReadMe.rst b/ReadMe.rst
+index 497d963559..31dc684c72 100644
+--- a/ReadMe.rst
++++ b/ReadMe.rst
+@@ -94,6 +94,7 @@ that are covered by additional licenses.
+ -  `MdeModulePkg/Universal/RegularExpressionDxe/oniguruma <https://github.com/kkos/oniguruma/blob/abfc8ff81df4067f309032467785e06975678f0d/COPYING>`__
+ -  `UnitTestFrameworkPkg/Library/CmockaLib/cmocka <https://github.com/tianocore/edk2-cmocka/blob/f5e2cd77c88d9f792562888d2b70c5a396bfbf7a/COPYING>`__
+ -  `UnitTestFrameworkPkg/Library/GoogleTestLib/googletest <https://github.com/google/googletest/blob/86add13493e5c881d7e4ba77fb91c1f57752b3a4/LICENSE>`__
++-  `UnitTestFrameworkPkg/Library/SubhookLib/subhook <https://github.com/tianocore/edk2-subhook/blob/83d4e1ebef3588fae48b69a7352cc21801cb70bc/LICENSE.txt>`__
+ -  `RedfishPkg/Library/JsonLib/jansson <https://github.com/akheron/jansson/blob/2882ead5bb90cf12a01b07b2c2361e24960fae02/LICENSE>`__
+ 
+ The EDK II Project is composed of packages. The maintainers for each package
+-- 
+2.47.0
+

@@ -1,0 +1,84 @@
+From 19bdaf01335b8e68fdf162e4dd217a6ce4edced1 Mon Sep 17 00:00:00 2001
+From: Michael D Kinney <michael.d.kinney@intel.com>
+Date: Mon, 4 Nov 2024 10:02:59 -0800
+Subject: [PATCH] UnitTestFrameworkPkg: Use TianoCore mirror of subhook
+ submodule
+
+Change subhook url from https://github.com/Zeex/subhook to
+https://github.com/tianocore/edk2-subhook because old url is
+no longer available.
+
+Also align .gitmodules file to use consistent LF line endings.
+
+Signed-off-by: Michael D Kinney <michael.d.kinney@intel.com>
+---
+ .gitmodules                    | 13 ++++++++-----
+ ReadMe.rst                     |  2 +-
+ UnitTestFrameworkPkg/ReadMe.md |  4 ++--
+ 3 files changed, 11 insertions(+), 8 deletions(-)
+
+diff --git a/.gitmodules b/.gitmodules
+index 60d54b45eb..6d29190a14 100644
+--- a/.gitmodules
++++ b/.gitmodules
+@@ -16,7 +16,7 @@
+ [submodule "BaseTools/Source/C/BrotliCompress/brotli"]
+ 	path = BaseTools/Source/C/BrotliCompress/brotli
+ 	url = https://github.com/google/brotli
+-	ignore = untracked
++	ignore = untracked
+ [submodule "RedfishPkg/Library/JsonLib/jansson"]
+ 	path = RedfishPkg/Library/JsonLib/jansson
+ 	url = https://github.com/akheron/jansson
+@@ -25,13 +25,16 @@
+ 	url = https://github.com/google/googletest.git
+ [submodule "UnitTestFrameworkPkg/Library/SubhookLib/subhook"]
+ 	path = UnitTestFrameworkPkg/Library/SubhookLib/subhook
+-	url = https://github.com/Zeex/subhook.git
+-[submodule "MdePkg/Library/BaseFdtLib/libfdt"]
+-	path = MdePkg/Library/BaseFdtLib/libfdt
+-	url = https://github.com/devicetree-org/pylibfdt.git
++	url = https://github.com/tianocore/edk2-subhook.git
++[submodule "MdePkg/Library/BaseFdtLib/libfdt"]
++	path = MdePkg/Library/BaseFdtLib/libfdt
++	url = https://github.com/devicetree-org/pylibfdt.git
+ [submodule "MdePkg/Library/MipiSysTLib/mipisyst"]
+ 	path = MdePkg/Library/MipiSysTLib/mipisyst
+ 	url = https://github.com/MIPI-Alliance/public-mipi-sys-t.git
+ [submodule "CryptoPkg/Library/MbedTlsLib/mbedtls"]
+ 	path = CryptoPkg/Library/MbedTlsLib/mbedtls
+ 	url = https://github.com/ARMmbed/mbedtls
++[submodule "SecurityPkg/DeviceSecurity/SpdmLib/libspdm"]
++	path = SecurityPkg/DeviceSecurity/SpdmLib/libspdm
++	url = https://github.com/DMTF/libspdm.git
+diff --git a/ReadMe.rst b/ReadMe.rst
+index 808ccd37af..f14e271eaa 100644
+--- a/ReadMe.rst
++++ b/ReadMe.rst
+@@ -95,7 +95,7 @@ that are covered by additional licenses.
+ -  `MdeModulePkg/Universal/RegularExpressionDxe/oniguruma <https://github.com/kkos/oniguruma/blob/abfc8ff81df4067f309032467785e06975678f0d/COPYING>`__
+ -  `UnitTestFrameworkPkg/Library/CmockaLib/cmocka <https://github.com/tianocore/edk2-cmocka/blob/f5e2cd77c88d9f792562888d2b70c5a396bfbf7a/COPYING>`__
+ -  `UnitTestFrameworkPkg/Library/GoogleTestLib/googletest <https://github.com/google/googletest/blob/86add13493e5c881d7e4ba77fb91c1f57752b3a4/LICENSE>`__
+--  `UnitTestFrameworkPkg/Library/SubhookLib/subhook <https://github.com/Zeex/subhook/blob/83d4e1ebef3588fae48b69a7352cc21801cb70bc/LICENSE.txt>`__
++-  `UnitTestFrameworkPkg/Library/SubhookLib/subhook <https://github.com/tianocore/edk2-subhook/blob/83d4e1ebef3588fae48b69a7352cc21801cb70bc/LICENSE.txt>`__
+ -  `RedfishPkg/Library/JsonLib/jansson <https://github.com/akheron/jansson/blob/2882ead5bb90cf12a01b07b2c2361e24960fae02/LICENSE>`__
+ -  `MdePkg/Library/BaseFdtLib/libfdt <https://github.com/devicetree-org/pylibfdt/blob/f39368a217496d32c4091a2dba4045b60649e3a5/BSD-2-Clause>`__
+ -  `MdePkg/Library/MipiSysTLib/mipisyst <https://github.com/MIPI-Alliance/public-mipi-sys-t/blob/aae857d0d05ac65152ed24992a4acd834a0a107c/LICENSE>`__
+diff --git a/UnitTestFrameworkPkg/ReadMe.md b/UnitTestFrameworkPkg/ReadMe.md
+index d28cb5cb0a..6a67ca23a1 100644
+--- a/UnitTestFrameworkPkg/ReadMe.md
++++ b/UnitTestFrameworkPkg/ReadMe.md
+@@ -485,8 +485,8 @@ function to be compiled into the test application and then hooked to during a
+ test.
+ 
+ This library is mainly a wrapper around the
+-[subhook](https://github.com/Zeex/subhook) header and source files. It is
+-important to note that the use of the mock function macros and the creation
++[subhook](https://github.com/tianocore/edk2-subhook) header and source files. It
++is important to note that the use of the mock function macros and the creation
+ of mock functions requires no knowledge about the SubhookLib. The SubhookLib
+ library is entirely hidden and encapsulated within FunctionMockLib, and it
+ is only mentioned here to provide a complete explanation on all the libraries
+-- 
+2.47.0
+
