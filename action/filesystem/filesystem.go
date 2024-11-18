@@ -14,9 +14,12 @@ import (
 )
 
 var (
-	ErrEmptyPath       = errors.New("provided path is empty")                      // ErrEmptyPath is returned when function is called with empty path parameter
-	ErrPathIsDirectory = fmt.Errorf("provided path is directory: %w", os.ErrExist) // ErrPathIsDirectory is returned when path exists, but is a directory and not a file
-	ErrFileNotRegular  = errors.New("file is not regular file")                    // ErrFileNotRegular is returned when path exists, but is not a regular file
+	// ErrEmptyPath is returned when function is called with empty path parameter
+	ErrEmptyPath       = errors.New("provided path is empty")
+	// ErrPathIsDirectory is returned when path exists, but is a directory and not a file
+	ErrPathIsDirectory = fmt.Errorf("provided path is directory: %w", os.ErrExist)
+	// ErrFileNotRegular is returned when path exists, but is not a regular file
+	ErrFileNotRegular  = errors.New("file is not regular file")
 )
 
 // CheckFileExists checks if file exists at PATH
