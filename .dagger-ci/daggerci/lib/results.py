@@ -24,7 +24,7 @@ class Results:
         self.results: dict[str, dict[str, dict[str, str | bool | None]]] = {}
 
     def add(
-        self,  # pylint: disable=too-many-arguments
+        self,
         top_element: str,
         dockerfile: str,
         stage: str,
@@ -34,6 +34,10 @@ class Results:
         """
         Add entry into results
         """
+
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-positional-arguments
+
         # Update list of all dockerfiles
         if [top_element, dockerfile] not in self.all_dockerfiles:
             self.all_dockerfiles.append([top_element, dockerfile])
