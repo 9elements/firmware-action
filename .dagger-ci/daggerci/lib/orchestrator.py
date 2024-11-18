@@ -348,6 +348,7 @@ class Orchestrator:
         #   "AttributeError: module 'dagger' has no attribute 'api'"
 
         # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-positional-arguments
         """
         Does the actual building of docker container
         """
