@@ -224,8 +224,8 @@ func NormalizeArchitectureForLinux(arch string) string {
 	archMap := map[string]string{
 		// x86 32-bit
 		"i386": "x86",
-		// x86 64-bit
-		"amd64": "x86_64",
+		// x86 64-bit (x86_64 reuses x86)
+		"amd64": "x86",
 	}
 	result, ok := archMap[normalArch]
 	if result != "" && ok {
