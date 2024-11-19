@@ -23,17 +23,6 @@ updates:
           - 'minor'
           - 'patch'
 
-  - package-ecosystem: docker
-    directory: '/docker'
-    schedule:
-      interval: 'daily'
-      time: '00:00'
-    groups:
-      docker:
-        update-types:
-          - 'minor'
-          - 'patch'
-
   - package-ecosystem: gomod
     directory: '/action'
     schedule:
