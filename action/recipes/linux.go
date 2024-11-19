@@ -175,7 +175,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		{"ln", "--symbolic", "--relative", "arch/x86", "arch/x86_64"},
 		// the symlink simplifies this command
 		{"mkdir", "-p", fmt.Sprintf("arch/%s/configs/", NormalizeArchitectureForLinux(opts.Arch))},
-		{"cp", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", NormalizeArchitectureForLinux(opts.Arch), defconfigBasename)},
+		{"mv", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", NormalizeArchitectureForLinux(opts.Arch), defconfigBasename)},
 		// generate dotconfig from defconfig
 		{"make", defconfigBasename},
 		// compile
