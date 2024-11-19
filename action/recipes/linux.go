@@ -171,8 +171,6 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		// remove existing config if exists
 		//   -f: ignore nonexistent files
 		{"rm", "-f", ".config"},
-		// x86_64 reuses x86
-		{"ln", "--symbolic", "--relative", "arch/x86", "arch/x86_64"},
 		// the symlink simplifies this command
 		{"mkdir", "-p", fmt.Sprintf("arch/%s/configs/", NormalizeArchitectureForLinux(opts.Arch))},
 		{"mv", defconfigBasename, fmt.Sprintf("arch/%s/configs/%s", NormalizeArchitectureForLinux(opts.Arch), defconfigBasename)},
