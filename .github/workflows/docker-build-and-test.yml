@@ -97,6 +97,7 @@ jobs:
             ca-certificates \
             curl \
             git \
+            git-lfs \
             jq \
             sudo \
             tzdata \
@@ -129,37 +130,49 @@ jobs:
           COREBOOT_HASH="$( git rev-parse --short HEAD )"
           echo "${COREBOOT_HASH}"
           echo "COREBOOT_HASH=${COREBOOT_HASH}" >> "${GITHUB_OUTPUT}"
-      - name: Artefact and cache key
+
+      - name: Check if toolchain is stored in firmware-action-toolchains repo
+        continue-on-error: true
+        run: |
+          # Check if the toolchain exists without downloading it
+          wget --no-verbose --tries=3 "https://github.com/9elements/firmware-action-toolchains/raw/refs/heads/main/coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}-xgcc.tar.sha256"
+      - name: Check if toolchain exist
+        id: toolchains-exist
+        run: |
+          if [ -f "${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}-xgcc.tar.sha256" ]; then
+            echo "toolchain is stored in firmware-action-toolchains repository, skipping rest of the job"
+            echo "EXIST=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "toolchain is NOT stored in firmware-action-toolchains repository, will build it"
+            echo "EXIST=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Cache key
         id: cache-key
         run: |
-          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
+          CACHE_KEY="coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}-xgcc"
           echo "${CACHE_KEY}"
           echo "CACHE_KEY=${CACHE_KEY}" >> "${GITHUB_OUTPUT}"
+      - name: Tar filename
+        id: tar-filename
+        run: |
+          TAR_FILENAME="${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}-xgcc.tar"
+          echo "${TAR_FILENAME}"
+          echo "TAR_FILENAME=${TAR_FILENAME}" >> "${GITHUB_OUTPUT}"
 
       - name: Restore cached toolchains
         id: cache-toolchains
         uses: actions/cache/restore@v4
+        if: steps.toolchains-exist.outputs.EXIST == 'false'
         with:
-          path: coreboot/util/crossgcc/xgcc
-          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
-      - name: Restore cached utils
-        id: cache-utils
-        uses: actions/cache/restore@v4
-        with:
-          path: /usr/local/bin
-          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
-
-      - name: Debug list crossgcc
-        if: steps.cache-toolchains.outputs.cache-hit == 'true'
-        run: |
-          ls -a1lh coreboot/util/crossgcc/xgcc
-      - name: Debug list utils
-        if: steps.cache-utils.outputs.cache-hit == 'true'
-        run: |
-          ls -a1lh /usr/local/bin
+          path: |
+            ${{ steps.tar-filename.outputs.TAR_FILENAME }}
+            ${{ steps.tar-filename.outputs.TAR_FILENAME }}.sha256
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}
 
       - name: Install dependencies if needed
-        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        # != 'true' because on miss the cache-hit is empty
+        if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         run: |
           apt-get install -y --no-install-recommends \
             acpica-tools \
@@ -185,69 +198,79 @@ jobs:
             uuid-dev \
             zlib1g-dev
       - name: Install dependencies if needed (amd64)
-        if: matrix.arch == 'amd64' && steps.cache-toolchains.outputs.cache-hit != 'true'
+        if: matrix.arch == 'amd64' && steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         run: |
           apt-get install -y --no-install-recommends \
             iucode-tool
 
       - name: Build coreboot toolchains
-        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         run: |
           cd coreboot
           make crossgcc CPUS="$(nproc)"
-      - name: Build coreboot utils
-        if: steps.cache-utils.outputs.cache-hit != 'true'
-        run: |
-          cd coreboot
-          make -C util/ifdtool install
-          make -C util/cbfstool install
       - name: Compress toolchain binaries
         # This step should shrink the size of single toolchain from 1.5 GB down to around 700 MB
         # I think it is save to compress all binaries except libraries, hence the '-wholename'
-        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         run: |
           cd coreboot/util/crossgcc/xgcc
           # shellcheck disable=SC2016
           find . -type f -wholename '*/bin/*' -exec bash -c 'upx-ucl -9 "$1"' shell {} \; || true
 
+      - name: Tar toolchain to prevent permission loss
+        if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
+        run: |
+          # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+          mv "coreboot/util/crossgcc/xgcc" "coreboot/util/crossgcc/${{ matrix.arch }}-xgcc"
+          tar -cf "${{ steps.tar-filename.outputs.TAR_FILENAME }}" "coreboot/util/crossgcc/${{ matrix.arch }}-xgcc"
+          sha256sum "${{ steps.tar-filename.outputs.TAR_FILENAME }}" > "${{ steps.tar-filename.outputs.TAR_FILENAME }}.sha256"
+
       # Store toolchains and utils in cache
       - name: Cache toolchains
         uses: actions/cache/save@v4
-        if: steps.cache-toolchains.outputs.cache-hit != 'true'
+        if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         with:
-          path: coreboot/util/crossgcc/xgcc
-          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
-      - name: Cache utils
-        uses: actions/cache/save@v4
-        if: steps.cache-utils.outputs.cache-hit != 'true'
-        with:
-          path: /usr/local/bin
-          key: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
+          path: |
+            ${{ steps.tar-filename.outputs.TAR_FILENAME }}
+            ${{ steps.tar-filename.outputs.TAR_FILENAME }}.sha256
+          key: ${{ steps.cache-key.outputs.CACHE_KEY }}
 
-      # Upload toolchains and utils as artifacts
-      - name: Tar toolchain to prevent permission loss
-        # Docs: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: steps.toolchains-exist.outputs.EXIST == 'false'
+        with:
+          repository: '9elements/firmware-action-toolchains'
+          path: 'firmware-action-toolchains'
+          ref: 'main'
+          lfs: false
+          token: ${{ secrets.GH_PAT_TOOLCHAINS }}
+      - name: Set up Git
+        if: steps.toolchains-exist.outputs.EXIST == 'false'
         run: |
-          if [ ! -f "coreboot/util/crossgcc/xgcc-tar/${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar" ]; then
-            mv coreboot/util/crossgcc/xgcc coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
-            tar -cf ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar coreboot/util/crossgcc/${{ matrix.arch }}-xgcc
-          fi
-      - name: Upload toolchain
-        uses: actions/upload-artifact@v4.4.3
+          cd firmware-action-toolchains
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install
+      - name: Prepare files for firmware-action-toolchains repository
+        if: steps.toolchains-exist.outputs.EXIST == 'false'
+        run: |
+          # Clone repo without downloading LFS items
+          cd firmware-action-toolchains
+          mkdir -p "coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/"
+          mv "../${{ steps.tar-filename.outputs.TAR_FILENAME }}" "coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/"
+          mv "../${{ steps.tar-filename.outputs.TAR_FILENAME }}.sha256" "coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/"
+      - name: Create pull request in firmware-action-toolchains repository
+        uses: peter-evans/create-pull-request@v7
+        if: steps.toolchains-exist.outputs.EXIST == 'false'
         with:
-          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc
-          path: ${{ steps.cache-key.outputs.CACHE_KEY }}-xgcc.tar
-          retention-days: 30
-          include-hidden-files: true
-          compression-level: 9
-      - name: Upload utils
-        uses: actions/upload-artifact@v4.4.3
-        with:
-          name: ${{ steps.cache-key.outputs.CACHE_KEY }}-utils
-          path: /usr/local/bin
-          retention-days: 30
-          include-hidden-files: true
-          compression-level: 9
+          path: 'firmware-action-toolchains'
+          token: ${{ secrets.GH_PAT_TOOLCHAINS }}
+          add-paths: |
+            coreboot/**
+          branch: "feat/${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
+          commit-message: "feat: add toolchain for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }}"
+
 
   #=========================
   # Build Docker containers
