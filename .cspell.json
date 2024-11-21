@@ -31,6 +31,9 @@
     "pyproject.toml",
     "report",
     "requirements.txt",
+    "shell-completion/firmware-action.bash",
+    "shell-completion/firmware-action.fish",
+    "shell-completion/firmware-action.zsh",
     "tests/**"
   ],
   "language": "en",
@@ -60,6 +63,7 @@
     "cmds",
     "cocogitto",
     "commitlint",
+    "complgen",
     "composefile",
     "coreboot",
     "coreinfo",
