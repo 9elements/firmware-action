@@ -1,0 +1,14 @@
+---
+version: '3'
+
+tasks:
+  generate-completions:
+    cmds:
+      - for: ['bash', 'fish', 'zsh']
+        cmd: complgen aot --{{.ITEM}}-script firmware-action.{{.ITEM}} firmware-action.usage
+    sources:
+      - firmware-action.usage
+    generates:
+      - firmware-action.bash
+      - firmware-action.fish
+      - firmware-action.zsh
