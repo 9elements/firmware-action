@@ -21,7 +21,7 @@ indent_size = 2
 indent_style = space
 indent_size = 4
 
-[{*.md,.pylintrc,index.hbs}]
+[{*.md,.pylintrc,index.hbs,firmware-action.bash,firmware-action.fish,firmware-action.zsh}]
 indent_style = unset
 indent_size = unset
 generated_code = true
