@@ -28,7 +28,7 @@ runs:
   steps:
     - id: version
       shell: bash
-      run: echo "version=v0.6.1" >> "${GITHUB_OUTPUT}"
+      run: echo "version=v0.7.0" >> "${GITHUB_OUTPUT}"
 
     - id: arch
       # This ARCH is used to fetch correct executable of firmware-action
