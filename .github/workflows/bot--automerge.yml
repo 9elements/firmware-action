@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    continue-on-error: true
     if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
@@ -33,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+    continue-on-error: true
     if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
