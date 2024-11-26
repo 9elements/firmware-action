@@ -151,7 +151,6 @@ RUN mkdir Edk2 && \
 # Back-porting patch 4dfdca63a9 which fixed submodules
 COPY patches $TOOLSDIR/Edk2/.firmware-action-patches
 ENV PATCH_FILE=.firmware-action-patches/${EDK2_VERSION}-zeex-subhook.patch
-ENV CACHEBUSTER=18:24
 RUN cd Edk2 && \
     if [ -f "${PATCH_FILE}" ]; then \
         git apply "${PATCH_FILE}"; \
