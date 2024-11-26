@@ -67,6 +67,12 @@ type CorebootBlobs struct {
 	// The Kconfig `CONFIG_GBE_BIN_PATH` will be changed to point to the same path.
 	IntelGbePath string `json:"intel_gbe_path" type:"blob"`
 
+	// Gives the (relative) path to the Intel 10 Gigabit Ethernet engine binary.
+	// In a 'coreboot' build, the file will be placed at
+	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/10gbe0.bin`.
+	// The Kconfig `CONFIG_10GBE_0_BIN_PATH` will be changed to point to the same path.
+	Intel10Gbe0Path string `json:"intel_10gbe0_path" type:"blob"`
+
 	// Gives the (relative) path to the Intel FSP binary.
 	// In a 'coreboot' build, the file will be placed at
 	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
@@ -150,6 +156,12 @@ func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 		"intel_gbe_path": {
 			DestinationFilename: "gbe.bin",
 			KconfigKey:          "CONFIG_GBE_BIN_PATH",
+			IsDirectory:         false,
+		},
+		// Intel 10 GbE
+		"intel_10gbe0_path": {
+			DestinationFilename: "10gbe0.bin",
+			KconfigKey:          "CONFIG_10GBE_0_BIN_PATH",
 			IsDirectory:         false,
 		},
 		// Intel FSP binary (Intel Firmware Support Package)
