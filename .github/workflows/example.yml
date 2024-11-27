@@ -64,6 +64,7 @@ jobs:
               - 'docker/**'
               - 'tests/**'
               - 'action.yml'
+              - 'action/**'
 
   # Change detection in action golang code
   changes:
