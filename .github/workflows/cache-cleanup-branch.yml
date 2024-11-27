@@ -17,6 +17,7 @@ jobs:
     steps:
       - name: Clean cache for each branch
         uses: opengrabeso/clean-cache@v1
+        continue-on-error: true
         with:
           post: true
           keep: 1
