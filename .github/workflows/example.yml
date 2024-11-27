@@ -96,7 +96,7 @@ jobs:
               - 'action/**'
       - name: Compile
         id: compile
-        # Require compilation if changes in action code or if breaking changes since last release
+        # Require compilation if changes in action golang code or if any breaking changes since last release
         run: |
           if [ "${{ steps.semver.outputs.bump }}" == "major" ] || [ "${{ steps.filter.outputs.action }}" == "true" ]; then
             echo "compile=true" >> "${GITHUB_OUTPUT}"
