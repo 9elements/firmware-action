@@ -1,4 +1,29 @@
-## Unreleased (09d8897..dca2df1)
+## Unreleased (bd1063d..1a4af0c)
+#### Bug Fixes
+- **(ci)** cache cleanup - (1a4af0c) - AtomicFS
+- **(ci)** run example tests on change in golang code - (b60076b) - AtomicFS
+- **(ci)** automerge on pull_request_target instead of pull_request - (b946bcf) - AtomicFS
+- **(ci)** allow automerge to fail - (46c5296) - AtomicFS
+- **(ci)** replace only first semver in Taskfile - (bd1063d) - AtomicFS
+- **(docker)** forgotten debug variable - (c5e7f0e) - AtomicFS
+- **(linter)** cspell, editorconfig and shellcheck - (db36238) - AtomicFS
+- **(taskfile)** tweaks - (5619f15) - AtomicFS
+#### Build system
+- **(deps)** bump docs/src/firmware-action-example - (5cad9d3) - dependabot[bot]
+- **(deps)** bump github.com/stretchr/testify - (3491a1b) - dependabot[bot]
+#### Documentation
+- **(ci)** update comment - (190b283) - AtomicFS
+- add notes on containers - (8b6cb99) - AtomicFS
+#### Features
+- **(action)** add shell completion - (8fe18fe) - AtomicFS
+- **(action/coreboot)** add support for 10gbe blob - (66619f0) - AtomicFS
+- **(docker)** download toolchains from separate repository - (109fb8e) - AtomicFS
+- **(docker)** store toolchains in separate repository - (2032b7e) - AtomicFS
+- **(docker)** do not pre-compile utilities - (b363acc) - AtomicFS
+
+- - -
+
+## v0.7.0 - 2024-11-27
 #### Bug Fixes
 - **(action)** infinite symlink issue - (3d9a259) - AtomicFS
 - **(action)** linux make defconfig file conflict - (50e1d3d) - AtomicFS
@@ -111,6 +136,7 @@
 - **(taskfile)** add tasks to build containers - (d627efd) - AtomicFS
 - **(taskfile)** add python virtual environment setup task - (b103b16) - AtomicFS
 #### Miscellaneous Chores
+- **(action)** bump version to v0.7.0 - (6427558) - AtomicFS
 - **(action)** add debug for arch inputs - (22afde5) - AtomicFS
 - **(action)** unify architecture strings - (32583f7) - AtomicFS
 - **(action)** remove obsolete code - (6c8fc70) - AtomicFS
@@ -139,7 +165,7 @@
 
 - - -
 
-## v0.6.1 - 2024-11-22
+## v0.6.1 - 2024-11-27
 #### Bug Fixes
 - **(action/linux)** defconfig filename - (4b9e9d4) - AtomicFS
 #### Miscellaneous Chores
@@ -147,7 +173,7 @@
 
 - - -
 
-## v0.6.0 - 2024-11-22
+## v0.6.0 - 2024-11-27
 #### Bug Fixes
 - **(ci)** consolidate jobs - (a9e6b0d) - AtomicFS
 - **(dagger)** missing docker-compose - (6b41c2e) - AtomicFS
@@ -168,7 +194,7 @@
 
 - - -
 
-## v0.5.0 - 2024-11-22
+## v0.5.0 - 2024-11-27
 #### Bug Fixes
 - **(action)** remove unnecessary apostrophes - (f715557) - AtomicFS
 - **(action)** if statement using compile input - (77403bf) - AtomicFS
@@ -199,7 +225,7 @@
 
 - - -
 
-## v0.4.0 - 2024-11-22
+## v0.4.0 - 2024-11-27
 #### Bug Fixes
 - **(action)** broken InputDirs - (4ae3cba) - AtomicFS
 - **(action)** simplify u-root test - (ed3f45c) - AtomicFS
@@ -253,7 +279,7 @@
 
 - - -
 
-## v0.3.2 - 2024-11-22
+## v0.3.2 - 2024-11-27
 #### Features
 - **(action)** allow multi-module workspaces for u-root - (f54803d) - AtomicFS
 #### Miscellaneous Chores
@@ -261,7 +287,7 @@
 
 - - -
 
-## v0.3.1 - 2024-11-22
+## v0.3.1 - 2024-11-27
 #### Bug Fixes
 - **(again)** build docker containers on release - (2d33a7e) - AtomicFS
 #### Miscellaneous Chores
@@ -269,7 +295,7 @@
 
 - - -
 
-## v0.3.0 - 2024-11-22
+## v0.3.0 - 2024-11-27
 #### Bug Fixes
 - **(megalinter)** fix spelling - (99a6247) - AtomicFS
 - **(typo)** typo - (a5d9fb5) - AtomicFS
@@ -295,7 +321,7 @@
 
 - - -
 
-## v0.2.1 - 2024-11-22
+## v0.2.1 - 2024-11-27
 #### Bug Fixes
 - **(action)** fix issue 195 - (d8bc51a) - AtomicFS
 - **(action)** fix bin filename in Taskfile.yml - (5b20be4) - AtomicFS
@@ -377,7 +403,7 @@
 
 - - -
 
-## v0.2.0 - 2024-11-22
+## v0.2.0 - 2024-11-27
 #### Build system
 - **(deps)** bump the golang group in /action with 1 update - (d7e9dc8) - dependabot[bot]
 - **(deps)** update pytest-timeout requirement in /.dagger-ci/daggerci - (11045e2) - dependabot[bot]
@@ -392,7 +418,7 @@
 
 - - -
 
-## v0.1.2 - 2024-11-22
+## v0.1.2 - 2024-11-27
 #### Bug Fixes
 - **(commitlint)** add config increasing max line length - (38a005e) - AtomicFS
 - **(docker)** edk2 repositories were missing files - (4cf4603) - AtomicFS
@@ -442,13 +468,13 @@
 
 - - -
 
-## v0.1.1 - 2024-11-22
+## v0.1.1 - 2024-11-27
 #### Bug Fixes
 - **(action)** naming mistake in JSON config - (58ebf67) - AtomicFS
 
 - - -
 
-## v0.1.0 - 2024-11-22
+## v0.1.0 - 2024-11-27
 #### Bug Fixes
 - **(docker)** add cleanup commands - (b26acf4) - AtomicFS
 - guard queue with mutex in recipes.go - (b160e01) - Marvin Drees
@@ -470,7 +496,7 @@
 
 - - -
 
-## v0.0.1 - 2024-11-22
+## v0.0.1 - 2024-11-27
 #### Bug Fixes
 - **(Dockerfile)** add --no-cache-dir - (c116873) - Patrick Rudolph
 - **(Dockerfile)** add user to fix linter - (ebca447) - Patrick Rudolph
