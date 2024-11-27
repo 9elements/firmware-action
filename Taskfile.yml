@@ -22,6 +22,10 @@ tasks:
       - go build -ldflags="-s -w" -o ../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
     env:
       CGO_ENABLED: 0
+    sources:
+      - ./**/*.go
+    generates:
+      - ../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
 
   lint:
     desc: Run the linters
