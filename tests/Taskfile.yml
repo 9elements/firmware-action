@@ -4,6 +4,14 @@ vars:
   WORKDIR: '.example_runs'
 
 tasks:
+  mkdir:
+    desc: Make working directory for examples
+    internal: true
+    cmds:
+      - mkdir -p '{{.WORKDIR}}'
+    status:
+      - test -d '{{.WORKDIR}}'
+
   #=======
   # LINUX
   #=======
@@ -45,11 +53,12 @@ tasks:
   linux-*:
     desc: Run example
     deps:
+      - task: mkdir
       - task: :build-go-binary
     vars:
       VARIANT: '{{index .MATCH 0}}'
     cmds:
-      - mkdir -p '{{.WORKDIR}}'
+      - trash '{{.WORKDIR}}/output-linux'
       - task: linux-fetch
         vars:
           LINUX_VERSION: '{{.VARIANT}}'
