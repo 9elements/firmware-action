@@ -20,12 +20,8 @@ Please conform to [Conventional Commits](https://www.conventionalcommits.org/en/
 Can be run locally, but it is pain. See [MegaLinter Runner](https://megalinter.io/latest/mega-linter-runner/).
 
 
-#### commitlint (soon depreciated)
+#### commitlint
 [commitlint](https://github.com/conventional-changelog/commitlint) checks if the commit message conforms to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-
-
-#### bugbundle/commits (coming soon)
-[bugbundle/commits](https://github.com/bugbundle/commits) checks if the commit message conforms to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
 To run locally, check [Tooling for Conventional Commits](https://www.conventionalcommits.org/en/about/#tooling-for-conventional-commits).
 
