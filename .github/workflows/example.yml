@@ -64,7 +64,7 @@ jobs:
               - 'docker/**'
               - 'tests/**'
               - 'action.yml'
-              - 'action/**'
+              - 'cmd/firmware-action/**'
 
   # Change detection in action golang code
   changes:
@@ -94,7 +94,7 @@ jobs:
         with:
           filters: |
             action:
-              - 'action/**'
+              - 'cmd/firmware-action/**'
       - name: Compile
         id: compile
         # Require compilation if changes in action golang code or if any breaking changes since last release

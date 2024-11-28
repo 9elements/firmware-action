@@ -6,8 +6,8 @@ dependencies:
       - changed-files:
           - any-glob-to-any-file:
               - '.dagger-ci/daggerci/requirements.txt'
-              - 'action/go.mod'
-              - 'action/go.sum'
+              - 'cmd/firmware-action/go.mod'
+              - 'cmd/firmware-action/go.sum'
 docker:
   - any:
       - changed-files:
@@ -37,38 +37,38 @@ go:
       - changed-files:
           - any-glob-to-any-file:
               - '*.go'
-              - 'action/.golangci.yml'
-              - 'action/.goreleaser.yaml'
-              - 'action/go.mod'
-              - 'action/go.sum'
+              - 'cmd/firmware-action/.golangci.yml'
+              - 'cmd/firmware-action/.goreleaser.yaml'
+              - 'cmd/firmware-action/go.mod'
+              - 'cmd/firmware-action/go.sum'
 module/coreboot:
   - any:
       - changed-files:
           - any-glob-to-any-file:
-              - 'action/recipes/coreboot*'
+              - 'cmd/firmware-action/recipes/coreboot*'
               - 'docker/coreboot/**'
 module/edk2:
   - any:
       - changed-files:
           - any-glob-to-any-file:
-              - 'action/recipes/edk2*'
+              - 'cmd/firmware-action/recipes/edk2*'
               - 'docker/edk2/**'
 module/linux:
   - any:
       - changed-files:
           - any-glob-to-any-file:
-              - 'action/recipes/linux*'
+              - 'cmd/firmware-action/recipes/linux*'
               - 'docker/linux/**'
 module/stitching:
   - any:
       - changed-files:
           - any-glob-to-any-file:
-              - 'action/recipes/stitching*'
+              - 'cmd/firmware-action/recipes/stitching*'
 module/u-root:
   - any:
       - changed-files:
           - any-glob-to-any-file:
-              - 'action/recipes/uroot*'
+              - 'cmd/firmware-action/recipes/uroot*'
               - 'docker/uroot/**'
 python:
   - any:
@@ -89,7 +89,7 @@ testing:
               - '.markdownlint.json'
               - '.mega-linter.yml'
               - '.trivy.yaml'
-              - 'action/**/*_test.go'
+              - 'cmd/firmware-action/**/*_test.go'
               - 'tests/**'
       - head-branch:
           - '^test'
