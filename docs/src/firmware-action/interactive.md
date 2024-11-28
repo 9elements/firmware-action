@@ -29,7 +29,7 @@ To start a `ssh` service and wait for user to log-in, the container has to be co
 As a workaround, when the evaluation of pipeline fails in the container, the container from previous step is converted into a `service` container with everything as it was just before the failing command was executed. In essence, when you connect, you end up in pristine environment.
 
 ~~~go
-{{#include ../../../action/container/ssh.go:ContainerAsService}}
+{{#include ../../../cmd/firmware-action/container/ssh.go:ContainerAsService}}
 ~~~
 ```
 
