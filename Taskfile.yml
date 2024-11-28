@@ -17,19 +17,19 @@ includes:
 tasks:
   build-go-binary:
     desc: Template task to build a go binary
-    dir: action
+    dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
-      - go build -ldflags="-s -w" -o ../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
+      - go build -ldflags="-s -w" -o ../../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
     env:
       CGO_ENABLED: 0
     sources:
       - ./**/*.go
     generates:
-      - ../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
+      - ../../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
 
   lint:
     desc: Run the linters
-    dir: action
+    dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
       - revive ./...
       - go vet ./...
@@ -39,11 +39,11 @@ tasks:
   format:
     desc: Run gofumt (fork of gofmt, stricter)
     cmds:
-      - gofumpt -w action
+      - gofumpt -w '{{.GOLANG_CODE_PATH}}'
 
   test:
     desc: Run tests
-    dir: action
+    dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
       - go test {{.CLI_ARGS}} -race -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out ./...
       - go tool cover -func=coverage.out
@@ -51,7 +51,7 @@ tasks:
 
   godocs:
     desc: Start godocs http server
-    dir: action
+    dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
       - godoc -http=:6060
 

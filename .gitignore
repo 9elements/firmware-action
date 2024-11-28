@@ -1,11 +1,11 @@
 .coverage
 .task
 .example_runs
-action/coverage.html
-action/coverage.out
+cmd/firmware-action/coverage.html
+cmd/firmware-action/coverage.out
 bin/
 megalinter-reports
 node_modules
-action/recipes/__tmp_files__/
+cmd/firmware-action/recipes/__tmp_files__/
 output-*/
 docker/coreboot/coreboot-*
