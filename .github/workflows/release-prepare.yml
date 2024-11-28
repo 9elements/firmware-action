@@ -29,6 +29,7 @@ jobs:
         with:
           token: ${{ github.token }}
           branch: main
+          noVersionBumpBehavior: patch
 
       # Bump version
       - name: Update main.go
