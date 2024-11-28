@@ -24,7 +24,7 @@ updates:
           - 'patch'
 
   - package-ecosystem: gomod
-    directory: '/action'
+    directory: '/cmd/firmware-action'
     schedule:
       interval: 'daily'
       time: '00:00'
