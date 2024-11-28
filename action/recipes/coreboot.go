@@ -129,7 +129,7 @@ func (opts CorebootOpts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
-// corebootProcessBlobs is used to fill figure out blobs from provided data.
+// corebootProcessBlobs is used to figure out blobs from provided data
 func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	blobMap := map[string]BlobDef{
 		// Payload
@@ -299,6 +299,11 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 
 		// Copy into container
 		if err = filesystem.CheckFileExists(src); !errors.Is(err, os.ErrExist) {
+			slog.Error(
+				fmt.Sprintf("Blob '%s' was not found", src),
+				slog.String("suggestion", "blobs are copied into container separately from 'input_files' and 'input_dirs', the path should point to files on your host"),
+				slog.Any("error", err),
+			)
 			return nil, err
 		}
 		if blobs[blob].IsDirectory {
