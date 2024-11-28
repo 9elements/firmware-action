@@ -173,7 +173,7 @@ func parseCli() (string, error) {
 	// Get inputs from command line options
 	ctx := kong.Parse(
 		&CLI,
-		kong.Description("Utility to create firmware images for several open source firmware solutions"),
+		kong.Description("Utility to create firmware images for several open source firmware solutions. Source code at 'https://github.com/9elements/firmware-action'"),
 		kong.UsageOnError(),
 		kong.Vars{
 			"config_file": "firmware-action.json",
