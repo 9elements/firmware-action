@@ -58,7 +58,7 @@ Each module has sections:
 - `specific`
 
 ```go
-{{#include ../../../action/recipes/coreboot.go:CorebootOpts}}
+{{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
 ```
 
 `common` & `specific` are identical in function. There is no real difference between these two. They are split to simplify the code. They define things like path to source code, version and source of SDK to use, and so on.
@@ -113,31 +113,31 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 
 ### Common
 ```go
-{{#include ../../../action/recipes/config.go:CommonOpts}}
+{{#include ../../../cmd/firmware-action/recipes/config.go:CommonOpts}}
 ```
 
 ### Specific / coreboot
 ```go
-{{#include ../../../action/recipes/coreboot.go:CorebootOpts}}
-{{#include ../../../action/recipes/coreboot.go:CorebootBlobs}}
+{{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
+{{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootBlobs}}
 ```
 
 ### Specific / Linux
 ```go
-{{#include ../../../action/recipes/linux.go:LinuxOpts}}
-{{#include ../../../action/recipes/linux.go:LinuxSpecific}}
+{{#include ../../../cmd/firmware-action/recipes/linux.go:LinuxOpts}}
+{{#include ../../../cmd/firmware-action/recipes/linux.go:LinuxSpecific}}
 ```
 
 ### Specific / Edk2
 ```go
-{{#include ../../../action/recipes/edk2.go:Edk2Opts}}
-{{#include ../../../action/recipes/edk2.go:Edk2Specific}}
+{{#include ../../../cmd/firmware-action/recipes/edk2.go:Edk2Opts}}
+{{#include ../../../cmd/firmware-action/recipes/edk2.go:Edk2Specific}}
 ```
 
 ### Specific / Firmware stitching
 ```go
-{{#include ../../../action/recipes/stitching.go:FirmwareStitchingOpts}}
-{{#include ../../../action/recipes/stitching.go:IfdtoolEntry}}
+{{#include ../../../cmd/firmware-action/recipes/stitching.go:FirmwareStitchingOpts}}
+{{#include ../../../cmd/firmware-action/recipes/stitching.go:IfdtoolEntry}}
 ```
 
 ### Specific / u-root
