@@ -26,6 +26,7 @@ ARG USE_GCC_VERSION=5
 ENV USE_GCC_VERSION=$USE_GCC_VERSION
 
 ARG PYTHON_PACKAGES=python-is-python3 python2 python3
+ARG PYTHON_VERSION=python3
 ARG GCC_CROSS_COMPILER_PACKAGES_ARM=gcc-${GCC_VERSION}-aarch64-linux-gnu gcc-${GCC_VERSION}-arm-linux-gnueabi
 ARG GCC_CROSS_COMPILER_PACKAGES_X86=gcc-${GCC_VERSION}-i686-linux-gnu
 
@@ -90,7 +91,7 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
     mkdir -p "${TOOLSDIR}" && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
-    update-alternatives --install /usr/local/bin/python python /usr/bin/python3 100 && \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/${PYTHON_VERSION} 100 && \
     wget --quiet -O rustup.sh https://sh.rustup.rs && \
         chmod +x ./rustup.sh && \
         ./rustup.sh -y --profile minimal
