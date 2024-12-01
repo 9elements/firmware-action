@@ -117,6 +117,11 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 
 		// Pull docker container
 		container = client.Container().From(opts.ContainerURL)
+		imageRef, _ := container.ImageRef(ctx)
+		slog.Info(
+			"Container information",
+			slog.String("Image reference", imageRef),
+		)
 	} else {
 		// Use Dockerfile
 		slog.Info("Container setup running in Dockerfile mode")
