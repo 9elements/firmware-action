@@ -20,6 +20,7 @@
         - [GitHub CI](firmware-action/usage_github.md)
     - [Configuration](firmware-action/config.md)
     - [Offline usage](firmware-action/offline_usage.md)
+    - [Troubleshooting](firmware-action/troubleshooting.md)
     - [Features](firmware-action/features.md)
 
 ---
