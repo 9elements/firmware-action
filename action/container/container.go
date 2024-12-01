@@ -186,7 +186,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 		if errors.Is(err, context.DeadlineExceeded) {
 			slog.Error(
 				message,
-				slog.String("suggestion", "Your network configuration likely changed, try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"),
+				slog.String("suggestion", "Your network configuration likely changed, try this: https://docs.dagger.io/troubleshooting#dagger-is-unable-to-resolve-host-names-after-network-configuration-changes"),
 				slog.Any("error", err),
 			)
 		}
