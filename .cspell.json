@@ -103,6 +103,7 @@
     "libelf",
     "libncurses",
     "libnss",
+    "linuxboot",
     "logdir",
     "mainboard",
     "mainboarddir",

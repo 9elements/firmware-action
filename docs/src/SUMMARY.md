@@ -19,6 +19,7 @@
         - [Local system](firmware-action/usage_local.md)
         - [GitHub CI](firmware-action/usage_github.md)
     - [Configuration](firmware-action/config.md)
+    - [Offline usage](firmware-action/offline_usage.md)
     - [Features](firmware-action/features.md)
 
 ---
