@@ -109,7 +109,7 @@ func run(ctx context.Context) error {
 			patterSub := regexp.MustCompile(`^\-[\d\w]* `)
 			slog.Warn(
 				"Git submodule seems to be uninitialized",
-				slog.String("suggestion", "run 'git submodule update --init --recursive'"),
+				slog.String("suggestion", "run 'git submodule update --depth 0 --init --recursive --checkout'"),
 				slog.String("offending_submodule", patterSub.ReplaceAllString(v, "")),
 			)
 		}
