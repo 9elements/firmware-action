@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"dagger.io/dagger"
@@ -19,8 +20,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// ErrVerboseJSON is raised when JSONVerboseError can't find location of problem in JSON configuration file
-var ErrVerboseJSON = errors.New("unable to pinpoint the problem in JSON file")
+var (
+	// ErrVerboseJSON is raised when JSONVerboseError can't find location of problem in JSON configuration file
+	ErrVerboseJSON     = errors.New("unable to pinpoint the problem in JSON file")
+	// ErrEnvVarUndefined is raised when undefined environment variable is found in JSON configuration file
+	ErrEnvVarUndefined = errors.New("environment variable used in JSON file is not present in the environment")
+)
 
 // =================
 //  Data structures
@@ -221,6 +226,16 @@ func ValidateConfig(conf Config) error {
 	return nil
 }
 
+// FindAllEnvVars returns all environment variables found in the provided string
+func FindAllEnvVars(text string) []string {
+	pattern := regexp.MustCompile(`\${?([a-zA-Z0-9_]+)}?`)
+	result := pattern.FindAllString(text, -1)
+	for index, value := range result {
+		result[index] = pattern.ReplaceAllString(value, "$1")
+	}
+	return result
+}
+
 // ReadConfig is for reading and parsing JSON configuration file into Config struct
 func ReadConfig(filepath string) (*Config, error) {
 	// Read JSON file
@@ -233,8 +248,27 @@ func ReadConfig(filepath string) (*Config, error) {
 		return nil, err
 	}
 
-	// Expand environment variables
 	contentStr := string(content)
+
+	// Check if all environment variables are defined
+	envVars := FindAllEnvVars(contentStr)
+	undefinedVarFound := false
+	for _, envVar := range envVars {
+		_, found := os.LookupEnv(envVar)
+		if !found {
+			slog.Error(
+				fmt.Sprintf("environment variable '%s' is undefined", envVar),
+				slog.String("suggestion", "define the environment variable in the environment"),
+				slog.Any("error", ErrEnvVarUndefined),
+			)
+			undefinedVarFound = true
+		}
+	}
+	if undefinedVarFound {
+		return nil, ErrEnvVarUndefined
+	}
+
+	// Expand environment variables
 	contentStr = os.ExpandEnv(contentStr)
 
 	// Decode JSON
