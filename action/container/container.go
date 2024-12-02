@@ -10,6 +10,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
+	"runtime"
 	"strings"
 
 	"dagger.io/dagger"
@@ -189,12 +191,26 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfi
 				slog.String("suggestion", "try this: https://archive.docs.dagger.io/0.9/235290/troubleshooting/#dagger-pipeline-is-unable-to-resolve-host-names-after-network-configuration-changes"),
 				slog.Any("error", err),
 			)
-		} else {
-			slog.Error(
-				message,
-				slog.Any("error", err),
-			)
 		}
+		if strings.Contains(err.Error(), "timed out waiting for session params") && runtime.GOOS == "linux" {
+			// On Linux, check if 'iptable_nat' kernel module is loaded
+			content, err := os.ReadFile("/proc/modules")
+			if err != nil {
+				pattern := regexp.MustCompile(`^iptable_nat`)
+				if pattern.FindString(string(content)) == "" {
+					slog.Error(
+						message,
+						slog.String("suggestion", "dagger requires the 'iptable_nat' Linux kernel module in order to function properly, https://docs.dagger.io/troubleshooting#dagger-restarts-with-a-cni-setup-error"),
+						slog.Any("error", err),
+					)
+				}
+			}
+		}
+		slog.Error(
+			message,
+			slog.String("suggestion", "something is wrong with dagger, please check dagger troubleshooting guide at: https://docs.dagger.io/troubleshooting"),
+			slog.Any("error", err),
+		)
 	}
 
 	return container, err
