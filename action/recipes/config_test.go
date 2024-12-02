@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -120,6 +121,53 @@ func TestConfigReadAndWrite(t *testing.T) {
 	}
 }
 
+func TestFindAllEnvVars(t *testing.T) {
+	testCases := []struct {
+		name            string
+		text            string
+		expectedEnvVars []string
+	}{
+		{
+			name:            "no env vars",
+			text:            "dummy string",
+			expectedEnvVars: []string{},
+		},
+		{
+			name:            "one env var",
+			text:            "dummy string with $MY_VAR",
+			expectedEnvVars: []string{"MY_VAR"},
+		},
+		{
+			name:            "one env var with brackets",
+			text:            "dummy string with ${MY_VAR}",
+			expectedEnvVars: []string{"MY_VAR"},
+		},
+		{
+			name:            "two env vars",
+			text:            "dummy string with $MY_VAR and ${MY_VAR}",
+			expectedEnvVars: []string{"MY_VAR", "MY_VAR"},
+		},
+		{
+			name:            "two env vars with numbers",
+			text:            "dummy string with $MY_VAR1 and ${MY_VAR2}",
+			expectedEnvVars: []string{"MY_VAR1", "MY_VAR2"},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			foundVars := FindAllEnvVars(tc.text)
+			fmt.Println(foundVars)
+			fmt.Println(tc.expectedEnvVars)
+
+			assert.Equal(t, len(tc.expectedEnvVars), len(foundVars))
+			// If both slices are of zero length, then the comparison fails for whatever reason
+			if len(tc.expectedEnvVars) > 0 {
+				assert.True(t, reflect.DeepEqual(tc.expectedEnvVars, foundVars))
+			}
+		})
+	}
+}
+
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
 		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
@@ -182,6 +230,15 @@ func TestConfigEnvVars(t *testing.T) {
 				"TEST_ENV_VAR_REPOPATH": "dummy/dir/",
 			},
 		},
+		{
+			name:             "undefined env var",
+			wantErr:          ErrEnvVarUndefined,
+			url:              "ghcr.io/$TEST_ENV_VAR/coreboot_4.19:main",
+			urlExpected:      commonDummy.SdkURL,
+			repoPath:         commonDummy.RepoPath,
+			repoPathExpected: commonDummy.RepoPath,
+			envVars:          map[string]string{},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -213,12 +270,13 @@ func TestConfigEnvVars(t *testing.T) {
 			assert.NoError(t, err)
 			// Read
 			optsConverted, err := ReadConfig(configFilepath)
-			assert.NoError(t, err)
 
 			// err = ValidateConfig(optsConverted)
 			assert.ErrorIs(t, err, tc.wantErr)
-			assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].SdkURL)
-			assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].RepoPath)
+			if tc.wantErr == nil {
+				assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].SdkURL)
+				assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].RepoPath)
+			}
 		})
 	}
 }
