@@ -22,7 +22,7 @@ import (
 
 var (
 	// ErrVerboseJSON is raised when JSONVerboseError can't find location of problem in JSON configuration file
-	ErrVerboseJSON     = errors.New("unable to pinpoint the problem in JSON file")
+	ErrVerboseJSON = errors.New("unable to pinpoint the problem in JSON file")
 	// ErrEnvVarUndefined is raised when undefined environment variable is found in JSON configuration file
 	ErrEnvVarUndefined = errors.New("environment variable used in JSON file is not present in the environment")
 )
