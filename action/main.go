@@ -139,8 +139,8 @@ submodule_out:
 		result := ""
 		if item.BuildResult == nil {
 			result = "Success"
-		} else if errors.Is(item.BuildResult, recipes.ErrBuildSkipped) {
-			result = "Skipped"
+		} else if errors.Is(item.BuildResult, recipes.ErrBuildUpToDate) {
+			result = "Up-to-date"
 		} else {
 			result = "Fail"
 		}
