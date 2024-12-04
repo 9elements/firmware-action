@@ -18,6 +18,7 @@ import (
 	"github.com/9elements/firmware-action/action/recipes"
 	"github.com/alecthomas/kong"
 	"github.com/go-git/go-git/v5"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/sethvargo/go-githubactions"
 )
 
@@ -133,8 +134,11 @@ submodule_out:
 		recipes.Execute,
 	)
 
-	// Print overview
-	summary := "Build summary:"
+	// Pretty table
+	summaryTable := table.NewWriter()
+	summaryTable.AppendHeader(table.Row{"Module", "Status"})
+
+	// Create overview table
 	for _, item := range results {
 		result := ""
 		if item.BuildResult == nil {
@@ -144,9 +148,9 @@ submodule_out:
 		} else {
 			result = "Fail"
 		}
-		summary = fmt.Sprintf("%s\n%s: %s", summary, item.Name, result)
+		summaryTable.AppendRow([]interface{}{item.Name, result})
 	}
-	slog.Info(summary)
+	slog.Info(fmt.Sprintf("Build summary:\n%s", summaryTable.Render()))
 
 	if err == nil {
 		slog.Info("Build finished successfully")
