@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -98,4 +99,93 @@ func TestDirTree(t *testing.T) {
 	files, err := DirTree(pwd)
 	assert.NoError(t, err)
 	assert.True(t, len(files) > 0, "found no files or directories")
+}
+
+func TestLastSaveRunTime(t *testing.T) {
+	currentTime := time.Now()
+
+	tmpDir := t.TempDir()
+	pathTimeFile := filepath.Join(tmpDir, "last_run_time.txt")
+
+	// Load - should fallback because no file exists, but no error
+	loadTime, err := LoadLastRunTime(pathTimeFile)
+	assert.NoError(t, err)
+	assert.Equal(t, loadTime, time.Time{})
+	assert.ErrorIs(t, CheckFileExists(pathTimeFile), os.ErrNotExist)
+
+	// Save
+	err = SaveCurrentRunTime(pathTimeFile)
+	assert.NoError(t, err)
+	// file should now exist
+	assert.ErrorIs(t, CheckFileExists(pathTimeFile), os.ErrExist)
+
+	// Load again - should now work since file exists
+	loadTime, err = LoadLastRunTime(pathTimeFile)
+	assert.NoError(t, err)
+	assert.True(t, loadTime.After(currentTime))
+	assert.True(t, time.Now().After(loadTime))
+}
+
+func TestGetFileModTime(t *testing.T) {
+	tmpDir := t.TempDir()
+	pathFile := filepath.Join(tmpDir, "test.txt")
+
+	// Missing file - should fail
+	modTime, err := GetFileModTime(pathFile)
+	assert.ErrorIs(t, err, os.ErrNotExist)
+	assert.Equal(t, modTime, time.Time{})
+	assert.ErrorIs(t, CheckFileExists(pathFile), os.ErrNotExist)
+
+	// Make file
+	err = os.WriteFile(pathFile, []byte{}, 0o666)
+	assert.NoError(t, err)
+	assert.ErrorIs(t, CheckFileExists(pathFile), os.ErrExist)
+
+	// Should work
+	_, err = GetFileModTime(pathFile)
+	assert.NoError(t, err)
+}
+
+func TestAnyFileNewerThan(t *testing.T) {
+	tmpDir := t.TempDir()
+	pathFile := filepath.Join(tmpDir, "test.txt")
+
+	// Call on missing file - should fail
+	mod, err := AnyFileNewerThan(pathFile, time.Now())
+	assert.ErrorIs(t, err, os.ErrNotExist)
+	assert.False(t, mod)
+
+	// Call on existing file
+	// - Make file
+	err = os.WriteFile(pathFile, []byte{}, 0o666)
+	assert.NoError(t, err)
+	assert.ErrorIs(t, CheckFileExists(pathFile), os.ErrExist)
+	// - Should work - is file newer than last year? (true)
+	mod, err = AnyFileNewerThan(pathFile, time.Now().AddDate(-1, 0, 0))
+	assert.NoError(t, err)
+	assert.True(t, mod)
+	// - Should work - is file newer than next year? (false)
+	mod, err = AnyFileNewerThan(pathFile, time.Now().AddDate(1, 0, 0))
+	assert.NoError(t, err)
+	assert.False(t, mod)
+
+	// Call on nested directory
+	// - Make directory tree
+	subDirRoot := filepath.Join(tmpDir, "test")
+	subSubDir := filepath.Join(subDirRoot, "deep_test/even_deeper")
+	err = os.MkdirAll(subSubDir, os.ModePerm)
+	assert.NoError(t, err)
+	// - Make file
+	deepFile := filepath.Join(subSubDir, "test.txt")
+	err = os.WriteFile(deepFile, []byte{}, 0o666)
+	assert.NoError(t, err)
+	assert.ErrorIs(t, CheckFileExists(deepFile), os.ErrExist)
+	// - Should work - older
+	mod, err = AnyFileNewerThan(subDirRoot, time.Now().AddDate(-1, 0, 0))
+	assert.NoError(t, err)
+	assert.True(t, mod)
+	// - Should work - newer
+	mod, err = AnyFileNewerThan(subDirRoot, time.Now().AddDate(1, 0, 0))
+	assert.NoError(t, err)
+	assert.False(t, mod)
 }
