@@ -7,8 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/plus3it/gorecurcopy"
 )
@@ -20,6 +22,8 @@ var (
 	ErrPathIsDirectory = fmt.Errorf("provided path is directory: %w", os.ErrExist)
 	// ErrFileNotRegular is returned when path exists, but is not a regular file
 	ErrFileNotRegular = errors.New("file is not regular file")
+	// ErrFileModified is returned when a file in given path was modified
+	ErrFileModified = errors.New("file has been modified since")
 )
 
 // CheckFileExists checks if file exists at PATH
@@ -144,4 +148,123 @@ func DirTree(root string) ([]string, error) {
 	}
 
 	return files, err
+}
+
+// LoadLastRunTime loads time of the last execution from file
+func LoadLastRunTime(pathLastRun string) (time.Time, error) {
+	// Return zero time if file doesn't exist
+	err := CheckFileExists(pathLastRun)
+	if errors.Is(err, os.ErrNotExist) {
+		return time.Time{}, nil
+	}
+
+	content, err := os.ReadFile(pathLastRun)
+	// Return zero and error on reading error
+	if err != nil {
+		slog.Warn(
+			fmt.Sprintf("Error when reading file '%s'", pathLastRun),
+			slog.Any("error", err),
+		)
+		return time.Time{}, err
+	}
+
+	// File should contain time in RFC3339Nano format
+	lastRun, err := time.Parse(time.RFC3339Nano, string(content))
+	// Return zero and error on parsing error
+	if err != nil {
+		slog.Warn(
+			fmt.Sprintf("Error when parsing time-stamp from '%s'", pathLastRun),
+			slog.Any("error", err),
+		)
+		return time.Time{}, err
+	}
+	return lastRun, nil
+}
+
+// SaveCurrentRunTime writes the current time into file
+func SaveCurrentRunTime(pathLastRun string) error {
+	// Create temporaryFilesDir
+
+	// Create directory if needed
+	dir := filepath.Dir(pathLastRun)
+	err := CheckFileExists(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Write the current time into file
+	return os.WriteFile(pathLastRun, []byte(time.Now().Format(time.RFC3339Nano)), 0o666)
+}
+
+// GetFileModTime returns modification time of a file
+func GetFileModTime(filePath string) (time.Time, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return info.ModTime(), nil
+}
+
+// AnyFileNewerThan checks recursively if any file in given path (can be directory or file) has
+// modification time newer than the given time.
+// Returns:
+// - true if a newer file is found
+// - false if no newer file is found or givenTime is zero
+// Function is lazy, and returns on first positive occurrence.
+func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
+	// If path does not exist
+	err := CheckFileExists(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, err
+	}
+
+	// If given time is zero, assume up-to-date
+	// This is handy especially for CI, where we can't assume that people will cache firmware-action
+	//   timestamp directory, but they will likely cache the produced files
+	if givenTime.Equal(time.Time{}) {
+		return false, nil
+	}
+
+	// If path is directory
+	if errors.Is(err, ErrPathIsDirectory) {
+		errMod := filepath.WalkDir(path, func(path string, info os.DirEntry, _ error) error {
+			// skip .git
+			if info.Name() == ".git" {
+				return filepath.SkipDir
+			}
+			if !info.IsDir() {
+				fileInfo, err := info.Info()
+				if err != nil {
+					return err
+				}
+				if fileInfo.ModTime().After(givenTime) {
+					return fmt.Errorf("file '%s' has been modified: %w", path, ErrFileModified)
+				}
+			}
+			return nil
+		})
+		if errors.Is(errMod, ErrFileModified) {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	// If path is file
+	if errors.Is(err, os.ErrExist) {
+		modTime, errMod := GetFileModTime(path)
+		if errMod != nil {
+			slog.Warn(
+				fmt.Sprintf("Encountered error when getting modification time of file '%s'", path),
+				slog.Any("error", errMod),
+			)
+			return false, errMod
+		}
+		return modTime.After(givenTime), nil
+	}
+
+	// If path is neither file nor directory
+	return false, err
 }
