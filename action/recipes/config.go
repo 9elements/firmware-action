@@ -155,6 +155,20 @@ func (opts CommonOpts) GetOutputDir() string {
 	return opts.OutputDir
 }
 
+// GetSources returns slice of paths to all sources which are used for build
+func (opts CommonOpts) GetSources() []string {
+	sources := []string{}
+
+	// Repository path
+	sources = append(sources, opts.RepoPath)
+
+	// Input files and directories
+	sources = append(sources, opts.InputDirs[:]...)
+	sources = append(sources, opts.InputFiles[:]...)
+
+	return sources
+}
+
 // Config is for storing parsed configuration file
 type Config struct {
 	// defined in coreboot.go
@@ -201,6 +215,7 @@ type FirmwareModule interface {
 	GetContainerOutputDirs() []string
 	GetContainerOutputFiles() []string
 	GetOutputDir() string
+	GetSources() []string
 	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error)
 }
 

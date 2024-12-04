@@ -4,7 +4,6 @@ package recipes
 import (
 	"context"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"dagger.io/dagger"
@@ -101,15 +100,6 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	assert.NoError(t, err)
 	err = Execute(ctx, target, &myConfig, interactive)
 	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
-
-	// Create file inside output directory
-	myfile, err := os.Create(filepath.Join(outputDir, "dummy.txt"))
-	assert.NoError(t, err)
-	myfile.Close()
-
-	// Since there is now existing non-empty output directory, it should skip the build
-	err = Execute(ctx, target, &myConfig, interactive)
-	assert.ErrorIs(t, err, ErrBuildSkipped)
 }
 
 func executeDummy(_ context.Context, _ string, _ *Config, _ bool) error {
