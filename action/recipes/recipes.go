@@ -152,12 +152,10 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
-		// Check if output artifacts already exist
-		for _, artifact := range *modules[target].GetArtifacts() {
-			if _, err := os.Stat(artifact.HostPath); err == nil {
-				slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
-				return ErrBuildSkipped
-			}
+		if _, err := os.Stat(modules[target].GetOutputDir()); err == nil {
+		// Check if output directory already exist
+			slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
+			return ErrBuildSkipped
 		}
 
 		// Check if all outputs of required modules exist
