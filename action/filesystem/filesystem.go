@@ -126,7 +126,11 @@ func MoveFile(pathSource, pathDestination string) error {
 func DirTree(root string) ([]string, error) {
 	var files []string
 
-	err := filepath.Walk(root, func(path string, info os.FileInfo, _ error) error {
+	// WalkDir is faster than Walk
+	// https://pkg.go.dev/path/filepath#Walk
+	//   > Walk is less efficient than WalkDir, introduced in Go 1.16, which avoids
+	//   > calling os.Lstat on every visited file or directory.
+	err := filepath.WalkDir(root, func(path string, info os.DirEntry, _ error) error {
 		foundItem := path
 		if info.IsDir() {
 			foundItem = fmt.Sprintf("%s/", path)
