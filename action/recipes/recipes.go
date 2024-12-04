@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -140,6 +141,25 @@ func Build(
 	return builds, err
 }
 
+// IsDirEmpty returns whether given directory is empty or not
+func IsDirEmpty(path string) (bool, error) {
+	// Source: https://stackoverflow.com/questions/30697324/how-to-check-if-directory-on-path-is-empty
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// File.Readdirnames() take a parameter which is used to limit the number of returned values
+	// It is enough to query only 1 child
+	// File.Readdirnames() is faster than File.Readdir()
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err // Either not empty or error, suits both cases
+}
+
 // Execute a build step
 func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
 	// Setup dagger client
@@ -152,8 +172,12 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
-		if _, err := os.Stat(modules[target].GetOutputDir()); err == nil {
 		// Check if output directory already exist
+		// We want to skip build if the output directory exists and is not empty
+		// If it is empty, then just continue with the building
+		_, errExists := os.Stat(modules[target].GetOutputDir())
+		empty, _ := IsDirEmpty(modules[target].GetOutputDir())
+		if errExists == nil && !empty {
 			slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
 			return ErrBuildSkipped
 		}
