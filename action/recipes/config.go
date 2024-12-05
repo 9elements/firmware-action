@@ -98,17 +98,17 @@ type CommonOpts struct {
 
 	// Overview:
 	//
-	// | Configuration option   | Direction            |
-	// |:-----------------------|:--------------------:|
-	// | RepoPath               | Host  --> Container  |
-	// |                        |                      |
-	// | ContainerOutputDirs    | Host <--  Container  |
-	// | ContainerOutputFiles   | Host <--  Container  |
-	// | OutputDir              | Host <--  Container  |
-	// |                        |                      |
-	// | InputDirs              | Host  --> Container  |
-	// | InputFiles             | Host  --> Container  |
-	// | ContainerInputDir      | Host  --> Container  |
+	// | Configuration option   | Host side              | Direction            | Container side                 |
+	// |:-----------------------|:-----------------------|:--------------------:|:-------------------------------|
+	// | RepoPath               | $RepoPath              | Host  --> Container  | $(pwd)                         |
+	// |                        |                        |                      |                                |
+	// | OutputDir              | $(pwd)/$OutputDir      | Host <--  Container  | N/A                            |
+	// | ContainerOutputDirs    | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputDirs           |
+	// | ContainerOutputFiles   | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputFiles          |
+	// |                        |                        |                      |                                |
+	// | ContainerInputDir      | N/A                    | Host  --> Container  | $(pwd)/$ContainerInputDir      |
+	// | InputDirs              | $InputDirs             | Host  --> Container  | $(pwd)/$ContainerInputDir/...  |
+	// | InputFiles             | $InputFiles            | Host  --> Container  | $(pwd)/$ContainerInputDir/...  |
 }
 
 // ANCHOR_END: CommonOpts
