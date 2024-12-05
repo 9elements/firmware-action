@@ -232,7 +232,7 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 	if errors.Is(err, ErrPathIsDirectory) {
 		errMod := filepath.WalkDir(path, func(path string, info os.DirEntry, _ error) error {
 			// skip .git
-			if info.Name() == ".git" {
+			if info.Name() == ".git" && info.IsDir() {
 				return filepath.SkipDir
 			}
 			if !info.IsDir() {
