@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -15,13 +16,14 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/action/filesystem"
 	"github.com/heimdalr/dag"
 )
 
 // Errors for recipes
 var (
 	ErrBuildFailed               = errors.New("build failed")
-	ErrBuildSkipped              = errors.New("build skipped")
+	ErrBuildUpToDate             = errors.New("build is up-to-date")
 	ErrDependencyTreeUndefDep    = errors.New("module has invalid dependency")
 	ErrDependencyTreeUnderTarget = errors.New("target not found in dependency tree")
 	ErrDependencyOutputMissing   = errors.New("output of one or more dependencies is missing")
@@ -30,8 +32,12 @@ var (
 	ErrTargetMissing             = errors.New("no target specified")
 )
 
-// ContainerWorkDir specifies directory in container used as work directory
-var ContainerWorkDir = "/workdir"
+var (
+	// ContainerWorkDir specifies directory in container used as work directory
+	ContainerWorkDir = "/workdir"
+	// TimestampsDir specifies directory for timestamps to detect changes in sources
+	TimestampsDir = ".firmware-action/timestamps"
+)
 
 func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependencies [][]string) ([][]string, error) {
 	err := forest.AddVertexByID(key, key)
@@ -117,7 +123,7 @@ func Build(
 			err = executor(ctx, item, config, interactive)
 			builds = append(builds, BuildResults{item, err})
 
-			if err != nil && !errors.Is(err, ErrBuildSkipped) {
+			if err != nil && !errors.Is(err, ErrBuildUpToDate) {
 				break
 			}
 		}
@@ -132,7 +138,7 @@ func Build(
 	// Check results
 	err = nil
 	for _, item := range builds {
-		if item.BuildResult != nil && !errors.Is(item.BuildResult, ErrBuildSkipped) {
+		if item.BuildResult != nil && !errors.Is(item.BuildResult, ErrBuildUpToDate) {
 			err = item.BuildResult
 		}
 	}
@@ -140,23 +146,70 @@ func Build(
 	return builds, err
 }
 
-// Execute a build step
-func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
-	// Setup dagger client
-	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+// IsDirEmpty returns whether given directory is empty or not
+func IsDirEmpty(path string) (bool, error) {
+	// Source: https://stackoverflow.com/questions/30697324/how-to-check-if-directory-on-path-is-empty
+	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return false, err
 	}
-	defer client.Close()
+	defer f.Close()
+
+	// File.Readdirnames() take a parameter which is used to limit the number of returned values
+	// It is enough to query only 1 child
+	// File.Readdirnames() is faster than File.Readdir()
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err // Either not empty or error, suits both cases
+}
+
+// Execute a build step
+// func Execute(ctx context.Context, target string, config *Config, interactive bool, bulldozeMode bool) error {
+func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
+	// Prep
+	_, err := os.Stat(TimestampsDir)
+	if err != nil {
+		err = os.MkdirAll(TimestampsDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
 
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
-		// Check if output artifacts already exist
-		for _, artifact := range *modules[target].GetArtifacts() {
-			if _, err := os.Stat(artifact.HostPath); err == nil {
-				slog.Warn(fmt.Sprintf("Output directory for '%s' already exists, skipping build", target))
-				return ErrBuildSkipped
+		// Check if up-to-date
+		// Either returns time, or zero time and error
+		// zero time means there was no previous run
+		timestampFile := filepath.Join(TimestampsDir, fmt.Sprintf("%s.txt", target))
+		lastRun, _ := filesystem.LoadLastRunTime(timestampFile)
+
+		sources := modules[target].GetSources()
+		changesDetected := false
+		for _, source := range sources {
+			changes, _ := filesystem.AnyFileNewerThan(source, lastRun)
+			if changes {
+				changesDetected = true
+				break
+			}
+		}
+
+		// Check if output directory already exist
+		// We want to skip build if the output directory exists and is not empty
+		// If it is empty, then just continue with the building
+		// If changes in sources were detected, re-build
+		_, errExists := os.Stat(modules[target].GetOutputDir())
+		empty, _ := IsDirEmpty(modules[target].GetOutputDir())
+		if errExists == nil && !empty {
+			if changesDetected {
+				// If any of the sources changed, we need to rebuild
+				os.RemoveAll(modules[target].GetOutputDir())
+			} else {
+				// Is already up-to-date
+				slog.Warn(fmt.Sprintf("Target '%s' is up-to-date, skipping build", target))
+				return ErrBuildUpToDate
 			}
 		}
 
@@ -180,8 +233,19 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 			}
 		}
 
-		// Build module
+		// Setup dagger client
+		client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+		if err != nil {
+			return err
+		}
+		defer client.Close()
+
+		// Build the module
 		myContainer, err := modules[target].buildFirmware(ctx, client, "")
+		if err == nil {
+			// On success update the timestamp
+			_ = filesystem.SaveCurrentRunTime(timestampFile)
+		}
 		if err != nil && interactive {
 			// If error, try to open SSH
 			opts := container.NewSettingsSSH(container.WithWaitPressEnter())
