@@ -62,9 +62,9 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 
 	// Create configuration
 	const target = "dummy"
-	const outputDir = "output-coreboot"
+	const outputDir = "output-coreboot/"
 	const depends = "pre-dummy"
-	const outputDir2 = "output-coreboot2"
+	const outputDir2 = "output-coreboot2/"
 	myConfig := Config{
 		Coreboot: map[string]CorebootOpts{
 			target: {
@@ -95,12 +95,11 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
 
 	// Create the output directory
+	// Should build because the directory is empty
 	err = os.Mkdir(outputDir, os.ModePerm)
 	assert.NoError(t, err)
-
-	// Since there is now existing output directory, it should skip the build
 	err = Execute(ctx, target, &myConfig, interactive)
-	assert.ErrorIs(t, err, ErrBuildSkipped)
+	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
 }
 
 func executeDummy(_ context.Context, _ string, _ *Config, _ bool) error {
