@@ -21,6 +21,8 @@ type URootSpecific struct {
 
 // ANCHOR_END: URootSpecific
 
+// ANCHOR: URootOpts
+
 // URootOpts is used to store all data needed to build u-root
 type URootOpts struct {
 	// List of IDs this instance depends on
@@ -33,6 +35,8 @@ type URootOpts struct {
 	// u-root specific options
 	URootSpecific
 }
+
+// ANCHOR_END: URootOpts
 
 // GetDepends is used to return list of dependencies
 func (opts URootOpts) GetDepends() []string {
