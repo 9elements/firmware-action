@@ -57,7 +57,7 @@ jobs:
     needs: skip-check
     strategy:
       matrix:
-        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot']
+        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot', 'TestUniversal']
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
