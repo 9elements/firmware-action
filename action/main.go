@@ -205,6 +205,7 @@ func parseCli() (string, error) {
 			Edk2:              map[string]recipes.Edk2Opts{"edk2-example": {}},
 			FirmwareStitching: map[string]recipes.FirmwareStitchingOpts{"stitching-example": {}},
 			URoot:             map[string]recipes.URootOpts{"uroot-example": {}},
+			Universal:         map[string]recipes.UniversalOpts{"universal-example": {}},
 		}
 
 		// Convert to JSON

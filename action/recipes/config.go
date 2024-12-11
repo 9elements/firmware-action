@@ -171,6 +171,9 @@ type Config struct {
 
 	// defined in uroot.go
 	URoot map[string]URootOpts `json:"u-root" validate:"dive"`
+
+	// defined in universal.go
+	Universal map[string]UniversalOpts `json:"universal" validate:"dive"`
 }
 
 // AllModules method returns slice with all modules
@@ -189,6 +192,9 @@ func (c Config) AllModules() map[string]FirmwareModule {
 		modules[key] = value
 	}
 	for key, value := range c.URoot {
+		modules[key] = value
+	}
+	for key, value := range c.Universal {
 		modules[key] = value
 	}
 	return modules
