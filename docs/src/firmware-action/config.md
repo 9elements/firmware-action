@@ -140,3 +140,9 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 {{#include ../../../action/recipes/stitching.go:IfdtoolEntry}}
 ```
 
+### Specific / u-root
+```go
+{{#include ../../../action/recipes/uroot.go:URootOpts}}
+{{#include ../../../action/recipes/uroot.go:URootSpecific}}
+```
+
