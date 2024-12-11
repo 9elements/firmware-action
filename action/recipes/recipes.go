@@ -169,12 +169,9 @@ func IsDirEmpty(path string) (bool, error) {
 // func Execute(ctx context.Context, target string, config *Config, interactive bool, bulldozeMode bool) error {
 func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
 	// Prep
-	_, err := os.Stat(TimestampsDir)
+	err := os.MkdirAll(TimestampsDir, os.ModePerm)
 	if err != nil {
-		err = os.MkdirAll(TimestampsDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	// Find requested target
