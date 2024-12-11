@@ -12,7 +12,7 @@ import (
 	"github.com/9elements/firmware-action/action/container"
 )
 
-// UniversalSpecific is used to store data specific to universal
+// UniversalSpecific is used to store data specific to the universal command module
 // ANCHOR: UniversalSpecific
 type UniversalSpecific struct {
 	// Specifies build commands to execute inside container
@@ -23,7 +23,7 @@ type UniversalSpecific struct {
 
 // ANCHOR: UniversalOpts
 
-// UniversalOpts is used to store all data needed to run universal
+// UniversalOpts is used to store all data needed to run universal commands
 type UniversalOpts struct {
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
@@ -48,7 +48,7 @@ func (opts UniversalOpts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
-// buildFirmware builds universal
+// buildFirmware builds (or rather executes) universal command module
 func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	// Spin up container
 	containerOpts := container.SetupOpts{
