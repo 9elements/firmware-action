@@ -187,12 +187,9 @@ func SaveCurrentRunTime(pathLastRun string) error {
 
 	// Create directory if needed
 	dir := filepath.Dir(pathLastRun)
-	err := CheckFileExists(dir)
-	if errors.Is(err, os.ErrNotExist) {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		}
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return err
 	}
 
 	// Write the current time into file
