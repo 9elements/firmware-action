@@ -146,3 +146,9 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 {{#include ../../../action/recipes/uroot.go:URootSpecific}}
 ```
 
+### Specific / Universal module
+```go
+{{#include ../../../action/recipes/universal.go:UniversalOpts}}
+{{#include ../../../action/recipes/universal.go:UniversalSpecific}}
+```
+
