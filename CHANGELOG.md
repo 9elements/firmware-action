@@ -1,4 +1,11 @@
-## Unreleased (b4deb3a..ad462d3)
+## Unreleased (fd6eae2..8e739ed)
+#### Build system
+- **(deps)** bump golang.org/x/crypto from 0.30.0 to 0.31.0 in /action - (8e739ed) - dependabot[bot]
+- **(deps)** update dagger-io requirement in /.dagger-ci/daggerci - (fd6eae2) - dependabot[bot]
+
+- - -
+
+## v0.10.0 - 2024-12-14
 #### Bug Fixes
 - **(action)** skipping .git - (f57cc93) - AtomicFS
 - **(action)** check for existing non-empty output directory - (f1f9418) - AtomicFS
@@ -21,6 +28,7 @@
 - **(action)** add functions to detect changes in files - (c88853b) - AtomicFS
 - **(action)** add universal module - (3318c85) - AtomicFS
 #### Miscellaneous Chores
+- **(action)** bump version to v0.10.0 - (d4beebe) - AtomicFS
 - **(action)** cosmetic fixes - (ad462d3) - AtomicFS
 - **(action)** prettify summary table - (f5d8ae3) - AtomicFS
 - **(action)** speed up filesystem.DirTree - (81e0b94) - AtomicFS
@@ -32,7 +40,7 @@
 
 - - -
 
-## v0.9.0 - 2024-12-11
+## v0.9.0 - 2024-12-14
 #### Build system
 - **(deps)** bump docs/src/firmware-action-example - (a91d6a9) - dependabot[bot]
 - **(deps)** bump github.com/alecthomas/kong - (8a4052d) - dependabot[bot]
@@ -56,7 +64,7 @@
 
 - - -
 
-## v0.8.1 - 2024-12-11
+## v0.8.1 - 2024-12-14
 #### Bug Fixes
 - **(ci)** next version calculation - (ce6e90f) - AtomicFS
 - **(docker)** udk2017 needs python2 - (c3c3f22) - AtomicFS
@@ -68,7 +76,7 @@
 
 - - -
 
-## v0.8.0 - 2024-12-11
+## v0.8.0 - 2024-12-14
 #### Bug Fixes
 - **(ci)** cache cleanup - (1a4af0c) - AtomicFS
 - **(ci)** run example tests on change in golang code - (b60076b) - AtomicFS
@@ -95,7 +103,7 @@
 
 - - -
 
-## v0.7.0 - 2024-12-11
+## v0.7.0 - 2024-12-14
 #### Bug Fixes
 - **(action)** infinite symlink issue - (3d9a259) - AtomicFS
 - **(action)** linux make defconfig file conflict - (50e1d3d) - AtomicFS
@@ -237,7 +245,7 @@
 
 - - -
 
-## v0.6.1 - 2024-12-11
+## v0.6.1 - 2024-12-14
 #### Bug Fixes
 - **(action/linux)** defconfig filename - (4b9e9d4) - AtomicFS
 #### Miscellaneous Chores
@@ -245,7 +253,7 @@
 
 - - -
 
-## v0.6.0 - 2024-12-11
+## v0.6.0 - 2024-12-14
 #### Bug Fixes
 - **(ci)** consolidate jobs - (a9e6b0d) - AtomicFS
 - **(dagger)** missing docker-compose - (6b41c2e) - AtomicFS
@@ -266,7 +274,7 @@
 
 - - -
 
-## v0.5.0 - 2024-12-11
+## v0.5.0 - 2024-12-14
 #### Bug Fixes
 - **(action)** remove unnecessary apostrophes - (f715557) - AtomicFS
 - **(action)** if statement using compile input - (77403bf) - AtomicFS
@@ -297,7 +305,7 @@
 
 - - -
 
-## v0.4.0 - 2024-12-11
+## v0.4.0 - 2024-12-14
 #### Bug Fixes
 - **(action)** broken InputDirs - (4ae3cba) - AtomicFS
 - **(action)** simplify u-root test - (ed3f45c) - AtomicFS
@@ -351,7 +359,7 @@
 
 - - -
 
-## v0.3.2 - 2024-12-11
+## v0.3.2 - 2024-12-14
 #### Features
 - **(action)** allow multi-module workspaces for u-root - (f54803d) - AtomicFS
 #### Miscellaneous Chores
@@ -359,7 +367,7 @@
 
 - - -
 
-## v0.3.1 - 2024-12-11
+## v0.3.1 - 2024-12-14
 #### Bug Fixes
 - **(again)** build docker containers on release - (2d33a7e) - AtomicFS
 #### Miscellaneous Chores
@@ -367,7 +375,7 @@
 
 - - -
 
-## v0.3.0 - 2024-12-11
+## v0.3.0 - 2024-12-14
 #### Bug Fixes
 - **(megalinter)** fix spelling - (99a6247) - AtomicFS
 - **(typo)** typo - (a5d9fb5) - AtomicFS
@@ -393,7 +401,7 @@
 
 - - -
 
-## v0.2.1 - 2024-12-11
+## v0.2.1 - 2024-12-14
 #### Bug Fixes
 - **(action)** fix issue 195 - (d8bc51a) - AtomicFS
 - **(action)** fix bin filename in Taskfile.yml - (5b20be4) - AtomicFS
@@ -475,7 +483,7 @@
 
 - - -
 
-## v0.2.0 - 2024-12-11
+## v0.2.0 - 2024-12-14
 #### Build system
 - **(deps)** bump the golang group in /action with 1 update - (d7e9dc8) - dependabot[bot]
 - **(deps)** update pytest-timeout requirement in /.dagger-ci/daggerci - (11045e2) - dependabot[bot]
@@ -490,7 +498,7 @@
 
 - - -
 
-## v0.1.2 - 2024-12-11
+## v0.1.2 - 2024-12-14
 #### Bug Fixes
 - **(commitlint)** add config increasing max line length - (38a005e) - AtomicFS
 - **(docker)** edk2 repositories were missing files - (4cf4603) - AtomicFS
@@ -540,13 +548,13 @@
 
 - - -
 
-## v0.1.1 - 2024-12-11
+## v0.1.1 - 2024-12-14
 #### Bug Fixes
 - **(action)** naming mistake in JSON config - (58ebf67) - AtomicFS
 
 - - -
 
-## v0.1.0 - 2024-12-11
+## v0.1.0 - 2024-12-14
 #### Bug Fixes
 - **(docker)** add cleanup commands - (b26acf4) - AtomicFS
 - guard queue with mutex in recipes.go - (b160e01) - Marvin Drees
@@ -568,7 +576,7 @@
 
 - - -
 
-## v0.0.1 - 2024-12-11
+## v0.0.1 - 2024-12-14
 #### Bug Fixes
 - **(Dockerfile)** add --no-cache-dir - (c116873) - Patrick Rudolph
 - **(Dockerfile)** add user to fix linter - (ebca447) - Patrick Rudolph
