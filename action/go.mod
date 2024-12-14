@@ -13,10 +13,11 @@ require (
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/google/go-cmp v0.6.0
 	github.com/heimdalr/dag v1.5.0
+	github.com/jedib0t/go-pretty/v6 v6.6.3
 	github.com/plus3it/gorecurcopy v0.0.1
 	github.com/sethvargo/go-githubactions v1.3.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.31.0
 )
 
 require (
@@ -42,7 +43,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.6.3 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
