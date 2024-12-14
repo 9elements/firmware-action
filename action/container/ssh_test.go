@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"dagger.io/dagger"
 	"github.com/stretchr/testify/assert"
@@ -110,7 +111,15 @@ func TestOpenSSH(t *testing.T) {
 				assert.NoError(t, err)
 			}()
 			// Wait until SSH server is ready
-			<-tc.optsSSH.TunnelReady
+			ticker := time.NewTicker(5 * time.Second)
+			select {
+			case <-tc.optsSSH.TunnelReady:
+				ticker.Stop()
+			case <-ticker.C:
+				ticker.Stop()
+				ctx.Done()
+				assert.FailNow(t, "timeout waiting for SSH server to be ready")
+			}
 
 			// Connect with client
 			config := &ssh.ClientConfig{
