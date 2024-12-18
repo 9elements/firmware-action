@@ -43,7 +43,7 @@ jobs:
         run: |
           git branch --show-current
           git pull
-          echo "version=$(grep 'const firmwareActionVersion' < action/main.go | sed -E 's/.*= "//g' | sed 's/"//g')" >> "${GITHUB_OUTPUT}"
+          echo "version=$(grep 'const firmwareActionVersion' < cmd/firmware-action/main.go | sed -E 's/.*= "//g' | sed 's/"//g')" >> "${GITHUB_OUTPUT}"
           # Can't really use cocogitto here
 
       - name: Create tag

@@ -129,7 +129,7 @@ func TestLinux(t *testing.T) {
 
 			// Copy over defconfig file into tmpDir/linux
 			defconfigPath := filepath.Join(myLinuxOpts.RepoPath, myLinuxOpts.DefconfigPath)
-			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../.."))
+			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../../.."))
 			assert.NoError(t, err)
 			//   common.RepoPath = path to end user repository (in this case somewhere in /tmp)
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
