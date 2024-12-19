@@ -1,7 +1,7 @@
 ---
 version: '3'
 vars:
-  SEMVER: 'v0.10.1'
+  SEMVER: 'v0.10.2'
 
 includes:
   containers:
