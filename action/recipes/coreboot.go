@@ -129,6 +129,41 @@ func (opts CorebootOpts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
+// GetSources returns slice of paths to all sources which are used for build
+func (opts CorebootOpts) GetSources() []string {
+	sources := opts.CommonOpts.GetSources()
+
+	// Add blobs to list of sources
+	blobs, err := corebootProcessBlobs(opts.Blobs)
+	if err != nil {
+		slog.Error(
+			"Failed to process all blobs",
+			slog.Any("error", err),
+		)
+		return nil
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		slog.Error(
+			"Could not get working directory",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+			slog.Any("error", err),
+		)
+		return nil
+	}
+	for blob := range blobs {
+		// Path to local file on host
+		src := filepath.Join(
+			pwd,
+			blobs[blob].Path,
+		)
+		sources = append(sources, src)
+	}
+
+	return sources
+}
+
 // corebootProcessBlobs is used to figure out blobs from provided data
 func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 	blobMap := map[string]BlobDef{
