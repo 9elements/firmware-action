@@ -17,9 +17,6 @@ on:
       - 'docker/**'
       - 'tests/**'
   release:
-  schedule:
-    # First day of the month at midnight
-    - cron: '0 0 1 * 0'
   workflow_dispatch:
 
 env:
