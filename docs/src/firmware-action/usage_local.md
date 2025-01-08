@@ -1,28 +1,11 @@
 # Local system
 
-To get firmware-action, there are few options:
-- download compiled binary executable from [releases](https://github.com/9elements/firmware-action/releases)
-- build from source with [taskfile](https://taskfile.dev/)
-- `firmware-action` [Arch Linux AUR package](https://aur.archlinux.org/packages/firmware-action)
-
-
-## Build from source
-```
-git clone https://github.com/9elements/firmware-action.git
-cd firmware-action
-task build-go-binary
-```
-
-
-## Arch Linux AUR
-For Arch Linux there is also a [AUR package](https://aur.archlinux.org/packages/firmware-action) available.
-
+To get firmware-action loot into [Get firmware-action](get_started/04_get_firmware_action.md) section.
 
 ## Run
 ```
-./firmware-action build --config=<path-to-JSON-config> --target=<my-target>
+firmware-action build --config=<path-to-JSON-config> --target=<my-target>
 ```
-
 
 ## Help
 
