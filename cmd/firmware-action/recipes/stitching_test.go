@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/9elements/firmware-action/filesystem"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )

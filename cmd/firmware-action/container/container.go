@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/logging"
+	"github.com/9elements/firmware-action/logging"
 )
 
 var (

@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/container"
 )
 
 // URootSpecific is used to store data specific to u-root
