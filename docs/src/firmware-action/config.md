@@ -142,13 +142,13 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 
 ### Specific / u-root
 ```go
-{{#include ../../../action/recipes/uroot.go:URootOpts}}
-{{#include ../../../action/recipes/uroot.go:URootSpecific}}
+{{#include ../../../cmd/firmware-action/recipes/uroot.go:URootOpts}}
+{{#include ../../../cmd/firmware-action/recipes/uroot.go:URootSpecific}}
 ```
 
 ### Specific / Universal module
 ```go
-{{#include ../../../action/recipes/universal.go:UniversalOpts}}
-{{#include ../../../action/recipes/universal.go:UniversalSpecific}}
+{{#include ../../../cmd/firmware-action/recipes/universal.go:UniversalOpts}}
+{{#include ../../../cmd/firmware-action/recipes/universal.go:UniversalSpecific}}
 ```
 
