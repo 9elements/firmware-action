@@ -36,7 +36,7 @@ func InitLogger(level slog.Level, opts ...PrettyHandlerOption) {
 // TrimNameFunction just trims the name
 func TrimNameFunction(pc uintptr) string {
 	// 'runtime.FuncForPC(pc).Name()' is nice and all, but it will return this monstrosity:
-	//   github.com/9elements/firmware-action/action/<package>.<func>...
+	//   github.com/9elements/firmware-action/<package>.<func>...
 	// So this function is just to trim it down
 	// Usage:
 	//   pc, _, _, _ := runtime.Caller(0)

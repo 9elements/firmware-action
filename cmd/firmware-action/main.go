@@ -13,9 +13,9 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/9elements/firmware-action/action/filesystem"
-	"github.com/9elements/firmware-action/action/logging"
-	"github.com/9elements/firmware-action/action/recipes"
+	"github.com/9elements/firmware-action/filesystem"
+	"github.com/9elements/firmware-action/logging"
+	"github.com/9elements/firmware-action/recipes"
 	"github.com/alecthomas/kong"
 	"github.com/go-git/go-git/v5"
 	"github.com/jedib0t/go-pretty/v6/table"

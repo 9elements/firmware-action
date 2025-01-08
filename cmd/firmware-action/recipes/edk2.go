@@ -12,7 +12,7 @@ import (
 	"runtime"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
+	"github.com/9elements/firmware-action/container"
 )
 
 // ANCHOR: Edk2Specific

@@ -15,8 +15,8 @@ import (
 	"sync"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
-	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/9elements/firmware-action/container"
+	"github.com/9elements/firmware-action/filesystem"
 	"github.com/heimdalr/dag"
 )
 

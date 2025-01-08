@@ -1,4 +1,4 @@
-module github.com/9elements/firmware-action/action
+module github.com/9elements/firmware-action
 
 go 1.22.5
 

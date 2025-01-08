@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/filesystem"
+	"github.com/9elements/firmware-action/filesystem"
 	"github.com/stretchr/testify/assert"
 )
 

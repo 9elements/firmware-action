@@ -14,8 +14,8 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/action/container"
-	"github.com/9elements/firmware-action/action/logging"
+	"github.com/9elements/firmware-action/container"
+	"github.com/9elements/firmware-action/logging"
 	"github.com/dustin/go-humanize"
 )
 
