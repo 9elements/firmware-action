@@ -16,6 +16,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/container"
+	"github.com/9elements/firmware-action/environment"
 	"github.com/9elements/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/logging"
 )
@@ -378,7 +379,15 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	)
 
 	// Setup environment variables in the container
-	envVars := map[string]string{}
+	// envVars := map[string]string{}
+	envVars, err := corebootPassEnvVars(opts.RepoPath)
+	if err != nil {
+		slog.Error(
+			"Failed to extract environment variables from current environment",
+			slog.Any("error", err),
+		)
+		return myContainerPrevious, fmt.Errorf("coreboot build failed: %w", err)
+	}
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
@@ -400,4 +409,57 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 
 	// Extract artifacts
 	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
+}
+
+func corebootPassEnvVars(repoPath string) (map[string]string, error) {
+	passVariables := []string{"KERNELVERSION", "BUILD_TIMELESS"}
+	envVariables := environment.FetchEnvVars(passVariables)
+
+	// coreboot build system takes a version from:
+	// - environment variable: KERNELVERSION
+	// - shell command: git describe ...
+	// - content of file: .coreboot-version
+
+	// To check for coreboot version in compiled binary, run these commands:
+	//   $ cbfstool build/coreboot.rom extract -n build_info -f /tmp/foo
+	//   $ grep COREBOOT_VERSION /tmp/foo
+
+	// coreboot make will fail to run 'git describe' because of
+	//   missing '.git' directory once the content of repoPath
+	//   is copied into the container
+	// To fix this we need to run 'git describe' now and create a new
+	//   environment variable to pass over into the container
+	// This way, the compiled coreboot binary will not have unknown version
+
+	// If KERNELVERSION is defined in current environment, do nothing
+	if _, ok := envVariables["KERNELVERSION"]; ok {
+		return envVariables, nil
+	}
+
+	// If .coreboot-version file exists in coreboot directory, do nothing
+	pwd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	corebootVersionPath := filepath.Join(pwd, repoPath, ".coreboot-version")
+	err = filesystem.CheckFileExists(corebootVersionPath)
+	if errors.Is(err, os.ErrExist) {
+		return envVariables, nil
+	}
+
+	// At this point we checked that user did not define their own coreboot version
+	// coreboot build system would at this point attempt to run git describe, which would fail
+	// Define a new environment variable KERNELVERSION with value from git describe
+	//   and then pass it into the container
+	err = filesystem.CheckFileExists(filepath.Join(pwd, repoPath))
+	if errors.Is(err, filesystem.ErrPathIsDirectory) {
+		describe, err := filesystem.GitDescribeCoreboot(repoPath)
+		if err != nil {
+			return nil, err
+		}
+		envVariables["KERNELVERSION"] = describe
+	}
+
+	return envVariables, nil
 }
