@@ -46,6 +46,7 @@
     "HEALTHCHECK",
     "Hadolint",
     "IPXE",
+    "KERNELVERSION",
     "NOTSET",
     "REPOPATH",
     "TARGETARCH",
