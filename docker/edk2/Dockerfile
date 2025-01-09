@@ -45,6 +45,9 @@ ENV WORKSPACE=$TOOLSDIR/Edk2
 RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         dpkg --add-architecture i386; \
     fi; \
+    wget --quiet -O nodesource_setup.sh https://deb.nodesource.com/setup_20.x && \
+        chmod +x nodesource_setup.sh && \
+        ./nodesource_setup.sh && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ${PYTHON_PACKAGES} \
