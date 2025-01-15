@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -24,12 +23,11 @@ func gitRun(subdir string, command []string) (string, error) {
 	}
 
 	// Change current working directory into the repository / submodule
-	subdirPath := filepath.Join(pwd, subdir)
 	defer os.Chdir(pwd) // nolint:errcheck
-	err = os.Chdir(subdirPath)
+	err = os.Chdir(subdir)
 	if err != nil {
 		slog.Error(
-			fmt.Sprintf("Failed to change current working directory to '%s'", subdirPath),
+			fmt.Sprintf("Failed to change current working directory to '%s'", subdir),
 			slog.Any("error", err),
 		)
 		return "", err
@@ -40,7 +38,7 @@ func gitRun(subdir string, command []string) (string, error) {
 	describe, err := cmd.CombinedOutput()
 	if err != nil {
 		slog.Error(
-			fmt.Sprintf("Failed to run git command in '%s'", subdirPath),
+			fmt.Sprintf("Failed to run git command in '%s'", subdir),
 			slog.Any("error", err),
 		)
 		return "", err

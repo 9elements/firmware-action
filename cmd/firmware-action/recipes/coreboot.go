@@ -437,13 +437,8 @@ func corebootPassEnvVars(repoPath string) (map[string]string, error) {
 	}
 
 	// If .coreboot-version file exists in coreboot directory, do nothing
-	pwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	corebootVersionPath := filepath.Join(pwd, repoPath, ".coreboot-version")
-	err = filesystem.CheckFileExists(corebootVersionPath)
+	corebootVersionPath := filepath.Join(repoPath, ".coreboot-version")
+	err := filesystem.CheckFileExists(corebootVersionPath)
 	if errors.Is(err, os.ErrExist) {
 		return envVariables, nil
 	}
@@ -452,7 +447,7 @@ func corebootPassEnvVars(repoPath string) (map[string]string, error) {
 	// coreboot build system would at this point attempt to run git describe, which would fail
 	// Define a new environment variable KERNELVERSION with value from git describe
 	//   and then pass it into the container
-	err = filesystem.CheckFileExists(filepath.Join(pwd, repoPath))
+	err = filesystem.CheckFileExists(repoPath)
 	if errors.Is(err, filesystem.ErrPathIsDirectory) {
 		describe, err := filesystem.GitDescribeCoreboot(repoPath)
 		if err != nil {
