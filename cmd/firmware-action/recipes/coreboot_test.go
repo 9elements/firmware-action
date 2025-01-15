@@ -313,3 +313,289 @@ func TestCorebootBuild(t *testing.T) {
 		})
 	}
 }
+
+func gitCloneAsSubmoduleWithCache(projectName string, dirName string, destination string, tag string, url string, fetch bool) error {
+	// Get current working directory
+	pwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// Make directory for temporary testing files
+	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
+	err = os.MkdirAll(tmpFiles, 0o750)
+	if err != nil {
+		return fmt.Errorf("%w: failed to create TMP dir", err)
+	}
+	repoPath := filepath.Join(tmpFiles, projectName)
+	err = os.MkdirAll(repoPath, 0o750)
+	if err != nil {
+		return fmt.Errorf("%w: failed to create TMP dir", err)
+	}
+
+	// Clone repository into cache if not done yet
+	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
+		err = os.Chdir(repoPath)
+		if err != nil {
+			return fmt.Errorf("%w: failed to change directory to '%s'", err, repoPath)
+		}
+
+		// Make empty repository and add coreboot as git submodule
+		cmds := [][]string{
+			{"git", "init"},
+			{"git", "submodule", "add", url, dirName},
+			{"git", "submodule", "update", "--init", "--checkout"},
+		}
+		for _, cmd := range cmds {
+			command := exec.Command(cmd[0], cmd[1:]...)
+			err = command.Run()
+			if err != nil {
+				return fmt.Errorf("%w: failed to run command: '%v'", err, cmd)
+			}
+		}
+
+		// Change to coreboot submodule
+		err = os.Chdir(filepath.Join(repoPath, "coreboot"))
+		if err != nil {
+			return fmt.Errorf("%w: failed to change directory to '%s'", err, repoPath)
+		}
+
+		if fetch || tag != "" {
+			// Fetch
+			cmds := [][]string{
+				{"git", "fetch", "-a"},
+				{"git", "fetch", "-t"},
+			}
+			for _, cmd := range cmds {
+				command := exec.Command(cmd[0], cmd[1:]...)
+				err = command.Run()
+				if err != nil {
+					return fmt.Errorf("%w: failed to 'git fetch'", err)
+				}
+			}
+		}
+
+		if tag != "" {
+			// Checkout tag
+			cmd := exec.Command("git", "checkout", tag)
+			err = cmd.Run()
+			if err != nil {
+				return fmt.Errorf("%w: failed to 'git checkout %s'", err, tag)
+			}
+		}
+
+		// Init git submodules
+		cmd := exec.Command("git", "submodule", "update", "--init", "--checkout")
+		err = cmd.Run()
+		if err != nil {
+			return fmt.Errorf("%w: failed to init git submodules", err)
+		}
+	}
+
+	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
+		return fmt.Errorf("%w: dir does not exists '%s'", os.ErrNotExist, repoPath)
+	}
+	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
+		return fmt.Errorf("%w: dir does not exists '%s/%s'", os.ErrNotExist, repoPath, ".git")
+	}
+	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, "coreboot")), os.ErrNotExist) {
+		return fmt.Errorf("%w: dir does not exists '%s/%s'", os.ErrNotExist, repoPath, "coreboot")
+	}
+
+	// Copy repository into destination
+	err = filesystem.CopyDir(repoPath, destination)
+	if err != nil {
+		return fmt.Errorf("%w: failed to copy git repository from cache", err)
+	}
+
+	err = os.Chdir(pwd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func TestCorebootSubmodule(t *testing.T) {
+	// This test is really slow (like 100 seconds)
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
+	common := CommonOpts{
+		OutputDir: "output",
+		ContainerOutputFiles: []string{
+			"build/coreboot.rom",
+			"defconfig",
+		},
+	}
+	// The universal module is used in this test to check version of compiled coreboot binary
+	optionsUniversal := UniversalOpts{
+		CommonOpts: CommonOpts{
+			OutputDir: "output-universal",
+			ContainerOutputFiles: []string{
+				"build_info.txt",
+			},
+			ContainerInputDir: "input",
+		},
+		UniversalSpecific: UniversalSpecific{
+			BuildCommands: []string{
+				"cbfstool coreboot.rom extract -n build_info -f build_info.txt",
+			},
+		},
+	}
+
+	testCases := []struct {
+		name               string
+		corebootVersion    string
+		corebootOptions    CorebootOpts
+		universalOptions   UniversalOpts
+		envVars            map[string]string
+		versionFileContent string
+		versionRegex       string
+		wantErr            error
+	}{
+		{
+			name:            "normal build for QEMU with user-defined KERNELVERSION",
+			corebootVersion: "4.19",
+			corebootOptions: CorebootOpts{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+			},
+			universalOptions: optionsUniversal,
+			envVars: map[string]string{
+				"KERNELVERSION": "0.1.2",
+			},
+			versionFileContent: "",
+			versionRegex:       `0\.1\.2`,
+			wantErr:            nil,
+		},
+		{
+			name:            "normal build for QEMU with user-created .coreboot-version",
+			corebootVersion: "4.19",
+			corebootOptions: CorebootOpts{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+			},
+			universalOptions:   optionsUniversal,
+			versionFileContent: "0.1.3",
+			versionRegex:       `0\.1\.3`,
+			wantErr:            nil,
+		},
+		{
+			name:            "normal build for QEMU with auto-generated KERNELVERSION",
+			corebootVersion: "4.19",
+			corebootOptions: CorebootOpts{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+			},
+			universalOptions:   optionsUniversal,
+			versionFileContent: "",
+			versionRegex:       `4\.19`,
+			wantErr:            nil,
+		},
+		{
+			name:            "normal build for QEMU with auto-generated dirty KERNELVERSION",
+			corebootVersion: "4.19",
+			corebootOptions: CorebootOpts{
+				CommonOpts:    common,
+				DefconfigPath: "seabios_defconfig",
+			},
+			universalOptions:   optionsUniversal,
+			versionFileContent: "",
+			versionRegex:       `4\.19\-dirty`,
+			wantErr:            nil,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+			assert.NoError(t, err)
+			defer client.Close()
+
+			// Prepare options
+			tmpDir := t.TempDir()
+			projectName := fmt.Sprintf("coreboot-as-submodule-%s", tc.corebootVersion)
+			dirName := "coreboot"
+			// Prepare options - coreboot
+			tc.corebootOptions.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
+			tc.corebootOptions.RepoPath = filepath.Join(tmpDir, projectName, dirName)
+			// Prepare options - universal module
+			tc.universalOptions.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
+			tc.universalOptions.RepoPath = filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
+
+			// Change current working directory
+			pwd, err := os.Getwd()
+			defer os.Chdir(pwd) // nolint:errcheck
+			assert.NoError(t, err)
+			err = os.Chdir(tmpDir)
+			assert.NoError(t, err)
+
+			// Clone coreboot repo
+			err = gitCloneAsSubmoduleWithCache(projectName, dirName, filepath.Join(tmpDir, projectName), tc.corebootVersion, "https://review.coreboot.org/coreboot", true)
+			assert.NoError(t, err)
+			if err != nil {
+				t.Fatal("fucked")
+			}
+
+			// Copy over defconfig file into tmpDir
+			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../../.."))
+			assert.NoError(t, err)
+			//   repoPath = path to end user repository (in this case somewhere in /tmp)
+			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
+			err = filesystem.CopyFile(
+				filepath.Join(repoRootPath, fmt.Sprintf("tests/coreboot_%s/seabios.defconfig", tc.corebootVersion)),
+				filepath.Join(tmpDir, tc.corebootOptions.DefconfigPath),
+			)
+			assert.NoError(t, err)
+
+			// Artifacts
+			outputPath := filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
+			err = os.MkdirAll(outputPath, os.ModePerm)
+			assert.NoError(t, err)
+			tc.corebootOptions.OutputDir = outputPath
+			outputPathUniversal := filepath.Join(tmpDir, tc.universalOptions.OutputDir)
+			tc.universalOptions.OutputDir = outputPathUniversal
+
+			// Prep - environment variables
+			for key, value := range tc.envVars {
+				os.Setenv(key, value)
+				defer os.Unsetenv(key)
+				fmt.Printf("Setting %s = %s\n", key, value)
+			}
+
+			// Make version file if required
+			if tc.versionFileContent != "" {
+				assert.NoError(t, os.WriteFile(filepath.Join(projectName, dirName, ".coreboot-version"), []byte(tc.versionFileContent), 0o666))
+			}
+
+			// Try to build coreboot
+			_, err = tc.corebootOptions.buildFirmware(ctx, client, "")
+			assert.ErrorIs(t, err, tc.wantErr)
+
+			// Check artifacts
+			if tc.wantErr == nil {
+				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "coreboot.rom")), os.ErrExist)
+				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+			}
+
+			// Check coreboot version
+			_, err = tc.universalOptions.buildFirmware(ctx, client, "")
+			assert.ErrorIs(t, err, tc.wantErr)
+
+			// Check file with coreboot version exists
+			corebootVersionFile := filepath.Join(outputPathUniversal, "build_info.txt")
+			assert.ErrorIs(t, filesystem.CheckFileExists(corebootVersionFile), os.ErrExist)
+
+			// Find the coreboot version
+			corebootVersionFileContent, err := os.ReadFile(corebootVersionFile)
+			assert.NoError(t, err)
+			versionEntryPatter := regexp.MustCompile(`COREBOOT_VERSION: (.*)`)
+			version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
+
+			versionPattern := regexp.MustCompile(tc.versionRegex)
+			assert.True(t, versionPattern.MatchString(version), fmt.Sprintf("found version '%s' does not match expected regex '%s'", version, tc.versionRegex))
+		})
+	}
+}
