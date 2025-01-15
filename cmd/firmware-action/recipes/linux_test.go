@@ -94,7 +94,7 @@ func TestLinux(t *testing.T) {
 			// Change current working directory
 			//   create __tmp_files__ directory to store source-code of Linux Kernel
 			//   mostly useful for repeated local-run tests to save bandwidth and time
-			tmpFiles := filepath.Join(pwd, "__tmp_files__")
+			tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
 			err = os.MkdirAll(tmpFiles, 0o750)
 			assert.NoError(t, err)
 			err = os.Chdir(tmpFiles)

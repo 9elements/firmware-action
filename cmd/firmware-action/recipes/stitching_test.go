@@ -193,7 +193,7 @@ func TestStitching(t *testing.T) {
 	}
 
 	// Download blobs (contains example IFD.bin)
-	blobDir := "__tmp_files__/blobs"
+	blobDir := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__/blobs")
 	if _, err := os.Stat(blobDir); os.IsNotExist(err) {
 		err := exec.Command("git", "clone", "https://review.coreboot.org/blobs.git", blobDir).Run()
 		assert.NoError(t, err)
@@ -221,11 +221,11 @@ func TestStitching(t *testing.T) {
 			files: []makeFile{
 				{
 					Path:       baseFileName,
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/descriptor.bin"),
 				},
 				{
 					Path:       "me.bin",
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/me.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/me.bin"),
 				},
 			},
 			expectedSha256: "a09cf57dae3062b18ae84f6695a22c5e1e61e3a84a9c9de69af40a0e54b658d4",
@@ -249,11 +249,11 @@ func TestStitching(t *testing.T) {
 			files: []makeFile{
 				{
 					Path:       baseFileName,
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/descriptor.bin"),
 				},
 				{
 					Path:       "me.bin",
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/me.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/me.bin"),
 				},
 			},
 			expectedSha256: "a09cf57dae3062b18ae84f6695a22c5e1e61e3a84a9c9de69af40a0e54b658d4",
@@ -277,11 +277,11 @@ func TestStitching(t *testing.T) {
 			files: []makeFile{
 				{
 					Path:       baseFileName,
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/descriptor.bin"),
 				},
 				{
 					Path:       "me.bin",
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/me.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/me.bin"),
 				},
 			},
 			expectedSha256: "a09cf57dae3062b18ae84f6695a22c5e1e61e3a84a9c9de69af40a0e54b658d4",
@@ -304,7 +304,7 @@ func TestStitching(t *testing.T) {
 			files: []makeFile{
 				{
 					Path:       baseFileName,
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/descriptor.bin"),
 				},
 			},
 			// Should complain about missing file
@@ -326,7 +326,7 @@ func TestStitching(t *testing.T) {
 			files: []makeFile{
 				{
 					Path:       baseFileName,
-					SourcePath: "__tmp_files__/blobs/mainboard/intel/emeraldlake2/descriptor.bin",
+					SourcePath: filepath.Join(blobDir, "mainboard/intel/emeraldlake2/descriptor.bin"),
 				},
 			},
 			expectedSha256: "5c8283b8c668e6735afe3b4209dce64924f7d5f5da771d51b05d37d52dc48331",
@@ -354,7 +354,6 @@ func TestStitching(t *testing.T) {
 
 			// Move files
 			for i := range tc.files {
-				tc.files[i].SourcePath = filepath.Join(pwd, tc.files[i].SourcePath)
 				err = tc.files[i].MakeMe()
 				assert.NoError(t, err)
 			}
