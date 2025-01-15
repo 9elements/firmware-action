@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"testing"
 
@@ -163,13 +164,30 @@ func TestCorebootBuild(t *testing.T) {
 			"defconfig",
 		},
 	}
+	// The universal module is used in this test to check version of compiled coreboot binary
+	optionsUniversal := UniversalOpts{
+		CommonOpts: CommonOpts{
+			OutputDir: "output-universal",
+			ContainerOutputFiles: []string{
+				"build_info.txt",
+			},
+			ContainerInputDir: "input",
+		},
+		UniversalSpecific: UniversalSpecific{
+			BuildCommands: []string{
+				"cbfstool coreboot.rom extract -n build_info -f build_info.txt",
+			},
+		},
+	}
 
 	testCases := []struct {
-		name            string
-		corebootVersion string
-		corebootOptions CorebootOpts
-		cmds            [][]string
-		wantErr         error
+		name             string
+		corebootVersion  string
+		corebootOptions  CorebootOpts
+		universalOptions UniversalOpts
+		cmds             [][]string
+		versionRegex     string
+		wantErr          error
 	}{
 		{
 			name:            "normal build for QEMU",
@@ -178,7 +196,9 @@ func TestCorebootBuild(t *testing.T) {
 				CommonOpts:    common,
 				DefconfigPath: "seabios_defconfig",
 			},
-			wantErr: nil,
+			universalOptions: optionsUniversal,
+			versionRegex:     `4\.19`,
+			wantErr:          nil,
 		},
 		{
 			name:            "binary payload - file does not exists",
@@ -190,7 +210,8 @@ func TestCorebootBuild(t *testing.T) {
 					PayloadFilePath: "my_payload",
 				},
 			},
-			wantErr: os.ErrNotExist,
+			universalOptions: optionsUniversal,
+			wantErr:          os.ErrNotExist,
 		},
 		{
 			name:            "binary payload - file exists but empty",
@@ -202,10 +223,12 @@ func TestCorebootBuild(t *testing.T) {
 					IntelMePath: "intel_me.bin",
 				},
 			},
+			universalOptions: optionsUniversal,
 			cmds: [][]string{
 				{"touch", "intel_me.bin"},
 			},
-			wantErr: nil,
+			versionRegex: `4\.19`,
+			wantErr:      nil,
 		},
 	}
 	for _, tc := range testCases {
@@ -217,8 +240,12 @@ func TestCorebootBuild(t *testing.T) {
 
 			// Prepare options
 			tmpDir := t.TempDir()
+			// Prepare options - coreboot
 			tc.corebootOptions.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
 			tc.corebootOptions.RepoPath = filepath.Join(tmpDir, "coreboot")
+			// Prepare options - universal module
+			tc.universalOptions.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/coreboot_%s:main", tc.corebootVersion)
+			tc.universalOptions.RepoPath = filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
 
 			// Change current working directory
 			pwd, err := os.Getwd()
@@ -247,6 +274,8 @@ func TestCorebootBuild(t *testing.T) {
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
 			tc.corebootOptions.OutputDir = outputPath
+			outputPathUniversal := filepath.Join(tmpDir, tc.universalOptions.OutputDir)
+			tc.universalOptions.OutputDir = outputPathUniversal
 
 			// Prep
 			for cmd := range tc.cmds {
@@ -261,6 +290,25 @@ func TestCorebootBuild(t *testing.T) {
 			if tc.wantErr == nil {
 				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "coreboot.rom")), os.ErrExist)
 				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+			}
+
+			if tc.wantErr == nil {
+				// Check coreboot version
+				_, err = tc.universalOptions.buildFirmware(ctx, client, "")
+				assert.ErrorIs(t, err, tc.wantErr)
+
+				// Check file with coreboot version exists
+				corebootVersionFile := filepath.Join(outputPathUniversal, "build_info.txt")
+				assert.ErrorIs(t, filesystem.CheckFileExists(corebootVersionFile), os.ErrExist)
+
+				// Find the coreboot version
+				corebootVersionFileContent, err := os.ReadFile(corebootVersionFile)
+				assert.NoError(t, err)
+				versionEntryPatter := regexp.MustCompile(`COREBOOT_VERSION: (.*)`)
+				version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
+
+				versionPattern := regexp.MustCompile(tc.versionRegex)
+				assert.True(t, versionPattern.MatchString(version), fmt.Sprintf("found version '%s' does not match expected regex '%s'", version, tc.versionRegex))
 			}
 		})
 	}
