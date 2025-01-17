@@ -106,7 +106,15 @@ func Build(
 		queueMutex.Unlock()
 		return nil, nil
 	}
-	_, err = dependencyForest.DescendantsFlow(target, nil, flowCallback)
+
+	// Create a subgraph with target as the only root
+	// Having multiple roots will result in miscalculation inside DescendantsFlow channel size calculation
+	pruned, rootID, err := dependencyForest.GetDescendantsGraph(target)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = pruned.DescendantsFlow(rootID, nil, flowCallback)
 	if err != nil {
 		return nil, err
 	}
