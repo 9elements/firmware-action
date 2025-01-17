@@ -207,6 +207,43 @@ func TestBuild(t *testing.T) {
 			recursive: false,
 			config:    testConfigDependencyHell,
 		},
+		{
+			name:      "dependency clusterfuck - middle",
+			wantErr:   nil,
+			target:    "milk",
+			recursive: false,
+			config:    testConfigDependencyHell,
+		},
+		{
+			name:      "two leaves and one root",
+			wantErr:   nil,
+			target:    "stitch",
+			recursive: false,
+			config: Config{
+				Edk2: map[string]Edk2Opts{
+					"edk2-build-a": {Depends: []string{}},
+					"edk2-build-b": {Depends: []string{}},
+				},
+				FirmwareStitching: map[string]FirmwareStitchingOpts{
+					"stitch":  {Depends: []string{"edk2-build-a"}},
+				},
+			},
+		},
+		{
+			name:      "one root and two leaves",
+			wantErr:   nil,
+			target:    "stitch-a",
+			recursive: false,
+			config: Config{
+				Edk2: map[string]Edk2Opts{
+					"edk2-build": {Depends: []string{}},
+				},
+				FirmwareStitching: map[string]FirmwareStitchingOpts{
+					"stitch-a":  {Depends: []string{"edk2-build"}},
+					"stitch-b": {Depends: []string{"edk2-build"}},
+				},
+			},
+		},
 	}
 
 	const interactive = false
