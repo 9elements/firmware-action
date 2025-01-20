@@ -4,12 +4,14 @@
 ARG SOURCE_IMAGE=buildpack-deps:focal
 ARG INTERMEDIATE_IMAGE=base
 ARG TARGETARCH=amd64
+ARG NODESOURCE=https://deb.nodesource.com/setup_20.x
 
 #=============
 # "base" stage with all needed build dependencies
 FROM ${SOURCE_IMAGE} AS base
 
 ARG TARGETARCH
+ARG NODESOURCE
 
 ARG EDK2_VERSION=edk2-stable202008
 ENV EDK2_VERSION=$EDK2_VERSION
@@ -45,7 +47,7 @@ ENV WORKSPACE=$TOOLSDIR/Edk2
 RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         dpkg --add-architecture i386; \
     fi; \
-    wget --quiet -O nodesource_setup.sh https://deb.nodesource.com/setup_20.x && \
+    wget --quiet -O nodesource_setup.sh "${NODESOURCE}" && \
         chmod +x nodesource_setup.sh && \
         ./nodesource_setup.sh && \
     apt-get update && \

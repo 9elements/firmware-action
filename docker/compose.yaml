@@ -56,6 +56,7 @@ services:
         - PYTHON_VERSION=python2
         - GCC_CROSS_COMPILER_PACKAGES_ARM=gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi gcc-i686-linux-gnu
         - GCC_CROSS_COMPILER_PACKAGES_X86=gcc-i686-linux-gnu
+        - NODESOURCE=https://deb.nodesource.com/setup_16.x
       # NonOSI wasn't used in 2017
   edk2-stable202008:
     build:
@@ -69,6 +70,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202105:
     build:
       context: edk2
@@ -81,6 +83,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202111:
     build:
       context: edk2
@@ -93,6 +96,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   # Building UniversalPayload from this point on is likely ???
   edk2-stable202205:
     build:
@@ -107,6 +111,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202208:
     build:
       context: edk2
@@ -120,6 +125,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202211:
     build:
       context: edk2
@@ -132,6 +138,7 @@ services:
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202302:
     build:
       context: edk2
@@ -145,6 +152,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202305:
     build:
       context: edk2
@@ -158,6 +166,7 @@ services:
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   # Since edk2-stable202305 the GCC_VERSION should be more flexible
   # https://github.com/tianocore/edk2/commit/0fc07b1c6a491fa1e81daed6cfc2ec33c8cac973
   edk2-stable202308:
@@ -173,6 +182,7 @@ services:
         - GCC_VERSION=12
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202311:
     build:
       context: edk2
@@ -186,6 +196,7 @@ services:
         - GCC_VERSION=12
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202402:
     build:
       context: edk2
@@ -199,6 +210,7 @@ services:
         - GCC_VERSION=12
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202405:
     build:
       context: edk2
@@ -212,6 +224,7 @@ services:
         - GCC_VERSION=12
         - PYTHON_PACKAGES=python-is-python3 python2 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202408.01:
     build:
       context: edk2
@@ -225,6 +238,7 @@ services:
         - GCC_VERSION=13
         - PYTHON_PACKAGES=python-is-python3 python3
         - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   #==================
   # linux
   #==================
