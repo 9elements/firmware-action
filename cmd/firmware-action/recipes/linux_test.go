@@ -155,8 +155,10 @@ func TestLinux(t *testing.T) {
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
-			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "vmlinux")), os.ErrExist)
-			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+			if tc.wantErr == nil {
+				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "vmlinux")), os.ErrExist)
+				assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "defconfig")), os.ErrExist)
+			}
 		})
 	}
 	assert.NoError(t, os.Chdir(pwd)) // just to make sure

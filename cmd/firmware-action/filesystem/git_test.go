@@ -56,7 +56,7 @@ func TestGitRun(t *testing.T) {
 	// Test git status
 	stdout, err := gitRun("./", []string{"git", "status"})
 	assert.NoError(t, err)
-	assert.Equal(t, stdout, "On branch master\nnothing to commit, working tree clean\n")
+	assert.Equal(t, "On branch master\nnothing to commit, working tree clean\n", stdout)
 }
 
 func TestGitDescribeCoreboot(t *testing.T) {
@@ -73,7 +73,7 @@ func TestGitDescribeCoreboot(t *testing.T) {
 	// Test git status
 	describe, err := GitDescribeCoreboot("./")
 	assert.NoError(t, err)
-	assert.Equal(t, describe, "4eeb1eaf0c81")
+	assert.Equal(t, "4eeb1eaf0c81", describe)
 	// This magic value comes from manual execution of the test
 	// Since the content, author and time of the commit are hard-coded,
 	//   the commit hash is always the same
