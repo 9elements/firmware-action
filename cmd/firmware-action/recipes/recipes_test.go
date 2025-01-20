@@ -225,7 +225,7 @@ func TestBuild(t *testing.T) {
 					"edk2-build-b": {Depends: []string{}},
 				},
 				FirmwareStitching: map[string]FirmwareStitchingOpts{
-					"stitch":  {Depends: []string{"edk2-build-a"}},
+					"stitch": {Depends: []string{"edk2-build-a"}},
 				},
 			},
 		},
@@ -239,7 +239,7 @@ func TestBuild(t *testing.T) {
 					"edk2-build": {Depends: []string{}},
 				},
 				FirmwareStitching: map[string]FirmwareStitchingOpts{
-					"stitch-a":  {Depends: []string{"edk2-build"}},
+					"stitch-a": {Depends: []string{"edk2-build"}},
 					"stitch-b": {Depends: []string{"edk2-build"}},
 				},
 			},
