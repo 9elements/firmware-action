@@ -5,7 +5,7 @@ ARG TARGETARCH=amd64
 
 #=============
 # "base" stage with all needed build dependencies
-ARG SOURCE_IMAGE=ubuntu:jammy
+ARG SOURCE_IMAGE=ubuntu:noble
 FROM ${SOURCE_IMAGE} AS base
 
 ARG TARGETARCH
