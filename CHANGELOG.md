@@ -1,3 +1,9 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
+
+- - -
+
 ## v0.10.2 - 2024-12-19
 #### Build system
 - **(deps)** bump docs/src/firmware-action-example - (4d59952) - dependabot[bot]
