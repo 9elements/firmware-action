@@ -60,52 +60,65 @@ func TestCorebootProcessBlobs(t *testing.T) {
 	}
 }
 
-func gitCloneWithCache(dirName string, destination string, branch string, tag string, depth int, url string, fetch bool) error {
+type gitCloneOpts struct {
+	projectName string
+	dirName     string
+	destination string
+	branch      string
+	tag         string
+	depth       int
+	url         string
+	fetch       bool
+}
+
+func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
+	tb.Helper()
+
 	// Get current working directory
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		tb.Error(err)
 	}
 
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
 	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
-		return fmt.Errorf("%w: failed to create TMP dir", err)
+		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
 
-	repoPath := filepath.Join(tmpFiles, dirName)
+	repoPath := filepath.Join(tmpFiles, opts.dirName)
 
 	// Clone repository into cache if not done yet
 	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
 		err = os.Chdir(tmpFiles)
 		if err != nil {
-			return fmt.Errorf("%w: failed to change directory to '%s'", err, tmpFiles)
+			tb.Errorf("failed to change directory to '%s': %s", tmpFiles, err.Error())
 		}
 
 		command := []string{"git", "clone"}
-		if branch != "" {
-			command = append(command, "--branch", branch)
+		if opts.branch != "" {
+			command = append(command, "--branch", opts.branch)
 		}
-		if depth != 0 {
-			command = append(command, "--depth", strconv.Itoa(depth))
+		if opts.depth != 0 {
+			command = append(command, "--depth", strconv.Itoa(opts.depth))
 		}
-		command = append(command, url, dirName)
+		command = append(command, opts.url, opts.dirName)
 
 		// Clone
 		cmd := exec.Command(command[0], command[1:]...)
 		err = cmd.Run()
 		if err != nil {
-			return fmt.Errorf("%w: failed to 'git clone'", err)
+			tb.Errorf("failed to 'git clone': %s", err.Error())
 		}
 
 		// Change to repository
 		err = os.Chdir(repoPath)
 		if err != nil {
-			return fmt.Errorf("%w: failed to change directory to '%s'", err, repoPath)
+			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
 		}
 
-		if fetch || tag != "" {
+		if opts.fetch || opts.tag != "" {
 			// Fetch
 			cmds := [][]string{
 				{"git", "fetch", "-a"},
@@ -115,17 +128,17 @@ func gitCloneWithCache(dirName string, destination string, branch string, tag st
 				command := exec.Command(cmd[0], cmd[1:]...)
 				err = command.Run()
 				if err != nil {
-					return fmt.Errorf("%w: failed to 'git fetch'", err)
+					tb.Errorf("failed to 'git fetch': %s", err.Error())
 				}
 			}
 		}
 
-		if tag != "" {
+		if opts.tag != "" {
 			// Checkout a tag
-			cmd = exec.Command("git", "checkout", tag)
+			cmd = exec.Command("git", "checkout", opts.tag)
 			err = cmd.Run()
 			if err != nil {
-				return fmt.Errorf("%w: failed to 'git checkout %s'", err, tag)
+				tb.Errorf("failed to 'git checkout %s': %s", opts.tag, err.Error())
 			}
 		}
 
@@ -133,22 +146,20 @@ func gitCloneWithCache(dirName string, destination string, branch string, tag st
 		cmd = exec.Command("git", "submodule", "update", "--init", "--checkout")
 		err = cmd.Run()
 		if err != nil {
-			return fmt.Errorf("%w: failed to init git submodules", err)
+			tb.Errorf("failed to init git submodules: %s", err.Error())
 		}
 	}
 
 	// Copy repository into destination
-	err = filesystem.CopyDir(repoPath, destination)
+	err = filesystem.CopyDir(repoPath, opts.destination)
 	if err != nil {
-		return fmt.Errorf("%w: failed to copy git repository from cache", err)
+		tb.Errorf("failed to copy git repository from cache: %s", err.Error())
 	}
 
 	err = os.Chdir(pwd)
 	if err != nil {
-		return err
+		tb.Error(err)
 	}
-
-	return nil
 }
 
 func TestCorebootBuild(t *testing.T) {
@@ -255,8 +266,14 @@ func TestCorebootBuild(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Clone coreboot repo
-			err = gitCloneWithCache(fmt.Sprintf("coreboot-%s", tc.corebootVersion), filepath.Join(tmpDir, "coreboot"), "", tc.corebootVersion, 0, "https://review.coreboot.org/coreboot", true)
-			assert.NoError(t, err)
+			opts := gitCloneOpts{
+				dirName:     fmt.Sprintf("coreboot-%s", tc.corebootVersion),
+				destination: filepath.Join(tmpDir, "coreboot"),
+				tag:         tc.corebootVersion,
+				url:         "https://review.coreboot.org/coreboot",
+				fetch:       true,
+			}
+			gitCloneWithCache(t, &opts)
 
 			// Copy over defconfig file into tmpDir
 			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../../.."))
@@ -314,53 +331,55 @@ func TestCorebootBuild(t *testing.T) {
 	}
 }
 
-func gitCloneAsSubmoduleWithCache(projectName string, dirName string, destination string, tag string, url string, fetch bool) error {
+func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
+	tb.Helper()
+
 	// Get current working directory
 	pwd, err := os.Getwd()
 	if err != nil {
-		return err
+		tb.Error(err)
 	}
 
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
 	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
-		return fmt.Errorf("%w: failed to create TMP dir", err)
+		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
-	repoPath := filepath.Join(tmpFiles, projectName)
+	repoPath := filepath.Join(tmpFiles, opts.projectName)
 	err = os.MkdirAll(repoPath, 0o750)
 	if err != nil {
-		return fmt.Errorf("%w: failed to create TMP dir", err)
+		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
 
 	// Clone repository into cache if not done yet
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
 		err = os.Chdir(repoPath)
 		if err != nil {
-			return fmt.Errorf("%w: failed to change directory to '%s'", err, repoPath)
+			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
 		}
 
 		// Make empty repository and add coreboot as git submodule
 		cmds := [][]string{
 			{"git", "init"},
-			{"git", "submodule", "add", url, dirName},
+			{"git", "submodule", "add", opts.url, opts.dirName},
 			{"git", "submodule", "update", "--init", "--checkout"},
 		}
 		for _, cmd := range cmds {
 			command := exec.Command(cmd[0], cmd[1:]...)
 			err = command.Run()
 			if err != nil {
-				return fmt.Errorf("%w: failed to run command: '%v'", err, cmd)
+				tb.Errorf("failed to run command: '%v': %s", cmd, err.Error())
 			}
 		}
 
 		// Change to coreboot submodule
 		err = os.Chdir(filepath.Join(repoPath, "coreboot"))
 		if err != nil {
-			return fmt.Errorf("%w: failed to change directory to '%s'", err, repoPath)
+			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
 		}
 
-		if fetch || tag != "" {
+		if opts.fetch || opts.tag != "" {
 			// Fetch
 			cmds := [][]string{
 				{"git", "fetch", "-a"},
@@ -370,17 +389,17 @@ func gitCloneAsSubmoduleWithCache(projectName string, dirName string, destinatio
 				command := exec.Command(cmd[0], cmd[1:]...)
 				err = command.Run()
 				if err != nil {
-					return fmt.Errorf("%w: failed to 'git fetch'", err)
+					tb.Errorf("failed to 'git fetch': %s", err.Error())
 				}
 			}
 		}
 
-		if tag != "" {
+		if opts.tag != "" {
 			// Checkout tag
-			cmd := exec.Command("git", "checkout", tag)
+			cmd := exec.Command("git", "checkout", opts.tag)
 			err = cmd.Run()
 			if err != nil {
-				return fmt.Errorf("%w: failed to 'git checkout %s'", err, tag)
+				tb.Errorf("failed to 'git checkout %s': %s", opts.tag, err.Error())
 			}
 		}
 
@@ -388,32 +407,30 @@ func gitCloneAsSubmoduleWithCache(projectName string, dirName string, destinatio
 		cmd := exec.Command("git", "submodule", "update", "--init", "--checkout")
 		err = cmd.Run()
 		if err != nil {
-			return fmt.Errorf("%w: failed to init git submodules", err)
+			tb.Errorf("failed to init git submodules: %s", err.Error())
 		}
 	}
 
 	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
-		return fmt.Errorf("%w: dir does not exists '%s'", os.ErrNotExist, repoPath)
+		tb.Errorf("dir does not exists '%s'", repoPath)
 	}
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
-		return fmt.Errorf("%w: dir does not exists '%s/%s'", os.ErrNotExist, repoPath, ".git")
+		tb.Errorf("dir does not exists '%s/%s'", repoPath, ".git")
 	}
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, "coreboot")), os.ErrNotExist) {
-		return fmt.Errorf("%w: dir does not exists '%s/%s'", os.ErrNotExist, repoPath, "coreboot")
+		tb.Errorf("dir does not exists '%s/%s'", repoPath, "coreboot")
 	}
 
 	// Copy repository into destination
-	err = filesystem.CopyDir(repoPath, destination)
+	err = filesystem.CopyDir(repoPath, opts.destination)
 	if err != nil {
-		return fmt.Errorf("%w: failed to copy git repository from cache", err)
+		tb.Errorf("failed to copy git repository from cache: %s", err.Error())
 	}
 
 	err = os.Chdir(pwd)
 	if err != nil {
-		return err
+		tb.Error(err)
 	}
-
-	return nil
 }
 
 func TestCorebootSubmodule(t *testing.T) {
@@ -533,11 +550,15 @@ func TestCorebootSubmodule(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Clone coreboot repo
-			err = gitCloneAsSubmoduleWithCache(projectName, dirName, filepath.Join(tmpDir, projectName), tc.corebootVersion, "https://review.coreboot.org/coreboot", true)
-			assert.NoError(t, err)
-			if err != nil {
-				t.Fatal("fucked")
+			opts := gitCloneOpts{
+				projectName: projectName,
+				dirName:     dirName,
+				destination: filepath.Join(tmpDir, projectName),
+				tag:         tc.corebootVersion,
+				url:         "https://review.coreboot.org/coreboot",
+				fetch:       true,
 			}
+			gitCloneAsSubmoduleWithCache(t, &opts)
 
 			// Copy over defconfig file into tmpDir
 			repoRootPath, err := filepath.Abs(filepath.Join(pwd, "../../.."))
