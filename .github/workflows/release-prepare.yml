@@ -48,7 +48,8 @@ jobs:
           cargo install --locked cocogitto
       - name: Update changelog
         run: |
-          cog changelog > CHANGELOG.md
+          cog bump --auto --disable-bump-commit
+        # cog bump will create a new tag, but it does not get pushed in along with the new PR branch
 
       - name: Create pull request
         id: create_pr
