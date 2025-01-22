@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.11.1 - 2025-01-22
+#### Bug Fixes
+- release workflow - (5e845cd) - AtomicFS
+
+- - -
+
 ## v0.11.0 - 2025-01-22
 #### Bug Fixes
 - **(action)** add coreboot blobs into GetSources - (0f0a9a6) - AtomicFS
