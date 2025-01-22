@@ -3,6 +3,55 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.11.0 - 2025-01-22
+#### Bug Fixes
+- **(action)** add coreboot blobs into GetSources - (0f0a9a6) - AtomicFS
+- **(ci)** stop scheduled docker container builds - (8617665) - AtomicFS
+- **(cmd)** passing coreboot version into container - (38c7b20) - AtomicFS
+- **(docker)** downgrade NodeJS for udk2017 - (23c8d31) - AtomicFS
+- **(docker)** install newer NodeJS into edk2 containers - (52d5cd8) - AtomicFS
+- create subgraph when multiple roots present - (942bc1b) - Marvin Drees
+- undefined variable in Taskfile - (bbc46be) - AtomicFS
+#### Build system
+- **(deps)** bump github.com/go-playground/validator/v10 - (c90f456) - dependabot[bot]
+- **(deps)** bump golang.org/x/crypto from 0.31.0 to 0.32.0 in /action - (5ac5e4a) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /action - (943d480) - dependabot[bot]
+- **(deps)** update anyio requirement in /.dagger-ci/daggerci - (3d6789e) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /action - (cb6d824) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (f60fd1d) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /action - (e1ec222) - dependabot[bot]
+#### Continuous Integration
+- tweak release-prepare - (5d8cef1) - AtomicFS
+#### Documentation
+- fix changelog headline - (4fa835d) - AtomicFS
+- fix dates in changelog - (01261dc) - AtomicFS
+- unify firmare-action name in README - (c948e47) - AtomicFS
+- update firmware-action installation instruction - (c760068) - AtomicFS
+- update remaining '/action' reference - (1d6a465) - Marvin Drees
+- add golang installation instructions - (ec9bbd1) - AtomicFS
+#### Features
+- **(cmd)** pass env vars into coreboot container - (16085ab) - AtomicFS
+- **(cmd)** add functions to help with passing env vars into container - (1cefcf7) - AtomicFS
+- **(cmd)** add functions for handling git describe - (2aebc88) - AtomicFS
+#### Miscellaneous Chores
+- **(action)** move golang code - (94b500f) - AtomicFS
+- **(cmd)** unify assert parameters - (586199f) - AtomicFS
+- **(docker)** bump coreboot docker containers from jammy to noble - (4ec7b9f) - AtomicFS
+- **(linter)** cspell - (990ce12) - AtomicFS
+- sort .gitignore alphabetically - (fcd2bf6) - AtomicFS
+- change go mod path and imports - (be9a59a) - Marvin Drees
+- cleanup after moving golang code - (07a5942) - AtomicFS
+#### Refactoring
+- **(cmd)** use DIY cache in /tmp for coreboot tests - (abdab2c) - AtomicFS
+- **(cmd/test)** according to review - (6c14e86) - AtomicFS
+- **(cmd/test)** use /tmp for cache in all tests - (4ef189c) - AtomicFS
+- **(test)** test embedded coreboot version in compiled binary - (88ba083) - AtomicFS
+#### Tests
+- **(cmd)** passing of git describe into container - (1ccd2d4) - AtomicFS
+- **(cmd)** orphaned node break DAG - (402447e) - AtomicFS
+
+- - -
+
 
 ## v0.10.2 - 2024-12-19
 #### Build system
