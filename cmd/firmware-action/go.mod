@@ -1,11 +1,10 @@
 module github.com/9elements/firmware-action
 
 go 1.22.5
-
 toolchain go1.23.2
 
 require (
-	dagger.io/dagger v0.14.0
+	dagger.io/dagger v0.15.2
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.6.1
 	github.com/dustin/go-humanize v1.0.1
@@ -22,11 +21,11 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/99designs/gqlgen v0.17.55 // indirect
+	github.com/99designs/gqlgen v0.17.57 // indirect
 	github.com/Khan/genqlient v0.7.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.5 // indirect
-	github.com/adrg/xdg v0.5.1 // indirect
+	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
@@ -53,7 +52,7 @@ require (
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.17 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.20 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/otel v1.27.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.0.0-20240518090000-14441aefdf88 // indirect
@@ -79,8 +78,8 @@ require (
 	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
-	google.golang.org/grpc v1.66.1 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/grpc v1.68.0 // indirect
+	google.golang.org/protobuf v1.35.2 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
