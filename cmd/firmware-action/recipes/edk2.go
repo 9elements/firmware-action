@@ -5,10 +5,8 @@ package recipes
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
-	"os"
 	"runtime"
 
 	"dagger.io/dagger"
@@ -27,7 +25,7 @@ type Edk2Specific struct {
 	//   "source ./edksetup.sh; build -t GCC5 -a IA32 -p UefiPayloadPkg/UefiPayloadPkg.dsc"
 	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"
 	//   "Intel/AlderLakeFspPkg/BuildFv.sh"
-	BuildCommand string `json:"build_command" validate:"required"`
+	BuildCommand []string `json:"build_command" validate:"required"`
 }
 
 // ANCHOR_END: Edk2Specific
@@ -51,11 +49,6 @@ type Edk2Opts struct {
 	//   - 'IA32X64'
 	//   - 'X64'
 	Arch string `json:"arch"`
-
-	// Gives the (relative) path to the defconfig that should be used to build the target.
-	// For EDK2 this is a one-line file containing the build arguments such as
-	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
-	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
 
 	// Coreboot specific options
 	Edk2Specific `validate:"required"`
@@ -105,24 +98,6 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
 
-	// Assemble build arguments
-	//   and read content of the config file at "defconfig_path"
-	var defconfigFileArgs []byte
-	if opts.DefconfigPath != "" {
-		if _, err := os.Stat(opts.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
-			defconfigFileArgs, err = os.ReadFile(opts.DefconfigPath)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			slog.Warn(
-				fmt.Sprintf("Failed to read file '%s' as defconfig_path: file does not exist", opts.DefconfigPath),
-				slog.String("suggestion", "Double check the path for defconfig"),
-				slog.Any("error", err),
-			)
-		}
-	}
-
 	// Assemble commands to build
 	buildSteps := [][]string{}
 	if !(runtime.GOARCH == "386" || runtime.GOARCH == "amd64") {
@@ -130,7 +105,9 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		// Docs: https://go.dev/doc/install/source#environment
 		buildSteps = append(buildSteps, []string{"bash", "-c", "cd ${TOOLSDIR}/Edk2/; make -C BaseTools/ -j $(nproc)"})
 	}
-	buildSteps = append(buildSteps, []string{"bash", "-c", fmt.Sprintf("%s %s", opts.BuildCommand, string(defconfigFileArgs))})
+	for _, cmd := range opts.BuildCommand {
+		buildSteps = append(buildSteps, []string{"bash", "-c", cmd})
+	}
 
 	// Build
 	var myContainerPrevious *dagger.Container
