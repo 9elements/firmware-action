@@ -134,6 +134,9 @@ func (opts CorebootOpts) GetArtifacts() *[]container.Artifacts {
 func (opts CorebootOpts) GetSources() []string {
 	sources := opts.CommonOpts.GetSources()
 
+	// Add DefconfigPath to list of sources
+	sources = append(sources, opts.DefconfigPath)
+
 	// Add blobs to list of sources
 	blobs, err := corebootProcessBlobs(opts.Blobs)
 	if err != nil {
