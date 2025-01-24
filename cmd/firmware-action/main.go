@@ -45,9 +45,8 @@ var CLI struct {
 	Config string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file"`
 
 	Build struct {
-		Target      string `required:"" help:"Select which target to build, use ID from configuration file"`
-		Recursive   bool   `help:"Build recursively with all dependencies and payloads"`
-		Interactive bool   `help:"Open interactive SSH into container if build fails"`
+		Target    string `required:"" help:"Select which target to build, use ID from configuration file"`
+		Recursive bool   `help:"Build recursively with all dependencies and payloads"`
 	} `cmd:"build" help:"Build a target defined in configuration file"`
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
@@ -80,7 +79,6 @@ func run(ctx context.Context) error {
 		slog.String("input/config", CLI.Config),
 		slog.String("input/target", CLI.Build.Target),
 		slog.Bool("input/recursive", CLI.Build.Recursive),
-		slog.Bool("input/interactive", CLI.Build.Interactive),
 	)
 
 	// Check if submodules were initialized
@@ -129,7 +127,6 @@ submodule_out:
 		ctx,
 		CLI.Build.Target,
 		CLI.Build.Recursive,
-		CLI.Build.Interactive,
 		myConfig,
 		recipes.Execute,
 	)

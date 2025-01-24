@@ -248,7 +248,7 @@ func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -265,7 +265,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Copy over the defconfig file
@@ -278,7 +278,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
@@ -288,7 +288,6 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
 	//   to extract value of 'CONFIG_MAINBOARD_DIR', there must be '.config'
 	generateDotConfigCmd := []string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"}
-	myContainerPrevious := myContainer
 	mainboardDir, err := myContainer.
 		WithExec(generateDotConfigCmd).
 		WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
@@ -298,7 +297,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to get value of MAINBOARD_DIR from .config",
 			slog.Any("error", err),
 		)
-		return myContainerPrevious, err
+		return err
 	}
 	//   strip newline from mainboardDir
 	mainboardDir = strings.Replace(mainboardDir, "\n", "", -1)
@@ -322,7 +321,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to process all blobs",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 	for blob := range blobs {
 		// Path to local file on host
@@ -343,7 +342,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				slog.String("suggestion", "blobs are copied into container separately from 'input_files' and 'input_dirs', the path should point to files on your host"),
 				slog.Any("error", err),
 			)
-			return nil, err
+			return err
 		}
 		if blobs[blob].IsDirectory {
 			// Directory
@@ -389,7 +388,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to extract environment variables from current environment",
 			slog.Any("error", err),
 		)
-		return myContainerPrevious, fmt.Errorf("coreboot build failed: %w", err)
+		return fmt.Errorf("coreboot build failed: %w", err)
 	}
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
@@ -397,7 +396,6 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 
 	// Build
 	for step := range buildSteps {
-		myContainerPrevious := myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
@@ -406,12 +404,12 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				"Failed to build coreboot",
 				slog.Any("error", err),
 			)
-			return myContainerPrevious, fmt.Errorf("coreboot build failed: %w", err)
+			return fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
 }
 
 func corebootPassEnvVars(repoPath string) (map[string]string, error) {

@@ -82,7 +82,7 @@ func (opts LinuxOpts) GetSources() []string {
 // buildFirmware builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
-func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -99,7 +99,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Copy over the defconfig file
@@ -112,7 +112,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		//   make: *** [Makefile:704: linux.defconfig] Error 2
 		// but defconfigBasename="linux_defconfig" works fine
 		// Don't know why, just return error and let user deal with it.
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"filename '%s' specified by defconfig_path must not contain '.defconfig'",
 			defconfigBasename,
 		)
@@ -121,7 +121,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	if !defconfigRegex.MatchString(defconfigBasename) {
 		// 'make $defconfigBasename' will fail for Linux kernel if the file
 		// does not end with 'defconfig'
-		return nil, fmt.Errorf(
+		return fmt.Errorf(
 			"filename '%s' specified by defconfig_path must end with 'defconfig'",
 			defconfigBasename,
 		)
@@ -134,7 +134,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
@@ -164,7 +164,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 				slog.String("target_architecture", opts.Arch),
 				slog.Any("error", err),
 			)
-			return nil, err
+			return err
 		}
 		if val != "" {
 			envVars["CROSS_COMPILE"] = val
@@ -193,9 +193,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	}
 
 	// Execute build commands
-	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
@@ -204,10 +202,10 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 				"Failed to build linux",
 				slog.Any("error", err),
 			)
-			return myContainerPrevious, fmt.Errorf("linux build failed: %w", err)
+			return fmt.Errorf("linux build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

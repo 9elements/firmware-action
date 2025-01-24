@@ -15,7 +15,6 @@ import (
 	"sync"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/container"
 	"github.com/9elements/firmware-action/filesystem"
 	"github.com/heimdalr/dag"
 )
@@ -61,9 +60,8 @@ func Build(
 	ctx context.Context,
 	target string,
 	recursive bool,
-	interactive bool,
 	config *Config,
-	executor func(context.Context, string, *Config, bool) error,
+	executor func(context.Context, string, *Config) error,
 ) ([]BuildResults, error) {
 	dependencyForest := dag.NewDAG()
 	dependencies := [][]string{}
@@ -128,7 +126,7 @@ func Build(
 		for _, item := range queue {
 			slog.Info(fmt.Sprintf("Building: %s", item))
 
-			err = executor(ctx, item, config, interactive)
+			err = executor(ctx, item, config)
 			builds = append(builds, BuildResults{item, err})
 
 			if err != nil && !errors.Is(err, ErrBuildUpToDate) {
@@ -139,7 +137,7 @@ func Build(
 		// else build only the target
 		slog.Info(fmt.Sprintf("Building '%s' NOT recursively", target))
 
-		err = executor(ctx, target, config, interactive)
+		err = executor(ctx, target, config)
 		builds = append(builds, BuildResults{target, err})
 	}
 
@@ -174,8 +172,8 @@ func IsDirEmpty(path string) (bool, error) {
 }
 
 // Execute a build step
-// func Execute(ctx context.Context, target string, config *Config, interactive bool, bulldozeMode bool) error {
-func Execute(ctx context.Context, target string, config *Config, interactive bool) error {
+// func Execute(ctx context.Context, target string, config *Config, bulldozeMode bool) error {
+func Execute(ctx context.Context, target string, config *Config) error {
 	// Prep
 	err := os.MkdirAll(TimestampsDir, os.ModePerm)
 	if err != nil {
@@ -246,16 +244,10 @@ func Execute(ctx context.Context, target string, config *Config, interactive boo
 		defer client.Close()
 
 		// Build the module
-		myContainer, err := modules[target].buildFirmware(ctx, client, "")
+		err = modules[target].buildFirmware(ctx, client, "")
 		if err == nil {
 			// On success update the timestamp
 			_ = filesystem.SaveCurrentRunTime(timestampFile)
-		}
-		if err != nil && interactive {
-			// If error, try to open SSH
-			opts := container.NewSettingsSSH(container.WithWaitPressEnter())
-			sshErr := container.OpenSSH(ctx, client, myContainer, ContainerWorkDir, opts)
-			return errors.Join(err, sshErr)
 		}
 		return err
 	}
