@@ -498,4 +498,9 @@ jobs:
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
         env:
+          COREBOOT_VERSION: '4.19'
+          LINUX_VERSION: '6.9.9'
+          SYSTEM_ARCH: 'amd64'
+          EDK2_VERSION: 'edk2-stable202208'
+          GCC_TOOLCHAIN_VERSION: 'GCC'
           UROOT_VERSION: ${{ matrix.uroot-version }}
