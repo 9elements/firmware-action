@@ -32,13 +32,14 @@
       "sdk_url": "ghcr.io/9elements/firmware-action/${EDK2_VERSION}:main",
       "arch": "X64",
       "repo_path": "Edk2/",
-      "defconfig_path": "edk2_config.cfg",
       "output_dir": "output-edk2/",
       "container_output_dirs": [
         "Build/"
       ],
       "container_output_files": null,
-      "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t ${GCC_TOOLCHAIN_VERSION}",
+      "build_command": [
+        "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t ${GCC_TOOLCHAIN_VERSION}"
+      ],
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null
