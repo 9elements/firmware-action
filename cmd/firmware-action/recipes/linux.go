@@ -69,6 +69,16 @@ func (opts LinuxOpts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
+// GetSources returns slice of paths to all sources which are used for build
+func (opts LinuxOpts) GetSources() []string {
+	sources := opts.CommonOpts.GetSources()
+
+	// Add DefconfigPath to list of sources
+	sources = append(sources, opts.DefconfigPath)
+
+	return sources
+}
+
 // buildFirmware builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html

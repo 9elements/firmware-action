@@ -73,6 +73,16 @@ func (opts Edk2Opts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
+// GetSources returns slice of paths to all sources which are used for build
+func (opts Edk2Opts) GetSources() []string {
+	sources := opts.CommonOpts.GetSources()
+
+	// Add DefconfigPath to list of sources
+	sources = append(sources, opts.DefconfigPath)
+
+	return sources
+}
+
 // buildFirmware builds edk2 or Intel FSP
 func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
 	envVars := map[string]string{
