@@ -47,7 +47,7 @@ var CLI struct {
 	Build struct {
 		Target    string `required:"" help:"Select which target to build, use ID from configuration file"`
 		Recursive bool   `help:"Build recursively with all dependencies and payloads"`
-	} `cmd:"build" help:"Build a target defined in configuration file"`
+	} `cmd:"build" help:"Build a target defined in configuration file. For interactive debugging preface the command with 'dagger run --interactive', for example 'dagger run --interactive $(which firmware-action) build --config=...'. To install dagger follow instructions at https://dagger.io/"`
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
 	Version        struct{} `cmd:"version" help:"Print version and exit"`
