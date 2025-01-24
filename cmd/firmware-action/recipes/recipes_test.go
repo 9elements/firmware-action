@@ -11,7 +11,6 @@ import (
 )
 
 func TestExecute(t *testing.T) {
-	const interactive = false
 	ctx := context.Background()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
@@ -39,14 +38,13 @@ func TestExecute(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err = Execute(ctx, tc.target, &tc.config, interactive)
+			err = Execute(ctx, tc.target, &tc.config)
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
 }
 
 func TestExecuteSkipAndMissing(t *testing.T) {
-	const interactive = false
 	ctx := context.Background()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
@@ -91,18 +89,18 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 
 	// Files from the 2nd modules are missing
 	// This should fail since the 2nd module is in Depends
-	err = Execute(ctx, target, &myConfig, interactive)
+	err = Execute(ctx, target, &myConfig)
 	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
 
 	// Create the output directory
 	// Should build because the directory is empty
 	err = os.Mkdir(outputDir, os.ModePerm)
 	assert.NoError(t, err)
-	err = Execute(ctx, target, &myConfig, interactive)
+	err = Execute(ctx, target, &myConfig)
 	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
 }
 
-func executeDummy(_ context.Context, _ string, _ *Config, _ bool) error {
+func executeDummy(_ context.Context, _ string, _ *Config) error {
 	return nil
 }
 
@@ -246,14 +244,12 @@ func TestBuild(t *testing.T) {
 		},
 	}
 
-	const interactive = false
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := Build(
 				ctx,
 				tc.target,
 				tc.recursive,
-				interactive,
 				&tc.config,
 				executeDummy,
 			)
@@ -266,7 +262,6 @@ func TestBuild(t *testing.T) {
 			ctx,
 			"pizza",
 			recursive,
-			interactive,
 			&testConfigDependencyHell,
 			executeDummy,
 		)
