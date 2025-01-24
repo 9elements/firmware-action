@@ -49,7 +49,7 @@ func (opts URootOpts) GetArtifacts() *[]container.Artifacts {
 }
 
 // buildFirmware builds u-root
-func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -66,7 +66,7 @@ func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Assemble commands to build
@@ -76,9 +76,7 @@ func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 	}
 
 	// Execute build commands
-	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
@@ -87,10 +85,10 @@ func (opts URootOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 				"Failed to build u-root",
 				slog.Any("error", err),
 			)
-			return myContainerPrevious, fmt.Errorf("u-root build failed: %w", err)
+			return fmt.Errorf("u-root build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

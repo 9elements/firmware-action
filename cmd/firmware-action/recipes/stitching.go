@@ -161,7 +161,7 @@ func ifdtoolCmd(platform string, arguments []string) []string {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Check that all files have unique filenames (they are copied into the same dir)
 	copiedFiles := map[string]string{}
 	for _, entry := range opts.IfdtoolEntries {
@@ -172,7 +172,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 				slog.String("suggestion", "Each file must have a unique name because they get copied into single directory"),
 				slog.Any("error", os.ErrExist),
 			)
-			return nil, os.ErrExist
+			return os.ErrExist
 		}
 		copiedFiles[filename] = entry.Path
 	}
@@ -190,7 +190,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Copy all the files into container
@@ -201,7 +201,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 	newBaseFilePath := filepath.Join(ContainerWorkDir, filepath.Base(opts.BaseFilePath))
 	myContainer = myContainer.WithFile(
@@ -236,20 +236,19 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 				slog.String("suggestion", "Double check provided path to file"),
 				slog.Any("error", err),
 			)
-			return nil, err
+			return err
 		}
 	}
 
 	// Get the size of image (total size)
 	cmd := ifdtoolCmd(opts.Platform, []string{"--dump", opts.BaseFilePath})
-	myContainerPrevious := myContainer
 	ifdtoolStdout, err := myContainer.WithExec(cmd).Stdout(ctx)
 	if err != nil {
 		slog.Error(
 			"Failed to dump Intel Firmware Descriptor (IFD)",
 			slog.Any("error", err),
 		)
-		return myContainerPrevious, err
+		return err
 	}
 	size, err := ExtractSizeFromString(ifdtoolStdout)
 	if err != nil {
@@ -257,7 +256,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			"Failed extract size from Intel Firmware Descriptor (IFD)",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 	var totalSize uint64
 	for _, i := range size {
@@ -270,7 +269,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	// Read the base file
 	baseFile, err := os.ReadFile(oldBaseFilePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	baseFileSize := uint64(len(baseFile))
 	slog.Info(
@@ -286,7 +285,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 			),
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Take baseFile content and expand it to correct size
@@ -310,11 +309,11 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	)
 	firmwareImageFile, err := os.Create(imageFilename)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	_, err = firmwareImageFile.Write(firmwareImage)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	firmwareImageFile.Close()
 	myContainer = myContainer.WithFile(
@@ -351,26 +350,24 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 				imageFilename,
 			},
 		)
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
 			slog.Error("Failed to inject region")
-			return myContainerPrevious, err
+			return err
 		}
 
 		// ifdtool makes a new file '<filename>.new', so let's rename back to original name
 		imageFilenameNew := fmt.Sprintf("%s.new", imageFilename)
 		cmd = []string{"mv", "--force", imageFilenameNew, imageFilename}
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.WithExec(cmd).Sync(ctx)
 		if err != nil {
 			slog.Error(
 				fmt.Sprintf("Failed to rename '%s' to '%s'", imageFilenameNew, imageFilename),
 			)
-			return myContainerPrevious, err
+			return err
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.CommonOpts.GetArtifacts())
 }

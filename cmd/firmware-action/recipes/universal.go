@@ -49,7 +49,7 @@ func (opts UniversalOpts) GetArtifacts() *[]container.Artifacts {
 }
 
 // buildFirmware builds (or rather executes) universal command module
-func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -66,7 +66,7 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Assemble commands to build
@@ -79,9 +79,7 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 	}
 
 	// Execute build commands
-	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
@@ -90,10 +88,10 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 				"Failed to build universal",
 				slog.Any("error", err),
 			)
-			return myContainerPrevious, fmt.Errorf("universal build failed: %w", err)
+			return fmt.Errorf("universal build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

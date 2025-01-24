@@ -74,7 +74,7 @@ func (opts Edk2Opts) GetArtifacts() *[]container.Artifacts {
 }
 
 // buildFirmware builds edk2 or Intel FSP
-func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error) {
+func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
 	envVars := map[string]string{
 		"WORKSPACE":      ContainerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",
@@ -97,7 +97,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
-		return nil, err
+		return err
 	}
 
 	// Setup environment variables in the container
@@ -112,7 +112,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		if _, err := os.Stat(opts.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
 			defconfigFileArgs, err = os.ReadFile(opts.DefconfigPath)
 			if err != nil {
-				return nil, err
+				return err
 			}
 		} else {
 			slog.Warn(
@@ -133,9 +133,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 	buildSteps = append(buildSteps, []string{"bash", "-c", fmt.Sprintf("%s %s", opts.BuildCommand, string(defconfigFileArgs))})
 
 	// Build
-	var myContainerPrevious *dagger.Container
 	for step := range buildSteps {
-		myContainerPrevious = myContainer
 		myContainer, err = myContainer.
 			WithExec(buildSteps[step]).
 			Sync(ctx)
@@ -144,10 +142,10 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 				"Failed to build edk2",
 				slog.Any("error", err),
 			)
-			return myContainerPrevious, fmt.Errorf("edk2 build failed: %w", err)
+			return fmt.Errorf("edk2 build failed: %w", err)
 		}
 	}
 
 	// Extract artifacts
-	return myContainer, container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
 }

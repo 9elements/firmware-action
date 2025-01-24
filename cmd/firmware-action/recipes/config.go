@@ -222,7 +222,7 @@ type FirmwareModule interface {
 	GetContainerOutputFiles() []string
 	GetOutputDir() string
 	GetSources() []string
-	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) (*dagger.Container, error)
+	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error
 }
 
 // ===========

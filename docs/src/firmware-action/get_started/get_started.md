@@ -15,5 +15,5 @@ The code from this example is available in [firmware-action-example](https://git
 
 - installed [Docker](https://wiki.archlinux.org/title/Docker)
 - installed git
+- installed [dagger](https://docs.dagger.io/install) (optional, needed for interactive debugging)
 - installed [taskfile](https://taskfile.dev/) (optional)
-
