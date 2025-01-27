@@ -1,7 +1,6 @@
 module github.com/9elements/firmware-action
 
-go 1.22.5
-toolchain go1.23.2
+go 1.22.7
 
 require (
 	dagger.io/dagger v0.15.2
