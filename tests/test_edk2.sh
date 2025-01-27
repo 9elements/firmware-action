@@ -39,8 +39,10 @@ fi
 # Try to build edk2
 #==========================
 
-git clone --branch "${VERIFICATION_TEST_EDK2_VERSION}" --depth 1 https://github.com/tianocore/edk2.git Edk2
+git clone https://github.com/tianocore/edk2.git Edk2
 cd Edk2
+git fetch --all
+git checkout "${VERIFICATION_TEST_EDK2_VERSION}"
 PATCH_FILE=../tests/edk2-patches/${VERIFICATION_TEST_EDK2_VERSION}-zeex-subhook.patch
 if [ -f "${PATCH_FILE}" ]; then
 	git apply "${PATCH_FILE}"
