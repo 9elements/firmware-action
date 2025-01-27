@@ -48,10 +48,9 @@ func TestEdk2(t *testing.T) {
 		{
 			name: "normal build",
 			edk2Options: Edk2Opts{
-				CommonOpts:    common,
-				DefconfigPath: "defconfig",
+				CommonOpts: common,
 				Edk2Specific: Edk2Specific{
-					BuildCommand: "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
+					BuildCommand: []string{"source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5 -D BOOTLOADER=COREBOOT"},
 				},
 			},
 			version:    "edk2-stable202105",
@@ -95,10 +94,6 @@ func TestEdk2(t *testing.T) {
 			err = os.Chdir(tmpDir)
 			assert.NoError(t, err)
 			defer os.Chdir(pwd) // nolint:errcheck
-
-			// Create "defconfig_path" file
-			err = os.WriteFile(tc.edk2Options.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)
-			assert.NoError(t, err)
 
 			// Artifacts
 			outputPath := filepath.Join(tmpDir, tc.edk2Options.OutputDir)
