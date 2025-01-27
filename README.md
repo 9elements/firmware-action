@@ -29,6 +29,8 @@ If your firmware consists of multiple components, such as `coreboot` with `linux
 
 [Documentation is hosted in pages](https://9elements.github.io/firmware-action/).
 
+There is a standalone repository with usage examples at [firmware-action-example](https://github.com/9elements/firmware-action-example).
+
 
 ## Containers
 
