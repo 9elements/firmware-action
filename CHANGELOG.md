@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.12.0 - 2025-01-27
+#### Bug Fixes
+- **(ci)** example runs on windows and macos - (b171694) - AtomicFS
+#### Build system
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (c840941) - dependabot[bot]
+- **(deps)** update prettytable requirement in /.dagger-ci/daggerci - (6aa77aa) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (82322c2) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (c31eb83) - dependabot[bot]
+#### Documentation
+- update notes on interactive debugging - (a58aa67) - AtomicFS
+#### Features
+- **(cmd)** add DefconfigPath to list of sources - (2a109e2) - AtomicFS
+#### Miscellaneous Chores
+- **(cmd)** remove interactivity via SSH - (bf44f0d) - AtomicFS
+- go mod tidy and drop toolchain pin - (76aa2b3) - Marvin Drees
+
+- - -
+
 ## v0.11.1 - 2025-01-22
 #### Bug Fixes
 - release workflow - (5e845cd) - AtomicFS
