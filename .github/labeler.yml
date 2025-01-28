@@ -47,29 +47,40 @@ module/coreboot:
           - any-glob-to-any-file:
               - 'cmd/firmware-action/recipes/coreboot*'
               - 'docker/coreboot/**'
+      - head-branch:
+          - 'coreboot'
 module/edk2:
   - any:
       - changed-files:
           - any-glob-to-any-file:
               - 'cmd/firmware-action/recipes/edk2*'
               - 'docker/edk2/**'
+      - head-branch:
+          - 'edk2'
 module/linux:
   - any:
       - changed-files:
           - any-glob-to-any-file:
               - 'cmd/firmware-action/recipes/linux*'
               - 'docker/linux/**'
+      - head-branch:
+          - 'linux'
 module/stitching:
   - any:
       - changed-files:
           - any-glob-to-any-file:
               - 'cmd/firmware-action/recipes/stitching*'
+      - head-branch:
+          - 'stitching'
 module/u-root:
   - any:
       - changed-files:
           - any-glob-to-any-file:
               - 'cmd/firmware-action/recipes/uroot*'
               - 'docker/uroot/**'
+      - head-branch:
+          - 'uroot'
+          - 'u-root'
 python:
   - any:
       - changed-files:
