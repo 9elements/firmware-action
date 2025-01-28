@@ -4,7 +4,6 @@
 package recipes
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -116,7 +115,7 @@ func TestConfigReadAndWrite(t *testing.T) {
 	// Compare
 	equal := cmp.Equal(&configOriginal, configNew)
 	if !equal {
-		fmt.Println(cmp.Diff(configOriginal, configNew))
+		t.Log(cmp.Diff(configOriginal, configNew))
 		assert.True(t, equal, "written and read configuration are not equal")
 	}
 }
@@ -156,8 +155,8 @@ func TestFindAllEnvVars(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			foundVars := FindAllEnvVars(tc.text)
-			fmt.Println(foundVars)
-			fmt.Println(tc.expectedEnvVars)
+			t.Log(foundVars)
+			t.Log(tc.expectedEnvVars)
 
 			assert.Equal(t, len(tc.expectedEnvVars), len(foundVars))
 			// If both slices are of zero length, then the comparison fails for whatever reason
@@ -258,7 +257,7 @@ func TestConfigEnvVars(t *testing.T) {
 			for key, value := range tc.envVars {
 				os.Setenv(key, value)
 				defer os.Unsetenv(key)
-				fmt.Printf("Setting %s = %s\n", key, value)
+				t.Logf("Setting %s = %s\n", key, value)
 			}
 
 			// Write and read config

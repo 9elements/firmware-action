@@ -57,7 +57,7 @@ func TestExtractSizeFromString(t *testing.T) {
 			result, err := ExtractSizeFromString(tc.stdout)
 			equal := cmp.Equal(tc.expected, result)
 			if !equal {
-				fmt.Println(cmp.Diff(tc.expected, result))
+				t.Log(cmp.Diff(tc.expected, result))
 				assert.True(t, equal, "failed to extract size of ROM from string")
 			}
 			assert.ErrorIs(t, err, tc.wantErr)
@@ -126,7 +126,7 @@ func TestStringToSizeMB(t *testing.T) {
 			result, err := StringToSizeMB(tc.text)
 			equal := cmp.Equal(tc.expected, result)
 			if !equal {
-				fmt.Println(cmp.Diff(tc.expected, result))
+				t.Log(cmp.Diff(tc.expected, result))
 				assert.True(t, equal, "failed to decipher size")
 			}
 			assert.ErrorIs(t, err, tc.wantErr)
