@@ -31,6 +31,8 @@ If your firmware consists of multiple components, such as `coreboot` with `linux
 
 There is a standalone repository with usage examples at [firmware-action-example](https://github.com/9elements/firmware-action-example).
 
+Pre-compiled coreboot toolchains for docker containers are stored in separate directory [firmware-action-toolchains](https://github.com/9elements/firmware-action-toolchains).
+
 
 ## Containers
 
