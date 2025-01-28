@@ -53,7 +53,7 @@ func TestCorebootProcessBlobs(t *testing.T) {
 
 			equal := cmp.Equal(tc.expected, output)
 			if !equal {
-				fmt.Println(cmp.Diff(tc.expected, output))
+				t.Log(cmp.Diff(tc.expected, output))
 				assert.True(t, equal, "processing blob parameters failed")
 			}
 		})
@@ -583,7 +583,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			for key, value := range tc.envVars {
 				os.Setenv(key, value)
 				defer os.Unsetenv(key)
-				fmt.Printf("Setting %s = %s\n", key, value)
+				t.Logf("Setting %s = %s\n", key, value)
 			}
 
 			// Make version file if required
