@@ -266,7 +266,10 @@ jobs:
           add-paths: |
             coreboot/**
           branch: "feat/${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
-          commit-message: "feat: add toolchain for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }}"
+          commit-message: "feat: add toolchain for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} ${{ matrix.arch }}"
+          body: "add toolchain for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}"
+          title: "feat: add toolchain for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}"
+          labels: "${{ matrix.arch }}"
 
 
   #=========================
