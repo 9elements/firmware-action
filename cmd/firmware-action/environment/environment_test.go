@@ -4,7 +4,6 @@
 package environment
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -51,7 +50,7 @@ func TestValidateConfig(t *testing.T) {
 			for key, value := range tc.envCreate {
 				os.Setenv(key, value)
 				defer os.Unsetenv(key)
-				fmt.Printf("Setting %s = %s\n", key, value)
+				t.Logf("Setting %s = %s\n", key, value)
 			}
 
 			result := FetchEnvVars(tc.envSearchFor)
