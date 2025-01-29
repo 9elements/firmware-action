@@ -25,7 +25,7 @@ In this example we will work with coreboot `4.19` release (it is a bit older rel
 Recursively initialize submodules.
 
 ```bash
-git submodule update --init --recursive
+git submodule update --init --recursive --checkout
 ```
 
 ```admonish warning
