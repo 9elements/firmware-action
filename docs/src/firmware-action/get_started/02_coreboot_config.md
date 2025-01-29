@@ -6,7 +6,7 @@ Either follow a [coreboot guide](https://doc.coreboot.org/tutorial/part1.html#st
 
 ~~~admonish example title="seabios_defconfig"
 ```properties
-{{#include ../../firmware-action-example/seabios_defconfig}}
+{{#include ../../firmware-action-example/coreboot-example/coreboot_seabios_defconfig}}
 ```
 ~~~
 

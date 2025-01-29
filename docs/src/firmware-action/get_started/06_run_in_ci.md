@@ -4,7 +4,7 @@ Now that we have `firmware-action` working on local system. Let's set up CI.
 
 ```admonish example title=".github/workflows/example.yml"
 ~~~yaml
-{{#include ../../firmware-action-example/.github/workflows/example.yml}}
+{{#include ../../firmware-action-example/.github/workflows/coreboot-example.yml}}
 ~~~
 ```
 
