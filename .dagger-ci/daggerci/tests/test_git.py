@@ -20,7 +20,7 @@ def test__git_get_latest_commit_sha_long():
 
 
 def test__git_get_latest_commit_sha_short():
-    assert re.match(r"^[a-z\d]{7}$", git_get_latest_commit_sha_short())
+    assert re.match(r"^[a-z\d]{11}$", git_get_latest_commit_sha_short())
 
 
 @pytest.mark.parametrize(

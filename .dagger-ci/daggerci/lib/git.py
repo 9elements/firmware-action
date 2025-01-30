@@ -19,7 +19,10 @@ def git_get_latest_commit_sha_short() -> str:
     Assuming that current working directory is part of git repository,
     get the sha of latest commit and return it.
     """
-    return git_get_latest_commit_sha_long()[:7]
+    # Typical git short sha which is 8-characters long:
+    # return git_get_latest_commit_sha_long()[:7]
+    # 12-character long short sha:
+    return git_get_latest_commit_sha_long()[:11]
 
 
 def git_describe() -> str | None:
