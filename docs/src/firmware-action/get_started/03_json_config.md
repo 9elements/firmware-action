@@ -4,7 +4,7 @@ This configuration file is for firmware-action, so that it knows what to do and 
 
 ~~~admonish example title="firmware-action.json"
 ```json
-{{#include ../../firmware-action-example/firmware-action.json}}
+{{#include ../../firmware-action-example/coreboot-example.json}}
 ```
 ~~~
 
