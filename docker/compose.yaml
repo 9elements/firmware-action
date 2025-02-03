@@ -297,3 +297,12 @@ services:
       args:
         - GO_VERSION=1.22
         - UROOT_VERSION=0.14.0
+  #==================
+  # u-boot
+  #==================
+  uboot_2025.01:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2025.01
+        - SOURCE_IMAGE=ubuntu:noble
