@@ -104,27 +104,9 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 
 	// Copy over the defconfig file
 	defconfigBasename := filepath.Base(opts.DefconfigPath)
-	if strings.Contains(defconfigBasename, ".defconfig") {
-		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
-		// contains '.defconfig' string ...
-		// it will just fail with generic error (defconfigBasename="linux.defconfig"):
-		//   make[1]: *** No rule to make target 'linux.defconfig'.  Stop.
-		//   make: *** [Makefile:704: linux.defconfig] Error 2
-		// but defconfigBasename="linux_defconfig" works fine
-		// Don't know why, just return error and let user deal with it.
-		return fmt.Errorf(
-			"filename '%s' specified by defconfig_path must not contain '.defconfig'",
-			defconfigBasename,
-		)
-	}
-	defconfigRegex := regexp.MustCompile(`.*defconfig$`)
-	if !defconfigRegex.MatchString(defconfigBasename) {
-		// 'make $defconfigBasename' will fail for Linux kernel if the file
-		// does not end with 'defconfig'
-		return fmt.Errorf(
-			"filename '%s' specified by defconfig_path must end with 'defconfig'",
-			defconfigBasename,
-		)
+	err = ValidateLinuxDefconfigFilename(opts.DefconfigPath)
+	if err != nil {
+		return err
 	}
 	//   not sure why, but without the 'pwd' I am getting different results between CI and 'go test'
 	pwd, err := os.Getwd()
@@ -143,34 +125,10 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 
 	// Setup environment variables in the container
 	//   Handle cross-compilation: Map architecture to cross-compiler
-	crossCompile := map[string]string{
-		"i386":  "i686-linux-gnu-",
-		"amd64": "x86-64-linux-gnu-",
-		"arm":   "arm-linux-gnueabi-",
-		"arm64": "aarch64-linux-gnu-",
+	envVars, err := LinuxCrossCompilationArchMap(opts.Arch)
+	if err != nil {
+		return err
 	}
-	envVars := map[string]string{
-		"ARCH": NormalizeArchitectureForLinux(opts.Arch),
-	}
-
-	// Check if cross-compilation is needed
-	if NormalizeArchitecture(runtime.GOARCH) != NormalizeArchitecture(opts.Arch) {
-		val, ok := crossCompile[opts.Arch]
-		if !ok {
-			err = errUnknownArchCrossCompile
-			slog.Error(
-				"Selected unknown cross compilation target architecture",
-				slog.String("system_architecture", runtime.GOARCH),
-				slog.String("target_architecture", opts.Arch),
-				slog.Any("error", err),
-			)
-			return err
-		}
-		if val != "" {
-			envVars["CROSS_COMPILE"] = val
-		}
-	}
-
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
@@ -208,4 +166,66 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 
 	// Extract artifacts
 	return container.GetArtifacts(ctx, myContainer, opts.GetArtifacts())
+}
+
+// ValidateLinuxDefconfigFilename checks if defconfig filename is valid
+func ValidateLinuxDefconfigFilename(defconfigPath string) error {
+	defconfigBasename := filepath.Base(defconfigPath)
+	if strings.Contains(defconfigBasename, ".defconfig") {
+		// 'make $defconfigBasename' will fail for Linux kernel if the $defconfigBasename
+		// contains '.defconfig' string ...
+		// it will just fail with generic error (defconfigBasename="linux.defconfig"):
+		//   make[1]: *** No rule to make target 'linux.defconfig'.  Stop.
+		//   make: *** [Makefile:704: linux.defconfig] Error 2
+		// but defconfigBasename="linux_defconfig" works fine
+		// Don't know why, just return error and let user deal with it.
+		return fmt.Errorf(
+			"filename '%s' specified by defconfig_path must not contain '.defconfig'",
+			defconfigBasename,
+		)
+	}
+	defconfigRegex := regexp.MustCompile(`.*defconfig$`)
+	if !defconfigRegex.MatchString(defconfigBasename) {
+		// 'make $defconfigBasename' will fail for Linux kernel if the file
+		// does not end with 'defconfig'
+		return fmt.Errorf(
+			"filename '%s' specified by defconfig_path must end with 'defconfig'",
+			defconfigBasename,
+		)
+	}
+	return nil
+}
+
+// LinuxCrossCompilationArchMap is to handle cross-compilation 'CROSS_COMPILE' environment variable for Linux builds
+func LinuxCrossCompilationArchMap(arch string) (map[string]string, error) {
+	// Map architecture to cross-compiler
+	crossCompile := map[string]string{
+		"i386":  "i686-linux-gnu-",
+		"amd64": "x86-64-linux-gnu-",
+		"arm":   "arm-linux-gnueabi-",
+		"arm64": "aarch64-linux-gnu-",
+	}
+	envVars := map[string]string{
+		"ARCH": NormalizeArchitectureForLinux(arch),
+	}
+
+	// Check if cross-compilation is needed
+	if NormalizeArchitecture(runtime.GOARCH) != NormalizeArchitecture(arch) {
+		val, ok := crossCompile[arch]
+		if !ok {
+			err := errUnknownArchCrossCompile
+			slog.Error(
+				"Selected unknown cross compilation target architecture",
+				slog.String("system_architecture", runtime.GOARCH),
+				slog.String("target_architecture", arch),
+				slog.Any("error", err),
+			)
+			return nil, err
+		}
+		if val != "" {
+			envVars["CROSS_COMPILE"] = val
+		}
+	}
+
+	return envVars, nil
 }
