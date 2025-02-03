@@ -59,7 +59,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         less \
         nano \
-        openssh-server \
         screen \
         tmux \
         tree \
@@ -94,9 +93,4 @@ COPY --from=toolchain /usr/local/bin/* /usr/local/bin/
 # Add pre-compiled coreboot toolchain and utils
 COPY coreboot-${COREBOOT_VERSION}/xgcc-${TARGETARCH} ${TOOLSDIR}/coreboot/util/crossgcc/xgcc
 RUN git clone --depth 1 "https://github.com/platomav/MEAnalyzer.git" "${TOOLSDIR}/MEAnalyzer/"
-
-# Prepare SSH for interactive debugging
-RUN mkdir -p /run/sshd && \
-    sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
-    sed -E "s/#PasswordAuthentication\b.*/PasswordAuthentication yes/g" -i /etc/ssh/sshd_config
 

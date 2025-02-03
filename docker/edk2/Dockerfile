@@ -85,7 +85,6 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
     apt-get install -y --no-install-recommends \
         less \
         nano \
-        openssh-server \
         screen \
         tmux \
         tree \
@@ -182,9 +181,4 @@ ARG INTERMEDIATE_IMAGE
 FROM ${INTERMEDIATE_IMAGE} AS final
 
 COPY --from=toolchain $TOOLSDIR $TOOLSDIR
-
-# Prepare SSH for interactive debugging
-RUN mkdir -p /run/sshd && \
-    sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
-    sed -E "s/#PasswordAuthentication\b.*/PasswordAuthentication yes/g" -i /etc/ssh/sshd_config
 

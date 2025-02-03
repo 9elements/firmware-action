@@ -21,16 +21,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         less \
         nano \
-        openssh-server \
         screen \
         tmux \
         tree \
         vim \
     && \
     rm -rf /var/lib/apt/lists/*
-
-# Prepare SSH for interactive debugging
-RUN mkdir -p /run/sshd && \
-    sed -E "s/#PermitRootLogin\b.*/PermitRootLogin yes/g" -i /etc/ssh/sshd_config && \
-    sed -E "s/#PasswordAuthentication\b.*/PasswordAuthentication yes/g" -i /etc/ssh/sshd_config
 
