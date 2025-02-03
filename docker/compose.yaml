@@ -297,6 +297,7 @@ services:
       args:
         - GO_VERSION=1.22
         - UROOT_VERSION=0.14.0
+        - SOURCE_IMAGE=ubuntu:noble
   #==================
   # u-boot
   #==================
