@@ -152,3 +152,7 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 {{#include ../../../cmd/firmware-action/recipes/universal.go:UniversalSpecific}}
 ```
 
+### Specific / u-boot module
+```go
+{{#include ../../../cmd/firmware-action/recipes/uboot.go:UBootOpts}}
+```
