@@ -58,7 +58,7 @@ tasks:
     vars:
       VARIANT: '{{index .MATCH 0}}'
     cmds:
-      - trash '{{.WORKDIR}}/output-linux'
+      - if [[ -f '{{.WORKDIR}}/output-linux' ]]; then trash '{{.WORKDIR}}/output-linux'; fi
       - task: linux-fetch
         vars:
           LINUX_VERSION: '{{.VARIANT}}'
