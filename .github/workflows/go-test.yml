@@ -58,7 +58,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot', 'TestUniversal']
+        testregex: ['TestLinux', 'TestEdk2', 'TestCoreboot', 'TestStitching', 'TestURoot', 'TestUniversal', 'TestUBoot']
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -97,4 +97,4 @@ jobs:
       - name: Run go test
         run: |
           cd cmd/firmware-action
-          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching|TestUniversal)' ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching|TestURoot|TestUniversal|TestUBoot)' ./...
