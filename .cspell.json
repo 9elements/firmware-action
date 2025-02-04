@@ -148,6 +148,7 @@
     "tianocore",
     "tinyconfig",
     "tzdata",
+    "uboot",
     "uefi",
     "uroot",
     "vmlinux",
