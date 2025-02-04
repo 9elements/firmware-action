@@ -42,6 +42,7 @@ type CommonOpts struct {
 	// Can also be a absolute or relative path to Dockerfile to build the image on the fly.
 	// NOTE: Updating the sdk_version might result in different binaries using the
 	//   same source code.
+	// ANCHOR: CommonOptsSdkURLExamples
 	// Examples:
 	//   https://ghcr.io/9elements/firmware-action/coreboot_4.19:main
 	//   https://ghcr.io/9elements/firmware-action/coreboot_4.19:latest
@@ -51,6 +52,9 @@ type CommonOpts struct {
 	//   file://my-image/Dockerfile
 	//   file:///home/user/my-image/Dockerfile
 	//   file:///home/user/my-image/
+	// ANCHOR_END: CommonOptsSdkURLExamples
+	// NOTE:
+	//   'file://' path cannot contain '..'
 	// See https://github.com/orgs/9elements/packages
 	SdkURL string `json:"sdk_url" validate:"required"`
 
