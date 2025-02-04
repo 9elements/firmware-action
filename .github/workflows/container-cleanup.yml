@@ -5,9 +5,6 @@ name: container cleanup
 on:
   workflow_dispatch
 
-env:
-  REGISTRY: ghcr.io
-
 permissions:
   contents: read
 
