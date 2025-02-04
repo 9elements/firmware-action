@@ -39,12 +39,18 @@ type CommonOpts struct {
 	// Specifies the container toolchain tag to use when building the image.
 	// This has an influence on the IASL, GCC and host GCC version that is used to build
 	//   the target. You must match the source level and sdk_version.
+	// Can also be a absolute or relative path to Dockerfile to build the image on the fly.
 	// NOTE: Updating the sdk_version might result in different binaries using the
 	//   same source code.
 	// Examples:
 	//   https://ghcr.io/9elements/firmware-action/coreboot_4.19:main
 	//   https://ghcr.io/9elements/firmware-action/coreboot_4.19:latest
 	//   https://ghcr.io/9elements/firmware-action/edk2-stable202111:latest
+	//   file://./my-image/Dockerfile
+	//   file://./my-image/
+	//   file://my-image/Dockerfile
+	//   file:///home/user/my-image/Dockerfile
+	//   file:///home/user/my-image/
 	// See https://github.com/orgs/9elements/packages
 	SdkURL string `json:"sdk_url" validate:"required"`
 
@@ -222,7 +228,7 @@ type FirmwareModule interface {
 	GetContainerOutputFiles() []string
 	GetOutputDir() string
 	GetSources() []string
-	buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error
+	buildFirmware(ctx context.Context, client *dagger.Client) error
 }
 
 // ===========

@@ -248,7 +248,7 @@ func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Client) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -259,7 +259,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		InputDirs:         opts.InputDirs,
 		InputFiles:        opts.InputFiles,
 	}
-	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
+	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",

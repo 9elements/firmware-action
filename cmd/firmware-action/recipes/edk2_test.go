@@ -24,14 +24,6 @@ func TestEdk2(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Chdir(pwd) // nolint:errcheck
 
-	// Use "" if you want to test containers from github package registry
-	// Use "../../container/edk2" if you want to test containers built fresh from Dockerfile
-	dockerfilePath := ""
-	if false {
-		dockerfilePath, err = filepath.Abs("../../container/edk2")
-		assert.NoError(t, err)
-	}
-
 	common := CommonOpts{
 		SdkURL:              "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
 		OutputDir:           "output",
@@ -107,7 +99,7 @@ func TestEdk2(t *testing.T) {
 			tc.edk2Options.OutputDir = outputPath
 
 			// Try to build edk2
-			err = tc.edk2Options.buildFirmware(ctx, client, dockerfilePath)
+			err = tc.edk2Options.buildFirmware(ctx, client)
 			assert.NoError(t, err)
 
 			// Check artifacts

@@ -98,7 +98,7 @@ func TestURoot(t *testing.T) {
 			myURootOpts.OutputDir = outputPath
 
 			// Try to build u-root initramfs
-			err = myURootOpts.buildFirmware(ctx, client, "")
+			err = myURootOpts.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts

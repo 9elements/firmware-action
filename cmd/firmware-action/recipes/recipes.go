@@ -244,7 +244,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		defer client.Close()
 
 		// Build the module
-		err = modules[target].buildFirmware(ctx, client, "")
+		err = modules[target].buildFirmware(ctx, client)
 		if err == nil {
 			// On success update the timestamp
 			_ = filesystem.SaveCurrentRunTime(timestampFile)

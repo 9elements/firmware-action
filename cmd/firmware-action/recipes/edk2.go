@@ -84,7 +84,7 @@ func (opts Edk2Opts) GetSources() []string {
 }
 
 // buildFirmware builds edk2 or Intel FSP
-func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) error {
 	envVars := map[string]string{
 		"WORKSPACE":      ContainerWorkDir,
 		"EDK_TOOLS_PATH": "/tools/Edk2/BaseTools",
@@ -101,7 +101,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client, d
 		InputFiles:        opts.InputFiles,
 	}
 
-	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
+	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",

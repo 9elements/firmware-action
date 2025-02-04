@@ -73,7 +73,7 @@ func TestUniversal(t *testing.T) {
 			myUniversalOpts.OutputDir = outputPath
 
 			// Try to build universal
-			err = myUniversalOpts.buildFirmware(ctx, client, "")
+			err = myUniversalOpts.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts

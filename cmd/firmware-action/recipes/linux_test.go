@@ -28,14 +28,6 @@ func TestLinux(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Chdir(pwd) // nolint:errcheck
 
-	// Use "" if you want to test containers from github package registry
-	// Use "../../container/linux" if you want to test containers built fresh from Dockerfile
-	dockerfilePath := ""
-	if false {
-		dockerfilePath, err = filepath.Abs("../../container/linux")
-		assert.NoError(t, err)
-	}
-
 	linuxOpts := LinuxOpts{
 		CommonOpts: CommonOpts{
 			OutputDir: "output",
@@ -151,7 +143,7 @@ func TestLinux(t *testing.T) {
 			myLinuxOpts.OutputDir = outputPath
 
 			// Try to build linux kernel
-			err = myLinuxOpts.buildFirmware(ctx, client, dockerfilePath)
+			err = myLinuxOpts.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
