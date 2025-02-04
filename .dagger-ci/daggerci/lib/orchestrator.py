@@ -76,6 +76,49 @@ def get_current_platform() -> str:
     return "{}/{}".format(platform_dict[current_platform], current_arch)
 
 
+class ContainerRegistry:
+    """
+    Class to hold data about container registry
+    """
+
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=too-few-public-methods
+
+    def __init__(
+        self,
+        name: str,
+        url: str | None,
+        username: str | None,
+        password: str | None,
+        publish_url: str,
+        publish_tag_only: bool,
+        publish: bool = False,
+    ):
+        self.name = name
+        self.url = url
+        self.username = username
+        self.password = password
+        self.publish = publish
+        self.publish_url = publish_url
+        self.publish_tag_only = publish_tag_only
+
+    def can_publish(self) -> bool:
+        """
+        Check if we have all information needed to publish
+        """
+        if self.url is None:
+            logging.warning("Publishing: Missing container registry")
+            return False
+        if self.username is None:
+            logging.warning("Publishing: Missing container registry username")
+            return False
+        if self.password is None:
+            logging.warning("Publishing: Missing container registry token")
+            return False
+        return True
+
+
 class Orchestrator:
     """
     The main class to abstract all actions
@@ -136,15 +179,35 @@ class Orchestrator:
             project_name=f"{self.organization}/{self.project_name}"
         )
         # Container registry vars
-        self.container_registry = get_env_var_value(
-            ["env.REGISTRY", "GITHUB_REGISTRY"], None
+        dockerhub_username = get_env_var_value(
+            ["vars.DOCKERHUB_USER", "DOCKERHUB_USER"], None
         )
-        self.container_registry_username = get_env_var_value(
-            ["github.actor", "GITHUB_ACTOR"], None
-        )
-        self.container_registry_password = get_env_var_value(
-            ["secrets.GITHUB_TOKEN", "GITHUB_TOKEN"], None
-        )
+        self.container_registry = [
+            # GitHub
+            ContainerRegistry(
+                name="GitHub",
+                url="ghcr.io",
+                username=get_env_var_value(["github.actor", "GITHUB_USER"], None),
+                password=get_env_var_value(
+                    ["secrets.GITHUB_TOKEN", "GITHUB_TOKEN"], None
+                ),
+                publish_url=f"ghcr.io/{self.organization}/{self.project_name}",
+                publish_tag_only=False,
+                publish=publish,
+            ),
+            # Docker Hub
+            ContainerRegistry(
+                name="DockerHub",
+                url="docker.io",
+                username=dockerhub_username,
+                password=get_env_var_value(
+                    ["secrets.DOCKERHUB_TOKEN", "DOCKERHUB_TOKEN"], None
+                ),
+                publish_url=f"docker.io/{dockerhub_username}",
+                publish_tag_only=True,
+                publish=publish,
+            ),
+        ]
 
         # Publishing-related info
         self.labels = {
@@ -176,23 +239,16 @@ class Orchestrator:
             self.tags += [self.tag_pull_request]
 
         # Publishing
-        self.publish = publish
-        if self.container_registry is None:
-            logging.warning("Publishing: Missing container registry")
-            self.publish = False
-        if self.container_registry_username is None:
-            logging.warning("Publishing: Missing container registry username")
-            self.publish = False
-        if self.container_registry_password is None:
-            logging.warning("Publishing: Missing container registry token")
-            self.publish = False
-        if not self.publish:
-            logging.warning("Skipping container publishing step")
-        logging.info(
-            "container registry: %s; username: %s",
-            self.container_registry,
-            self.container_registry_username,
-        )
+        for registry in self.container_registry:
+            if not registry.publish:
+                logging.warning(
+                    "Skipping container publishing step for %s", registry.name
+                )
+            logging.info(
+                "container registry: %s; username: %s",
+                registry.name,
+                registry.username,
+            )
 
         # Variable(s) for storing results of builds, tests and publishing
         self.results = Results()
@@ -314,26 +370,52 @@ class Orchestrator:
 
         # =======
         # PUBLISH
-        if self.publish:
-            logging.info("%s/%s: PUBLISHING", top_element, dockerfile)
-            # pylint: disable=attribute-defined-outside-init
-            self.secret_token = client.set_secret(
-                "GITHUB_TOKEN", self.container_registry_password
-            )
-            # pylint: enable=attribute-defined-outside-init
-            try:
-                await self.__publish__(
-                    variants=list(variants.values()),
-                    dockerfile=dockerfile,
-                    top_element=top_element,
+
+        # We want to publish all builds to GitHub, but publish only builds on
+        #   tagged git commits (releases) to DockerHub.
+        # Hence we have a registry.publish_tag_only, which if enabled should
+        #   publish only builds on tagged commits (releases), and skip publishing
+        #   builds to registry on non-tagged commits (not releases).
+        # If registry.publish_tag_only is enabled, self.tag_tag must be defined
+        #   (must not be None)
+        # Here is a truth table to show if container will be published:
+        #
+        #                           | self.tag_tag is None |
+        #                           | True     | False     |
+        #                   --------+----------------------|
+        #  publish_tag_only | True  | False    | True      |
+        #                   | False | True     | True      |
+
+        for registry in self.container_registry:
+            publish_filter = True
+            if registry.publish_tag_only and self.tag_tag is None:
+                publish_filter = False
+
+            if registry.publish and publish_filter:
+                logging.info("%s/%s: PUBLISHING", top_element, dockerfile)
+                # pylint: disable=attribute-defined-outside-init
+                self.secret_token = client.set_secret("GITHUB_TOKEN", registry.password)
+                # pylint: enable=attribute-defined-outside-init
+                try:
+                    await self.__publish__(
+                        registry=registry,
+                        variants=list(variants.values()),
+                        dockerfile=dockerfile,
+                        top_element=top_element,
+                    )
+                    self.results.add(
+                        top_element, dockerfile, f"publish {registry.name}", True
+                    )
+                except dagger.QueryError as exc:
+                    logging.error(exc)
+                    self.results.add(
+                        top_element, dockerfile, f"publish {registry.name}", False
+                    )
+                    return
+            else:
+                self.results.add(
+                    top_element, dockerfile, f"publish {registry.name}", False, "skip"
                 )
-                self.results.add(top_element, dockerfile, "publish", True)
-            except dagger.QueryError as exc:
-                logging.error(exc)
-                self.results.add(top_element, dockerfile, "publish", False)
-                return
-        else:
-            self.results.add(top_element, dockerfile, "publish", False, "skip")
 
     async def __build__(
         self,
@@ -463,6 +545,7 @@ class Orchestrator:
 
     async def __publish__(
         self,
+        registry: ContainerRegistry,
         variants: list[dagger.Container],
         dockerfile: str,
         top_element: str,
@@ -476,11 +559,11 @@ class Orchestrator:
 
         for tag in self.tags:
             image_ref = await container.with_registry_auth(
-                address=str(self.container_registry),
-                username=str(self.container_registry_username),
+                address=str(registry.url),
+                username=str(registry.username),
                 secret=self.secret_token,
             ).publish(
-                f"{self.container_registry}/{self.organization}/{self.project_name}/{dockerfile}:{tag}",
+                f"{registry.publish_url}/{dockerfile}:{tag}",
                 # add remaining containers:
                 platform_variants=variants,
             )
