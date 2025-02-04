@@ -82,7 +82,7 @@ func (opts LinuxOpts) GetSources() []string {
 // buildFirmware builds linux kernel
 //
 //	docs: https://www.kernel.org/doc/html/latest/kbuild/index.html
-func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client) error {
 	// Spin up container
 	containerOpts := container.SetupOpts{
 		ContainerURL:      opts.SdkURL,
@@ -93,7 +93,7 @@ func (opts LinuxOpts) buildFirmware(ctx context.Context, client *dagger.Client, 
 		InputDirs:         opts.InputDirs,
 		InputFiles:        opts.InputFiles,
 	}
-	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
+	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",

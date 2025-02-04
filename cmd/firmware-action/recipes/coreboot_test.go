@@ -300,7 +300,7 @@ func TestCorebootBuild(t *testing.T) {
 				assert.NoError(t, err)
 			}
 			// Try to build coreboot
-			err = tc.corebootOptions.buildFirmware(ctx, client, "")
+			err = tc.corebootOptions.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
@@ -311,7 +311,7 @@ func TestCorebootBuild(t *testing.T) {
 
 			if tc.wantErr == nil {
 				// Check coreboot version
-				err = tc.universalOptions.buildFirmware(ctx, client, "")
+				err = tc.universalOptions.buildFirmware(ctx, client)
 				assert.ErrorIs(t, err, tc.wantErr)
 
 				// Check file with coreboot version exists
@@ -592,7 +592,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			}
 
 			// Try to build coreboot
-			err = tc.corebootOptions.buildFirmware(ctx, client, "")
+			err = tc.corebootOptions.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check artifacts
@@ -602,7 +602,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			}
 
 			// Check coreboot version
-			err = tc.universalOptions.buildFirmware(ctx, client, "")
+			err = tc.universalOptions.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 
 			// Check file with coreboot version exists

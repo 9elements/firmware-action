@@ -89,14 +89,28 @@ func (opts SetupOpts) Validate() error {
 }
 
 // Setup for setting up a Docker container via dagger
-func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts, dockerfileDirectoryPath string) (*dagger.Container, error) {
-	// dockerfileDirectoryPath allows to use Dockerfile and build locally,
-	//   which is handy for testing changes to said Dockerfile without the need to
-	//   have the container uploaded into package registry
-
+func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger.Container, error) {
 	err := opts.Validate()
 	if err != nil {
 		return nil, err
+	}
+
+	// dockerfileDirectoryPath allows to use Dockerfile and build locally,
+	//   which is handy for testing changes to said Dockerfile without the need to
+	//   have the container uploaded into package registry
+	dockerfileDirectoryPath := ""
+	dockerfilePathPattern := regexp.MustCompile(`^file:\/\/.*`)
+	if dockerfilePathPattern.MatchString(opts.ContainerURL) {
+		// opts.ContainerURL is actually filepath
+		dockerfileDockerfilePattern := regexp.MustCompile(`.*\/Dockerfile$`)
+		pathPattern := regexp.MustCompile(`^file:\/\/`)
+		dockerfileDirectoryPath = pathPattern.ReplaceAllString(opts.ContainerURL, "")
+
+		// Docker requires to use directory, if path contains also Dockerfile as last element, remove it
+		// to get the base directory
+		if dockerfileDockerfilePattern.MatchString(opts.ContainerURL) {
+			dockerfileDirectoryPath = filepath.Dir(dockerfileDirectoryPath)
+		}
 	}
 
 	// Setup container either from URL or build from Dockerfile

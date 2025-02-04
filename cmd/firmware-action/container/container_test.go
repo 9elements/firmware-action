@@ -176,7 +176,7 @@ func TestSetup(t *testing.T) {
 			}
 
 			// Spin up container
-			container, err := Setup(ctx, client, &tc.opts, "")
+			container, err := Setup(ctx, client, &tc.opts)
 			assert.ErrorIs(t, err, tc.wantErr)
 			if err != nil {
 				// No need to continue on err
@@ -350,7 +350,7 @@ func TestGetArtifacts(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 
-			container, err := Setup(ctx, client, &opts, "")
+			container, err := Setup(ctx, client, &opts)
 			assert.NoError(t, err)
 
 			// Run commands in container

@@ -364,7 +364,7 @@ func TestStitching(t *testing.T) {
 			assert.NoError(t, err)
 			defer client.Close()
 
-			err = tc.stitchingOpts.buildFirmware(ctx, client, "")
+			err = tc.stitchingOpts.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
 			if tc.wantErr != nil {
 				return

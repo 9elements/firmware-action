@@ -161,7 +161,7 @@ func ifdtoolCmd(platform string, arguments []string) []string {
 }
 
 // buildFirmware builds coreboot with all blobs and stuff
-func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client, dockerfileDirectoryPath string) error {
+func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dagger.Client) error {
 	// Check that all files have unique filenames (they are copied into the same dir)
 	copiedFiles := map[string]string{}
 	for _, entry := range opts.IfdtoolEntries {
@@ -184,7 +184,7 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 		MountHostDir:      opts.RepoPath,
 		WorkdirContainer:  ContainerWorkDir,
 	}
-	myContainer, err := container.Setup(ctx, client, &containerOpts, dockerfileDirectoryPath)
+	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",
