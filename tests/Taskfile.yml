@@ -65,3 +65,48 @@ tasks:
       - task: linux-run
         vars:
           LINUX_VERSION: '{{.VARIANT}}'
+
+  #========
+  # U-BOOT
+  #========
+  uboot-fetch:
+    desc: Fetch u-boot source code
+    internal: true
+    dir: '{{.WORKDIR}}'
+    cmds:
+      - git clone https://source.denx.de/u-boot/u-boot.git "uboot-{{.UBOOT_VERSION}}"
+      - cd u-boot && git fetch -a && git checkout "{{.UBOOT_VERSION}}"
+    requires:
+      vars: [UBOOT_VERSION]
+    status:
+      - test -d 'uboot-{{.UBOOT_VERSION}}'
+
+  uboot-run:
+    desc: Run firmware-action
+    dir: '{{.WORKDIR}}'
+    internal: true
+    cmds:
+      - cp -f "../tests/uboot_{{.UBOOT_VERSION}}/uboot.defconfig" "uboot_defconfig"
+      - ln -sf "uboot-{{.UBOOT_VERSION}}" u-boot
+      - ../bin/firmware-action-linux-amd64-{{.SEMVER}} build --config="../tests/example_config__uboot.json" --target=u-boot-example
+    env:
+      UBOOT_VERSION: '{{.UBOOT_VERSION}}'
+      SYSTEM_ARCH: 'arm64'
+    requires:
+      vars: [UBOOT_VERSION]
+
+  uboot-*:
+    desc: Run example
+    deps:
+      - task: mkdir
+      - task: :build-go-binary
+    vars:
+      VARIANT: '{{index .MATCH 0}}'
+    cmds:
+      - if [[ -f '{{.WORKDIR}}/output-uboot' ]]; then trash '{{.WORKDIR}}/output-linux'; fi
+      - task: uboot-fetch
+        vars:
+          UBOOT_VERSION: '{{.VARIANT}}'
+      - task: uboot-run
+        vars:
+          UBOOT_VERSION: '{{.VARIANT}}'
