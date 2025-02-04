@@ -33,6 +33,7 @@ jobs:
       - build-linux
       - build-edk2
       - build-stitching
+      - build-uboot
       - build-uroot
       - test-operating-systems
     steps:
@@ -443,6 +444,73 @@ jobs:
           path: output-uroot
           retention-days: 14
   # ANCHOR_END: example_build_uroot
+
+  # Example of building u-boot
+  # ANCHOR: example_build_uboot
+  build-uboot:
+    needs:
+      - changes
+      - skip-check
+    strategy:
+      fail-fast: false
+      matrix:
+        uboot-version: ['2025.01']
+        arch: ['amd64', 'arm64']
+    runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
+    # Skip if pull_request_review on PR not made by a bot
+    steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore cached u-boot repo
+        uses: actions/cache/restore@v4
+        id: cache-repo
+        with:
+          path: ./u-boot
+          key: u-boot-${{ matrix.uboot-version }}
+      - name: Clone u-boot repo
+        if: steps.cache-repo.outputs.cache-hit != 'true'
+        run: |
+          git clone https://source.denx.de/u-boot/u-boot.git
+          cd u-boot
+          git fetch -a
+          git checkout "v${{ matrix.uboot-version }}"
+      - name: Store u-boot repo in cache
+        uses: actions/cache/save@v4
+        if: steps.cache-repo.outputs.cache-hit != 'true'
+        with:
+          path: ./u-boot
+          key: u-boot-${{ matrix.uboot-version }}
+
+      - name: Move my defconfig into place (filename must not contain '.defconfig')
+        run: |
+          mv "tests/uboot_${{ matrix.uboot-version }}/uboot.defconfig" "uboot_defconfig"
+
+      - name: firmware-action
+        uses: ./
+        # uses: 9elements/firmware-action
+        with:
+          config: 'tests/example_config__uboot.json'
+          target: 'u-boot-example'
+          recursive: 'false'
+          compile: ${{ needs.changes.outputs.compile }}
+        env:
+          UBOOT_VERSION: ${{ matrix.uboot-version }}
+
+      - name: Get artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: uboot-${{ matrix.uboot-version }}-${{ matrix.arch }}
+          path: output-uboot
+          retention-days: 14
+  # ANCHOR_END: example_build_uboot
 
   # Example of running on non-Linux systems
   test-operating-systems:
