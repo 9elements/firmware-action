@@ -65,10 +65,10 @@ type CommonOpts struct {
 	RepoPath string `json:"repo_path" validate:"required,dirpath"`
 
 	// Specifies the (relative) paths to directories where are produced files (inside Container).
-	ContainerOutputDirs []string `json:"container_output_dirs" validate:"dive,dirpath"`
+	ContainerOutputDirs []string `json:"container_output_dirs" validate:"dive,filepath|dirpath"`
 
 	// Specifies the (relative) paths to produced files (inside Container).
-	ContainerOutputFiles []string `json:"container_output_files" validate:"dive,filepath"`
+	ContainerOutputFiles []string `json:"container_output_files" validate:"dive,filepath|dirpath"`
 
 	// Specifies the (relative) path to directory into which place the produced files.
 	//   Directories listed in ContainerOutputDirs and files listed in ContainerOutputFiles
@@ -83,13 +83,13 @@ type CommonOpts struct {
 	//     ├── Build/
 	//     ├── coreboot.rom
 	//     └── defconfig
-	OutputDir string `json:"output_dir" validate:"required,dirpath"`
+	OutputDir string `json:"output_dir" validate:"required,filepath|dirpath"`
 
 	// Specifies the (relative) paths to directories which should be copied into the container.
-	InputDirs []string `json:"input_dirs" validate:"dive,dirpath"`
+	InputDirs []string `json:"input_dirs" validate:"dive,filepath|dirpath"`
 
 	// Specifies the (relative) paths to file which should be copied into the container.
-	InputFiles []string `json:"input_files" validate:"dive,filepath"`
+	InputFiles []string `json:"input_files" validate:"dive,filepath|dirpath"`
 
 	// Specifies the path to directory where to place input files and directories inside container.
 	//   Directories listed in ContainerInputDirs and files listed in ContainerInputFiles
@@ -104,7 +104,7 @@ type CommonOpts struct {
 	//     ├── config-files/
 	//     ├── README.md
 	//     └── Taskfile.yml
-	ContainerInputDir string `json:"container_input_dir" validate:"dirpath"`
+	ContainerInputDir string `json:"container_input_dir" validate:"filepath|dirpath"`
 
 	// Overview:
 	//
