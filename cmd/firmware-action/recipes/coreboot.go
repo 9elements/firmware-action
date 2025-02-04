@@ -15,10 +15,10 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/container"
-	"github.com/9elements/firmware-action/environment"
-	"github.com/9elements/firmware-action/filesystem"
-	"github.com/9elements/firmware-action/logging"
+	"github.com/9elements/firmware-action/cmd/firmware-action/container"
+	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
+	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
+	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 )
 
 // BlobDef is used to store information about a single blob.

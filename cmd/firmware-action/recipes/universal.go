@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"dagger.io/dagger"
-	"github.com/9elements/firmware-action/container"
+	"github.com/9elements/firmware-action/cmd/firmware-action/container"
 )
 
 // UniversalSpecific is used to store data specific to the universal command module
