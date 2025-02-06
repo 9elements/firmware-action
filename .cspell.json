@@ -79,6 +79,7 @@
     "distclean",
     "dockerfile",
     "dockerfiles",
+    "dockerhub",
     "dooper",
     "dotconfig",
     "dpkg",
