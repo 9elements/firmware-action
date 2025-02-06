@@ -68,7 +68,7 @@ tasks:
         bash -c "
         source {{.PYTHON_VENV}}/bin/activate;
         cd ..;
-        python .dagger-ci/daggerci/main.py -d {{.DOCKERFILE}};
+        python .dagger-ci/daggerci/main.py -d {{.DOCKERFILE}} {{.CLI_ARGS}};
         "
     requires:
       vars: [DOCKERFILE]
