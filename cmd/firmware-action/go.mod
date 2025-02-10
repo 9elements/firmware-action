@@ -5,7 +5,7 @@ go 1.22.7
 require (
 	dagger.io/dagger v0.15.3
 	github.com/Masterminds/semver v1.5.0
-	github.com/alecthomas/kong v1.7.0
+	github.com/alecthomas/kong v1.8.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/go-playground/validator/v10 v10.24.0
