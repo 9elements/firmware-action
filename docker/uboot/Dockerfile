@@ -23,6 +23,7 @@ RUN apt-get update && \
         bc \
         bison \
         build-essential \
+        clang \
         coccinelle \
         device-tree-compiler \
         dfu-util \
