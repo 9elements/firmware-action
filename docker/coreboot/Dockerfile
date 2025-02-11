@@ -31,9 +31,7 @@ RUN apt-get update && \
         bison \
         bsdmainutils \
         build-essential \
-        curl \
         flex \
-        git \
         gnat \
         imagemagick \
         libelf-dev \
@@ -57,12 +55,15 @@ RUN apt-get update && \
             iucode-tool; \
     fi; \
     apt-get install -y --no-install-recommends \
+        curl \
+        git \
         less \
         nano \
         screen \
         tmux \
         tree \
         vim \
+        wget \
     && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/* && \

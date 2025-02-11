@@ -31,7 +31,6 @@ RUN apt-get update && \
         flex \
         gcc \
         gdisk \
-        git \
         graphviz \
         imagemagick \
         libgnutls28-dev \
@@ -68,12 +67,15 @@ RUN apt-get update && \
             gcc-aarch64-linux-gnu; \
     fi && \
     apt-get install -y --no-install-recommends \
+        curl \
+        git \
         less \
         nano \
         screen \
         tmux \
         tree \
         vim \
+        wget \
     && \
     rm -rf /var/lib/apt/lists/*
 
