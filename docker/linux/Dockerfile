@@ -38,7 +38,6 @@ RUN apt-get update && \
         gcc-${GCC_VERSION} \
         gcc-${GCC_VERSION}-arm-linux-gnueabi \
         gcc-${GCC_VERSION}-i686-linux-gnu \
-        git \
         gnupg2 \
         libelf-dev \
         libiberty-dev \
@@ -49,7 +48,6 @@ RUN apt-get update && \
         llvm \
         nodejs \
         openssl \
-        wget \
         zstd \
     && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
@@ -61,12 +59,15 @@ RUN apt-get update && \
             gcc-${GCC_VERSION}-x86-64-linux-gnu; \
     fi && \
     apt-get install -y --no-install-recommends \
+        curl \
+        git \
         less \
         nano \
         screen \
         tmux \
         tree \
         vim \
+        wget \
     && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${GCC_VERSION} 100 && \
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_VERSION} 100 && \

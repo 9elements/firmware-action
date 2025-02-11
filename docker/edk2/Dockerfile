@@ -60,7 +60,6 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         flex \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION} \
-        git \
         imagemagick \
         nasm \
         nodejs \
@@ -83,12 +82,15 @@ RUN if [ "${TARGETARCH}" = 'amd64' ]; then \
         ; \
     fi; \
     apt-get install -y --no-install-recommends \
+        curl \
+        git \
         less \
         nano \
         screen \
         tmux \
         tree \
         vim \
+        wget \
     && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
