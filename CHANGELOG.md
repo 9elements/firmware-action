@@ -3,6 +3,59 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.13.0 - 2025-02-11
+#### Bug Fixes
+- **(ci)** go-test - (8bd0a26) - AtomicFS
+- **(cmd)** path validation in JSON - (7eaa619) - AtomicFS
+- **(cmd)** incorrect module path - (f1be43f) - AtomicFS
+- **(test)** example Taskfile for Linux - (c10087d) - AtomicFS
+- trivy false positive AVD-DS-0001 - (80c9b1d) - AtomicFS
+#### Build system
+- **(deps)** bump github.com/jedib0t/go-pretty/v6 - (51bac62) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (2e1b921) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (7f0cc81) - dependabot[bot]
+- **(deps)** update prettytable requirement in /.dagger-ci/daggerci - (3ab7832) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (5b8c9e6) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (f966bba) - dependabot[bot]
+#### Continuous Integration
+- **(docker)** cleanup and update env vars - (6ba5218) - AtomicFS
+- **(docker)** increase git commit sha slug to 12 characters - (b146d3d) - AtomicFS
+- **(docker)** move container cleanup into separate workflow - (1ee5926) - AtomicFS
+- **(labeler)** improve labeling for modules - (6126d79) - AtomicFS
+- better caching for coreboot - (ad0ed57) - AtomicFS
+- add u-boot example - (1e03ffe) - AtomicFS
+- remove cache cleanup workflows - (82ef4b3) - AtomicFS
+- cleanup coreboot toolchain PRs - (1acfd3a) - AtomicFS
+#### Documentation
+- add u-boot module config - (8a57478) - AtomicFS
+- notes about discontinued containers - (1ecc76d) - AtomicFS
+- update references to firmware-action-example - (f35bd79) - AtomicFS
+- add notes about building contianers on the fly - (7861a25) - AtomicFS
+- add link to toolchains repo - (5228032) - AtomicFS
+- add link to firmware-action-example repo - (f1f0b73) - AtomicFS
+#### Features
+- **(ci)** automatically re-run failed container builds - (b7a842d) - AtomicFS
+- **(cmd)** add support for u-boot - (a2b42d7) - AtomicFS
+- **(cmd)** warning about using discontinued containers - (ed551ea) - AtomicFS
+- **(cmd)** expose building contianers on the fly - (2af58ac) - AtomicFS
+- **(docker)** add clang into uboot container - (6d351b4) - AtomicFS
+- **(docker)** add support for DockerHub - (9421298) - AtomicFS
+- **(docker)** add uboot container - (cf5668f) - AtomicFS
+#### Miscellaneous Chores
+- **(ci)** cleanup - (86e9cc6) - AtomicFS
+- **(cmd)** fixup logging in tests - (5b573b8) - AtomicFS
+- **(docker)** add new coreboot containers - (d56e2fa) - AtomicFS
+- **(docker)** pass Taskfile CLI_ARGS to dagger-ci - (98831af) - AtomicFS
+- **(docker)** update get_env_var_value - (cd3ced9) - AtomicFS
+- **(docker)** remove ssh server from containers - (2ed69b8) - AtomicFS
+- **(linter)** cspell - (24744df) - AtomicFS
+- **(linter)** cspell - (55841a2) - AtomicFS
+- **(linter)** cspell - (5dd031a) - AtomicFS
+#### Tests
+- **(example)** add u-boot into Taskfile for local run - (1600333) - AtomicFS
+
+- - -
+
 ## v0.12.0 - 2025-01-27
 #### Bug Fixes
 - **(ci)** example runs on windows and macos - (b171694) - AtomicFS
