@@ -64,12 +64,14 @@ List of [firmware-action](https://github.com/orgs/9elements/packages?repo_name=f
 | edk2-stable202405     | [x]         |  |
 | edk2-stable202408     | [ ]         | discontinued in favor of `stable202408.01` |
 | edk2-stable202408.01  | [x]         |  |
+| edk2-stable202411     | [x]         |  |
 | linux_6.1.111         | [x]         |  |
 | linux_6.1.45          | [x]         |  |
 | linux_6.6.52          | [x]         |  |
 | linux_6.9.9           | [x]         |  |
 | linux_6.11            | [x]         |  |
 | uroot_0.14.0          | [x]         |  |
+| uboot_2025.01         | [x]         |  |
 
 
 ## Legacy containers
