@@ -111,6 +111,25 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		if dockerfileDockerfilePattern.MatchString(opts.ContainerURL) {
 			dockerfileDirectoryPath = filepath.Dir(dockerfileDirectoryPath)
 		}
+	} else {
+		// Check for discontinued containers
+		listDiscontinued := []string{
+			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.20(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.22(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_24\.02(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/edk2\-stable202408(:.*)?$`,
+			`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
+			`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
+		}
+		for _, discontinued := range listDiscontinued {
+			pattern := regexp.MustCompile(discontinued)
+			if pattern.MatchString(opts.ContainerURL) {
+				slog.Warn(
+					"Using discontinued container",
+					slog.String("suggestion", "The container will remain available, but will no longer receive any bug-fixes or updates. If you want maintained and up-to-date container, look at https://github.com/9elements/firmware-action#containers"),
+				)
+			}
+		}
 	}
 
 	// Setup container either from URL or build from Dockerfile
