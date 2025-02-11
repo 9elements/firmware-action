@@ -135,7 +135,7 @@ jobs:
         id: cache-repo
         with:
           path: ./my_super_dooper_awesome_coreboot
-          key: coreboot-${{ matrix.coreboot-version }}
+          key: coreboot-${{ matrix.coreboot-version }}-example
       - name: Clone coreboot repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -145,7 +145,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./my_super_dooper_awesome_coreboot
-          key: coreboot-${{ matrix.coreboot-version }}
+          key: coreboot-${{ matrix.coreboot-version }}-example
 
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
@@ -199,7 +199,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ./linux-${{ matrix.linux-version }}.tar.xz
-          key: linux-${{ matrix.linux-version }}
+          key: linux-${{ matrix.linux-version }}-example
       - name: Prepare linux kernel
         run: |
           # Download source files
@@ -218,7 +218,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./linux-${{ matrix.linux-version }}.tar.xz
-          key: linux-${{ matrix.linux-version }}
+          key: linux-${{ matrix.linux-version }}-example
 
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
@@ -273,7 +273,7 @@ jobs:
         id: cache-repo
         with:
           path: ./Edk2
-          key: edk2-${{ matrix.edk2-version }}
+          key: edk2-${{ matrix.edk2-version }}-example
       - name: Clone edk2 repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -286,7 +286,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./Edk2
-          key: edk2-${{ matrix.edk2-version }}
+          key: edk2-${{ matrix.edk2-version }}-example
 
       - name: Get versions of edk2
         id: edk2_versions
@@ -354,7 +354,7 @@ jobs:
         id: cache-repo
         with:
           path: ./stitch
-          key: coreboot-blobs-${{ matrix.coreboot-version }}
+          key: coreboot-blobs-${{ matrix.coreboot-version }}-example
       - name: Clone blobs repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -364,7 +364,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./stitch
-          key: coreboot-blobs-${{ matrix.coreboot-version }}
+          key: coreboot-blobs-${{ matrix.coreboot-version }}-example
 
       - name: firmware-action
         uses: ./
@@ -414,7 +414,7 @@ jobs:
         id: cache-repo
         with:
           path: ./u-root
-          key: u-root-${{ matrix.uroot-version }}
+          key: u-root-${{ matrix.uroot-version }}-example
       - name: Clone u-root repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -424,7 +424,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./u-root
-          key: u-root-${{ matrix.uroot-version }}
+          key: u-root-${{ matrix.uroot-version }}-example
 
       - name: firmware-action
         uses: ./
@@ -474,7 +474,7 @@ jobs:
         id: cache-repo
         with:
           path: ./u-boot
-          key: u-boot-${{ matrix.uboot-version }}
+          key: u-boot-${{ matrix.uboot-version }}-example
       - name: Clone u-boot repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -487,7 +487,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./u-boot
-          key: u-boot-${{ matrix.uboot-version }}
+          key: u-boot-${{ matrix.uboot-version }}-example
 
       - name: Move my defconfig into place (filename must not contain '.defconfig')
         run: |
@@ -536,7 +536,7 @@ jobs:
         id: cache-repo
         with:
           path: ./u-root
-          key: u-root-${{ matrix.uroot-version }}
+          key: u-root-${{ matrix.uroot-version }}-example
       - name: Clone u-root repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
@@ -546,7 +546,7 @@ jobs:
         if: steps.cache-repo.outputs.cache-hit != 'true'
         with:
           path: ./u-root
-          key: u-root-${{ matrix.uroot-version }}
+          key: u-root-${{ matrix.uroot-version }}-example
 
       - name: Install docker
         if: ${{ runner.os == 'macOS' }}
