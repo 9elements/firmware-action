@@ -37,7 +37,11 @@ Pre-compiled coreboot toolchains for docker containers are stored in separate di
 
 ## Containers
 
-List of [firmware-action](https://github.com/orgs/9elements/packages?repo_name=firmware-action) docker containers.
+We maintain multiple containers that can be freely used with `firmware-action`. They are hosted both in [GitHub registry](https://github.com/orgs/9elements/packages?repo_name=firmware-action) as well as in [DockerHub](https://hub.docker.com/u/9elementscyberops).
+
+DockerHub registry contains only releases, while GitHub registry contains also containers build on `main` branch.
+
+Here is a list of all containers:
 
 | Container             | Maintained  | Note  |
 |:----------------------|:------------|:------|
