@@ -125,9 +125,22 @@ jobs:
         run: |
           yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
 
+      - name: Restore cached coreboot repo
+        uses: actions/cache/restore@v4
+        id: cache-coreboot-repo
+        with:
+          path: ./coreboot
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
       - name: Clone coreboot
+        if: steps.cache-coreboot-repo.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+      - name: Store coreboot repo in cache
+        uses: actions/cache/save@v4
+        if: steps.cache-coreboot-repo.outputs.cache-hit != 'true'
+        with:
+          path: ./coreboot
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
 
       - name: Get coreboot commit hash
         id: coreboot-hash
@@ -312,10 +325,25 @@ jobs:
         id: version
         if: startsWith(matrix.dockerfile, 'coreboot')
         run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
-      - name: Clone coreboot
+
+      - name: Restore cached coreboot repo
+        uses: actions/cache/restore@v4
         if: startsWith(matrix.dockerfile, 'coreboot')
+        id: cache-coreboot-repo
+        with:
+          path: ./coreboot
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
+      - name: Clone coreboot
+        if: startsWith(matrix.dockerfile, 'coreboot') && steps.cache-coreboot-repo.outputs.cache-hit != 'true'
         run: |
           git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
+      - name: Store coreboot repo in cache
+        uses: actions/cache/save@v4
+        if: startsWith(matrix.dockerfile, 'coreboot') && steps.cache-coreboot-repo.outputs.cache-hit != 'true'
+        with:
+          path: ./coreboot
+          key: coreboot-${{ steps.version.outputs.COREBOOT_VERSION }}
+
       - name: Get coreboot commit hash
         id: coreboot-hash
         if: startsWith(matrix.dockerfile, 'coreboot')
