@@ -8,16 +8,7 @@
       "output_dir": "output-coreboot/",
       "container_output_dirs": null,
       "container_output_files": ["build/coreboot.rom", "defconfig"],
-      "blobs": {
-        "payload_file_path": "",
-        "intel_ifd_path": "",
-        "intel_me_path": "",
-        "intel_gbe_path": "",
-        "fsp_binary_path": "",
-        "fsp_header_path": "",
-        "vbt_path": "",
-        "ec_path": ""
-      },
+      "blobs": {},
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null

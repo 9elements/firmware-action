@@ -10,7 +10,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strings"
 
@@ -37,70 +36,6 @@ type BlobDef struct {
 	IsDirectory bool `validate:"required,boolean"`
 }
 
-// ANCHOR: CorebootBlobs
-
-// CorebootBlobs is used to store data specific to coreboot.
-type CorebootBlobs struct {
-	// ** List of supported blobs **
-	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
-	//
-	// Gives the (relative) path to the payload.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(MAINBOARDDIR)/payload`.
-	// The Kconfig `CONFIG_PAYLOAD_FILE` will be changed to point to the same path.
-	PayloadFilePath string `json:"payload_file_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel Flash descriptor binary.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/descriptor.bin`.
-	// The Kconfig `CONFIG_IFD_BIN_PATH` will be changed to point to the same path.
-	IntelIfdPath string `json:"intel_ifd_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel Management engine binary.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/me.bin`.
-	// The Kconfig `CONFIG_ME_BIN_PATH` will be changed to point to the same path.
-	IntelMePath string `json:"intel_me_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel Gigabit Ethernet engine binary.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/gbe.bin`.
-	// The Kconfig `CONFIG_GBE_BIN_PATH` will be changed to point to the same path.
-	IntelGbePath string `json:"intel_gbe_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel 10 Gigabit Ethernet engine binary.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/10gbe0.bin`.
-	// The Kconfig `CONFIG_10GBE_0_BIN_PATH` will be changed to point to the same path.
-	Intel10Gbe0Path string `json:"intel_10gbe0_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel FSP binary.
-	// In a 'coreboot' build, the file will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Fsp.fd`.
-	// The Kconfig `CONFIG_FSP_FD_PATH` will be changed to point to the same path.
-	FspBinaryPath string `json:"fsp_binary_path" type:"blob"`
-
-	// Gives the (relative) path to the Intel FSP header folder.
-	// In a 'coreboot' build, the files will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/Include`.
-	// The Kconfig `CONFIG_FSP_HEADER_PATH` will be changed to point to the same path.
-	FspHeaderPath string `json:"fsp_header_path" type:"blob"`
-
-	// Gives the (relative) path to the Video BIOS Table binary.
-	// In a 'coreboot' build, the files will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/vbt.bin`.
-	// The Kconfig `CONFIG_INTEL_GMA_VBT_FILE` will be changed to point to the same path.
-	VbtPath string `json:"vbt_path" type:"blob"`
-
-	// Gives the (relative) path to the Embedded Controller binary.
-	// In a 'coreboot' build, the files will be placed at
-	//   `3rdparty/blobs/mainboard/$(CONFIG_MAINBOARD_DIR)/ec.bin`.
-	// The Kconfig `CONFIG_EC_BIN_PATH` will be changed to point to the same path.
-	EcPath string `json:"ec_path" type:"blob"`
-}
-
-// ANCHOR_END: CorebootBlobs
-
 // ANCHOR: CorebootOpts
 
 // CorebootOpts is used to store all data needed to build coreboot.
@@ -114,8 +49,17 @@ type CorebootOpts struct {
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
 
-	// Coreboot specific options
-	Blobs CorebootBlobs `json:"blobs"`
+	// Blobs
+	// The blobs will be copied into the container into directory:
+	//   3rdparty/blobs/mainboard/${CONFIG_MAINBOARD_DIR}/
+	// And the blobs will remain their name
+	// NOTE: The blobs may not be added to the ROM, depends on provided defconfig.
+	// Example:
+	//   Config:
+	//     "CONFIG_PAYLOAD_FILE": "./my-payload.bin"
+	//   Will result in blob "my-payload.bin" at
+	//     "3rdparty/blobs/mainboard/${CONFIG_MAINBOARD_DIR}/my-payload.bin"
+	Blobs map[string]string `json:"blobs"`
 }
 
 // ANCHOR_END: CorebootOpts
@@ -138,7 +82,7 @@ func (opts CorebootOpts) GetSources() []string {
 	sources = append(sources, opts.DefconfigPath)
 
 	// Add blobs to list of sources
-	blobs, err := corebootProcessBlobs(opts.Blobs)
+	blobs, err := opts.ProcessBlobs()
 	if err != nil {
 		slog.Error(
 			"Failed to process all blobs",
@@ -168,81 +112,38 @@ func (opts CorebootOpts) GetSources() []string {
 	return sources
 }
 
-// corebootProcessBlobs is used to figure out blobs from provided data
-func corebootProcessBlobs(opts CorebootBlobs) ([]BlobDef, error) {
-	blobMap := map[string]BlobDef{
-		// Payload
-		// docs: https://doc.coreboot.org/payloads.html
-		"payload_file_path": {
-			DestinationFilename: "payload",
-			KconfigKey:          "CONFIG_PAYLOAD_FILE",
-			IsDirectory:         false,
-		},
-		// Intel IFD (Intel Flash Descriptor)
-		// docs: https://doc.coreboot.org/util/ifdtool/layout.html
-		"intel_ifd_path": {
-			DestinationFilename: "descriptor.bin",
-			KconfigKey:          "CONFIG_IFD_BIN_PATH",
-			IsDirectory:         false,
-		},
-		// Intel ME (Intel Management Engine)
-		"intel_me_path": {
-			DestinationFilename: "me.bin",
-			KconfigKey:          "CONFIG_ME_BIN_PATH",
-			IsDirectory:         false,
-		},
-		// Intel GbE (Intel Gigabit Ethernet)
-		"intel_gbe_path": {
-			DestinationFilename: "gbe.bin",
-			KconfigKey:          "CONFIG_GBE_BIN_PATH",
-			IsDirectory:         false,
-		},
-		// Intel 10 GbE
-		"intel_10gbe0_path": {
-			DestinationFilename: "10gbe0.bin",
-			KconfigKey:          "CONFIG_10GBE_0_BIN_PATH",
-			IsDirectory:         false,
-		},
-		// Intel FSP binary (Intel Firmware Support Package)
-		"fsp_binary_path": {
-			DestinationFilename: "Fsp.fd",
-			KconfigKey:          "CONFIG_FSP_FD_PATH",
-			IsDirectory:         false,
-		},
-		// Intel FSP header (Intel Firmware Support Package)
-		"fsp_header_path": {
-			DestinationFilename: "Include",
-			KconfigKey:          "CONFIG_FSP_HEADER_PATH",
-			IsDirectory:         true,
-		},
-		// VBT (Video BIOS Table)
-		"vbt_path": {
-			DestinationFilename: "vbt.bin",
-			KconfigKey:          "CONFIG_INTEL_GMA_VBT_FILE",
-			IsDirectory:         false,
-		},
-		// EC (Embedded Controller)
-		"ec_path": {
-			DestinationFilename: "ec.bin",
-			KconfigKey:          "CONFIG_EC_BIN_PATH",
-			IsDirectory:         false,
-		},
-	}
+// ProcessBlobs is used to figure out blobs from provided data
+func (opts CorebootOpts) ProcessBlobs() ([]BlobDef, error) {
 	blobs := []BlobDef{}
 
-	blob := reflect.ValueOf(opts)
-	for i := 0; i < blob.Type().NumField(); i++ {
-		t := blob.Type().Field(i)
-
-		jsonTag := t.Tag.Get("json")
-		jsonType := t.Tag.Get("type")
-		if jsonTag != "" && jsonType == "blob" {
-			newBlob := blobMap[jsonTag]
-			newBlob.Path = blob.Field(i).Interface().(string)
-			if newBlob.Path != "" {
-				blobs = append(blobs, newBlob)
-			}
+	for key, value := range opts.Blobs {
+		newBlob := BlobDef{
+			KconfigKey: key,
+			Path:       value,
+			// Blobs get renamed when moved to this string
+			DestinationFilename: filepath.Base(value),
 		}
+
+		err := filesystem.CheckFileExists(value)
+		if errors.Is(err, os.ErrExist) {
+			// blob is file
+			newBlob.IsDirectory = false
+		} else if errors.Is(err, filesystem.ErrPathIsDirectory) {
+			// blob is directory
+			newBlob.IsDirectory = true
+		} else if err != nil {
+			// Something is wrong, blob is not file nor directory
+			slog.Error(
+				"Failed to process a blob in coreboot configuration",
+				slog.String("suggestion", "Please double-check blobs, and make sure the paths point to actual file or directory"),
+				slog.String("blob_key", key),
+				slog.String("blob_value", value),
+				slog.Any("error", err),
+			)
+			return nil, err
+		}
+
+		blobs = append(blobs, newBlob)
 	}
 	return blobs, nil
 }
@@ -315,7 +216,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	// Firstly copy all the blobs into building container.
 	// Then use './util/scripts/config' script in coreboot repository to update configuration
 	//   options for said blobs (this must run inside container).
-	blobs, err := corebootProcessBlobs(opts.Blobs)
+	blobs, err := opts.ProcessBlobs()
 	if err != nil {
 		slog.Error(
 			"Failed to process all blobs",
