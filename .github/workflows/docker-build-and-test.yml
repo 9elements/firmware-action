@@ -20,16 +20,16 @@ on:
   workflow_dispatch:
     inputs:
       skip_rerun:
-        description: "Skip rerun?"
+        description: 'Skip rerun?'
         required: true
         default: false
         type: boolean
       retries:
-        description: "Number of rerun retries"
+        description: 'Number of rerun retries'
         required: true
-        default: "5"
+        default: '5'
         type: choice
-        options: ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        options: ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 permissions:
   contents: read
@@ -313,7 +313,6 @@ jobs:
             ${{ steps.tar-filename-tools.outputs.TAR_FILENAME }}.sha256
           key: ${{ steps.cache-tools-key.outputs.CACHE_KEY }}
 
-
       - name: Checkout
         uses: actions/checkout@v4
         if: steps.toolchains-exist.outputs.EXIST == 'false' || steps.tools-exist.outputs.EXIST == 'false'
@@ -354,12 +353,11 @@ jobs:
           token: ${{ secrets.GH_PAT_TOOLCHAINS }}
           add-paths: |
             coreboot/**
-          branch: "feat/${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}"
-          commit-message: "feat: add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} ${{ matrix.arch }}"
-          body: "add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}"
-          title: "feat: add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}"
-          labels: "${{ matrix.arch }}"
-
+          branch: 'feat/${{ steps.version.outputs.COREBOOT_VERSION }}-${{ steps.coreboot-hash.outputs.COREBOOT_HASH }}-${{ matrix.arch }}'
+          commit-message: 'feat: add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} ${{ matrix.arch }}'
+          body: 'add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}'
+          title: 'feat: add toolchain and tools for coreboot ${{ steps.version.outputs.COREBOOT_VERSION }} for ${{ matrix.arch }}'
+          labels: '${{ matrix.arch }}'
 
   #=========================
   # Build Docker containers
@@ -507,7 +505,6 @@ jobs:
           DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-
   #====================
   # Re-run failed jobs
   #====================
@@ -523,8 +520,8 @@ jobs:
     permissions:
       actions: write
     env:
-      GH_TOKEN: "${{ secrets.AUTO_RERUN || github.token }}"
-      github_repo: ""
+      GH_TOKEN: '${{ secrets.AUTO_RERUN || github.token }}'
+      github_repo: ''
       # To use ci-auto-rerun-failed-jobs.yml hosted in a remote repository else default to the current repository. Requires PAT token AUTO_RERUN
       retries: ${{ github.event.inputs.retries || '3' }}
       distinct_id: ${{ github.run_id }}
@@ -534,10 +531,10 @@ jobs:
 
       - name: ci-auto-rerun-failed-jobs via ${{ env.github_repo || github.repository }}
         run: >
-            gh workflow run docker-build-and-test-rerun.yml
-            --repo "${github_repo:-$GITHUB_REPOSITORY}"
-            -f github_repo="${GITHUB_REPOSITORY}"
-            -f run_id="${GITHUB_RUN_ID}"
-            -f attempts="${GITHUB_RUN_ATTEMPT}"
-            -f retries="${retries}"
-            -f distinct_id="${distinct_id}"
+          gh workflow run docker-build-and-test-rerun.yml
+          --repo "${github_repo:-$GITHUB_REPOSITORY}"
+          -f github_repo="${GITHUB_REPOSITORY}"
+          -f run_id="${GITHUB_RUN_ID}"
+          -f attempts="${GITHUB_RUN_ATTEMPT}"
+          -f retries="${retries}"
+          -f distinct_id="${distinct_id}"
