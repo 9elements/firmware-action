@@ -43,47 +43,47 @@ DockerHub registry contains only releases, while GitHub registry contains also c
 
 Here is a list of all containers:
 
-| Container             | Maintained  | Note  |
-|:----------------------|:------------|:------|
-| coreboot_4.19         | [x]         |  |
-| coreboot_4.20         | [ ]         | discontinued in favor of `4.20.1` |
-| coreboot_4.20.1       | [x]         |  |
-| coreboot_4.21         | [x]         |  |
-| coreboot_4.22         | [ ]         | discontinued in favor of `4.22.1` |
-| coreboot_4.22.01      | [x]         |  |
-| coreboot_24.02        | [ ]         | discontinued in favor of `24.02.01` |
-| coreboot_24.02.01     | [x]         |  |
-| coreboot_24.05        | [x]         |  |
-| udk2017               | [x]         |  |
-| edk2-stable202008     | [x]         |  |
-| edk2-stable202105     | [x]         |  |
-| edk2-stable202111     | [x]         |  |
-| edk2-stable202205     | [x]         |  |
-| edk2-stable202208     | [x]         |  |
-| edk2-stable202211     | [x]         |  |
-| edk2-stable202302     | [x]         |  |
-| edk2-stable202305     | [x]         |  |
-| edk2-stable202308     | [x]         |  |
-| edk2-stable202311     | [x]         |  |
-| edk2-stable202402     | [x]         |  |
-| edk2-stable202405     | [x]         |  |
-| edk2-stable202408     | [ ]         | discontinued in favor of `stable202408.01` |
-| edk2-stable202408.01  | [x]         |  |
-| edk2-stable202411     | [x]         |  |
-| linux_6.1.111         | [x]         |  |
-| linux_6.1.45          | [x]         |  |
-| linux_6.6.52          | [x]         |  |
-| linux_6.9.9           | [x]         |  |
-| linux_6.11            | [x]         |  |
-| uroot_0.14.0          | [x]         |  |
-| uboot_2025.01         | [x]         |  |
+| Container            | Maintained | Note                                       |
+| -------------------- | ---------- | ------------------------------------------ |
+| coreboot_4.19        | [x]        |                                            |
+| coreboot_4.20        | [ ]        | discontinued in favor of `4.20.1`          |
+| coreboot_4.20.1      | [x]        |                                            |
+| coreboot_4.21        | [x]        |                                            |
+| coreboot_4.22        | [ ]        | discontinued in favor of `4.22.1`          |
+| coreboot_4.22.01     | [x]        |                                            |
+| coreboot_24.02       | [ ]        | discontinued in favor of `24.02.01`        |
+| coreboot_24.02.01    | [x]        |                                            |
+| coreboot_24.05       | [x]        |                                            |
+| udk2017              | [x]        |                                            |
+| edk2-stable202008    | [x]        |                                            |
+| edk2-stable202105    | [x]        |                                            |
+| edk2-stable202111    | [x]        |                                            |
+| edk2-stable202205    | [x]        |                                            |
+| edk2-stable202208    | [x]        |                                            |
+| edk2-stable202211    | [x]        |                                            |
+| edk2-stable202302    | [x]        |                                            |
+| edk2-stable202305    | [x]        |                                            |
+| edk2-stable202308    | [x]        |                                            |
+| edk2-stable202311    | [x]        |                                            |
+| edk2-stable202402    | [x]        |                                            |
+| edk2-stable202405    | [x]        |                                            |
+| edk2-stable202408    | [ ]        | discontinued in favor of `stable202408.01` |
+| edk2-stable202408.01 | [x]        |                                            |
+| edk2-stable202411    | [x]        |                                            |
+| linux_6.1.111        | [x]        |                                            |
+| linux_6.1.45         | [x]        |                                            |
+| linux_6.6.52         | [x]        |                                            |
+| linux_6.9.9          | [x]        |                                            |
+| linux_6.11           | [x]        |                                            |
+| uroot_0.14.0         | [x]        |                                            |
+| uboot_2025.01        | [x]        |                                            |
 
 
 ## Legacy containers
 
 These were created by hand long time ago and since then have been replaced.
 
-| Container             | Maintained  | Note  |
-|:----------------------|:------------|:------|
-| [coreboot](https://github.com/orgs/9elements/packages/container/package/coreboot)  | [ ]         | discontinued |
-| [uefi](https://github.com/orgs/9elements/packages/container/package/uefi)          | [ ]         | discontinued |
+| Container                                                                         | Maintained | Note         |
+| --------------------------------------------------------------------------------- | ---------- | ------------ |
+| [coreboot](https://github.com/orgs/9elements/packages/container/package/coreboot) | [ ]        | discontinued |
+| [uefi](https://github.com/orgs/9elements/packages/container/package/uefi)         | [ ]        | discontinued |

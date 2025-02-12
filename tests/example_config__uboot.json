@@ -8,11 +8,7 @@
       "defconfig_path": "uboot_defconfig",
       "output_dir": "output-uboot/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "u-boot",
-        "u-boot.cfg",
-        "u-boot.elf"
-      ],
+      "container_output_files": ["u-boot", "u-boot.cfg", "u-boot.elf"],
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null

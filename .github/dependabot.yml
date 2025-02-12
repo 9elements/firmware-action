@@ -29,8 +29,8 @@ updates:
       interval: 'daily'
       time: '00:00'
 
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
+  - package-ecosystem: 'gitsubmodule'
+    directory: '/'
     schedule:
-      interval: "daily"
-      time: "00:00"
+      interval: 'daily'
+      time: '00:00'

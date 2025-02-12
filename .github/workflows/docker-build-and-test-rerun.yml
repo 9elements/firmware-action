@@ -6,19 +6,19 @@ on:
   workflow_dispatch:
     inputs:
       run_id:
-        description: "The run id of the workflow to rerun"
+        description: 'The run id of the workflow to rerun'
         required: true
       attempts:
-        description: "The number of attempts to rerun the workflow"
+        description: 'The number of attempts to rerun the workflow'
         required: true
       retries:
-        description: "The number of retries to rerun the workflow"
+        description: 'The number of retries to rerun the workflow'
         required: true
       github_repo:
-        description: "The repository to rerun the workflow"
+        description: 'The repository to rerun the workflow'
         required: false
       distinct_id:
-        description: "The distinct id of the workflow to rerun"
+        description: 'The distinct id of the workflow to rerun'
         required: false
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
       actions: write
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: "${{ secrets.AUTO_RERUN || github.token }}"
+      GH_TOKEN: '${{ secrets.AUTO_RERUN || github.token }}'
     steps:
       - name: Host - Checkout action ${{ inputs.distinct_id }}
         uses: actions/checkout@v4
