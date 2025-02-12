@@ -255,7 +255,7 @@ services:
     build:
       context: edk2
       args:
-        - EDK2_VERSION=edk2-stable202422
+        - EDK2_VERSION=edk2-stable202411
         - EDK2_VERSION_COMMIT=0f3867fa6ef0553e26c42f7d71ff6bdb98429742
         - SOURCE_IMAGE=buildpack-deps:noble
         - EDK2_PLATFORM_COMMIT=8148af7dd5134987ac8da90daf1f57a481e66455
