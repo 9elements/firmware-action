@@ -19,6 +19,7 @@ At the moment firmware-action has modules to build:
 - [tianocore / edk2](https://www.tianocore.org/)
 - firmware stitching (populating IFD regions with binaries)
 - [u-root](https://github.com/u-root/u-root)
+- [u-boot](https://docs.u-boot.org/en/latest/index.html)
 - universal module (run arbitrary commands in arbitrary Docker container)
 
 This list should expand in the future (see [issue 56](https://github.com/9elements/firmware-action/issues/56)).
