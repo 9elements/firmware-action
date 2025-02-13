@@ -23,38 +23,82 @@ import (
 func TestCorebootProcessBlobs(t *testing.T) {
 	testCases := []struct {
 		name            string
-		corebootOptions CorebootBlobs
+		corebootOptions map[string]string
 		expected        []BlobDef
+		wantErr         error
 	}{
 		{
 			name:            "empty",
-			corebootOptions: CorebootBlobs{},
+			corebootOptions: map[string]string{},
 			expected:        []BlobDef{},
+			wantErr:         nil,
 		},
 		{
-			name: "payload",
-			corebootOptions: CorebootBlobs{
-				PayloadFilePath: "dummy/path/to/payload.bin",
+			name: "payload does not exist",
+			corebootOptions: map[string]string{
+				"CONFIG_PAYLOAD_FILE": "dummy/path/to/payload.bin",
 			},
 			expected: []BlobDef{
 				{
 					Path:                "dummy/path/to/payload.bin",
-					DestinationFilename: "payload",
+					DestinationFilename: "payload.bin",
 					KconfigKey:          "CONFIG_PAYLOAD_FILE",
 					IsDirectory:         false,
 				},
 			},
+			wantErr: os.ErrNotExist,
+		},
+		{
+			name: "payload exists",
+			corebootOptions: map[string]string{
+				"CONFIG_PAYLOAD_FILE": "dummy/path/to/payload.bin",
+			},
+			expected: []BlobDef{
+				{
+					Path:                "dummy/path/to/payload.bin",
+					DestinationFilename: "payload.bin",
+					KconfigKey:          "CONFIG_PAYLOAD_FILE",
+					IsDirectory:         false,
+				},
+			},
+			wantErr: nil,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			output, err := corebootProcessBlobs(tc.corebootOptions)
+			pwd, err := os.Getwd()
 			assert.NoError(t, err)
 
-			equal := cmp.Equal(tc.expected, output)
-			if !equal {
-				t.Log(cmp.Diff(tc.expected, output))
-				assert.True(t, equal, "processing blob parameters failed")
+			tmpDir := t.TempDir()
+			err = os.Chdir(tmpDir)
+			assert.NoError(t, err)
+			defer os.Chdir(pwd) // nolint:errcheck
+
+			for i := range tc.expected {
+				// If we do not want error
+				payloadFile := filepath.Join(tmpDir, tc.expected[i].Path)
+				payloadDir := filepath.Dir(payloadFile)
+				if tc.wantErr == nil {
+					// Create the temp directory
+					err := os.MkdirAll(payloadDir, 0o750)
+					assert.NoError(t, err)
+					// Create the temp file to act as payload
+					err = os.WriteFile(payloadFile, []byte{}, 0o666)
+					assert.NoError(t, err)
+				}
+			}
+
+			opts := CorebootOpts{
+				Blobs: tc.corebootOptions,
+			}
+			output, err := opts.ProcessBlobs()
+			assert.ErrorIs(t, err, tc.wantErr)
+			if err == nil {
+				equal := cmp.Equal(tc.expected, output)
+				if !equal {
+					t.Log(cmp.Diff(tc.expected, output))
+					assert.True(t, equal, "processing blob parameters failed")
+				}
 			}
 		})
 	}
@@ -217,8 +261,8 @@ func TestCorebootBuild(t *testing.T) {
 			corebootOptions: CorebootOpts{
 				CommonOpts:    common,
 				DefconfigPath: "seabios_defconfig",
-				Blobs: CorebootBlobs{
-					PayloadFilePath: "my_payload",
+				Blobs: map[string]string{
+					"CONFIG_PAYLOAD_FILE": "my_payload",
 				},
 			},
 			universalOptions: optionsUniversal,
@@ -230,8 +274,8 @@ func TestCorebootBuild(t *testing.T) {
 			corebootOptions: CorebootOpts{
 				CommonOpts:    common,
 				DefconfigPath: "seabios_defconfig",
-				Blobs: CorebootBlobs{
-					IntelMePath: "intel_me.bin",
+				Blobs: map[string]string{
+					"CONFIG_ME_BIN_PATH": "intel_me.bin",
 				},
 			},
 			universalOptions: optionsUniversal,

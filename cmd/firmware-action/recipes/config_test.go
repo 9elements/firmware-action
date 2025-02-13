@@ -67,7 +67,7 @@ func TestValidateConfig(t *testing.T) {
 					"coreboot-A": {
 						CommonOpts:    commonDummy,
 						DefconfigPath: "dummy",
-						Blobs:         CorebootBlobs{},
+						Blobs:         map[string]string{},
 					},
 				},
 			},
@@ -80,7 +80,7 @@ func TestValidateConfig(t *testing.T) {
 					"coreboot-A": {
 						CommonOpts:    CommonOpts{},
 						DefconfigPath: "dummy",
-						Blobs:         CorebootBlobs{},
+						Blobs:         map[string]string{},
 					},
 				},
 			},
