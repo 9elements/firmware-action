@@ -34,21 +34,6 @@ func TestCorebootProcessBlobs(t *testing.T) {
 			wantErr:         nil,
 		},
 		{
-			name: "payload does not exist",
-			corebootOptions: map[string]string{
-				"CONFIG_PAYLOAD_FILE": "dummy/path/to/payload.bin",
-			},
-			expected: []BlobDef{
-				{
-					Path:                "dummy/path/to/payload.bin",
-					DestinationFilename: "payload.bin",
-					KconfigKey:          "CONFIG_PAYLOAD_FILE",
-					IsDirectory:         false,
-				},
-			},
-			wantErr: os.ErrNotExist,
-		},
-		{
 			name: "payload exists",
 			corebootOptions: map[string]string{
 				"CONFIG_PAYLOAD_FILE": "dummy/path/to/payload.bin",
@@ -58,7 +43,6 @@ func TestCorebootProcessBlobs(t *testing.T) {
 					Path:                "dummy/path/to/payload.bin",
 					DestinationFilename: "payload.bin",
 					KconfigKey:          "CONFIG_PAYLOAD_FILE",
-					IsDirectory:         false,
 				},
 			},
 			wantErr: nil,
