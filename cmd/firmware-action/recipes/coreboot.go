@@ -24,16 +24,13 @@ import (
 // This structure is not exposed to the user, it is filled in automatically based on user input.
 type BlobDef struct {
 	// Path to the blob (either file or directory)
-	Path string `validate:"required"`
+	Path string
 
 	// Blobs get renamed when moved to this string
-	DestinationFilename string `validate:"required"`
+	DestinationFilename string
 
 	// Kconfig key specifying the filepath to the blob in defconfig
-	KconfigKey string `validate:"required"`
-
-	// Is blob a directory? If blob is file, set to FALSE
-	IsDirectory bool `validate:"required,boolean"`
+	KconfigKey string
 }
 
 // ANCHOR: CorebootOpts
@@ -122,25 +119,6 @@ func (opts CorebootOpts) ProcessBlobs() ([]BlobDef, error) {
 			Path:       value,
 			// Blobs get renamed when moved to this string
 			DestinationFilename: filepath.Base(value),
-		}
-
-		err := filesystem.CheckFileExists(value)
-		if errors.Is(err, os.ErrExist) {
-			// blob is file
-			newBlob.IsDirectory = false
-		} else if errors.Is(err, filesystem.ErrPathIsDirectory) {
-			// blob is directory
-			newBlob.IsDirectory = true
-		} else if err != nil {
-			// Something is wrong, blob is not file nor directory
-			slog.Error(
-				"Failed to process a blob in coreboot configuration",
-				slog.String("suggestion", "Please double-check blobs, and make sure the paths point to actual file or directory"),
-				slog.String("blob_key", key),
-				slog.String("blob_value", value),
-				slog.Any("error", err),
-			)
-			return nil, err
 		}
 
 		blobs = append(blobs, newBlob)
@@ -237,7 +215,8 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		)
 
 		// Copy into container
-		if err = filesystem.CheckFileExists(src); !errors.Is(err, os.ErrExist) {
+		err = filesystem.CheckFileExists(src)
+		if !errors.Is(err, os.ErrExist) {
 			slog.Error(
 				fmt.Sprintf("Blob '%s' was not found", src),
 				slog.String("suggestion", "blobs are copied into container separately from 'input_files' and 'input_dirs', the path should point to files on your host"),
@@ -245,7 +224,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			)
 			return err
 		}
-		if blobs[blob].IsDirectory {
+		if errors.Is(err, filesystem.ErrPathIsDirectory) {
 			// Directory
 			slog.Info(fmt.Sprintf("Copying directory '%s' to container at '%s'", src, dst))
 			myContainer = myContainer.WithExec([]string{"mkdir", "-p", dst})
@@ -257,12 +236,22 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				dst,
 				client.Host().Directory(src),
 			)
-		} else {
+		} else if errors.Is(err, os.ErrExist) {
 			// File
 			myContainer = myContainer.WithFile(
 				dst,
 				client.Host().File(src),
 			)
+		} else {
+			// Something is wrong, blob is not file nor directory
+			slog.Error(
+				"Failed to process a blob in coreboot configuration",
+				slog.String("suggestion", "Please double-check blobs, and make sure the paths point to actual file or directory"),
+				slog.String("blob_path", blobs[blob].Path),
+				slog.String("blob_kconfig", blobs[blob].KconfigKey),
+				slog.Any("error", err),
+			)
+			return err
 		}
 
 		// Fix defconfig
