@@ -23,6 +23,8 @@
         - [Build Docker container on the fly](firmware-action/build_dockerfile_on_the_fly.md)
         - [Interactive debugging](firmware-action/interactive.md)
         - [Offline usage](firmware-action/offline_usage.md)
+    - [Migration instructions]()
+        - [Migration from v0.13.x to v0.14.0](firmware-action/migration/v0.13.x--v0.14.0/migrate.md)
 
 ---
 
