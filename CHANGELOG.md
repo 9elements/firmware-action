@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.14.0 - 2025-02-15
+#### Bug Fixes
+- **(cmd)** coreboot blobs directory vs file handling - (00be63f) - AtomicFS
+- **(docker)** compilation of coreboot utils - (c37115b) - AtomicFS
+- **(docker)** typo in edk2-stable202411 - (ccc219a) - AtomicFS
+- **(docker)** edk2 missing branch - (17519e7) - AtomicFS
+#### Build system
+- **(deps)** bump docs/src/firmware-action-example - (a94a109) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (4d82bde) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (c09c7e4) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (7de8daa) - dependabot[bot]
+#### Continuous Integration
+- **(lint)** disable markdown-table-formatter - (45dd6d7) - AtomicFS
+#### Documentation
+- add notes on migrating to new coreboot config - (2c10f80) - AtomicFS
+- add link to DockerHub containers - (871fb89) - AtomicFS
+- add u-boot into list of supported modules - (25e291c) - AtomicFS
+- update list of containers - (2572282) - AtomicFS
+#### Features
+- **(cmd)** refactor how coreboot blobs are handled - (d4437a0) - AtomicFS
+#### Miscellaneous Chores
+- **(docker)** add git wget and curl to all containers - (76c7a21) - AtomicFS
+- **(docker)** add new edk2-stable202411 container - (6cca466) - AtomicFS
+- **(linter)** cosmetic fixes - (56e3ee8) - AtomicFS
+
+- - -
+
 ## v0.13.0 - 2025-02-11
 #### Bug Fixes
 - **(ci)** go-test - (8bd0a26) - AtomicFS
