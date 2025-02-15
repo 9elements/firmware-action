@@ -1,7 +1,7 @@
 ---
 version: '3'
 vars:
-  SEMVER: 'v0.13.0'
+  SEMVER: 'v0.14.0'
   GOLANG_CODE_PATH: 'cmd/firmware-action'
 
 includes:
