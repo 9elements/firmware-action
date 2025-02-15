@@ -10,8 +10,8 @@ linters-settings:
     # Default: false
     attr-only: true
     # Enforce using methods that accept a context.
-    # Default: false
-    context: true
+    # Default: ""
+    context: "all"
     # Enforce using static values for log messages.
     # Default: false
     static-msg: true
