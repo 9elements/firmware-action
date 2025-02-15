@@ -70,11 +70,14 @@ Here is a list of all containers:
 | edk2-stable202408    | [ ]        | discontinued in favor of `stable202408.01` |
 | edk2-stable202408.01 | [x]        |                                            |
 | edk2-stable202411    | [x]        |                                            |
-| linux_6.1.111        | [x]        |                                            |
-| linux_6.1.45         | [x]        |                                            |
-| linux_6.6.52         | [x]        |                                            |
-| linux_6.9.9          | [x]        |                                            |
-| linux_6.11           | [x]        |                                            |
+| linux_6.1.111        | [ ]        | discontinued in favor of `linux_6.1`       |
+| linux_6.1.45         | [ ]        | discontinued in favor of `linux_6.1`       |
+| linux_6.1            | [x]        |                                            |
+| linux_6.6.52         | [ ]        | discontinued in favor of `linux_6.6`       |
+| linux_6.6            | [x]        |                                            |
+| linux_6.9.9          | [ ]        | discontinued because not LTS               |
+| linux_6.11           | [ ]        | discontinued because not LTS               |
+| linux_6.12           | [x]        |                                            |
 | uroot_0.14.0         | [x]        |                                            |
 | uboot_2025.01        | [x]        |                                            |
 
