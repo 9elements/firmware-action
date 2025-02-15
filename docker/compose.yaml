@@ -271,47 +271,34 @@ services:
   # Linux releases:  https://en.wikipedia.org/wiki/Linux_kernel_version_history
   #                  https://endoflife.date/linux
   # GCC releases:    https://gcc.gnu.org/releases.html
-  linux_6.1.45:
+  linux_6.1:
     # 2022-12
     # LTS
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.1.45
+        - LINUX_VERSION=6.1.127
+        - LINUX_VERSION_MAJOR_MINOR=6.1
         - GCC_VERSION=11
         - SOURCE_IMAGE=ubuntu:noble
-  linux_6.1.111:
-    # 2022-12
-    # LTS
-    build:
-      context: linux
-      args:
-        - LINUX_VERSION=6.1.111
-        - GCC_VERSION=11
-        - SOURCE_IMAGE=ubuntu:noble
-  linux_6.6.52:
+  linux_6.6:
     # 2023-10
     # LTS
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.6.52
+        - LINUX_VERSION=6.6.74
+        - LINUX_VERSION_MAJOR_MINOR=6.6
         - GCC_VERSION=12
         - SOURCE_IMAGE=ubuntu:noble
-  linux_6.9.9:
-    # 2024-05
+  linux_6.12:
+    # 2024-11
+    # LTS
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.9.9
-        - GCC_VERSION=13
-        - SOURCE_IMAGE=ubuntu:noble
-  linux_6.11:
-    # 2024-09
-    build:
-      context: linux
-      args:
-        - LINUX_VERSION=6.11
+        - LINUX_VERSION=6.12.11
+        - LINUX_VERSION_MAJOR_MINOR=6.12
         - GCC_VERSION=14
         - SOURCE_IMAGE=ubuntu:noble
   #==================
