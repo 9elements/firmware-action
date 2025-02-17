@@ -119,6 +119,11 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.20(:.*)?$`,
 			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.22(:.*)?$`,
 			`.*ghcr\.io\/9elements\/firmware\-action\/edk2\-stable202408(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.11(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.1\.11(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.1\.45(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.6\.52(:.*)?$`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.9\.9(:.*)?$`,
 			`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
 		}
 		for _, discontinued := range listDiscontinued {
