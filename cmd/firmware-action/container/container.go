@@ -114,12 +114,12 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 	} else {
 		// Check for discontinued containers
 		listDiscontinued := []string{
+			`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
+			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_24\.02(:.*)?$`,
 			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.20(:.*)?$`,
 			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.22(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_24\.02(:.*)?$`,
 			`.*ghcr\.io\/9elements\/firmware\-action\/edk2\-stable202408(:.*)?$`,
 			`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
-			`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
 		}
 		for _, discontinued := range listDiscontinued {
 			pattern := regexp.MustCompile(discontinued)
