@@ -89,6 +89,7 @@ jobs:
           token: ${{ github.token }}
           branch: ${{ github.ref }}
           noVersionBumpBehavior: patch
+          noNewCommitBehavior: warn
       - name: Filter
         uses: dorny/paths-filter@v3
         id: filter
