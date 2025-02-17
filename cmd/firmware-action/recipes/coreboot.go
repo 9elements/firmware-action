@@ -114,14 +114,16 @@ func (opts CorebootOpts) ProcessBlobs() ([]BlobDef, error) {
 	blobs := []BlobDef{}
 
 	for key, value := range opts.Blobs {
-		newBlob := BlobDef{
-			KconfigKey: key,
-			Path:       value,
-			// Blobs get renamed when moved to this string
-			DestinationFilename: filepath.Base(value),
-		}
+		if key != "" && value != "" {
+			newBlob := BlobDef{
+				KconfigKey: key,
+				Path:       value,
+				// Blobs get renamed when moved to this string
+				DestinationFilename: filepath.Base(value),
+			}
 
-		blobs = append(blobs, newBlob)
+			blobs = append(blobs, newBlob)
+		}
 	}
 	return blobs, nil
 }
