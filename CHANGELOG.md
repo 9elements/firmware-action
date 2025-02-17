@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.14.1 - 2025-02-17
+#### Bug Fixes
+- **(cmd)** empty coreboot blob handling - (5d58179) - AtomicFS
+#### Build system
+- **(deps)** bump docs/src/firmware-action-example - (0a47874) - dependabot[bot]
+- **(deps)** bump github.com/go-playground/validator/v10 - (96a430f) - dependabot[bot]
+
+- - -
+
 ## v0.14.0 - 2025-02-15
 #### Bug Fixes
 - **(cmd)** coreboot blobs directory vs file handling - (00be63f) - AtomicFS
