@@ -180,7 +180,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        linux-version: ['6.1.45', '6.1.111', '6.6.52', '6.9.9', '6.11']
+        linux-version: ['6.1', '6.6', '6.12']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
