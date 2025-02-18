@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
@@ -42,7 +43,7 @@ var CLI struct {
 	Indent bool `default:"false" help:"enable indentation for JSON output"`
 	Debug  bool `default:"false" help:"increase verbosity"`
 
-	Config string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file"`
+	Config []string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file, supports multiple flags to use multiple configuration files"`
 
 	Build struct {
 		Target    string `required:"" help:"Select which target to build, use ID from configuration file"`
@@ -76,7 +77,7 @@ func run(ctx context.Context) error {
 	)
 	slog.Info(
 		fmt.Sprintf("Running in %s mode", mode),
-		slog.String("input/config", CLI.Config),
+		slog.Any("input/config", CLI.Config),
 		slog.String("input/target", CLI.Build.Target),
 		slog.Bool("input/recursive", CLI.Build.Recursive),
 	)
@@ -108,7 +109,7 @@ func run(ctx context.Context) error {
 			patterSub := regexp.MustCompile(`^\-[\d\w]* `)
 			slog.Warn(
 				"Git submodule seems to be uninitialized",
-				slog.String("suggestion", "run 'git submodule update --depth 0 --init --recursive --checkout'"),
+				slog.String("suggestion", "run 'git submodule update --depth 1 --init --recursive --checkout'"),
 				slog.String("offending_submodule", patterSub.ReplaceAllString(v, "")),
 			)
 		}
@@ -117,7 +118,7 @@ submodule_out:
 
 	// Parse configuration file
 	var myConfig *recipes.Config
-	myConfig, err = recipes.ReadConfig(CLI.Config)
+	myConfig, err = recipes.ReadConfigs(CLI.Config)
 	if err != nil {
 		return err
 	}
@@ -188,8 +189,16 @@ func parseCli() (string, error) {
 		return mode, nil
 
 	case "generate-config":
+		// Check if at least one configuration file was supplied
+		if len(CLI.Config) == 0 {
+			slog.Error(
+				"No configuration file was supplied",
+				slog.Any("error", os.ErrNotExist),
+			)
+			return "", os.ErrNotExist
+		}
 		// Check if config file exists
-		err := filesystem.CheckFileExists(CLI.Config)
+		err := filesystem.CheckFileExists(CLI.Config[0])
 		if !errors.Is(err, os.ErrNotExist) {
 			// The file exists, or is directory, or some other problem
 			slog.Error(
@@ -222,7 +231,7 @@ func parseCli() (string, error) {
 
 		// Write to file
 		slog.Info(fmt.Sprintf("Generating configuration file at: %s", CLI.Config))
-		if err := os.WriteFile(CLI.Config, jsonString, 0o666); err != nil {
+		if err := os.WriteFile(CLI.Config[0], jsonString, 0o666); err != nil {
 			slog.Error(
 				"Unable to write generated configuration into file",
 				slog.Any("error", err),
@@ -253,7 +262,7 @@ func parseGithub() (string, error) {
 	action := githubactions.New()
 	regexTrue := regexp.MustCompile(`(?i)true`)
 
-	CLI.Config = action.GetInput("config")
+	CLI.Config = strings.Split(action.GetInput("config"), "\n")
 	CLI.Build.Target = action.GetInput("target")
 	CLI.Build.Recursive = regexTrue.MatchString(action.GetInput("recursive"))
 	CLI.JSON = regexTrue.MatchString(action.GetInput("json"))
