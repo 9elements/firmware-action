@@ -230,6 +230,78 @@ func (c Config) AllModules() map[string]FirmwareModule {
 	return modules
 }
 
+func checkIfModuleExists(ok bool, key string) {
+	if ok {
+		slog.Warn("Module already exists in configuration, and will be overwritten",
+			slog.String("module_name", key),
+			slog.String("suggestion", "Make sure each module has unique name, not only per single configuration file but across all configuration files."),
+		)
+	}
+}
+
+// Merge method will take other Config instance and adopt all of its modules
+func (c Config) Merge(other Config) (Config, error) {
+	// Not sure of there is cleaner way to do this :/
+
+	for key, value := range other.Coreboot {
+		if len(c.Coreboot) == 0 {
+			c.Coreboot = map[string]CorebootOpts{}
+		}
+		_, ok := c.Coreboot[key]
+		checkIfModuleExists(ok, key)
+		c.Coreboot[key] = value
+	}
+	for key, value := range other.Linux {
+		if len(c.Linux) == 0 {
+			c.Linux = map[string]LinuxOpts{}
+		}
+		_, ok := c.Linux[key]
+		checkIfModuleExists(ok, key)
+		c.Linux[key] = value
+	}
+	for key, value := range other.Edk2 {
+		if len(c.Edk2) == 0 {
+			c.Edk2 = map[string]Edk2Opts{}
+		}
+		_, ok := c.Edk2[key]
+		checkIfModuleExists(ok, key)
+		c.Edk2[key] = value
+	}
+	for key, value := range other.FirmwareStitching {
+		if len(c.FirmwareStitching) == 0 {
+			c.FirmwareStitching = map[string]FirmwareStitchingOpts{}
+		}
+		_, ok := c.FirmwareStitching[key]
+		checkIfModuleExists(ok, key)
+		c.FirmwareStitching[key] = value
+	}
+	for key, value := range other.URoot {
+		if len(c.URoot) == 0 {
+			c.URoot = map[string]URootOpts{}
+		}
+		_, ok := c.URoot[key]
+		checkIfModuleExists(ok, key)
+		c.URoot[key] = value
+	}
+	for key, value := range other.Universal {
+		if len(c.Universal) == 0 {
+			c.Universal = map[string]UniversalOpts{}
+		}
+		_, ok := c.Universal[key]
+		checkIfModuleExists(ok, key)
+		c.Universal[key] = value
+	}
+	for key, value := range other.UBoot {
+		if len(c.UBoot) == 0 {
+			c.UBoot = map[string]UBootOpts{}
+		}
+		_, ok := c.UBoot[key]
+		checkIfModuleExists(ok, key)
+		c.UBoot[key] = value
+	}
+	return c, nil
+}
+
 // FirmwareModule interface
 type FirmwareModule interface {
 	GetDepends() []string
@@ -271,6 +343,26 @@ func FindAllEnvVars(text string) []string {
 		result[index] = pattern.ReplaceAllString(value, "$1")
 	}
 	return result
+}
+
+// ReadConfigs is for reading and parsing multiple JSON configuration files into single Config struct
+func ReadConfigs(filepaths []string) (*Config, error) {
+	var allConfigs Config
+	for _, filepath := range filepaths {
+		trimmedFilepath := strings.TrimSpace(filepath)
+		slog.Debug("Reading config",
+			slog.String("path", trimmedFilepath),
+		)
+		payload, err := ReadConfig(trimmedFilepath)
+		if err != nil {
+			return nil, err
+		}
+		allConfigs, err = allConfigs.Merge(*payload)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &allConfigs, nil
 }
 
 // ReadConfig is for reading and parsing JSON configuration file into Config struct
