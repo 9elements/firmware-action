@@ -47,19 +47,19 @@ func TestLinux(t *testing.T) {
 	}{
 		{
 			name:         "normal build for x86 64bit",
-			linuxVersion: "6.1.45",
+			linuxVersion: "6.1.127",
 			arch:         "amd64",
 			wantErr:      nil,
 		},
 		{
 			name:         "normal build for x86 32bit",
-			linuxVersion: "6.1.45",
+			linuxVersion: "6.1.127",
 			arch:         "i386",
 			wantErr:      nil,
 		},
 		{
 			name:         "normal build for arm64",
-			linuxVersion: "6.1.45",
+			linuxVersion: "6.1.127",
 			arch:         "arm64",
 			wantErr:      nil,
 		},
@@ -79,7 +79,7 @@ func TestLinux(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			myLinuxOpts := linuxOpts
-			myLinuxOpts.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%s:main", linuxVersion.String())
+			myLinuxOpts.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%d.%d:main", linuxVersion.Major(), linuxVersion.Minor() )
 			myLinuxOpts.Arch = tc.arch
 			myLinuxOpts.RepoPath = filepath.Join(tmpDir, "linux")
 
@@ -96,22 +96,22 @@ func TestLinux(t *testing.T) {
 			// Download linux source code to __tmp_files__
 			var commands [][]string
 			// TODO: make these commands OS independent
-			if errors.Is(filesystem.CheckFileExists(fmt.Sprintf("linux-%s", linuxVersion.String())), os.ErrNotExist) {
+			if errors.Is(filesystem.CheckFileExists(fmt.Sprintf("linux-%s", tc.linuxVersion)), os.ErrNotExist) {
 				commands = [][]string{
 					// Get Linux Kernel sources
-					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.xz", linuxVersion.Major(), linuxVersion.String())},
-					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.sign", linuxVersion.Major(), linuxVersion.String())},
+					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.xz", linuxVersion.Major(), tc.linuxVersion)},
+					{"wget", "--quiet", fmt.Sprintf("https://cdn.kernel.org/pub/linux/kernel/v%d.x/linux-%s.tar.sign", linuxVersion.Major(), tc.linuxVersion)},
 					// un-xz
-					{"unxz", "--keep", fmt.Sprintf("linux-%s.tar.xz", linuxVersion.String())},
+					{"unxz", "--keep", fmt.Sprintf("linux-%s.tar.xz", tc.linuxVersion)},
 					// GPG verify
 					{"gpg2", "--locate-keys", "torvalds@kernel.org", "gregkh@kernel.org"},
-					{"gpg2", "--verify", fmt.Sprintf("linux-%s.tar.sign", linuxVersion.String())},
+					{"gpg2", "--verify", fmt.Sprintf("linux-%s.tar.sign", tc.linuxVersion)},
 					// un-tar
-					{"tar", "-xvf", fmt.Sprintf("linux-%s.tar", linuxVersion.String())},
+					{"tar", "-xvf", fmt.Sprintf("linux-%s.tar", tc.linuxVersion)},
 				}
 			}
 			//   always copy from __tmp_files__ to tmpDir for each test
-			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", linuxVersion.String()), myLinuxOpts.RepoPath})
+			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", tc.linuxVersion ), myLinuxOpts.RepoPath})
 			for _, cmd := range commands {
 				err = exec.Command(cmd[0], cmd[1:]...).Run()
 				assert.NoError(t, err)
@@ -127,7 +127,7 @@ func TestLinux(t *testing.T) {
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			defconfigLocalPath, err := filepath.Abs(filepath.Join(
 				repoRootPath,
-				fmt.Sprintf("tests/linux_%s/linux.defconfig", linuxVersion.String()),
+				fmt.Sprintf("tests/linux_%d.%d/linux.defconfig", linuxVersion.Major(), linuxVersion.Minor() ),
 			))
 			assert.NoErrorf(t, err, "encountered issue with missing files, is '%s' the root of the repo?", repoRootPath)
 			err = filesystem.CopyFile(
