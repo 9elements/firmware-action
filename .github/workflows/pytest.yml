@@ -66,7 +66,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install deps
         run: |
-          curl -SL "$( curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'browser_download_url' | grep "docker-compose-linux-$(uname -m)" | grep -v '.sha256' | sed -E 's/.*https/https/g' | sed -E 's/\"//g' )" -o docker-compose
+          curl -SL "$( curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'browser_download_url' | grep "docker-compose-linux-$(uname -m)" | grep -v '.sha256' | sed -E 's/.*https/https/g' | sed -E 's/\"//g' | grep -vE '.json$' )" -o docker-compose
           sudo mv docker-compose /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
