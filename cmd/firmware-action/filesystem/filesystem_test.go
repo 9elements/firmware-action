@@ -189,3 +189,97 @@ func TestAnyFileNewerThan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, mod)
 }
+
+func TestFilenamify(t *testing.T) {
+	testCases := []struct {
+		input  string
+		output string
+	}{
+		{
+			input:  "",
+			output: "",
+		},
+		{
+			input:  "foo<bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo>bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo:bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo\"bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo/bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo\\bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo\bar",
+			output: "foo_ar",
+		},
+		{
+			input:  "foo|bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo?bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo*bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo/bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo!bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo//bar",
+			output: "foo__bar",
+		},
+		{
+			input:  "//foo//bar//",
+			output: "__foo__bar__",
+		},
+		{
+			input:  "foo\\\\\\bar",
+			output: "foo___bar",
+		},
+		{
+			input:  "foo[*]bar",
+			output: "foo___bar",
+		},
+		{
+			input:  "foo bar",
+			output: "foo_bar",
+		},
+		{
+			input:  "foo\nbar",
+			output: "foo_bar",
+		},
+		{
+			input:  "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789junk",
+			output: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			result := Filenamify(tc.input)
+			assert.Equal(t, tc.output, result)
+		})
+	}
+}
