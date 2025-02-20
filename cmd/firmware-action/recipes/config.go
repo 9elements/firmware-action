@@ -17,6 +17,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/cmd/firmware-action/container"
+	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 	"github.com/go-playground/validator/v10"
 )
@@ -292,6 +293,18 @@ type FirmwareModule interface {
 	GetOutputDir() string
 	GetSources() []string
 	buildFirmware(ctx context.Context, client *dagger.Client) error
+}
+
+// ===============================
+//  Functions for FirmwareModules
+// ===============================
+
+// FilenameForFirmwareModule is used to take a user-defined module name and make it into filename, removing
+// all problematic characters
+func FilenameForFirmwareModule(name string) string {
+	// For example:
+	//   "Coreboot Example" should return "Coreboot_Example.json"
+	return fmt.Sprintf("%s.json", filesystem.Filenamify(name))
 }
 
 // ======================
