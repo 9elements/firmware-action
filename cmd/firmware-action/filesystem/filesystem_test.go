@@ -189,3 +189,127 @@ func TestAnyFileNewerThan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, mod)
 }
+
+func TestFilenamify(t *testing.T) {
+	testCases := []struct {
+		name           string
+		inputName      string
+		inputExtension string
+		output         string
+	}{
+		{
+			name:           "empty strings",
+			inputName:      "",
+			inputExtension: "",
+			output:         ".",
+		},
+		{
+			name:           "unicode control characters",
+			inputName:      "foo\u0000bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo<bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo>bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo:bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo\"bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo/bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo\\bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo\bar",
+			inputExtension: "",
+			output:         "foo_ar.",
+		},
+		{
+			inputName:      "foo|bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo?bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo*bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo/bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo!bar",
+			inputExtension: "",
+			output:         "foo_bar.",
+		},
+		{
+			inputName:      "foo//bar",
+			inputExtension: "",
+			output:         "foo__bar.",
+		},
+		{
+			inputName:      "//foo//bar//",
+			inputExtension: "",
+			output:         "__foo__bar__.",
+		},
+		{
+			inputName:      "foo\\\\\\bar",
+			inputExtension: "",
+			output:         "foo___bar.",
+		},
+		{
+			inputName:      "foo[*]bar",
+			inputExtension: "",
+			output:         "foo___bar.",
+		},
+		{
+			inputName:      "foo bar",
+			inputExtension: "01234567890123456789",
+			output:         "foo_bar.01234567890123",
+		},
+		{
+			inputName:      "foo\nbar",
+			inputExtension: "txt",
+			output:         "foo_bar.txt",
+		},
+		{
+			inputName:      "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789junk",
+			inputExtension: "txt",
+			output:         "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789.txt",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.inputName, func(t *testing.T) {
+			result := Filenamify(tc.inputName, tc.inputExtension)
+			assert.Equal(t, tc.output, result)
+			assert.LessOrEqual(t, len(result), 255)
+		})
+	}
+}

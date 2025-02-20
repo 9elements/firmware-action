@@ -10,6 +10,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/plus3it/gorecurcopy"
@@ -264,4 +266,35 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 
 	// If path is neither file nor directory
 	return false, err
+}
+
+func sanitizeAndTruncate(input string, length int) string {
+	// What characters are forbidden in Windows and Linux directory names?
+	//   https://stackoverflow.com/a/31976060
+
+	// ASCII characters (printable and non-printable)
+	//   https://en.wikipedia.org/wiki/Control_character#In_ASCII
+	charactersASCII := regexp.MustCompile(`[<>:"/\\|?*\x00-\x1F\x7F]`)
+	result := charactersASCII.ReplaceAllString(input, "_")
+
+	// just for a good measure
+	betterAvoid := regexp.MustCompile(`[!{}()[\]^$+*?. -]`)
+	result = betterAvoid.ReplaceAllString(result, "_")
+
+	// Remove invalid UTF-8 byte sequences
+	// - this includes unicode control characters
+	//   https://www.compart.com/en/unicode/category/Cc
+	result = strings.ToValidUTF8(result, "_")
+
+	if len(result) > length {
+		return string(result[:length])
+	}
+	return result
+}
+
+// Filenamify converts a string to a valid and safe filename
+func Filenamify(name string, extension string) string {
+	// Maximum length (let's assume maximum of 255 bytes and let's assume 14 bytes for extension)
+	//   https://serverfault.com/a/306726
+	return sanitizeAndTruncate(name, 240) + "." + sanitizeAndTruncate(extension, 14)
 }
