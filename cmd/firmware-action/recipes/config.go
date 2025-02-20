@@ -296,9 +296,9 @@ type FirmwareModule interface {
 	buildFirmware(ctx context.Context, client *dagger.Client) error
 }
 
-// ===========
-//  Functions
-// ===========
+// ======================
+//  Functions for Config
+// ======================
 
 // ValidateConfig is used to validate the configuration struct read out of JSON file
 func ValidateConfig(conf Config) error {
@@ -359,7 +359,6 @@ func ReadConfig(filepath string) (*Config, error) {
 		)
 		return nil, err
 	}
-
 	contentStr := string(content)
 
 	// Check if all environment variables are defined
