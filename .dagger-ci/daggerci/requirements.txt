@@ -1,5 +1,5 @@
 anyio~=4.8
-dagger-io~=0.15
+dagger-io~=0.16
 prettytable~=3.14
 pytest~=8.3
 pytest-benchmark~=5.1
