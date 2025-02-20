@@ -169,10 +169,8 @@ func TestFindAllEnvVars(t *testing.T) {
 
 func TestConfigEnvVars(t *testing.T) {
 	commonDummy := CommonOpts{
-		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
-		RepoPath:          "dummy/dir/",
-		OutputDir:         "dummy/dir/",
-		ContainerInputDir: "inputs/",
+		SdkURL:   "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		RepoPath: "dummy/dir/",
 	}
 
 	testCases := []struct {
