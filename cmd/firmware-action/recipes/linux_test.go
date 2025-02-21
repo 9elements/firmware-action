@@ -79,7 +79,7 @@ func TestLinux(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			myLinuxOpts := linuxOpts
-			myLinuxOpts.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%d.%d:main", linuxVersion.Major(), linuxVersion.Minor() )
+			myLinuxOpts.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/linux_%d.%d:main", linuxVersion.Major(), linuxVersion.Minor())
 			myLinuxOpts.Arch = tc.arch
 			myLinuxOpts.RepoPath = filepath.Join(tmpDir, "linux")
 
@@ -111,7 +111,7 @@ func TestLinux(t *testing.T) {
 				}
 			}
 			//   always copy from __tmp_files__ to tmpDir for each test
-			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", tc.linuxVersion ), myLinuxOpts.RepoPath})
+			commands = append(commands, []string{"cp", "-r", fmt.Sprintf("linux-%s", tc.linuxVersion), myLinuxOpts.RepoPath})
 			for _, cmd := range commands {
 				err = exec.Command(cmd[0], cmd[1:]...).Run()
 				assert.NoError(t, err)
@@ -127,7 +127,7 @@ func TestLinux(t *testing.T) {
 			//   repoRootPath    = path to our repository with this code (contains configuration files for testing)
 			defconfigLocalPath, err := filepath.Abs(filepath.Join(
 				repoRootPath,
-				fmt.Sprintf("tests/linux_%d.%d/linux.defconfig", linuxVersion.Major(), linuxVersion.Minor() ),
+				fmt.Sprintf("tests/linux_%d.%d/linux.defconfig", linuxVersion.Major(), linuxVersion.Minor()),
 			))
 			assert.NoErrorf(t, err, "encountered issue with missing files, is '%s' the root of the repo?", repoRootPath)
 			err = filesystem.CopyFile(
