@@ -71,6 +71,8 @@ func (opts CorebootOpts) GetArtifacts() *[]container.Artifacts {
 	return opts.CommonOpts.GetArtifacts()
 }
 
+// ANCHOR: CorebootOptsGetSources
+
 // GetSources returns slice of paths to all sources which are used for build
 func (opts CorebootOpts) GetSources() []string {
 	sources := opts.CommonOpts.GetSources()
@@ -108,6 +110,8 @@ func (opts CorebootOpts) GetSources() []string {
 
 	return sources
 }
+
+// ANCHOR_END: CorebootOptsGetSources
 
 // ProcessBlobs is used to figure out blobs from provided data
 func (opts CorebootOpts) ProcessBlobs() ([]BlobDef, error) {
