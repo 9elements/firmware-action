@@ -167,6 +167,8 @@ func (opts CommonOpts) GetOutputDir() string {
 	return opts.OutputDir
 }
 
+// ANCHOR: CommonOptsGetSources
+
 // GetSources returns slice of paths to all sources which are used for build
 func (opts CommonOpts) GetSources() []string {
 	sources := []string{}
@@ -180,6 +182,8 @@ func (opts CommonOpts) GetSources() []string {
 
 	return sources
 }
+
+// ANCHOR_END: CommonOptsGetSources
 
 // Config is for storing parsed configuration file
 type Config struct {
