@@ -87,6 +87,7 @@
     "elif",
     "emeraldlake",
     "exitcode",
+    "filenamify",
     "githubaction",
     "githubactions",
     "gocyclo",
