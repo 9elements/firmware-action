@@ -303,10 +303,10 @@ type FirmwareModule interface {
 
 // FilenameForFirmwareModule is used to take a user-defined module name and make it into filename, removing
 // all problematic characters
-func FilenameForFirmwareModule(name string) string {
+func FilenameForFirmwareModule(name string, extension string) string {
 	// For example:
 	//   "Coreboot Example" should return "Coreboot_Example.json"
-	return fmt.Sprintf("%s.json", filesystem.Filenamify(name))
+	return fmt.Sprintf("%s.%s", filesystem.Filenamify(name), extension)
 }
 
 // ======================
