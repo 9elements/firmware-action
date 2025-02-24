@@ -9,7 +9,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/go-playground/validator/v10 v10.25.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/heimdalr/dag v1.5.0
 	github.com/jedib0t/go-pretty/v6 v6.6.6
 	github.com/plus3it/gorecurcopy v0.0.1
