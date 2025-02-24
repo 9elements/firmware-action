@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -206,27 +207,31 @@ type Config struct {
 // AllModules method returns slice with all modules
 func (c Config) AllModules() map[string]FirmwareModule {
 	modules := make(map[string]FirmwareModule)
-	for key, value := range c.Coreboot {
-		modules[key] = value
+
+	configValue := reflect.ValueOf(c)
+
+	for i := range configValue.Type().NumField() {
+		fieldValue := configValue.Field(i)
+
+		// Check if the field is a map.
+		if fieldValue.Kind() == reflect.Map {
+			// Iterate over the keys in the map.
+			for _, key := range fieldValue.MapKeys() {
+				value := fieldValue.MapIndex(key)
+
+				// Type-assert the value to FirmwareModule.
+				if module, ok := value.Interface().(FirmwareModule); ok {
+					modules[key.String()] = module
+				} else {
+					slog.Error(
+						fmt.Sprintf("Value for key '%v' in config does not implement FirmwareModule", key),
+						slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+					)
+				}
+			}
+		}
 	}
-	for key, value := range c.Linux {
-		modules[key] = value
-	}
-	for key, value := range c.Edk2 {
-		modules[key] = value
-	}
-	for key, value := range c.FirmwareStitching {
-		modules[key] = value
-	}
-	for key, value := range c.URoot {
-		modules[key] = value
-	}
-	for key, value := range c.Universal {
-		modules[key] = value
-	}
-	for key, value := range c.UBoot {
-		modules[key] = value
-	}
+
 	return modules
 }
 
