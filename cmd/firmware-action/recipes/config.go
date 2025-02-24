@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -206,28 +207,82 @@ type Config struct {
 // AllModules method returns slice with all modules
 func (c Config) AllModules() map[string]FirmwareModule {
 	modules := make(map[string]FirmwareModule)
-	for key, value := range c.Coreboot {
-		modules[key] = value
+
+	configValue := reflect.ValueOf(c)
+	// configType := reflect.TypeOf(c)
+
+	for i := range configValue.Type().NumField() {
+		fieldValue := configValue.Field(i)
+		// fieldType := configType.Field(i)
+
+		// Check if the field is a map.
+		if fieldValue.Kind() == reflect.Map {
+			// Iterate over the keys in the map.
+			for _, key := range fieldValue.MapKeys() {
+				value := fieldValue.MapIndex(key)
+
+				// Type-assert the value to FirmwareModule.
+				if module, ok := value.Interface().(FirmwareModule); ok {
+					modules[key.String()] = module
+				} else {
+					slog.Error(
+						fmt.Sprintf("Value for key '%v' in config does not implement FirmwareModule", key),
+						slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+					)
+				}
+			}
+		}
 	}
-	for key, value := range c.Linux {
-		modules[key] = value
-	}
-	for key, value := range c.Edk2 {
-		modules[key] = value
-	}
-	for key, value := range c.FirmwareStitching {
-		modules[key] = value
-	}
-	for key, value := range c.URoot {
-		modules[key] = value
-	}
-	for key, value := range c.Universal {
-		modules[key] = value
-	}
-	for key, value := range c.UBoot {
-		modules[key] = value
-	}
+
 	return modules
+}
+
+// Merge method will take other Config instance and adopt all of its modules
+func (c Config) Merge(other Config) (Config, error) {
+	merged := Config{}
+
+	// Use reflection on the merged instance.
+	vMerged := reflect.ValueOf(&merged).Elem()
+	vC := reflect.ValueOf(c)
+	vOther := reflect.ValueOf(other)
+	t := vMerged.Type()
+
+	// Iterate over all fields of the struct.
+	for i := range t.NumField() {
+		fieldType := t.Field(i)
+		// Process only map fields.
+		if fieldType.Type.Kind() == reflect.Map {
+			// Create a new map for the merged result.
+			mergedMap := reflect.MakeMap(fieldType.Type)
+
+			// Get the map from c (receiver) and copy its key/value pairs.
+			mapC := vC.Field(i)
+			if mapC.IsValid() && !mapC.IsNil() {
+				for _, key := range mapC.MapKeys() {
+					mergedMap.SetMapIndex(key, mapC.MapIndex(key))
+				}
+			}
+
+			// Get the map from other and merge its entries.
+			mapOther := vOther.Field(i)
+			if mapOther.IsValid() && !mapOther.IsNil() {
+				for _, key := range mapOther.MapKeys() {
+					// If the key already exists, print a warning.
+					if existing := mergedMap.MapIndex(key); existing.IsValid() {
+						fmt.Printf("Warning: overriding key %v in field %s\n", key, fieldType.Name)
+					}
+					mergedMap.SetMapIndex(key, mapOther.MapIndex(key))
+				}
+			}
+			// Set the merged map into the new struct.
+			vMerged.Field(i).Set(mergedMap)
+		} else {
+			// For non-map fields, just copy the value from c.
+			vMerged.Field(i).Set(vC.Field(i))
+		}
+	}
+
+	return merged, nil
 }
 
 // FirmwareModule interface
@@ -271,6 +326,26 @@ func FindAllEnvVars(text string) []string {
 		result[index] = pattern.ReplaceAllString(value, "$1")
 	}
 	return result
+}
+
+// ReadConfigs is for reading and parsing multiple JSON configuration files into single Config struct
+func ReadConfigs(filepaths []string) (*Config, error) {
+	var allConfigs Config
+	for _, filepath := range filepaths {
+		trimmedFilepath := strings.TrimSpace(filepath)
+		slog.Debug("Reading config",
+			slog.String("path", trimmedFilepath),
+		)
+		payload, err := ReadConfig(trimmedFilepath)
+		if err != nil {
+			return nil, err
+		}
+		allConfigs, err = allConfigs.Merge(*payload)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &allConfigs, nil
 }
 
 // ReadConfig is for reading and parsing JSON configuration file into Config struct
