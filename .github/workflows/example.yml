@@ -156,12 +156,15 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config__coreboot.json'
+          config: |-
+            tests/example_config__coreboot.json
+            tests/example_config__uroot.json
           target: 'coreboot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
+          UROOT_VERSION: "dummy"
 
       - name: Get artifacts
         uses: actions/upload-artifact@v4
@@ -229,13 +232,16 @@ jobs:
         uses: ./
         # uses: 9elements/firmware-action
         with:
-          config: 'tests/example_config__linux.json'
+          config: |-
+            tests/example_config__uroot.json
+            tests/example_config__linux.json
           target: 'linux-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
           SYSTEM_ARCH: ${{ matrix.arch }}
+          UROOT_VERSION: "dummy"
 
       - name: Get artifacts
         uses: actions/upload-artifact@v4

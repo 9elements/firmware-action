@@ -6,7 +6,19 @@
 ~~~
 ```
 
-The config are split by type (`coreboot`, `linux`, `edk2`, ...).
+```admonish tip
+Multiple configuration files can be supplied to firmware-action. Dependencies also work across files.
+
+~~~
+firmware-action build --config=config-01.json --config=config-02.json ...
+~~~
+
+Beware that modules with identical names are permitted, as long as they are not in the same configuration file.
+
+`firmware-action` processes the files in order in which they were supplied and in case of name-collision, the configuration in last file takes precedence.
+```
+
+The configuration is split by type (`coreboot`, `linux`, `edk2`, ...).
 
 In each type can be any number of modules.
 

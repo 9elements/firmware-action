@@ -9,6 +9,23 @@ As usual, [check if issue already exists](https://docs.github.com/en/github/sear
 ## Commit messages
 Please conform to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
 
+Use of AI generated code is permitted, however please mark it as AI generated in the commit message body by adding:
+```
+AI-Generated: true
+AI-Model: <model used>
+```
+
+For example:
+```
+feat(...): add new feature
+
+- adding new fun thing
+
+AI-Generated: true
+AI-Model: ChatGPT o3-mini
+Signed-off-by: ...
+```
+
 
 ## Used tools
 
