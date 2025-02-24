@@ -13,6 +13,60 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAllModules(t *testing.T) {
+	testCases := []struct {
+		name        string
+		opts        Config
+		wantModules map[string]FirmwareModule
+	}{
+		{
+			name:        "empty",
+			opts:        Config{},
+			wantModules: map[string]FirmwareModule{},
+		},
+		{
+			name: "simple",
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {},
+				},
+			},
+			wantModules: map[string]FirmwareModule{
+				"coreboot-A": CorebootOpts{},
+			},
+		},
+		{
+			name: "more complex",
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+			wantModules: map[string]FirmwareModule{
+				"coreboot-A": CorebootOpts{
+					DefconfigPath: "dummy",
+				},
+				"linux-A": LinuxOpts{
+					DefconfigPath: "dummy",
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			allModules := tc.opts.AllModules()
+			assert.True(t, reflect.DeepEqual(tc.wantModules, allModules))
+		})
+	}
+}
+
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
 		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
