@@ -235,76 +235,52 @@ func (c Config) AllModules() map[string]FirmwareModule {
 	return modules
 }
 
-func checkIfModuleExists(ok bool, key string) {
-	if ok {
-		slog.Warn("Module already exists in configuration, and will be overwritten",
-			slog.String("module_name", key),
-			slog.String("suggestion", "Make sure each module has unique name, not only per single configuration file but across all configuration files."),
-		)
-	}
-}
-
 // Merge method will take other Config instance and adopt all of its modules
 func (c Config) Merge(other Config) (Config, error) {
-	// Not sure of there is cleaner way to do this :/
+	merged := Config{}
 
-	for key, value := range other.Coreboot {
-		if len(c.Coreboot) == 0 {
-			c.Coreboot = map[string]CorebootOpts{}
+	// Use reflection on the merged instance.
+	vMerged := reflect.ValueOf(&merged).Elem()
+	vC := reflect.ValueOf(c)
+	vOther := reflect.ValueOf(other)
+	t := vMerged.Type()
+
+	// Iterate over all fields of the struct.
+	for i := range t.NumField() {
+		fieldType := t.Field(i)
+		// Process only map fields.
+		if fieldType.Type.Kind() == reflect.Map {
+			// Create a new map for the merged result.
+			mergedMap := reflect.MakeMap(fieldType.Type)
+
+			// Get the map from c (receiver) and copy its key/value pairs.
+			mapC := vC.Field(i)
+			if mapC.IsValid() && !mapC.IsNil() {
+				for _, key := range mapC.MapKeys() {
+					mergedMap.SetMapIndex(key, mapC.MapIndex(key))
+				}
+			}
+
+			// Get the map from other and merge its entries.
+			mapOther := vOther.Field(i)
+			if mapOther.IsValid() && !mapOther.IsNil() {
+				for _, key := range mapOther.MapKeys() {
+					// If the key already exists, print a warning.
+					if existing := mergedMap.MapIndex(key); existing.IsValid() {
+						fmt.Printf("Warning: overriding key %v in field %s\n", key, fieldType.Name)
+					}
+					mergedMap.SetMapIndex(key, mapOther.MapIndex(key))
+				}
+			}
+			// Set the merged map into the new struct.
+			vMerged.Field(i).Set(mergedMap)
+		} else {
+			// For non-map fields, just copy the value from c.
+			vMerged.Field(i).Set(vC.Field(i))
 		}
-		_, ok := c.Coreboot[key]
-		checkIfModuleExists(ok, key)
-		c.Coreboot[key] = value
 	}
-	for key, value := range other.Linux {
-		if len(c.Linux) == 0 {
-			c.Linux = map[string]LinuxOpts{}
-		}
-		_, ok := c.Linux[key]
-		checkIfModuleExists(ok, key)
-		c.Linux[key] = value
-	}
-	for key, value := range other.Edk2 {
-		if len(c.Edk2) == 0 {
-			c.Edk2 = map[string]Edk2Opts{}
-		}
-		_, ok := c.Edk2[key]
-		checkIfModuleExists(ok, key)
-		c.Edk2[key] = value
-	}
-	for key, value := range other.FirmwareStitching {
-		if len(c.FirmwareStitching) == 0 {
-			c.FirmwareStitching = map[string]FirmwareStitchingOpts{}
-		}
-		_, ok := c.FirmwareStitching[key]
-		checkIfModuleExists(ok, key)
-		c.FirmwareStitching[key] = value
-	}
-	for key, value := range other.URoot {
-		if len(c.URoot) == 0 {
-			c.URoot = map[string]URootOpts{}
-		}
-		_, ok := c.URoot[key]
-		checkIfModuleExists(ok, key)
-		c.URoot[key] = value
-	}
-	for key, value := range other.Universal {
-		if len(c.Universal) == 0 {
-			c.Universal = map[string]UniversalOpts{}
-		}
-		_, ok := c.Universal[key]
-		checkIfModuleExists(ok, key)
-		c.Universal[key] = value
-	}
-	for key, value := range other.UBoot {
-		if len(c.UBoot) == 0 {
-			c.UBoot = map[string]UBootOpts{}
-		}
-		_, ok := c.UBoot[key]
-		checkIfModuleExists(ok, key)
-		c.UBoot[key] = value
-	}
-	return c, nil
+
+	return merged, nil
 }
 
 // FirmwareModule interface

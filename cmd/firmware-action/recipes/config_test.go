@@ -67,6 +67,88 @@ func TestAllModules(t *testing.T) {
 	}
 }
 
+func TestMerge(t *testing.T) {
+	testCases := []struct {
+		name       string
+		optsA      Config
+		optsB      Config
+		wantConfig Config
+		wantErr    error
+	}{
+		{
+			name:       "empty",
+			optsA:      Config{},
+			optsB:      Config{},
+			wantConfig: Config{},
+			wantErr:    nil,
+		},
+		{
+			name: "simple",
+			optsA: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {},
+				},
+			},
+			optsB: Config{},
+			wantConfig: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name: "more complex",
+			optsA: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+			optsB: Config{
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+			wantConfig: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+			wantErr: nil,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			bigConfig, err := tc.optsA.Merge(tc.optsB)
+
+			// Initialize empty maps in wantConfig so that deep equal works correctly
+			wantConfigValue := reflect.ValueOf(&tc.wantConfig).Elem()
+			for i := 0; i < wantConfigValue.NumField(); i++ {
+				fieldValue := wantConfigValue.Field(i)
+				if fieldValue.Kind() == reflect.Map && fieldValue.IsNil() {
+					fieldValue.Set(reflect.MakeMap(fieldValue.Type()))
+				}
+			}
+
+			// Compare the merged config with the expected one
+			assert.Equal(t, tc.wantConfig, bigConfig)
+			assert.True(t, reflect.DeepEqual(tc.wantConfig, bigConfig))
+			assert.ErrorIs(t, err, tc.wantErr)
+		})
+	}
+}
+
 func TestValidateConfig(t *testing.T) {
 	commonDummy := CommonOpts{
 		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
