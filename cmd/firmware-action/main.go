@@ -22,6 +22,12 @@ import (
 	"github.com/sethvargo/go-githubactions"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	logging.InitLogger(slog.LevelInfo)
 
@@ -33,8 +39,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-const firmwareActionVersion = "v0.14.1"
 
 // CLI (Command Line Interface) holds data from environment
 var CLI struct {
@@ -233,7 +237,9 @@ func parseCli() (string, error) {
 
 	case "version":
 		// Print version and exit
-		fmt.Println(firmwareActionVersion)
+		fmt.Printf("version: %s\n", version)
+		fmt.Printf("commit: %s\n", commit)
+		fmt.Printf("date: %s\n", date)
 		return "", nil
 
 	default:

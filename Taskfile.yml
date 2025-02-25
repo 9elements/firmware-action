@@ -1,7 +1,13 @@
 ---
 version: '3'
 vars:
-  SEMVER: 'v0.14.1'
+  VERSION:
+    sh: git describe --tags --always --abbrev=8 | sed -E 's/^v//g'
+    # strip the 'v' prefix to match behaviour of goreleaser
+  COMMIT:
+    sh: git rev-parse --short HEAD
+  DATE:
+    sh: date --rfc-3339=seconds | sed 's/ /T/' | sed 's/+/Z/'
   GOLANG_CODE_PATH: 'cmd/firmware-action'
 
 includes:
@@ -13,20 +19,20 @@ includes:
     taskfile: ./tests/Taskfile.yml
     optional: true
     vars:
-      SEMVER: '{{.SEMVER}}'
+      VERSION: 'v{{.VERSION}}'
 
 tasks:
   build-go-binary:
     desc: Template task to build a go binary
     dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
-      - go build -ldflags="-s -w" -o ../../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
+      - go build -ldflags="-s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.date={{.DATE}}" -o ../../bin/firmware-action-{{OS}}-{{ARCH}}-v{{.VERSION}}
     env:
       CGO_ENABLED: 0
     sources:
       - ./**/*.go
     generates:
-      - ../../bin/firmware-action-{{OS}}-{{ARCH}}-{{.SEMVER}}
+      - ../../bin/firmware-action-{{OS}}-{{ARCH}}-v{{.VERSION}}
 
   lint:
     desc: Run the linters

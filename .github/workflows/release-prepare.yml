@@ -32,12 +32,6 @@ jobs:
           noVersionBumpBehavior: patch
 
       # Bump version
-      - name: Update main.go
-        run: |
-          sed -i -E 's/const firmwareActionVersion = .*/const firmwareActionVersion = "${{ steps.semver.outputs.next }}"/g' cmd/firmware-action/main.go
-      - name: Update Taskfile.yml
-        run: |
-          sed -i -E "s/^  SEMVER: .*/  SEMVER: '${{ steps.semver.outputs.next }}'/g" Taskfile.yml
       - name: Update action.yml
         run: |
           sed -i -E "s/version=v[a-zA-Z0-9\.]+/version=${{ steps.semver.outputs.next }}/g" action.yml
