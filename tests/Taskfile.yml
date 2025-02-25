@@ -43,7 +43,7 @@ tasks:
     internal: true
     cmds:
       - cp -f "../tests/linux_{{.LINUX_VERSION}}/linux.defconfig" "ci_defconfig"
-      - ../bin/firmware-action-linux-amd64-{{.SEMVER}} build --config="../tests/example_config__linux.json" --target=linux-example
+      - ../bin/firmware-action-linux-amd64-v{{.VERSION}} build --config="../tests/example_config__linux.json" --target=linux-example
     env:
       LINUX_VERSION: '{{.LINUX_VERSION}}'
       SYSTEM_ARCH: 'amd64'
@@ -88,7 +88,7 @@ tasks:
     cmds:
       - cp -f "../tests/uboot_{{.UBOOT_VERSION}}/uboot.defconfig" "uboot_defconfig"
       - ln -sf "uboot-{{.UBOOT_VERSION}}" u-boot
-      - ../bin/firmware-action-linux-amd64-{{.SEMVER}} build --config="../tests/example_config__uboot.json" --target=u-boot-example
+      - ../bin/firmware-action-linux-amd64-v{{.VERSION}} build --config="../tests/example_config__uboot.json" --target=u-boot-example
     env:
       UBOOT_VERSION: '{{.UBOOT_VERSION}}'
       SYSTEM_ARCH: 'arm64'
