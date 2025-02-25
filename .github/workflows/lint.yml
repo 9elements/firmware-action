@@ -67,3 +67,14 @@ jobs:
         with:
           version: latest
           working-directory: cmd/firmware-action
+
+  goreleaser-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check goreleaser configuration
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          args: check
+          workdir: cmd/firmware-action
