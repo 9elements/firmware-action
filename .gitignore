@@ -9,3 +9,4 @@ docker/coreboot/coreboot-*
 megalinter-reports
 node_modules
 output-*/
+.aider*
