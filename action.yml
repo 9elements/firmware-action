@@ -146,3 +146,4 @@ runs:
         path: |
           ${{ fromJSON( cat '.firmware-action/cache-dirs.json' ).paths }}
         key: firmware-action-${{ hashFiles(inputs.config) }}
+

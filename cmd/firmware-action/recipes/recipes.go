@@ -5,6 +5,7 @@ package recipes
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -248,6 +249,55 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		if err == nil {
 			// On success update the timestamp
 			_ = filesystem.SaveCurrentRunTime(timestampFile)
+
+			// Upload artifacts if running in GitHub Actions
+			if os.Getenv("GITHUB_ACTIONS") != "" {
+				// Get output paths
+				type artifactInfo struct {
+					Name string `json:"name"`
+					Path string `json:"path"`
+				}
+				artifacts := []artifactInfo{}
+
+				// Add all output directories and files
+				outputDir := modules[target].GetOutputDir()
+				for _, dir := range modules[target].GetContainerOutputDirs() {
+					artifacts = append(artifacts, artifactInfo{
+						Name: fmt.Sprintf("%s-%s", target, filepath.Base(dir)),
+						Path: filepath.Join(outputDir, filepath.Base(dir)),
+					})
+				}
+				for _, file := range modules[target].GetContainerOutputFiles() {
+					artifacts = append(artifacts, artifactInfo{
+						Name: fmt.Sprintf("%s-%s", target, filepath.Base(file)),
+						Path: filepath.Join(outputDir, filepath.Base(file)),
+					})
+				}
+
+				// Create .firmware-action directory if it doesn't exist
+				if err := os.MkdirAll(".firmware-action", 0o755); err != nil {
+					slog.Error("Failed to create .firmware-action directory", slog.Any("error", err))
+					return err
+				}
+
+				// Write artifacts list to JSON file
+				artifactsJSON, err := json.MarshalIndent(artifacts, "", "  ")
+				if err != nil {
+					slog.Error("Failed to marshal artifacts JSON", slog.Any("error", err))
+					return err
+				}
+
+				if err := os.WriteFile(".firmware-action/artifacts-upload.json", artifactsJSON, 0o644); err != nil {
+					slog.Error("Failed to write artifacts JSON file", slog.Any("error", err))
+					return err
+				}
+
+				// Upload each artifact using GitHub Actions commands
+				for _, artifact := range artifacts {
+					fmt.Printf("::notice::Uploading artifact %s from %s\n", artifact.Name, artifact.Path)
+					fmt.Printf("::save-artifact name=%s::%s\n", artifact.Name, artifact.Path)
+				}
+			}
 		}
 		return err
 	}
