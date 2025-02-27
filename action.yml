@@ -29,6 +29,74 @@ inputs:
     required: false
     default: 'false'
 
+  # Options passed over to artifact uploading
+  artifact-if-no-files-found:
+    description: |
+      The desired behavior if no files are found using the provided path.
+
+      Available Options:
+        warn: Output a warning but do not fail the action
+        error: Fail the action with an error message
+        ignore: Do not output any warnings or errors, the action does not fail
+    default: 'warn'
+  artifact-compression-level:
+    description: |
+      The level of compression for Zlib to be applied to the artifact archive.
+      The value can range from 0 to 9:
+      - 0: No compression
+      - 1: Best speed
+      - 6: Default compression (same as GNU Gzip)
+      - 9: Best compression
+      Higher levels will result in better compression, but will take longer to complete.
+      For large files that are not easily compressed, a value of 0 is recommended for significantly faster uploads.
+    default: '6'
+  artifact-overwrite:
+    description: |
+      If true, an artifact with a matching name will be deleted before a new one is uploaded.
+      If false, the action will fail if an artifact for the given name already exists.
+      Does not fail if the artifact does not exist.
+    default: 'false'
+  ## We do need this enabled because we are uploading the `./firmware-action` directory
+  ##   which would not get uploaded at all with this option set to 'false'
+  ##   We might change the behavior in the future if anyone needs it
+  ##   (maybe just renaming the directory before upload)
+  #artifact-include-hidden-files:
+  #  description: |
+  #    If true, hidden files will be included in the artifact.
+  #    If false, hidden files will be excluded from the artifact.
+  #  default: 'false'
+  ## Not sure how the action would behave if a empty input would be provided,
+  ##   and not sure if I want to just give it some arbitrarily picked default.
+  ##   So let's leave it empty and the actions/upload-artifact will just pick the
+  ##   repository default.
+  #artifact-retention-days:
+  #  description: |
+  #    Duration after which artifact will expire in days. 0 means using default retention.
+  #
+  #    Minimum 1 day.
+  #    Maximum 90 days unless changed from the repository settings page.
+
+outputs:
+  artifact-name:
+    description: |
+      Name of the artifact which will be uploaded to GitHub
+    value: ${{ steps.get_artifact_name.outputs.artifact_name }}
+
+  # These outputs are just passing on outputs of 'upload-artifact'
+  #   Docs: https://github.com/actions/upload-artifact
+  artifact-id:
+    description: |
+      GitHub ID of an Artifact, can be used by the REST API
+    value: ${{ steps.upload_artifact.outputs.artifact-id }}
+  artifact-url:
+    description: |
+      URL to download an Artifact. Can be used in many scenarios such as linking to artifacts in issues or pull requests. Users must be logged-in in order for this URL to work. This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted
+    value: ${{ steps.upload_artifact.outputs.artifact-url }}
+  artifact-digest:
+    description: |
+      SHA-256 digest of an Artifact
+    value: ${{ steps.upload_artifact.outputs.artifact-digest }}
+
 runs:
   using: 'composite'
   steps:
@@ -170,6 +238,23 @@ runs:
           fi
         done
 
+    #=====================
+    # ARTIFACTS: Download
+    #=====================
+    #
+    # Download all artifacts for the current workflow run.
+    # Docs: https://github.com/actions/download-artifact?tab=readme-ov-file#download-all-artifacts
+
+    - name: download_artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: .firmware-action2/
+        merge-multiple: true
+    - name: merge_firmware_action_directory
+      shell: bash
+      run: |
+        # Get output directories from merged config
+
     #=================================
     # RUN: firmware-action executable
     #=================================
@@ -224,3 +309,29 @@ runs:
       with:
         path: .firmware-action/
         key: firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+
+    #===================
+    # ARTIFACTS: Upload
+    #===================
+
+    - name: get_artifact_name
+      if: always()
+      shell: bash
+      id: get_artifact_name
+      run: |
+        # Extract output_dir for the specific target from config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ inputs.config }}" | sed -E 's/\/$//g')
+        DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
+        echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
+
+    - name: upload_artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      id: upload_artifact
+      with:
+        name: ${{ steps.get_artifact_name.outputs.artifact_name }}
+        path: .firmware-action/
+        include-hidden-files: true
+        if-no-files-found: ${{ inputs.artifact-if-no-files-found }}
+        compression-level: ${{ inputs.artifact-compression-level }}
+        overwrite: ${{ inputs.artifact-overwrite }}
