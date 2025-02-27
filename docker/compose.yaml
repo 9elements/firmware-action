@@ -150,6 +150,7 @@ services:
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=9
         - PYTHON_PACKAGES=python-is-python3 python2 python3
+        - PYTHON_VERSION=python3
         - NODESOURCE=https://deb.nodesource.com/setup_20.x
   edk2-stable202302:
     build:
