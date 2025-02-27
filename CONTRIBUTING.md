@@ -2,30 +2,26 @@
 
 We use GitHub to host code, to track issues and feature requests, as well as accept pull requests.
 
+For coding guidelines and commit message conventions, please look into [CONVENTIONS.md](https://github.com/9elements/firmware-action/blob/main/CONVENTIONS.md).
+
 
 ## Issues
 As usual, [check if issue already exists](https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-issues-and-pull-requests#search-by-the-title-body-or-comments) in GitHub issue tracker.
 
-## Commit messages
-Please conform to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
+Please use issue template if applicable.
 
 
-## Used tools
+## Pull Requests / Merge Requests
 
-### Linters
+We accept GitHub pull requests.
 
-#### MegaLinter
-[MegaLinter](https://megalinter.io/latest/) is used in [GitHub Flow](https://docs.github.com/en/get-started/quickstart/github-flow), which checks all the source code.
+Fork the project on GitHub, work in your fork and in branches, push these to your GitHub fork, and when ready, do a GitHub pull requests against [https://github.com/9elements/firmware-action](https://github.com/9elements/firmware-action).
 
-Can be run locally, but it is pain. See [MegaLinter Runner](https://megalinter.io/latest/mega-linter-runner/).
+Organize your changes in small and meaningful commits which are easy to review. Not every commit in your pull request needs to be able to build and pass the CI tests, but the whole PR must build and pass CI all tests.
 
-
-#### commitlint
-[commitlint](https://github.com/conventional-changelog/commitlint) checks if the commit message conforms to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-
-To run locally, check [Tooling for Conventional Commits](https://www.conventionalcommits.org/en/about/#tooling-for-conventional-commits).
+If the pull request closes an issue please note it as: "Fixes #NNN".
 
 
-### editorconfig
-Please make sure to conform to provided [editorconfig](https://editorconfig.org/).
+## Code Reviews
 
+It is not necessary to tag anyone for review, we are using [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners) file to define individuals or teams that are responsible. They will be tagged automatically.
