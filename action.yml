@@ -125,20 +125,34 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: .firmware-action/
-        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
         restore-keys: |
+          firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-
           firmware-action-${{ hashFiles(inputs.config) }}-
           firmware-action-
 
     - name: unpack_cached_files
       shell: bash
       run: |
+        # Get output directories from config
         mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' tests/example_config.json)
+
+        # For each output directory
         for DIR in "${OUTPUT_DIRS[@]}"; do
-          if [ -d ".firmware-action/${DIR}" ]; then
-            mv ".firmware-action/${DIR}" ./
+          if [ -d ".firmware-action/artifacts/${DIR}" ]; then
+            mv ".firmware-action/artifacts/${DIR}" ./
           fi
         done
+
+    #=====================
+    # ARTIFACTS: Download
+    #=====================
+
+        #- name: download_artifacts
+        #  uses: actions/download-artifact@v4
+        #  with:
+        #    name: artifacts-${{ inputs.target }}
+        #    path: .firmware-action2/
 
     #=================================
     # RUN: firmware-action executable
@@ -168,14 +182,19 @@ runs:
     # CACHE: Create
     #===============
 
-    - name: pack_files_for_cache
+    - name: copy_artifacts
       if: always()
       shell: bash
       run: |
-        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' tests/example_config.json)
+        mkdir -p .firmware-action/artifacts/
+
+        # Get output directories from config
+        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ inputs.config }}")
+
+        # For each output directory
         for DIR in "${OUTPUT_DIRS[@]}"; do
           if [ -d "${DIR}" ]; then
-            cp -r "${DIR}" .firmware-action/
+            cp -r "${DIR}" .firmware-action/artifacts/
           fi
         done
 
@@ -184,4 +203,26 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: .firmware-action/
-        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+
+    #===================
+    # ARTIFACTS: Upload
+    #===================
+
+    - name: get_output_dir
+      if: always()
+      shell: bash
+      id: get_output_dir
+      run: |
+        # Extract output_dir for the specific target from config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ inputs.config }}" | sed -E 's/\/$//g')
+        echo "output_dir=${OUTPUT_DIR}" >> "${GITHUB_OUTPUT}"
+
+    - name: upload_artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts--${{ inputs.target }}--${{ steps.get_output_dir.outputs.output_dir }}
+        path: .firmware-action/
+        include-hidden-files: true
+        overwrite: true

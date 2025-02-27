@@ -154,13 +154,6 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uroot-${{ matrix.uroot-version }}-${{ matrix.arch }}
-          path: output-uroot
-          retention-days: 14
   # ANCHOR_END: example_build_uroot
 
   # Example of building u-boot
@@ -221,13 +214,6 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
         env:
           UBOOT_VERSION: ${{ matrix.uboot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uboot-${{ matrix.uboot-version }}-${{ matrix.arch }}
-          path: output-uboot
-          retention-days: 14
   # ANCHOR_END: example_build_uboot
 
   # Example of running on non-Linux systems
