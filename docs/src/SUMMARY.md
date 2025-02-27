@@ -19,6 +19,7 @@
         - [GitHub CI](firmware-action/usage_github.md)
     - [Configuration](firmware-action/config.md)
     - [Troubleshooting](firmware-action/troubleshooting.md)
+    - [Tips and Tricks](firmware-action/tips.md)
     - [Features](firmware-action/features.md)
         - [Build Docker container on the fly](firmware-action/build_dockerfile_on_the_fly.md)
         - [Interactive debugging](firmware-action/interactive.md)

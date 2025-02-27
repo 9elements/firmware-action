@@ -182,5 +182,6 @@ RUN cd Edk2 && \
 ARG INTERMEDIATE_IMAGE
 FROM ${INTERMEDIATE_IMAGE} AS final
 
+COPY --chown=root:root --chmod=755 scripts/* /bin/
 COPY --from=toolchain $TOOLSDIR $TOOLSDIR
 

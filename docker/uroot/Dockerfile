@@ -23,6 +23,7 @@ RUN apt-get update && \
         git \
         less \
         nano \
+        nodejs \
         screen \
         tmux \
         tree \

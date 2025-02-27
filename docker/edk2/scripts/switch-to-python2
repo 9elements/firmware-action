@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+echo "Switching from Python 3 to Python 2 as default"
+
+# Uninstall python-is-python3 if installed
+apt-get remove -y python-is-python3 || true
+
+# Update alternatives
+update-alternatives --remove python /usr/bin/python3
+update-alternatives --install /usr/local/bin/python python /usr/bin/python2 100
