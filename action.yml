@@ -110,6 +110,15 @@ runs:
       run: |
         go build -ldflags="-s -w" -o ../../firmware-action.exe
 
+    - name: restore_cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          .firmware-action/cache-dirs.json
+        key: firmware-action-${{ hashFiles(inputs.config) }}
+        restore-keys: |
+          firmware-action-
+
     - name: run_unix
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
       shell: bash
@@ -129,3 +138,18 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+
+    - id: cat_file
+      if: always()
+      shell: bash
+      run: |
+        echo "content=$(cat .firmware-action/cache-dirs.json)" >> "${GITHUB_OUTPUT}"
+
+    - name: save_cache
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ${{ fromJSON(steps.cat_file.outputs.content).paths }}
+        key: firmware-action-${{ hashFiles(inputs.config) }}
+
