@@ -43,6 +43,7 @@ RUN apt-get update && \
         lz4 \
         lzma \
         lzma-alone \
+        nodejs \
         openssl \
         pkg-config \
         python3 \
