@@ -1,0 +1,34 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: firmware-action
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - name: 9elements
+    address: Kortumstraße 19-21
+    city: Bochum
+    country: DE
+    post-code: '44787'
+    email: contact@9elements.com
+    website: 'https://9elements.com/'
+    tel: +49-234-6894188
+repository-code: 'https://github.com/9elements/firmware-action'
+repository: 'https://github.com/9elements/firmware-action-example/'
+abstract: >-
+  Firmware-action is a tool to simplify building firmware.
+  It is like Makefile or Taskfile but specifically for
+  firmware.
+keywords:
+  - firmware
+  - coreboot
+  - u-boot
+  - linuxboot
+  - UEFI
+  - edk2
+  - BIOS
+  - GitHub action
+license: MIT
