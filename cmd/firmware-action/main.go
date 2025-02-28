@@ -55,6 +55,7 @@ var CLI struct {
 	} `cmd:"build" help:"Build a target defined in configuration file. For interactive debugging preface the command with 'dagger run --interactive', for example 'dagger run --interactive $(which firmware-action) build --config=...'. To install dagger follow instructions at https://dagger.io/"`
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
+	ValidateConfig struct{} `cmd:"validate-config" help:"Validate configuration file"`
 	Version        struct{} `cmd:"version" help:"Print version and exit"`
 }
 
@@ -191,6 +192,25 @@ func parseCli() (string, error) {
 	case "build":
 		// This is handled elsewhere
 		return mode, nil
+
+	case "validate-config":
+		// Check if at least one configuration file was supplied
+		if len(CLI.Config) == 0 {
+			slog.Error(
+				"No configuration file was supplied",
+				slog.Any("error", os.ErrNotExist),
+			)
+			return "", os.ErrNotExist
+		}
+
+		// Parse and validate configuration files
+		_, err := recipes.ReadConfigs(CLI.Config)
+		if err != nil {
+			return "", err
+		}
+
+		slog.Info("Configuration file(s) validated successfully")
+		return "", nil
 
 	case "generate-config":
 		// Check if at least one configuration file was supplied
