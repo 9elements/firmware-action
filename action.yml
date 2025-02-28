@@ -82,6 +82,9 @@ runs:
       with:
         go-version: stable
 
+    #==============================================
+    # Acquire firmware-action executable for Linux
+    #==============================================
     - id: fetch_unix
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
@@ -97,6 +100,10 @@ runs:
       run: |
         go build -ldflags="-s -w" -o ../../firmware-action
 
+    #================================================
+    # Acquire firmware-action executable for Windows
+    #================================================
+
     - id: fetch_windows
       if: ${{ runner.os == 'Windows' && inputs.compile == 'false' }}
       shell: pwsh
@@ -109,6 +116,47 @@ runs:
       working-directory: ./cmd/firmware-action
       run: |
         go build -ldflags="-s -w" -o ../../firmware-action.exe
+
+    #================
+    # CACHE: Restore
+    #================
+
+    - name: restore_cache
+      uses: actions/cache/restore@v4
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+        restore-keys: |
+          firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-
+          firmware-action-${{ hashFiles(inputs.config) }}-
+          firmware-action-
+
+    - name: unpack_cached_files
+      shell: bash
+      run: |
+        # Get output directories from config
+        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' tests/example_config.json)
+
+        # For each output directory
+        for DIR in "${OUTPUT_DIRS[@]}"; do
+          if [ -d ".firmware-action/artifacts/${DIR}" ]; then
+            mv ".firmware-action/artifacts/${DIR}" ./
+          fi
+        done
+
+    #=====================
+    # ARTIFACTS: Download
+    #=====================
+
+        #- name: download_artifacts
+        #  uses: actions/download-artifact@v4
+        #  with:
+        #    name: artifacts-${{ inputs.target }}
+        #    path: .firmware-action2/
+
+    #=================================
+    # RUN: firmware-action executable
+    #=================================
 
     - name: run_unix
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
@@ -129,3 +177,52 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+
+    #===============
+    # CACHE: Create
+    #===============
+
+    - name: copy_artifacts
+      if: always()
+      shell: bash
+      run: |
+        mkdir -p .firmware-action/artifacts/
+
+        # Get output directories from config
+        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ inputs.config }}")
+
+        # For each output directory
+        for DIR in "${OUTPUT_DIRS[@]}"; do
+          if [ -d "${DIR}" ]; then
+            cp -r "${DIR}" .firmware-action/artifacts/
+          fi
+        done
+
+    - name: save_cache
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+
+    #===================
+    # ARTIFACTS: Upload
+    #===================
+
+    - name: get_output_dir
+      if: always()
+      shell: bash
+      id: get_output_dir
+      run: |
+        # Extract output_dir for the specific target from config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ inputs.config }}" | sed -E 's/\/$//g')
+        echo "output_dir=${OUTPUT_DIR}" >> "${GITHUB_OUTPUT}"
+
+    - name: upload_artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifacts--${{ inputs.target }}--${{ steps.get_output_dir.outputs.output_dir }}
+        path: .firmware-action/
+        include-hidden-files: true
+        overwrite: true
