@@ -4,9 +4,11 @@ package recipes
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,8 +54,8 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 
 	// Change current working directory
 	pwd, err := os.Getwd()
-	defer os.Chdir(pwd) // nolint:errcheck
 	assert.NoError(t, err)
+	defer os.Chdir(pwd) // nolint:errcheck
 	tmpDir := t.TempDir()
 	err = os.Chdir(tmpDir)
 	assert.NoError(t, err)
@@ -98,6 +100,91 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	assert.NoError(t, err)
 	err = Execute(ctx, target, &myConfig)
 	assert.ErrorIs(t, err, ErrDependencyOutputMissing)
+}
+
+func TestExecuteUpToDate(t *testing.T) {
+	ctx := context.Background()
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	assert.NoError(t, err)
+	defer client.Close()
+
+	// Change current working directory
+	pwd, err := os.Getwd()
+	assert.NoError(t, err)
+	defer os.Chdir(pwd) // nolint:errcheck
+	tmpDir := t.TempDir()
+	err = os.Chdir(tmpDir)
+	assert.NoError(t, err)
+
+	// Create configuration
+	const target = "dummy"
+	const outputDir = "output-universal/"
+	const depends = "pre-dummy"
+	const outputDir2 = "output-universal2/"
+	const repopath = "fake-repo/"
+	config := Config{
+		Universal: map[string]UniversalOpts{
+			target: {
+				Depends: []string{depends},
+				CommonOpts: CommonOpts{
+					SdkURL:            "whatever",
+					RepoPath:          repopath,
+					OutputDir:         outputDir,
+					ContainerInputDir: "inputs/",
+					ContainerOutputFiles: []string{
+						"file.rom",
+					},
+				},
+				UniversalSpecific: UniversalSpecific{
+					BuildCommands: []string{"false"},
+				},
+			},
+			depends: {
+				CommonOpts: CommonOpts{
+					SdkURL:            "whatever",
+					RepoPath:          repopath,
+					OutputDir:         outputDir2,
+					ContainerInputDir: "inputs/",
+					ContainerOutputFiles: []string{
+						"file.rom",
+					},
+				},
+				UniversalSpecific: UniversalSpecific{
+					BuildCommands: []string{"false"},
+				},
+			},
+		},
+	}
+
+	// Create directories needed by Execute()
+	err = os.MkdirAll(TimestampsDir, os.ModePerm)
+	assert.NoError(t, err)
+	err = os.MkdirAll(CompiledConfigsDir, os.ModePerm)
+	assert.NoError(t, err)
+	err = os.MkdirAll(repopath, os.ModePerm)
+	assert.NoError(t, err)
+
+	// Create output dir and add a file to make it non-empty
+	err = os.MkdirAll(outputDir, os.ModePerm)
+	assert.NoError(t, err)
+	err = os.WriteFile(filepath.Join(outputDir, "file.rom"), []byte("test"), 0o666)
+	assert.NoError(t, err)
+	err = os.MkdirAll(outputDir2, os.ModePerm)
+	assert.NoError(t, err)
+	err = os.WriteFile(filepath.Join(outputDir2, "file.rom"), []byte("test"), 0o666)
+	assert.NoError(t, err)
+
+	// Test 1: Skip due to up-to-date timestamp
+	timestampFile := filepath.Join(TimestampsDir, filesystem.Filenamify(target, "txt"))
+	saveCheckpointTimeStamp(timestampFile, true)
+	err = Execute(ctx, target, &config)
+	assert.ErrorIs(t, err, ErrBuildUpToDate)
+
+	// Test 2: Skip due to up-to-date config
+	configFile := filepath.Join(CompiledConfigsDir, filesystem.Filenamify(target, "json"))
+	saveCheckpointConfig(configFile, &config, true)
+	err = Execute(ctx, target, &config)
+	assert.ErrorIs(t, err, ErrBuildUpToDate)
 }
 
 func executeDummy(_ context.Context, _ string, _ *Config) error {
