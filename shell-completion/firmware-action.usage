@@ -9,5 +9,5 @@ firmware-action build ( --help | ( --json | --indent | --debug | --config <PATH>
 
 #<TARGET> ::= {{{ cat <PATH> | jq '.[] | keys | .[]' }}}
 # ^^ This would allow to dynamically from file get possible targets
-#    but I don't know how to get the value used passed to --config ...
-#    so I don't know which tile user is about to use :(
+#    but I don't know how to get the value user passed to --config ...
+#    so I don't know which file user is about to use :(
