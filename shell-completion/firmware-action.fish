@@ -14,18 +14,18 @@ function _firmware-action
         set COMP_CWORD (count $COMP_WORDS)
     end
 
-    set --local literals "generate-config" "--config" "--json" "build" "version" "--indent" "--debug" "--target" "--recursive" "--interactive" "--help"
+    set --local literals "generate-config" "--config" "--json" "validate-config" "version" "build" "--indent" "--debug" "--target" "--recursive" "--interactive" "--help"
 
     set --local descriptions
 
     set --local literal_transitions
-    set literal_transitions[1] "set inputs 1 4 5 11; set tos 2 3 4 4"
-    set literal_transitions[2] "set inputs 2 11; set tos 5 4"
-    set literal_transitions[3] "set inputs 6 2 3 7 8 9 10 11; set tos 7 8 7 7 6 7 7 4"
-    set literal_transitions[7] "set inputs 6 2 3 7 8 9 10; set tos 7 8 7 7 6 7 7"
+    set literal_transitions[1] "set inputs 1 4 5 6 12; set tos 2 2 3 4 3"
+    set literal_transitions[2] "set inputs 2 12; set tos 5 3"
+    set literal_transitions[4] "set inputs 7 2 3 8 9 10 11 12; set tos 6 7 6 6 8 6 6 3"
+    set literal_transitions[6] "set inputs 7 2 3 8 9 10 11; set tos 6 7 6 6 8 6 6"
 
-    set --local match_anything_transitions_from 6 5 8
-    set --local match_anything_transitions_to 7 4 7
+    set --local match_anything_transitions_from 5 8 7
+    set --local match_anything_transitions_to 3 6 6
 
     set --local state 1
     set --local word_index 2
@@ -77,7 +77,7 @@ function _firmware-action
         end
     end
 
-    set specialized_command_states 5 8
+    set specialized_command_states 5 7
     set specialized_command_ids 2 2
     if contains $state $specialized_command_states
         set --local index (contains --index $state $specialized_command_states)

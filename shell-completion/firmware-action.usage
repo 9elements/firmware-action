@@ -4,6 +4,7 @@
 firmware-action --help;
 firmware-action version;
 firmware-action generate-config ( --help | --config <PATH> );
+firmware-action validate-config ( --help | --config <PATH> );
 firmware-action build ( --help | ( --json | --indent | --debug | --config <PATH> | --target <TARGET> | --recursive | --interactive )... );
 
 #<TARGET> ::= {{{ cat <PATH> | jq '.[] | keys | .[]' }}}
