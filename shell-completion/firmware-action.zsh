@@ -3,18 +3,18 @@ _firmware-action_spec_1 () {
 }
 
 _firmware-action () {
-    local -a literals=("generate-config" "--config" "--json" "build" "version" "--indent" "--debug" "--target" "--recursive" "--interactive" "--help")
+    local -a literals=("generate-config" "--config" "--json" "validate-config" "version" "build" "--indent" "--debug" "--target" "--recursive" "--interactive" "--help")
 
     local -A descriptions
 
     local -A literal_transitions
-    literal_transitions[1]="([1]=2 [4]=3 [5]=4 [11]=4)"
-    literal_transitions[2]="([2]=5 [11]=4)"
-    literal_transitions[3]="([6]=7 [2]=8 [3]=7 [7]=7 [8]=6 [9]=7 [10]=7 [11]=4)"
-    literal_transitions[7]="([6]=7 [2]=8 [3]=7 [7]=7 [8]=6 [9]=7 [10]=7)"
+    literal_transitions[1]="([1]=2 [4]=2 [5]=3 [6]=4 [12]=3)"
+    literal_transitions[2]="([2]=5 [12]=3)"
+    literal_transitions[4]="([7]=6 [2]=7 [3]=6 [8]=6 [9]=8 [10]=6 [11]=6 [12]=3)"
+    literal_transitions[6]="([7]=6 [2]=7 [3]=6 [8]=6 [9]=8 [10]=6 [11]=6)"
 
     local -A match_anything_transitions
-    match_anything_transitions=([6]=7 [5]=4 [8]=7)
+    match_anything_transitions=([5]=3 [8]=6 [7]=6)
 
     declare -A subword_transitions
 
@@ -75,7 +75,7 @@ _firmware-action () {
         done
     fi
 
-    local -A specialized_commands=([5]=1 [8]=1)
+    local -A specialized_commands=([5]=1 [7]=1)
     if [[ -v "specialized_commands[$state]" ]]; then
         local command_id=${specialized_commands[$state]}
         _firmware-action_spec_${command_id} ${words[$CURRENT]}
