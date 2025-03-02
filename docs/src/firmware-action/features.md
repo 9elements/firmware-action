@@ -5,4 +5,5 @@
 - [Interactive mode](./interactive.md)
 - [Offline usage](./offline_usage.md)
 - [Recursive builds](./config.md#modules)
+- [Change detection](./change_detection.md)
 
