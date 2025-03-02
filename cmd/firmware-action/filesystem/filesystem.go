@@ -246,6 +246,10 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 			return nil
 		})
 		if errors.Is(errMod, ErrFileModified) {
+			slog.Debug(
+				"Detected changes in files",
+				slog.Any("error", errMod),
+			)
 			return true, nil
 		}
 		return false, nil
