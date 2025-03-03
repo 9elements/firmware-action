@@ -157,7 +157,7 @@ func LoadLastRunTime(pathLastRun string) (time.Time, error) {
 	// Return zero time if file doesn't exist
 	err := CheckFileExists(pathLastRun)
 	if errors.Is(err, os.ErrNotExist) {
-		return time.Time{}, nil
+		return time.Time{}, fmt.Errorf("%w: %s", os.ErrNotExist, pathLastRun)
 	}
 
 	content, err := os.ReadFile(pathLastRun)
