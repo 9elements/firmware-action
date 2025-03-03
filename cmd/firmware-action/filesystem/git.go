@@ -4,6 +4,7 @@
 package filesystem
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -11,6 +12,9 @@ import (
 	"regexp"
 	"strings"
 )
+
+// ErrNotGitRepository is returned when a git command is executed outside of git repository
+var ErrNotGitRepository = errors.New("not a git repository")
 
 // gitRun is generic function to execute any git command in sub-directory
 func gitRun(subdir string, command []string) (string, error) {
@@ -35,16 +39,24 @@ func gitRun(subdir string, command []string) (string, error) {
 
 	// Run git describe
 	cmd := exec.Command(command[0], command[1:]...)
-	describe, err := cmd.CombinedOutput()
+	stdout, err := cmd.CombinedOutput()
+	stdoutStr := string(stdout)
 	if err != nil {
+		pattern := regexp.MustCompile(`^fatal: not a git repository.*`)
+		match := pattern.MatchString(stdoutStr)
+		if match {
+			err = ErrNotGitRepository
+		}
+
 		slog.Error(
 			fmt.Sprintf("Failed to run git command in '%s'", subdir),
+			slog.String("stdout and stderr", stdoutStr),
 			slog.Any("error", err),
 		)
-		return "", err
+		return stdoutStr, err
 	}
 
-	return string(describe), nil
+	return stdoutStr, nil
 }
 
 type describe struct {
