@@ -79,6 +79,15 @@ func (c *ChangeConfig) DetectChanges(target string) bool {
 	//   proving to be far too much work. Instead we save the whole configuration file (for each module
 	//   separately) and only compare the relevant modules between these two configurations
 
+	// Check if current config is nil
+	if c.Config == nil {
+		slog.Warn("Current configuration is nil, assuming no changes are needed",
+			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
+		)
+		c.ChangesDetected = false
+		return false
+	}
+
 	err := filesystem.CheckFileExists(c.ResultFile)
 	if errors.Is(err, os.ErrExist) {
 		oldConfig, err := ReadConfig(c.ResultFile)
