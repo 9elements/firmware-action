@@ -7,7 +7,7 @@
 ```
 
 ```admonish tip
-Multiple configuration files can be supplied to firmware-action. Dependencies also work across files.
+Multiple configuration files can be supplied to `firmware-action`. Dependencies also work across files.
 
 ~~~
 firmware-action build --config=config-01.json --config=config-02.json ...
