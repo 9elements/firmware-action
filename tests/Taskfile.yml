@@ -88,7 +88,7 @@ tasks:
     cmds:
       - cp -f "../tests/uboot_{{.UBOOT_VERSION}}/uboot.defconfig" "uboot_defconfig"
       - ln -sf "uboot-{{.UBOOT_VERSION}}" u-boot
-      - ../bin/firmware-action-linux-amd64-v{{.VERSION}} build --config="../tests/example_config__uboot.json" --target=u-boot-example
+      - ../bin/firmware-action build --config="../tests/example_config__uboot.json" --target=u-boot-example
     env:
       UBOOT_VERSION: '{{.UBOOT_VERSION}}'
       SYSTEM_ARCH: 'arm64'
