@@ -22,6 +22,27 @@ inputs:
       Compile the action from source instead of downloading pre-compiled binary from releases.
     required: false
     default: 'false'
+outputs:
+  artifact-name:
+    description: |
+      Name of the artifact which will be uploaded to GitHub
+    value: ${{ steps.get_artifact_name.outputs.artifact_name }}
+
+  # These outputs are just passing on outputs of 'upload-artifact'
+  #   Docs: https://github.com/actions/upload-artifact
+  artifact-id:
+    description: |
+      GitHub ID of an Artifact, can be used by the REST API
+    value: ${{ steps.upload_artifact.outputs.artifact-id }}
+  artifact-url:
+    description: |
+      URL to download an Artifact. Can be used in many scenarios such as linking to artifacts in issues or pull requests. Users must be logged-in in order for this URL to work. This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted
+    value: ${{ steps.upload_artifact.outputs.artifact-url }}
+  artifact-digest:
+    description: |
+      SHA-256 digest of an Artifact
+    value: ${{ steps.upload_artifact.outputs.artifact-digest }}
+
 
 runs:
   using: 'composite'
@@ -82,6 +103,9 @@ runs:
       with:
         go-version: stable
 
+    #==============================================
+    # Acquire firmware-action executable for Linux
+    #==============================================
     - id: fetch_unix
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
@@ -97,6 +121,10 @@ runs:
       run: |
         go build -ldflags="-s -w" -o ../../firmware-action
 
+    #================================================
+    # Acquire firmware-action executable for Windows
+    #================================================
+
     - id: fetch_windows
       if: ${{ runner.os == 'Windows' && inputs.compile == 'false' }}
       shell: pwsh
@@ -109,6 +137,57 @@ runs:
       working-directory: ./cmd/firmware-action
       run: |
         go build -ldflags="-s -w" -o ../../firmware-action.exe
+
+    #================
+    # CACHE: Restore
+    #================
+    #
+    # GitHub does not allow to run a single step in some sort of for-loop, nor does allow to call another
+    #   reusable action to potentially use matrix strategy to achieve this.
+    # I also looked into GitHub CI commands (link to docs below), but there is no support for uploading
+    #   cache or artifacts
+    # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions
+    # The only way that I could come up with is to pack it (move all the files into single directory) and then upload.
+    #   And upon download it is unpacked.
+    # One way might be to implement GitHub API interface right into the golang code, but that seems like too much
+    #   overkill for what we want.
+
+    - name: restore_cache
+      uses: actions/cache/restore@v4
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+        restore-keys: |
+          firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-
+          firmware-action-${{ hashFiles(inputs.config) }}-
+          firmware-action-
+
+    - name: unpack_cached_files
+      shell: bash
+      run: |
+        # Get output directories from config
+        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' tests/example_config.json)
+
+        # For each output directory
+        for DIR in "${OUTPUT_DIRS[@]}"; do
+          if [ -d ".firmware-action/artifacts/${DIR}" ]; then
+            mv ".firmware-action/artifacts/${DIR}" ./
+          fi
+        done
+
+    #=====================
+    # ARTIFACTS: Download
+    #=====================
+
+        #- name: download_artifacts
+        #  uses: actions/download-artifact@v4
+        #  with:
+        #    name: artifacts-${{ inputs.target }}
+        #    path: .firmware-action2/
+
+    #=================================
+    # RUN: firmware-action executable
+    #=================================
 
     - name: run_unix
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
@@ -129,3 +208,53 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+
+    #===============
+    # CACHE: Create
+    #===============
+
+    - name: copy_artifacts
+      if: always()
+      shell: bash
+      run: |
+        mkdir -p .firmware-action/artifacts/
+
+        # Get output directories from config
+        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ inputs.config }}")
+
+        # For each output directory
+        for DIR in "${OUTPUT_DIRS[@]}"; do
+          if [ -d "${DIR}" ]; then
+            cp -r "${DIR}" .firmware-action/artifacts/
+          fi
+        done
+
+    - name: save_cache
+      if: always()
+      uses: actions/cache/save@v4
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+
+    #===================
+    # ARTIFACTS: Upload
+    #===================
+
+    - name: get_artifact_name
+      if: always()
+      shell: bash
+      id: get_artifact_name
+      run: |
+        # Extract output_dir for the specific target from config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ inputs.config }}" | sed -E 's/\/$//g')
+        DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
+        echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
+
+    - name: upload_artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      id: upload_artifact
+      with:
+        name: ${{ steps.get_artifact_name.outputs.artifact_name }}
+        path: .firmware-action/
+        include-hidden-files: true

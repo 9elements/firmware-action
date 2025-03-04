@@ -115,6 +115,7 @@
     "logdir",
     "mainboard",
     "mainboarddir",
+    "mapfile",
     "markdownlint",
     "megalinter",
     "menuconfig",
