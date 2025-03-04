@@ -1,4 +1,4 @@
-# Run firmware-action in GitHub CI
+# Run `firmware-action` in GitHub CI
 
 Now that we have `firmware-action` working on local system. Let's set up CI.
 

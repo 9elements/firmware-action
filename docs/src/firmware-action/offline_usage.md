@@ -30,4 +30,4 @@ It will also be displayed every time `firmware-action` is executed as `INFO` mes
     - origin of this message: container.Setup
 ```
 
-Simply copy-paste the digest (or image reference) into your configuration file and firmware-action will not connect to the internet to fetch a container if one matching is already present.
+Simply copy-paste the digest (or image reference) into your configuration file and `firmware-action` will not connect to the internet to fetch a container if one matching is already present.

@@ -1,4 +1,4 @@
-# Get firmware-action
+# Get `firmware-action`
 
 Firstly, you will need to [install and setup Docker](https://docs.docker.com/engine/install/).
 
