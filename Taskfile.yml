@@ -27,6 +27,7 @@ tasks:
     dir: '{{.GOLANG_CODE_PATH}}'
     cmds:
       - go build -ldflags="-s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.date={{.DATE}}" -o ../../bin/firmware-action-{{OS}}-{{ARCH}}-v{{.VERSION}}
+      - ln -sf ./firmware-action-{{OS}}-{{ARCH}}-v{{.VERSION}} ../../bin/firmware-action
     env:
       CGO_ENABLED: 0
     sources:
@@ -67,6 +68,7 @@ tasks:
     dir: docs
     cmds:
       - mdbook build
+      - echo "Visit file://{{.USER_WORKING_DIR}}/docs/public/index.html"
 
   build-mdbook-watch:
     desc: Build mdBook with watch
