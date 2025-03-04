@@ -43,15 +43,37 @@ tasks:
     internal: true
     cmds:
       - cp -f "../tests/linux_{{.LINUX_VERSION}}/linux.defconfig" "ci_defconfig"
-      - ../bin/firmware-action-linux-amd64-v{{.VERSION}} build --config="../tests/example_config__linux.json" --target=linux-example
+      - ../bin/firmware-action build --config="../tests/example_config__linux.json" --target=linux-example
     env:
       LINUX_VERSION: '{{.LINUX_VERSION}}'
       SYSTEM_ARCH: 'amd64'
+      UROOT_VERSION: ""
     requires:
       vars: [LINUX_VERSION]
 
-  linux-*:
-    desc: Run example
+  linux-run-github:
+    desc: Run firmware-action just like in GitHub runner
+    dir: '{{.WORKDIR}}'
+    internal: true
+    cmds:
+      - cp -f "../tests/linux_{{.LINUX_VERSION}}/linux.defconfig" "ci_defconfig"
+      - ../bin/firmware-action
+    env:
+      LINUX_VERSION: '{{.LINUX_VERSION}}'
+      SYSTEM_ARCH: 'amd64'
+      UROOT_VERSION: ""
+      # Fake GitHub runner
+      GITHUB_ACTIONS: "yes"
+      INPUT_TARGET: "linux-example"
+      INPUT_RECURSIVE: "false"
+      # For testing multiple config inputs
+      #INPUT_CONFIG: "  ../tests/example_config__linux.json\n  ../tests/example_config__uroot.json  \n   "
+      INPUT_CONFIG: "../tests/example_config__linux.json"
+    requires:
+      vars: [LINUX_VERSION]
+
+  linux-local-*:
+    desc: Run example as it would run locally
     deps:
       - task: mkdir
       - task: :build-go-binary
@@ -65,6 +87,22 @@ tasks:
       - task: linux-run
         vars:
           LINUX_VERSION: '{{.VARIANT}}'
+
+  linux-github-*:
+    desc: Run example as it would run in GitHub CI
+    deps:
+      - task: mkdir
+      - task: :build-go-binary
+    vars:
+      VARIANT: '{{index .MATCH 0}}'
+    cmds:
+      - task: linux-fetch
+        vars:
+          LINUX_VERSION: '{{.VARIANT}}'
+      - task: linux-run-github
+        vars:
+          LINUX_VERSION: '{{.VARIANT}}'
+
 
   #========
   # U-BOOT
