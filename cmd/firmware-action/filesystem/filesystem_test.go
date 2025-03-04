@@ -109,7 +109,7 @@ func TestLastSaveRunTime(t *testing.T) {
 
 	// Load - should fallback because no file exists, but no error
 	loadTime, err := LoadLastRunTime(pathTimeFile)
-	assert.NoError(t, err)
+	assert.ErrorIs(t, err, os.ErrNotExist)
 	assert.Equal(t, time.Time{}, loadTime)
 	assert.ErrorIs(t, CheckFileExists(pathTimeFile), os.ErrNotExist)
 

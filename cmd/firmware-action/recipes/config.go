@@ -184,6 +184,11 @@ func (opts CommonOpts) GetSources() []string {
 
 // ANCHOR_END: CommonOptsGetSources
 
+// GetRepoPath returns Repository path
+func (opts CommonOpts) GetRepoPath() string {
+	return opts.RepoPath
+}
+
 // Config is for storing parsed configuration file
 type Config struct {
 	// defined in coreboot.go
@@ -296,6 +301,7 @@ type FirmwareModule interface {
 	GetOutputDir() string
 	GetSources() []string
 	buildFirmware(ctx context.Context, client *dagger.Client) error
+	GetRepoPath() string
 }
 
 // ======================

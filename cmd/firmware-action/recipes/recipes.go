@@ -16,7 +16,6 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
-	"github.com/google/go-cmp/cmp"
 	"github.com/heimdalr/dag"
 )
 
@@ -42,6 +41,8 @@ var (
 	// CompiledConfigsDir specifies directory for successfully compiled module configurations to detect changes in
 	//   configuration
 	CompiledConfigsDir = filepath.Join(StatusDir, "configs")
+	// GitRepoHashDir specifies directory for git hashes to detect changes in sources
+	GitRepoHashDir = filepath.Join(StatusDir, "git-hashes")
 )
 
 func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependencies [][]string) ([][]string, error) {
@@ -180,61 +181,38 @@ func IsDirEmpty(path string) (bool, error) {
 // Execute a build step
 // func Execute(ctx context.Context, target string, config *Config, bulldozeMode bool) error {
 func Execute(ctx context.Context, target string, config *Config) error {
-	// Prep
-	err := os.MkdirAll(TimestampsDir, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	err = os.MkdirAll(CompiledConfigsDir, os.ModePerm)
-	if err != nil {
-		return err
+	// Prep directories
+	for _, dir := range []string{TimestampsDir, CompiledConfigsDir, GitRepoHashDir} {
+		err := os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Find requested target
 	modules := config.AllModules()
 	if _, ok := modules[target]; ok {
 		// Check for any change in source files
-		//   Either returns time, or zero time and error
-		//   zero time means there was no previous run
-		timestampFile := filepath.Join(TimestampsDir, filesystem.Filenamify(target, "txt"))
-		lastRun, _ := filesystem.LoadLastRunTime(timestampFile)
-
-		sources := modules[target].GetSources()
-		changesDetected := false
-		for _, source := range sources {
-			changes, _ := filesystem.AnyFileNewerThan(source, lastRun)
-			if changes {
-				changesDetected = true
-				break
-			}
+		detectedChanges := AllChanges{
+			TimeStamp: ChangeTimeStamp{
+				Change: Change{
+					ResultFile: filepath.Join(TimestampsDir, filesystem.Filenamify(target, "txt")),
+				},
+				Sources: modules[target].GetSources(),
+			},
+			Configuration: ChangeConfig{
+				Change: Change{
+					ResultFile: filepath.Join(CompiledConfigsDir, filesystem.Filenamify(target, "json")),
+				},
+				Config: config,
+			},
+			GitHash: ChangeGitHash{
+				Change: Change{
+					ResultFile: filepath.Join(GitRepoHashDir, filesystem.Filenamify(target, ".txt")),
+				},
+				RepoPath: modules[target].GetRepoPath(),
+			},
 		}
-
-		// Check for any change in configuration
-		//   I did consider to save only the small struct related to each module, but it was
-		//   proving to be far too much work. Instead we save the whole configuration file (for each module
-		//   separately) and only compare the relevant modules between these two configurations
-		oldConfigPath := filepath.Join(CompiledConfigsDir, filesystem.Filenamify(target, "json"))
-		err = filesystem.CheckFileExists(oldConfigPath)
-		changedConfig := false
-		if errors.Is(err, os.ErrExist) {
-			oldConfig, err := ReadConfig(oldConfigPath)
-			// The config might be old / obsolete
-			// If the config is old / obsolete and no longer valid, it should just be ignored
-			// and it should be assumed that re-build is needed
-			if err != nil {
-				changedConfig = true
-				slog.Warn(
-					fmt.Sprintf("The configuration used for previous build, stored in '%s', is not valid and will be assumed obsolete", CompiledConfigsDir),
-				)
-			} else {
-				oldModules := oldConfig.AllModules()
-				changedConfig = !cmp.Equal(modules[target], oldModules[target])
-			}
-		}
-		slog.Debug("Changes were detected",
-			slog.Bool("sources", changesDetected),
-			slog.Bool("config", changedConfig),
-		)
 
 		// Check if output directory already exist
 		// We want to skip build if the output directory exists and is not empty
@@ -243,7 +221,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		_, errExists := os.Stat(modules[target].GetOutputDir())
 		empty, _ := IsDirEmpty(modules[target].GetOutputDir())
 		if errExists == nil && !empty {
-			if changesDetected || changedConfig {
+			if detectedChanges.DetectChanges(target) {
 				// If any of the sources changed, we need to rebuild
 				os.RemoveAll(modules[target].GetOutputDir())
 			} else {
@@ -256,8 +234,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 				// If the 'override' is false, and if these files already exist, they will not
 				//   be overridden
 				// We want these files to reflect last successful build, not last check
-				saveCheckpointTimeStamp(timestampFile, false)
-				saveCheckpointConfig(oldConfigPath, config, false)
+				detectedChanges.SaveCheckpoint(target, false)
 				return ErrBuildUpToDate
 			}
 		}
@@ -292,36 +269,12 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		// Build the module
 		err = modules[target].buildFirmware(ctx, client)
 		if err == nil {
-			// On successful build, save timestamp and current configuration
-			saveCheckpointTimeStamp(timestampFile, true)
-			saveCheckpointConfig(oldConfigPath, config, true)
+			// On successful build, save checkpoint data for next change detection
+			detectedChanges.SaveCheckpoint(target, true)
 		}
 		return err
 	}
 	return ErrTargetMissing
-}
-
-func saveCheckpointTimeStamp(timestampFilePath string, override bool) {
-	// On success update the timestamp
-	err := filesystem.CheckFileExists(timestampFilePath)
-	if errors.Is(err, os.ErrNotExist) || override {
-		slog.Debug("Saving timestamp")
-		_ = filesystem.SaveCurrentRunTime(timestampFilePath)
-	}
-}
-
-func saveCheckpointConfig(configPath string, config *Config, override bool) {
-	// On success update the old configuration
-	err := filesystem.CheckFileExists(configPath)
-	if errors.Is(err, os.ErrNotExist) || override {
-		slog.Debug("Saving copy of configuration file")
-		err = WriteConfig(configPath, config)
-		if err != nil {
-			slog.Warn("Failed to create a snapshot of configuration for detecting future changes",
-				slog.Any("error", err),
-			)
-		}
-	}
 }
 
 // NormalizeArchitecture will translate various architecture strings into expected format
