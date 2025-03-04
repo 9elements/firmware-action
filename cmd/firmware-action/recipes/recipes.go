@@ -196,7 +196,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		// Check for any change in source files
 		//   Either returns time, or zero time and error
 		//   zero time means there was no previous run
-		timestampFile := filepath.Join(TimestampsDir, fmt.Sprintf("%s.txt", target))
+		timestampFile := filepath.Join(TimestampsDir, filesystem.Filenamify(target, "txt"))
 		lastRun, _ := filesystem.LoadLastRunTime(timestampFile)
 
 		sources := modules[target].GetSources()
