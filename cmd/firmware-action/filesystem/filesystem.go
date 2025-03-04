@@ -290,6 +290,8 @@ func sanitizeAndTruncate(input string, length int) string {
 	//   https://www.compart.com/en/unicode/category/Cc
 	result = strings.ToValidUTF8(result, "_")
 
+	// slicing works with bytes, not runes
+	// range works with runes
 	if len(result) > length {
 		return string(result[:length])
 	}
