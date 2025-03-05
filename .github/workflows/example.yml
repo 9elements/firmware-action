@@ -163,6 +163,7 @@ jobs:
           target: 'coreboot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
           UROOT_VERSION: "dummy"
@@ -230,6 +231,7 @@ jobs:
           target: 'linux-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
           SYSTEM_ARCH: ${{ matrix.arch }}
@@ -303,6 +305,7 @@ jobs:
           target: 'edk2-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
           GCC_TOOLCHAIN_VERSION: ${{ steps.gcc_toolchain.outputs.gcc_toolchain_version }}
@@ -355,6 +358,7 @@ jobs:
           target: 'stitching-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
   # ANCHOR_END: example_build_stitch
@@ -406,6 +410,7 @@ jobs:
           target: 'u-root-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
   # ANCHOR_END: example_build_uroot
@@ -464,6 +469,7 @@ jobs:
           target: 'u-boot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           UBOOT_VERSION: ${{ matrix.uboot-version }}
   # ANCHOR_END: example_build_uboot
@@ -592,6 +598,7 @@ jobs:
           target: 'u-root-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
         env:
           COREBOOT_VERSION: '4.19'
           LINUX_VERSION: '6.9.9'

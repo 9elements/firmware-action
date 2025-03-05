@@ -296,6 +296,7 @@ func parseGithub() (string, error) {
 	CLI.Build.Recursive = regexTrue.MatchString(action.GetInput("recursive"))
 	CLI.Build.PruneDockerContainers = regexTrue.MatchString(action.GetInput("prune"))
 	CLI.JSON = regexTrue.MatchString(action.GetInput("json"))
+	CLI.Debug = regexTrue.MatchString(action.GetInput("debug"))
 
 	return "GitHub", nil
 }
