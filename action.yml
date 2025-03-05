@@ -1,27 +1,133 @@
 ---
 name: 'Compile open firmware solution'
-description: |
+description: >
   Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
 author: '9elements'
+
 inputs:
   config:
-    description: |
+    description: >
       Path to the JSON configuration file.
     required: true
   target:
-    description: |
+    description: >
       The firmware recipe to build. Use ID from JSON configuration file.
     required: true
   recursive:
-    description: |
+    description: >
       Build target recursively, with all of its dependencies.
     required: false
     default: 'false'
+  debug:
+    description: >
+      Run the action with increased verbosity.
+    required: false
+    default: 'false'
   compile:
-    description: |
+    description: >
       Compile the action from source instead of downloading pre-compiled binary from releases.
     required: false
     default: 'false'
+
+  # Options for automatic caches and artifacts
+  auto-cache:
+    description: >
+      Automatically cache the '.firmware-action' directory along with all existing output directories.
+      Firmware-action can automatically cache the produced files, by iterating over all 'output_dir'
+        entries in the confirmation file. These files, if exists, can be cached.
+      Because firmware-action has multiple methods of detecting changes in the sources, it can then
+        rebuild the files if needed. But it there was no change, it can greatly speed up the CI run.
+    required: false
+    default: 'false'
+  auto-artifact-download:
+    description: >
+      Automatically download all artifacts for the current workflow run.
+      There is no easy convenient way to download all required artifacts, so firmware-action offers the
+        option to just automatically download all available artifacts. This does not mean that they will
+        be used during the build, but it means that you do not need to handle the downloading of artifacts
+        yourself.
+    required: false
+    default: 'false'
+  auto-artifact-upload:
+    description: >
+      Automatically upload all artifacts.
+      Firmware action can automatically upload the artifacts for the current target (upload the 'output_dir'
+        directory), so that you don't have it. Combined with the option 'auto-artifact-download'
+        firmware-action should be able to built entire firmware stack in CI even if it is split into multiple
+        jobs and even if there are multiple matrix builds running in parallel.
+    required: false
+    default: 'false'
+
+  # Options passed over to artifact uploading
+  artifact-if-no-files-found:
+    description: >
+      The desired behavior if no files are found using the provided path.
+
+      Available Options:
+        warn: Output a warning but do not fail the action
+        error: Fail the action with an error message
+        ignore: Do not output any warnings or errors, the action does not fail
+    default: 'warn'
+  artifact-compression-level:
+    description: >
+      The level of compression for Zlib to be applied to the artifact archive.
+      The value can range from 0 to 9:
+      - 0: No compression
+      - 1: Best speed
+      - 6: Default compression (same as GNU Gzip)
+      - 9: Best compression
+      Higher levels will result in better compression, but will take longer to complete.
+      For large files that are not easily compressed, a value of 0 is recommended for significantly faster uploads.
+    default: '6'
+  artifact-overwrite:
+    description: >
+      If true, an artifact with a matching name will be deleted before a new one is uploaded.
+      If false, the action will fail if an artifact for the given name already exists.
+      Does not fail if the artifact does not exist.
+    default: 'false'
+  ## We do need this enabled because we are uploading the `./firmware-action` directory
+  ##   which would not get uploaded at all with this option set to 'false'
+  ##   We might change the behavior in the future if anyone needs it
+  ##   (maybe just renaming the directory before upload)
+  #artifact-include-hidden-files:
+  #  description: >
+  #    If true, hidden files will be included in the artifact.
+  #    If false, hidden files will be excluded from the artifact.
+  #  default: 'false'
+  ## Not sure how the action would behave if a empty input would be provided,
+  ##   and not sure if I want to just give it some arbitrarily picked default.
+  ##   So let's leave it empty and the actions/upload-artifact will just pick the
+  ##   repository default.
+  #artifact-retention-days:
+  #  description: >
+  #    Duration after which artifact will expire in days. 0 means using default retention.
+  #
+  #    Minimum 1 day.
+  #    Maximum 90 days unless changed from the repository settings page.
+
+outputs:
+  artifact-name:
+    description: >
+      Name of the artifact which will be uploaded to GitHub
+    value: ${{ steps.get_artifact_name.outputs.artifact_name }}
+
+  # These outputs are just passing on outputs of 'upload-artifact'
+  #   Docs: https://github.com/actions/upload-artifact
+  artifact-id:
+    description: >
+      GitHub ID of an Artifact, can be used by the REST API
+    value: ${{ steps.upload_artifact.outputs.artifact-id }}
+  artifact-url:
+    description: >-
+      URL to download an Artifact.
+      Can be used in many scenarios such as linking to artifacts in issues or pull requests.
+      Users must be logged-in in order for this URL to work.
+      This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted.
+    value: ${{ steps.upload_artifact.outputs.artifact-url }}
+  artifact-digest:
+    description: >
+      SHA-256 digest of an Artifact
+    value: ${{ steps.upload_artifact.outputs.artifact-digest }}
 
 runs:
   using: 'composite'
@@ -82,33 +188,151 @@ runs:
       with:
         go-version: stable
 
+    #==============================================
+    # Acquire firmware-action executable for Linux
+    #==============================================
     - id: fetch_unix
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
       run: |
+        echo "::group::curl"
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
         tar -xvzf "${{ steps.filename.outputs.filename }}"
         chmod +x firmware-action
+        echo "::endgroup::"
       # chmod should not be necessary, but just to be safe
     - name: compile_unix
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'true' }}
       shell: bash
       working-directory: ./cmd/firmware-action
       run: |
+        echo "::group::compile firmware-action"
         go build -ldflags="-s -w" -o ../../firmware-action
+        echo "::endgroup::"
+
+    #================================================
+    # Acquire firmware-action executable for Windows
+    #================================================
 
     - id: fetch_windows
       if: ${{ runner.os == 'Windows' && inputs.compile == 'false' }}
       shell: pwsh
       run: |
+        echo ##[group]fetch
         Invoke-WebRequest -Uri "${{ steps.url.outputs.url }}" -OutFile "${{ steps.filename.outputs.filename }}"
         Expand-Archive -Path "${{ steps.filename.outputs.filename }}" -DestinationPath .\
+        echo ##[endgroup]
     - name: compile_windows
       if: ${{ runner.os == 'Windows' && inputs.compile == 'true' }}
       shell: pwsh
       working-directory: ./cmd/firmware-action
       run: |
+        echo ##[group]compile firmware-action
         go build -ldflags="-s -w" -o ../../firmware-action.exe
+        echo ##[endgroup]
+
+    #================
+    # CACHE: Restore
+    #================
+    #
+    # GitHub does not allow to run a single step in some sort of for-loop, nor does allow to call another
+    #   reusable action to potentially use matrix strategy to achieve this.
+    # I also looked into GitHub CI commands (link to docs below), but there is no support for uploading
+    #   cache or artifacts
+    # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions
+    # The only way that I could come up with is to pack it (move all the files into single directory) and then upload.
+    #   And upon download it is unpacked.
+    # One way might be to implement GitHub API interface right into the golang code, but that seems like too much
+    #   overkill for what we want.
+
+    - name: restore_cache
+      uses: actions/cache/restore@v4
+      if: inputs.auto-cache == 'true'
+      id: cache
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+        restore-keys: |
+          firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-${{ github.sha }}-
+          firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-
+          firmware-action-${{ inputs.target }}-
+
+    - name: merge_config_files
+      shell: bash
+      id: merge_config
+      run: |
+        # Create temporary directory for merged config
+        TEMP_DIR=$(mktemp -d)
+        MERGED_CONFIG="${TEMP_DIR}/merged.json"
+        echo "merged_config=${MERGED_CONFIG}" >> "${GITHUB_OUTPUT}"
+
+        # Initialize empty JSON object
+        echo '{}' > "${MERGED_CONFIG}"
+
+        # Split config input into individual files
+        readarray -t CONFIG_FILES <<< "${{ inputs.config }}"
+
+        # Process and merge each config file
+        for CONFIG_FILE in "${CONFIG_FILES[@]}"; do
+          # Trim whitespace
+          CONFIG_FILE=$(echo "${CONFIG_FILE}" | xargs)
+
+          # Skip empty lines
+          [ -z "${CONFIG_FILE}" ] && continue
+
+          # Merge this config with accumulated config
+          jq -s '.[0] * .[1]' "${MERGED_CONFIG}" "${CONFIG_FILE}" > "${TEMP_DIR}/temp.json"
+          mv "${TEMP_DIR}/temp.json" "${MERGED_CONFIG}"
+        done
+
+    #=====================
+    # ARTIFACTS: Download
+    #=====================
+    #
+    # Download all artifacts for the current workflow run.
+    # Docs: https://github.com/actions/download-artifact?tab=readme-ov-file#download-all-artifacts
+
+    - name: download_artifacts
+      uses: actions/download-artifact@v4
+      if: inputs.auto-artifact-download == 'true'
+      with:
+        path: .firmware-action2/
+        merge-multiple: true
+    - name: merge_firmware_action_directory
+      if: inputs.auto-artifact-download == 'true'
+      shell: bash
+      run: |
+        echo "::group::merge"
+        mkdir -p .firmware-action/
+        # Check if firmware-action2 directory exists and has content
+        if [ -d ".firmware-action2/" ] && [ "$(ls -A .firmware-action2/ 2>/dev/null)" ]; then
+          # Copy all content from firmware-action2 to firmware-action, overwriting existing files
+          cp -rf .firmware-action2/. .firmware-action/
+          echo "Merged downloaded artifacts into .firmware-action directory"
+        else
+          echo "No downloaded artifacts found in .firmware-action2/"
+        fi
+        echo "::endgroup::"
+
+    - name: unpack_cached_files
+      shell: bash
+      if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.auto-cache == 'true' }}
+      run: |
+        echo "::group::unpack"
+        # Get output directories from merged config
+        while IFS= read -r DIR; do
+          # Expand any environment variables in DIR
+          EXPANDED_DIR=$(eval echo "${DIR}")
+          if [ -d ".firmware-action/artifacts/${EXPANDED_DIR}" ]; then
+            echo "moving ${EXPANDED_DIR}"
+            mv ".firmware-action/artifacts/${EXPANDED_DIR}" ./
+          fi
+        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
+        echo "::endgroup::"
+
+    #=================================
+    # RUN: firmware-action executable
+    #=================================
 
     - name: run_unix
       if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
@@ -129,3 +353,60 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+
+    #===============
+    # CACHE: Create
+    #===============
+
+    - name: copy_artifacts
+      if: ${{ always() && ( inputs.auto-cache == 'true' || inputs.auto-artifact-upload == 'true' ) }}
+      shell: bash
+      run: |
+        echo "::group::pack"
+        mkdir -p .firmware-action/artifacts/
+
+        # Get output directories from merged config and copy them
+        while IFS= read -r DIR; do
+          # Expand any environment variables in DIR
+          EXPANDED_DIR=$(eval echo "${DIR}")
+          if [ -d "${EXPANDED_DIR}" ]; then
+            echo "copying ${EXPANDED_DIR}"
+            cp -r "${EXPANDED_DIR}" .firmware-action/artifacts/
+          fi
+        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
+        echo "::endgroup::"
+
+    - name: save_cache
+      if: ${{ always() && inputs.auto-cache == 'true' }}
+      uses: actions/cache/save@v4
+      with:
+        path: .firmware-action/
+        key: firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
+
+    #===================
+    # ARTIFACTS: Upload
+    #===================
+
+    - name: get_artifact_name
+      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
+      shell: bash
+      id: get_artifact_name
+      run: |
+        # Extract output_dir for the specific target from merged config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\/$//g')
+        # Expand any environment variables in OUTPUT_DIR
+        OUTPUT_DIR=$(eval echo "${OUTPUT_DIR}")
+        DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
+        echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
+
+    - name: upload_artifact
+      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
+      uses: actions/upload-artifact@v4
+      id: upload_artifact
+      with:
+        name: ${{ steps.get_artifact_name.outputs.artifact_name }}
+        path: .firmware-action/
+        include-hidden-files: true
+        if-no-files-found: ${{ inputs.artifact-if-no-files-found }}
+        compression-level: ${{ inputs.artifact-compression-level }}
+        overwrite: ${{ inputs.artifact-overwrite }}
