@@ -1,80 +1,89 @@
 # Github CI
 
-You can use `firmware-action` as any other action. The action automatically handles artifact uploading and caching to improve build times.
-
+You can use `firmware-action` as any other GitHub action. The action requires a configuration file (`config`) and target (`target`) to build, with additional options for artifact handling and caching to improve build times.
 
 ## Artifacts and Outputs
 
-The action automatically uploads build artifacts and provides the following outputs:
-- `artifact-name`: Name of the uploaded artifact
+The action can automatically upload build artifacts when the `auto-artifact-upload` option is enabled (disabled by default). When enabled, the action provides the following outputs:
 
-Internally, `firmware-action` is using [upload-artifact](https://github.com/actions/upload-artifact) action and passes on it's outputs too:
+- `artifact-name`: Name of the uploaded artifact
 - `artifact-id`: GitHub ID of the artifact (useful for REST API)
 - `artifact-url`: Direct download URL for the artifact (requires GitHub login)
 - `artifact-digest`: SHA-256 digest of the artifact
 
+Internally, `firmware-action` uses the [upload-artifact](https://github.com/actions/upload-artifact) action to handle artifact uploads.
+
 ```admonish example
 You can use these outputs in subsequent steps:
 ~~~yaml
-steps:
-  - name: Build firmware
-    id: firmware
-    uses: 9elements/firmware-action@main
-    with:
-      config: 'config.json'
-      target: 'my-target'
-
-  - name: Use artifact info
-    run: |
-      echo "Artifact name: ${{ steps.firmware.outputs.artifact-name }}"
-      echo "Download from: ${{ steps.firmware.outputs.artifact-url }}"
+{{#include ../firmware-action-example/.github/workflows/coreboot-example.yml:CorebootExample}}
 ~~~
 ```
 
+You can configure artifact handling with these options:
+- `artifact-if-no-files-found`: Behavior if no files are found ('warn', 'error', or 'ignore', default: 'warn')
+- `artifact-compression-level`: Compression level for artifacts (0-9, default: '6')
+- `artifact-overwrite`: Whether to overwrite existing artifacts with the same name (default: 'false')
 
 ## Build Caching
 
-The action automatically caches build artifacts between runs to speed up builds. The cache is:
+The action can cache build artifacts between runs to speed up builds, but this feature must be explicitly enabled with the `auto-cache` input (disabled by default).
+
+When enabled, the cache is:
 - Keyed by the config file contents and commit SHA
 - Restored at the start of each run
 - Saved after each run, even if the build fails
 
-No configuration is needed - caching works out of the box.
+You can also use the `recursive` option to build a target with all its dependencies, and the `debug` option for increased verbosity when troubleshooting.
 
+## Artifact Downloading
+
+When `auto-artifact-download` is enabled (disabled by default), the action automatically downloads all artifacts from the current workflow run. This feature is particularly useful in workflows with multiple jobs that depend on each other, as it can save a lot of copy-pasting between workflow steps.
+
+```admonish note
+Due to limitations in GitHub Actions, it's not possible for the action to download only relevant artifacts. When enabled, it downloads all artifacts from the current workflow run regardless of whether they're needed for the current build.
+```
+
+```admonish warning
+When using `auto-artifact-download`, be careful to avoid naming conflicts in the `output_dir` values across different targets. Since all artifacts are downloaded and merged into the same workspace, files with the same paths will overwrite each other.
+```
+
+```admonish warning
+At the time of writing, GitHub-hosted runners have only 14GB of disk space. If your artifacts are large and/or you have many matrix combinations, the workflow could run out of disk space. Monitor your disk usage when using this feature with large builds.
+```
+
+## Complete Configuration Example
+
+For a complete example with all options:
+
+```admonish example
+~~~yaml
+{{#include ../firmware-action-example/.github/workflows/linuxboot-example.yml:AllFeatures}}
+~~~
+```
 
 ## Parametric builds with environment variables
 
 To take advantage of matrix builds in GitHub, it is possible to use environment variables inside the JSON configuration file.
 
 ```admonish example
-For example let's make `COREBOOT_VERSION` environment variable which will hold version of coreboot.
+For example let's make `RELEASE_TYPE` environment variable which will hold either `DEBUG` or `RELEASE`.
 
 JSON would look like this:
 ~~~json
-...
-"sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
-...
-"defconfig_path": "tests/coreboot_${COREBOOT_VERSION}/seabios.defconfig",
-...
+{
+  "u-root": {
+    "uroot-example-${RELEASE_TYPE}": {
+      ...
+      "output_dir": "output-linuxboot-uroot-${RELEASE_TYPE}/",
+      ...
+    }
+  }
+}
 ~~~
 
 YAML would look like this:
 ~~~yaml
-name: Firmware example build
-jobs:
-  firmware_build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        coreboot_version: ["4.19", "4.20"]
-    steps:
-      - name: Build coreboot with firmware-action
-        uses: 9elements/firmware-action@main
-        with:
-          config: '<path to firmware-action JSON config>'
-          target: '<name of the target from JSON config>'
-          recursive: 'false'
-        env:
-          COREBOOT_VERSION: ${{ matrix.coreboot_version }}
+{{#include ../firmware-action-example/.github/workflows/linuxboot-example-separate-jobs.yml:Parametric}}
 ~~~
 ```
