@@ -254,18 +254,32 @@ runs:
           firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-
           firmware-action-${{ inputs.target }}-
 
-    - name: unpack_cached_files
+    - name: merge_config_files
       shell: bash
-      if: ${{ steps.cache.outputs.cache-hit == 'true' && inputs.auto-cache == 'true' }}
+      id: merge_config
       run: |
-        # Get output directories from config
-        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' inputs.config)
+        # Create temporary directory for merged config
+        TEMP_DIR=$(mktemp -d)
+        MERGED_CONFIG="${TEMP_DIR}/merged.json"
+        echo "merged_config=${MERGED_CONFIG}" >> "${GITHUB_OUTPUT}"
 
-        # For each output directory
-        for DIR in "${OUTPUT_DIRS[@]}"; do
-          if [ -d ".firmware-action/artifacts/${DIR}" ]; then
-            mv ".firmware-action/artifacts/${DIR}" ./
-          fi
+        # Initialize empty JSON object
+        echo '{}' > "${MERGED_CONFIG}"
+
+        # Split config input into individual files
+        readarray -t CONFIG_FILES <<< "${{ inputs.config }}"
+
+        # Process and merge each config file
+        for CONFIG_FILE in "${CONFIG_FILES[@]}"; do
+          # Trim whitespace
+          CONFIG_FILE=$(echo "${CONFIG_FILE}" | xargs)
+
+          # Skip empty lines
+          [ -z "${CONFIG_FILE}" ] && continue
+
+          # Merge this config with accumulated config
+          jq -s '.[0] * .[1]' "${MERGED_CONFIG}" "${CONFIG_FILE}" > "${TEMP_DIR}/temp.json"
+          mv "${TEMP_DIR}/temp.json" "${MERGED_CONFIG}"
         done
 
     #=====================
@@ -285,7 +299,33 @@ runs:
       if: inputs.auto-artifact-download == 'true'
       shell: bash
       run: |
+        echo "::group::merge"
+        mkdir -p .firmware-action/
+        # Check if firmware-action2 directory exists and has content
+        if [ -d ".firmware-action2/" ] && [ "$(ls -A .firmware-action2/ 2>/dev/null)" ]; then
+          # Copy all content from firmware-action2 to firmware-action, overwriting existing files
+          cp -rf .firmware-action2/. .firmware-action/
+          echo "Merged downloaded artifacts into .firmware-action directory"
+        else
+          echo "No downloaded artifacts found in .firmware-action2/"
+        fi
+        echo "::endgroup::"
+
+    - name: unpack_cached_files
+      shell: bash
+      if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.auto-cache == 'true' }}
+      run: |
+        echo "::group::unpack"
         # Get output directories from merged config
+        while IFS= read -r DIR; do
+          # Expand any environment variables in DIR
+          EXPANDED_DIR=$(eval echo "${DIR}")
+          if [ -d ".firmware-action/artifacts/${EXPANDED_DIR}" ]; then
+            echo "moving ${EXPANDED_DIR}"
+            mv ".firmware-action/artifacts/${EXPANDED_DIR}" ./
+          fi
+        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
+        echo "::endgroup::"
 
     #=================================
     # RUN: firmware-action executable
@@ -324,16 +364,16 @@ runs:
         echo "::group::pack"
         mkdir -p .firmware-action/artifacts/
 
-        # Get output directories from config
-        mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ inputs.config }}")
-
-        # For each output directory
-        for DIR in "${OUTPUT_DIRS[@]}"; do
-          if [ -d "${DIR}" ]; then
-            echo "copying ${DIR}"
-            cp -r "${DIR}" .firmware-action/artifacts/
+        # Get output directories from merged config and copy them
+        while IFS= read -r DIR; do
+          # Expand any environment variables in DIR
+          EXPANDED_DIR=$(eval echo "${DIR}")
+          if [ -d "${EXPANDED_DIR}" ]; then
+            echo "copying ${EXPANDED_DIR}"
+            cp -r "${EXPANDED_DIR}" .firmware-action/artifacts/
           fi
-        done
+        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
+        echo "::endgroup::"
 
     - name: save_cache
       if: ${{ always() && inputs.auto-cache == 'true' }}
@@ -351,8 +391,10 @@ runs:
       shell: bash
       id: get_artifact_name
       run: |
-        # Extract output_dir for the specific target from config
-        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ inputs.config }}" | sed -E 's/\/$//g')
+        # Extract output_dir for the specific target from merged config
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\/$//g')
+        # Expand any environment variables in OUTPUT_DIR
+        OUTPUT_DIR=$(eval echo "${OUTPUT_DIR}")
         DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
         echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
 
