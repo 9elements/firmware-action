@@ -62,7 +62,7 @@ func GitDescribeCoreboot(repoPath string) (string, error) {
 	valid := pattern.MatchString(result)
 	if !valid {
 		slog.Warn(
-			fmt.Sprintf("Output of 'git describe' for '%s' seems to be invalid, output is: '%s'", repoPath, result),
+			fmt.Sprintf("Output of 'git describe' for '%s' seems to be invalid commit hash, output is '%s'. Will carry on.", repoPath, result),
 		)
 	}
 
