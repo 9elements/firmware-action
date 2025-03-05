@@ -166,13 +166,6 @@ jobs:
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
           UROOT_VERSION: "dummy"
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coreboot-${{ matrix.coreboot-version }}-${{ matrix.arch }}
-          path: output-coreboot
-          retention-days: 14
   # ANCHOR_END: example_build_coreboot
 
   # Example of building Linux kernel
@@ -241,13 +234,6 @@ jobs:
           LINUX_VERSION: ${{ matrix.linux-version }}
           SYSTEM_ARCH: ${{ matrix.arch }}
           UROOT_VERSION: "dummy"
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-${{ matrix.linux-version }}-${{ matrix.arch }}
-          path: output-linux
-          retention-days: 14
   # ANCHOR_END: example_build_linux_kernel
 
   # Example of building EDK2
@@ -320,13 +306,6 @@ jobs:
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
           GCC_TOOLCHAIN_VERSION: ${{ steps.gcc_toolchain.outputs.gcc_toolchain_version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.edk2-version }}
-          path: output-edk2
-          retention-days: 14
   # ANCHOR_END: example_build_edk2
 
   # Example of building Firmware Stitching
@@ -378,13 +357,6 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: stitch-${{ matrix.coreboot-version }}-${{ matrix.arch }}
-          path: output-stitch
-          retention-days: 14
   # ANCHOR_END: example_build_stitch
 
   # Example of building u-root
@@ -436,13 +408,6 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uroot-${{ matrix.uroot-version }}-${{ matrix.arch }}
-          path: output-uroot
-          retention-days: 14
   # ANCHOR_END: example_build_uroot
 
   # Example of building u-boot
@@ -501,13 +466,6 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
         env:
           UBOOT_VERSION: ${{ matrix.uboot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uboot-${{ matrix.uboot-version }}-${{ matrix.arch }}
-          path: output-uboot
-          retention-days: 14
   # ANCHOR_END: example_build_uboot
 
   # Example of using universal module
