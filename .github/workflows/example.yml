@@ -99,9 +99,12 @@ jobs:
               - 'cmd/firmware-action/**'
       - name: Compile
         id: compile
-        # Require compilation if changes in action golang code or if any breaking changes since last release
+        # Require compilation if:
+        #  - any changes in action golang code
+        #  - any breaking changes since last release
+        #  - any new features since last release
         run: |
-          if [ "${{ steps.semver.outputs.bump }}" == "major" ] || [ "${{ steps.filter.outputs.action }}" == "true" ]; then
+          if [ "${{ steps.semver.outputs.bump }}" == "major" ] || [ "${{ steps.semver.outputs.bump }}" == "minor" ] || [ "${{ steps.filter.outputs.action }}" == "true" ]; then
             echo "compile=true" >> "${GITHUB_OUTPUT}"
           else
             echo "compile=false" >> "${GITHUB_OUTPUT}"
