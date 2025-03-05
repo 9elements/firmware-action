@@ -117,5 +117,14 @@ func gitDescribe(repoPath string, cfg *describe) (string, error) {
 	// Remove trailing newline
 	result := strings.TrimSpace(describe)
 
+	// Check validity of the returned string
+	pattern := regexp.MustCompile(`[\d\w]{13}(\-dirty)?`)
+	valid := pattern.MatchString(result)
+	if !valid {
+		slog.Warn(
+			fmt.Sprintf("Output of 'git describe' for '%s' seems to be invalid commit hash, output is '%s'. Will carry on.", repoPath, result),
+		)
+	}
+
 	return result, err
 }
