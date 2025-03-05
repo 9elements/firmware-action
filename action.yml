@@ -29,6 +29,35 @@ inputs:
     required: false
     default: 'false'
 
+  # Options for automatic caches and artifacts
+  auto-cache:
+    description: |
+      Automatically cache the '.firmware-action' directory along with all existing output directories.
+      Firmware-action can automatically cache the produced files, by iterating over all 'output_dir'
+        entries in the confirmation file. These files, if exists, can be cached.
+      Because firmware-action has multiple methods of detecting changes in the sources, it can then
+        rebuild the files if needed. But it there was no change, it can greatly speed up the CI run.
+    required: false
+    default: 'false'
+  auto-artifact-download:
+    description: |
+      Automatically download all artifacts for the current workflow run.
+      There is no easy convenient way to download all required artifacts, so firmware-action offers the
+        option to just automatically download all available artifacts. This does not mean that they will
+        be used during the build, but it means that you do not need to handle the downloading of artifacts
+        yourself.
+    required: false
+    default: 'false'
+  auto-artifact-upload:
+    description: |
+      Automatically upload all artifacts.
+      Firmware action can automatically upload the artifacts for the current target (upload the 'output_dir'
+        directory), so that you don't have it. Combined with the option 'auto-artifact-download'
+        firmware-action should be able to built entire firmware stack in CI even if it is split into multiple
+        jobs and even if there are multiple matrix builds running in parallel.
+    required: false
+    default: 'false'
+
   # Options passed over to artifact uploading
   artifact-if-no-files-found:
     description: |
@@ -215,6 +244,7 @@ runs:
 
     - name: restore_cache
       uses: actions/cache/restore@v4
+      if: inputs.auto-cache == 'true'
       id: cache
       with:
         path: .firmware-action/
@@ -226,7 +256,7 @@ runs:
 
     - name: unpack_cached_files
       shell: bash
-      if: steps.cache.outputs.cache-hit == 'true'
+      if: ${{ steps.cache.outputs.cache-hit == 'true' && inputs.auto-cache == 'true' }}
       run: |
         # Get output directories from config
         mapfile -t OUTPUT_DIRS < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' inputs.config)
@@ -247,10 +277,12 @@ runs:
 
     - name: download_artifacts
       uses: actions/download-artifact@v4
+      if: inputs.auto-artifact-download == 'true'
       with:
         path: .firmware-action2/
         merge-multiple: true
     - name: merge_firmware_action_directory
+      if: inputs.auto-artifact-download == 'true'
       shell: bash
       run: |
         # Get output directories from merged config
@@ -286,7 +318,7 @@ runs:
     #===============
 
     - name: copy_artifacts
-      if: always()
+      if: ${{ always() && ( inputs.auto-cache == 'true' || inputs.auto-artifact-upload == 'true' ) }}
       shell: bash
       run: |
         echo "::group::pack"
@@ -304,7 +336,7 @@ runs:
         done
 
     - name: save_cache
-      if: always()
+      if: ${{ always() && inputs.auto-cache == 'true' }}
       uses: actions/cache/save@v4
       with:
         path: .firmware-action/
@@ -315,7 +347,7 @@ runs:
     #===================
 
     - name: get_artifact_name
-      if: always()
+      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
       shell: bash
       id: get_artifact_name
       run: |
@@ -325,7 +357,7 @@ runs:
         echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
 
     - name: upload_artifact
-      if: always()
+      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
       uses: actions/upload-artifact@v4
       id: upload_artifact
       with:
