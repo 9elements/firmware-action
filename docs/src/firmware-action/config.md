@@ -9,9 +9,33 @@
 ```admonish tip
 Multiple configuration files can be supplied to `firmware-action`. Dependencies also work across files.
 
+Multiple configs in local build:
 ~~~
 firmware-action build --config=config-01.json --config=config-02.json ...
 ~~~
+
+Multiple configs in GitHub CI:
+~~~
+- name: firmware-action
+  uses: ./
+  with:
+    config: |-
+      config-01.json
+      config-02.json
+~~~
+```
+
+```admonish tip
+For YAML multi-line string please refer to documentation [Block Style Productions in YAML](https://yaml.org/spec/1.2.2/#block-style-productions)
+
+| Indicator | Name                | Behavior                                          |
+|-----------|---------------------|---------------------------------------------------|
+| `\|`      | Literal Block       | Preserves newlines, strips final newline          |
+| `\|+`     | Literal Block Keep  | Preserves all newlines including final            |
+| `\|-`     | Literal Block Strip | Strips all trailing newlines                      |
+| `>`       | Folded Block        | Folds newlines to spaces, keeps paragraph breaks  |
+| `>+`      | Folded Block Keep   | Like > but keeps final newline                    |
+| `>-`      | Folded Block Strip  | Like > but strips final newline                   |
 
 Beware that modules with identical names are permitted, as long as they are not in the same configuration file.
 
