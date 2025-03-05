@@ -23,6 +23,11 @@ inputs:
       Enable this when building complex firmware stack in single job recursively and you are running out of disk space.
     required: false
     default: 'false'
+  debug:
+    description: |
+      Run the action with increased verbosity.
+    required: false
+    default: 'false'
   compile:
     description: |
       Compile the action from source instead of downloading pre-compiled binary from releases.
@@ -119,7 +124,10 @@ outputs:
     value: ${{ steps.upload_artifact.outputs.artifact-id }}
   artifact-url:
     description: |
-      URL to download an Artifact. Can be used in many scenarios such as linking to artifacts in issues or pull requests. Users must be logged-in in order for this URL to work. This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted
+      URL to download an Artifact.
+      Can be used in many scenarios such as linking to artifacts in issues or pull requests.
+      Users must be logged-in in order for this URL to work.
+      This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted.
     value: ${{ steps.upload_artifact.outputs.artifact-url }}
   artifact-digest:
     description: |
