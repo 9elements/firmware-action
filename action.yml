@@ -95,16 +95,20 @@ runs:
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
       run: |
+        echo "::group::curl"
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
         tar -xvzf "${{ steps.filename.outputs.filename }}"
         chmod +x firmware-action
+        echo "::endgroup::"
       # chmod should not be necessary, but just to be safe
     - name: compile_unix
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'true' }}
       shell: bash
       working-directory: ./cmd/firmware-action
       run: |
+        echo "::group::compile firmware-action"
         go build -ldflags="-s -w" -o ../../firmware-action
+        echo "::endgroup::"
 
     #================================================
     # Acquire firmware-action executable for Windows
@@ -114,14 +118,18 @@ runs:
       if: ${{ runner.os == 'Windows' && inputs.compile == 'false' }}
       shell: pwsh
       run: |
+        echo ##[group]fetch
         Invoke-WebRequest -Uri "${{ steps.url.outputs.url }}" -OutFile "${{ steps.filename.outputs.filename }}"
         Expand-Archive -Path "${{ steps.filename.outputs.filename }}" -DestinationPath .\
+        echo ##[endgroup]
     - name: compile_windows
       if: ${{ runner.os == 'Windows' && inputs.compile == 'true' }}
       shell: pwsh
       working-directory: ./cmd/firmware-action
       run: |
+        echo ##[group]compile firmware-action
         go build -ldflags="-s -w" -o ../../firmware-action.exe
+        echo ##[endgroup]
 
     #================
     # CACHE: Restore
@@ -196,6 +204,7 @@ runs:
       if: always()
       shell: bash
       run: |
+        echo "::group::pack"
         mkdir -p .firmware-action/artifacts/
 
         # Get output directories from config
