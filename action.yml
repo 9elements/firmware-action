@@ -1,24 +1,30 @@
 ---
 name: 'Compile open firmware solution'
-description: |
+description: >
   Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
 author: '9elements'
+
 inputs:
   config:
-    description: |
+    description: >
       Path to the JSON configuration file.
     required: true
   target:
-    description: |
+    description: >
       The firmware recipe to build. Use ID from JSON configuration file.
     required: true
   recursive:
-    description: |
+    description: >
       Build target recursively, with all of its dependencies.
     required: false
     default: 'false'
+  debug:
+    description: >
+      Run the action with increased verbosity.
+    required: false
+    default: 'false'
   compile:
-    description: |
+    description: >
       Compile the action from source instead of downloading pre-compiled binary from releases.
     required: false
     default: 'false'
@@ -101,22 +107,25 @@ inputs:
 
 outputs:
   artifact-name:
-    description: |
+    description: >
       Name of the artifact which will be uploaded to GitHub
     value: ${{ steps.get_artifact_name.outputs.artifact_name }}
 
   # These outputs are just passing on outputs of 'upload-artifact'
   #   Docs: https://github.com/actions/upload-artifact
   artifact-id:
-    description: |
+    description: >
       GitHub ID of an Artifact, can be used by the REST API
     value: ${{ steps.upload_artifact.outputs.artifact-id }}
   artifact-url:
-    description: |
-      URL to download an Artifact. Can be used in many scenarios such as linking to artifacts in issues or pull requests. Users must be logged-in in order for this URL to work. This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted
+    description: >-
+      URL to download an Artifact.
+      Can be used in many scenarios such as linking to artifacts in issues or pull requests.
+      Users must be logged-in in order for this URL to work.
+      This URL is valid as long as the artifact has not expired or the artifact, run or repository have not been deleted.
     value: ${{ steps.upload_artifact.outputs.artifact-url }}
   artifact-digest:
-    description: |
+    description: >
       SHA-256 digest of an Artifact
     value: ${{ steps.upload_artifact.outputs.artifact-digest }}
 
