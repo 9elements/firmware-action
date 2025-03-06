@@ -28,6 +28,7 @@
         - [Change detection](firmware-action/change_detection.md)
     - [Migration instructions]()
         - [Migration from v0.13.x to v0.14.0](firmware-action/migration/v0.13.x--v0.14.0/migrate.md)
+        - [Migration from v0.14.x to v0.15.0](firmware-action/migration/v0.14.x--v0.15.0/migrate.md)
 
 ---
 
