@@ -1,0 +1,30 @@
+---
+name: linuxboot build
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build-coreboot-linuxboot-example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - name: Fetch few missing submodules
+        run: |
+          git submodule update --depth 1 --init --recursive --checkout
+
+      - name: firmware-action
+        uses: 9elements/firmware-action@v0.15.0
+        with:
+          config: 'coreboot-linuxboot-example.json'
+          target: 'coreboot-example-with-linuxboot'
+          recursive: 'true'
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
