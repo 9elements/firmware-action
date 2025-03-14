@@ -2,7 +2,11 @@
 # Remove old containers
 
 name: container cleanup
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+    # run weekly
 
 permissions:
   contents: read
@@ -35,6 +39,17 @@ jobs:
       fail-fast: false
       matrix:
         dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
+        # include discontinued containers
+        include:
+          - dockerfile: 'coreboot_4.20'
+          - dockerfile: 'coreboot_4.22'
+          - dockerfile: 'coreboot_24.02'
+          - dockerfile: 'edk2-stable202408'
+          - dockerfile: 'linux_6.1.111'
+          - dockerfile: 'linux_6.1.45'
+          - dockerfile: 'linux_6.6.52'
+          - dockerfile: 'linux_6.9.9'
+          - dockerfile: 'linux_6.11'
     permissions:
       contents: read
       packages: write
@@ -54,9 +69,8 @@ jobs:
         with:
           package-name: firmware-action/${{ matrix.dockerfile }}
           package-type: container
-          min-versions-to-keep: 5
-          ignore-versions:
-            '^(main|latest|v(\d+\.?)+)$'
+          min-versions-to-keep: 3
+          ignore-versions: '^(main|latest|v(\d+\.?)+)$'
             # ignore:
             # - main
             # - latest

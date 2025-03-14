@@ -91,3 +91,4 @@ In addition, there might be `VERIFICATION_TEST_*` variables. These are used insi
 
 - Update entry in list of containers in `README.md`
 - Add new regex entry into `Setup()` function in `cmd/firmware-action/container/container.go` to warn about discontinued containers
+- Add the discontinued container to `matrix` `include` in `.github/workflows/container-cleanup.yml` to keep even the discontinued containers tidy
