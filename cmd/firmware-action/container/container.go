@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -310,5 +311,125 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		slog.Debug(fmt.Sprintf("Artifact export: %s -> %s", artifact.ContainerPath, artifact.HostPath))
 	}
 
+	return nil
+}
+
+// CleanupAfterContainer performs cleanup operations after container use
+func CleanupAfterContainer(ctx context.Context) error {
+	// Unfortunately it is not possible to only remove the container used for building the module.
+	// Dagger Engine somehow absorbs the other containers into itself (possibly into it's volume, not sure).
+	// So to actually free up a disk space by deleting a container we have to delete the whole dagger engine
+	//   container and it's volume.
+	//
+	// This function is used to free up disk space on constrained environments like GitHub Actions.
+	//   GitHub-hosted public runners have only 14GB of disk space available.
+	// If user wants to build complex firmware stacks in single job recursively, they will easily run
+	//   out of disk space.
+	//
+	// WARNING: This will completely stop the Dagger engine. Any subsequent Dagger
+	//   operations will need to reinitialize the Dagger client.
+
+	slog.Info("Cleaning up Dagger container resources")
+
+	// Step 1: Find the Dagger engine container
+	findCmd := exec.CommandContext(ctx, "docker", "container", "ls", "--filter", "name=dagger-engine", "--format", "{{.ID}}")
+	containerID, err := findCmd.Output()
+	if err != nil {
+		slog.Error(
+			"Failed to find Dagger engine container",
+			slog.Any("error", err),
+		)
+		return err
+	}
+
+	containerIDStr := strings.TrimSpace(string(containerID))
+	if containerIDStr == "" {
+		slog.Info("No Dagger engine container found to clean up")
+		return nil
+	}
+
+	// Step 2: Stop the Dagger engine container
+	slog.Debug(
+		"Stopping Dagger engine container",
+		slog.String("containerID", containerIDStr),
+	)
+	stopCmd := exec.CommandContext(ctx, "docker", "container", "stop", containerIDStr)
+	stopOutput, err := stopCmd.CombinedOutput()
+	if err != nil {
+		slog.Error(
+			"Failed to stop Dagger engine container",
+			slog.String("output", strings.TrimSpace(string(stopOutput))),
+			slog.Any("error", err),
+		)
+		return err
+	}
+
+	// Step 3: Remove the Dagger engine container
+	slog.Debug(
+		"Removing Dagger engine container",
+		slog.String("containerID", containerIDStr),
+	)
+	rmCmd := exec.CommandContext(ctx, "docker", "container", "rm", containerIDStr)
+	rmOutput, err := rmCmd.CombinedOutput()
+	if err != nil {
+		slog.Error(
+			"Failed to remove Dagger engine container",
+			slog.String("output", strings.TrimSpace(string(rmOutput))),
+			slog.Any("error", err),
+		)
+		return err
+	}
+
+	// Step 4: Find and remove Dagger volumes
+	volCmd := exec.CommandContext(ctx, "docker", "volume", "ls", "--filter", "dangling=true", "--format", "{{.Name}}")
+	volumes, err := volCmd.Output()
+	if err != nil {
+		slog.Warn(
+			"Failed to list Docker volumes",
+			slog.Any("error", err),
+		)
+		// Continue even if this fails
+	} else {
+		volumeList := strings.Split(strings.TrimSpace(string(volumes)), "\n")
+		for _, vol := range volumeList {
+			if vol == "" {
+				continue
+			}
+			slog.Debug(
+				"Removing Docker volume",
+				slog.String("volume", vol),
+			)
+			rmVolCmd := exec.CommandContext(ctx, "docker", "volume", "rm", vol)
+			rmVolOutput, err := rmVolCmd.CombinedOutput()
+			if err != nil {
+				slog.Warn(
+					"Failed to remove Docker volume",
+					slog.String("volume", vol),
+					slog.String("output", strings.TrimSpace(string(rmVolOutput))),
+					slog.Any("error", err),
+				)
+				// Continue with other volumes even if one fails
+			}
+		}
+	}
+
+	// Step 5: Run system prune to clean up any remaining resources
+	pruneCmd := exec.CommandContext(ctx, "docker", "system", "prune", "-f")
+	pruneOutput, err := pruneCmd.CombinedOutput()
+	slog.Debug(
+		"Docker system prune output",
+		slog.String("command", "docker system prune -f"),
+		slog.String("output", strings.TrimSpace(string(pruneOutput))),
+	)
+	if err != nil {
+		slog.Error(
+			"Failed to prune Docker system",
+			slog.String("output", strings.TrimSpace(string(pruneOutput))),
+			slog.Any("error", err),
+		)
+		return err
+	}
+
+	slog.Info("Dagger container resources cleaned up successfully")
 	return nil
 }
