@@ -235,9 +235,10 @@ func parseCli() (string, error) {
 		// Create empty config
 		myConfig := recipes.Config{
 			Coreboot:          map[string]recipes.CorebootOpts{"coreboot-example": {}},
-			Linux:             map[string]recipes.LinuxOpts{"linux-example": {}},
 			Edk2:              map[string]recipes.Edk2Opts{"edk2-example": {}},
 			FirmwareStitching: map[string]recipes.FirmwareStitchingOpts{"stitching-example": {}},
+			Linux:             map[string]recipes.LinuxOpts{"linux-example": {}},
+			UBoot:             map[string]recipes.UBootOpts{"uboot-example": {}},
 			URoot:             map[string]recipes.URootOpts{"uroot-example": {}},
 			Universal:         map[string]recipes.UniversalOpts{"universal-example": {}},
 		}

@@ -17,6 +17,7 @@
     - [TLDR; Usage](firmware-action/usage.md)
         - [Local system](firmware-action/usage_local.md)
         - [GitHub CI](firmware-action/usage_github.md)
+        - [Examples](firmware-action/usage_examples.md)
     - [Configuration](firmware-action/config.md)
     - [Troubleshooting](firmware-action/troubleshooting.md)
     - [Tips and Tricks](firmware-action/tips.md)
