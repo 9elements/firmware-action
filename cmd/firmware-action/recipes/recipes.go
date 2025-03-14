@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/cmd/firmware-action/container"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/heimdalr/dag"
 )
@@ -67,6 +68,7 @@ func Build(
 	ctx context.Context,
 	target string,
 	recursive bool,
+	pruneDocker bool,
 	config *Config,
 	executor func(context.Context, string, *Config) error,
 ) ([]BuildResults, error) {
@@ -138,6 +140,16 @@ func Build(
 
 			if err != nil && !errors.Is(err, ErrBuildUpToDate) {
 				break
+			}
+
+			// Prune the Dagger Engine to free disk space
+			// It is fine to do here because the `executor` function connects and disconnects
+			//   to Dagger Engine (it is self-contained)
+			if pruneDocker {
+				err = container.CleanupAfterContainer(ctx)
+				if err != nil {
+					break
+				}
 			}
 		}
 	} else {
