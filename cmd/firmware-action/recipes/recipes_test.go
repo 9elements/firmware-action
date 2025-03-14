@@ -337,6 +337,7 @@ func TestBuild(t *testing.T) {
 				ctx,
 				tc.target,
 				tc.recursive,
+				false, // do not prune
 				&tc.config,
 				executeDummy,
 			)
@@ -349,6 +350,7 @@ func TestBuild(t *testing.T) {
 			ctx,
 			"pizza",
 			recursive,
+			false, // do not prune
 			&testConfigDependencyHell,
 			executeDummy,
 		)
