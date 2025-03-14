@@ -51,6 +51,10 @@ func TestGitRun(t *testing.T) {
 	err = os.Chdir(tmpDir)
 	assert.NoError(t, err)
 
+	// Test git status ordinary directory (not git repo)
+	_, err = gitRun("./", []string{"git", "status"})
+	assert.ErrorIs(t, err, ErrNotGitRepository)
+
 	gitRepoPrepare(t, tmpDir)
 
 	// Test git status
