@@ -544,6 +544,41 @@ jobs:
           retention-days: 14
   # ANCHOR_END: example_build_universal
 
+  # Example of building with pruning enabled
+  # ANCHOR: example_build_prune
+  build-with-pruning:
+    needs:
+      - changes
+      - skip-check
+    runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
+    # Skip if pull_request_review on PR not made by a bot
+    steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: firmware-action
+        uses: ./
+        # uses: 9elements/firmware-action
+        with:
+          config: 'tests/example_config__depends.json'
+          target: 'universal-example-B'
+          recursive: 'true'
+          prune: 'true'
+          compile: ${{ needs.changes.outputs.compile }}
+
+      - name: Get artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prune
+          path: output-universal-example-B
+          retention-days: 14
+  # ANCHOR_END: example_build_prune
+
   # Example of running on non-Linux systems
   test-operating-systems:
     strategy:
