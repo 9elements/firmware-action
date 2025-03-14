@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 	"github.com/9elements/firmware-action/cmd/firmware-action/recipes"
@@ -163,9 +164,7 @@ submodule_out:
 
 func getInputsFromEnvironment() (string, error) {
 	// Check for GitHub
-	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
-	_, exists := os.LookupEnv("GITHUB_ACTIONS")
-	if exists {
+	if environment.DetectGithub() {
 		return parseGithub()
 	}
 
