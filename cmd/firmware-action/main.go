@@ -292,6 +292,7 @@ func parseGithub() (string, error) {
 	CLI.Build.Target = action.GetInput("target")
 	CLI.Build.Recursive = regexTrue.MatchString(action.GetInput("recursive"))
 	CLI.JSON = regexTrue.MatchString(action.GetInput("json"))
+	CLI.Debug = regexTrue.MatchString(action.GetInput("debug"))
 
 	return "GitHub", nil
 }

@@ -165,16 +165,13 @@ jobs:
           target: 'coreboot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
-          UROOT_VERSION: "dummy"
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coreboot-${{ matrix.coreboot-version }}-${{ matrix.arch }}
-          path: output-coreboot
-          retention-days: 14
+          UROOT_VERSION: 'dummy'
   # ANCHOR_END: example_build_coreboot
 
   # Example of building Linux kernel
@@ -241,17 +238,14 @@ jobs:
           target: 'linux-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           LINUX_VERSION: ${{ matrix.linux-version }}
           SYSTEM_ARCH: ${{ matrix.arch }}
-          UROOT_VERSION: "dummy"
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-${{ matrix.linux-version }}-${{ matrix.arch }}
-          path: output-linux
-          retention-days: 14
+          UROOT_VERSION: 'dummy'
   # ANCHOR_END: example_build_linux_kernel
 
   # Example of building EDK2
@@ -323,16 +317,13 @@ jobs:
           target: 'edk2-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           EDK2_VERSION: ${{ matrix.edk2-version }}
           GCC_TOOLCHAIN_VERSION: ${{ steps.gcc_toolchain.outputs.gcc_toolchain_version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.edk2-version }}
-          path: output-edk2
-          retention-days: 14
   # ANCHOR_END: example_build_edk2
 
   # Example of building Firmware Stitching
@@ -384,15 +375,12 @@ jobs:
           target: 'stitching-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           COREBOOT_VERSION: ${{ matrix.coreboot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: stitch-${{ matrix.coreboot-version }}-${{ matrix.arch }}
-          path: output-stitch
-          retention-days: 14
   # ANCHOR_END: example_build_stitch
 
   # Example of building u-root
@@ -444,15 +432,12 @@ jobs:
           target: 'u-root-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           UROOT_VERSION: ${{ matrix.uroot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uroot-${{ matrix.uroot-version }}-${{ matrix.arch }}
-          path: output-uroot
-          retention-days: 14
   # ANCHOR_END: example_build_uroot
 
   # Example of building u-boot
@@ -511,15 +496,12 @@ jobs:
           target: 'u-boot-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           UBOOT_VERSION: ${{ matrix.uboot-version }}
-
-      - name: Get artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: uboot-${{ matrix.uboot-version }}-${{ matrix.arch }}
-          path: output-uboot
-          retention-days: 14
   # ANCHOR_END: example_build_uboot
 
   # Example of running on non-Linux systems
@@ -575,6 +557,10 @@ jobs:
           target: 'u-root-example'
           recursive: 'false'
           compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          auto-cache: 'true'
+          auto-artifact-download: 'true'
+          auto-artifact-upload: 'true'
         env:
           COREBOOT_VERSION: '4.19'
           LINUX_VERSION: '6.9.9'

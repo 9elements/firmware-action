@@ -1,0 +1,128 @@
+---
+name: linuxboot build
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build-coreboot-linuxboot-example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - name: Fetch few missing submodules
+        run: |
+          git submodule update --depth 1 --init --recursive --checkout
+
+      #==================================
+      # Get commit hashes for submodules
+      #==================================
+
+      - name: Extract uroot commit sha
+        id: uroot_commit
+        run: |
+          echo "uroot_commit=$( git rev-parse HEAD:coreboot-linuxboot-example/u-root )" >> "${GITHUB_OUTPUT}"
+
+      - name: Extract Linux commit sha
+        id: linux_commit
+        run: |
+          echo "linux_commit=$( git rev-parse HEAD:coreboot-linuxboot-example/linux )" >> "${GITHUB_OUTPUT}"
+
+      - name: Extract Coreboot commit sha
+        id: coreboot_commit
+        run: |
+          echo "coreboot_commit=$( git rev-parse HEAD:coreboot-linuxboot-example/coreboot )" >> "${GITHUB_OUTPUT}"
+
+      #===============
+      # Restore cache
+      #===============
+
+      - name: Restore cached u-root artefact
+        uses: actions/cache/restore@v4
+        id: cache-uroot
+        with:
+          path: output-linuxboot-uroot
+          key: uroot-${{ steps.uroot_commit.outputs.uroot_commit }}-${{ hashFiles('coreboot-linuxboot-example.json') }}
+
+      - name: Restore cached Linux artefact
+        uses: actions/cache/restore@v4
+        id: cache-linux
+        with:
+          path: output-linuxboot-linux
+          key: linux-${{ steps.linux_commit.outputs.linux_commit }}-${{ hashFiles('coreboot-linuxboot-example.json', 'coreboot-linuxboot-example/linux_defconfig', 'output-linuxboot-uroot/*') }}
+
+      - name: Restore cached coreboot artefact
+        uses: actions/cache/restore@v4
+        id: cache-coreboot
+        with:
+          path: output-linuxboot-coreboot
+          key: coreboot-${{ steps.coreboot_commit.outputs.coreboot_commit }}-${{ hashFiles('coreboot-linuxboot-example.json', 'coreboot-linuxboot-example/coreboot_linuxboot_defconfig', 'output-linuxboot-linux/*') }}
+
+      #============================
+      # Build with firmware-action
+      #============================
+
+      - name: firmware-action
+        uses: 9elements/firmware-action@v0.14.1
+        with:
+          config: 'coreboot-linuxboot-example.json'
+          target: 'coreboot-example-with-linuxboot'
+          recursive: 'true'
+
+      #==========================
+      # Upload artifacts - uroot
+      #==========================
+
+      - name: Cache u-root
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          key: uroot-${{ steps.uroot_commit.outputs.uroot_commit }}-${{ hashFiles('coreboot-linuxboot-example.json') }}
+          path: output-linuxboot-uroot
+
+      - name: Upload artifacts for uroot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linuxboot-uroot
+          path: output-linuxboot-uroot
+
+      #==========================
+      # Upload artifacts - Linux
+      #==========================
+
+      - name: Cache Linux
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          key: linux-${{ steps.linux_commit.outputs.linux_commit }}-${{ hashFiles('coreboot-linuxboot-example.json', 'coreboot-linuxboot-example/linux_defconfig', 'output-linuxboot-uroot/*') }}
+          path: output-linuxboot-linux
+
+      - name: Upload artifacts for Linux
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linuxboot-linux
+          path: output-linuxboot-linux
+
+      #=============================
+      # Upload artifacts - coreboot
+      #=============================
+
+      - name: Cache coreboot
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          key: coreboot-${{ steps.coreboot_commit.outputs.coreboot_commit }}-${{ hashFiles('coreboot-linuxboot-example.json', 'coreboot-linuxboot-example/coreboot_linuxboot_defconfig', 'output-linuxboot-linux/*') }}
+          path: output-linuxboot-coreboot
+
+      - name: Upload artifacts for coreboot
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linuxboot-coreboot
+          path: output-linuxboot-coreboot

@@ -10,5 +10,7 @@ Now that we have `firmware-action` working on local system. Let's set up CI.
 
 Commit, push and watch. And that is it.
 
+The action automatically handles artifact uploading and caching. See [GitHub CI Usage](../usage_github.md) for details about artifacts, outputs and caching.
+
 Now you should be able to build coreboot in CI and on your local machine.
 
