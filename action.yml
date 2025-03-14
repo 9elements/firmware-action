@@ -17,6 +17,12 @@ inputs:
       Build target recursively, with all of its dependencies.
     required: false
     default: 'false'
+  prune:
+    description: |
+      Remove Dagger container and its volumes after each module (only in recursive mode).
+      Enable this when building complex firmware stack in single job recursively and you are running out of disk space.
+    required: false
+    default: 'false'
   compile:
     description: |
       Compile the action from source instead of downloading pre-compiled binary from releases.
@@ -119,6 +125,7 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+        INPUT_PRUNE: ${{ inputs.prune }}
 
     - name: run_windows
       if: ${{ runner.os == 'Windows' }}
@@ -129,3 +136,4 @@ runs:
         INPUT_CONFIG: ${{ inputs.config }}
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
+        INPUT_PRUNE: ${{ inputs.prune }}

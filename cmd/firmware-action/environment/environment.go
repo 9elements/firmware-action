@@ -21,3 +21,11 @@ func FetchEnvVars(variables []string) map[string]string {
 
 	return result
 }
+
+// DetectGithub function returns True when the execution environment is detected to be GitHub CI
+func DetectGithub() bool {
+	// Check for GitHub
+	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+	_, exists := os.LookupEnv("GITHUB_ACTIONS")
+	return exists
+}

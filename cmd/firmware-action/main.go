@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 	"github.com/9elements/firmware-action/cmd/firmware-action/recipes"
@@ -50,8 +51,9 @@ var CLI struct {
 	Config []string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file, supports multiple flags to use multiple configuration files"`
 
 	Build struct {
-		Target    string `required:"" help:"Select which target to build, use ID from configuration file"`
-		Recursive bool   `help:"Build recursively with all dependencies and payloads"`
+		Target                string `required:"" help:"Select which target to build, use ID from configuration file"`
+		Recursive             bool   `help:"Build recursively with all dependencies and payloads"`
+		PruneDockerContainers bool   `help:"Remove Dagger container and its volumes after each module (only in recursive mode)"`
 	} `cmd:"build" help:"Build a target defined in configuration file. For interactive debugging preface the command with 'dagger run --interactive', for example 'dagger run --interactive $(which firmware-action) build --config=...'. To install dagger follow instructions at https://dagger.io/"`
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
@@ -85,6 +87,7 @@ func run(ctx context.Context) error {
 		slog.Any("input/config", CLI.Config),
 		slog.String("input/target", CLI.Build.Target),
 		slog.Bool("input/recursive", CLI.Build.Recursive),
+		slog.Bool("input/prune", CLI.Build.PruneDockerContainers),
 	)
 
 	// Check if submodules were initialized
@@ -133,6 +136,7 @@ submodule_out:
 		ctx,
 		CLI.Build.Target,
 		CLI.Build.Recursive,
+		CLI.Build.PruneDockerContainers,
 		myConfig,
 		recipes.Execute,
 	)
@@ -163,9 +167,7 @@ submodule_out:
 
 func getInputsFromEnvironment() (string, error) {
 	// Check for GitHub
-	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
-	_, exists := os.LookupEnv("GITHUB_ACTIONS")
-	if exists {
+	if environment.DetectGithub() {
 		return parseGithub()
 	}
 
@@ -291,6 +293,7 @@ func parseGithub() (string, error) {
 	CLI.Config = strings.Split(action.GetInput("config"), "\n")
 	CLI.Build.Target = action.GetInput("target")
 	CLI.Build.Recursive = regexTrue.MatchString(action.GetInput("recursive"))
+	CLI.Build.PruneDockerContainers = regexTrue.MatchString(action.GetInput("prune"))
 	CLI.JSON = regexTrue.MatchString(action.GetInput("json"))
 
 	return "GitHub", nil
