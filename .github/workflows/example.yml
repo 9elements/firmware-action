@@ -551,6 +551,10 @@ jobs:
       - changes
       - skip-check
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        prune: ['true', 'false']
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
     steps:
@@ -568,14 +572,14 @@ jobs:
           config: 'tests/example_config__depends.json'
           target: 'universal-example-B'
           recursive: 'true'
-          prune: 'true'
+          prune: ${{ matrix.prune }}
           compile: ${{ needs.changes.outputs.compile }}
 
       - name: Get artifacts
         uses: actions/upload-artifact@v4
         with:
           name: prune
-          path: output-universal-example-B
+          path: output-universal-example-B-${{ matrix.prune }}
           retention-days: 14
   # ANCHOR_END: example_build_prune
 
