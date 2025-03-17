@@ -90,25 +90,18 @@ inputs:
       If false, the action will fail if an artifact for the given name already exists.
       Does not fail if the artifact does not exist.
     default: 'false'
-  ## We do need this enabled because we are uploading the `./firmware-action` directory
-  ##   which would not get uploaded at all with this option set to 'false'
-  ##   We might change the behavior in the future if anyone needs it
-  ##   (maybe just renaming the directory before upload)
-  #artifact-include-hidden-files:
-  #  description: |
-  #    If true, hidden files will be included in the artifact.
-  #    If false, hidden files will be excluded from the artifact.
-  #  default: 'false'
-  ## Not sure how the action would behave if a empty input would be provided,
-  ##   and not sure if I want to just give it some arbitrarily picked default.
-  ##   So let's leave it empty and the actions/upload-artifact will just pick the
-  ##   repository default.
-  #artifact-retention-days:
-  #  description: |
-  #    Duration after which artifact will expire in days. 0 means using default retention.
+  # We do need this enabled because we are uploading the `./firmware-action` directory
+  #   which would not get uploaded at all with this option set to 'false'
+  #   We might change the behavior in the future if anyone needs it
+  #   (maybe just renaming the directory before upload)
   #
-  #    Minimum 1 day.
-  #    Maximum 90 days unless changed from the repository settings page.
+  # Action `actions/upload-artifact` also has these inputs:
+  #    - artifact-include-hidden-files:
+  #    - artifact-retention-days:
+  # Not sure how the action would behave if a empty input would be provided,
+  #   and not sure if I want to just give it some arbitrarily picked default.
+  #   So let's leave it empty and the actions/upload-artifact will just pick the
+  #   repository default.
 
 outputs:
   artifact-name:
