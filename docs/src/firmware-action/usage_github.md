@@ -11,7 +11,7 @@ The action can automatically upload build artifacts when the `auto-artifact-uplo
 - `artifact-url`: Direct download URL for the artifact (requires GitHub login)
 - `artifact-digest`: SHA-256 digest of the artifact
 
-Internally, `firmware-action` uses the [upload-artifact](https://github.com/actions/upload-artifact) action to handle artifact uploads.
+Internally, `firmware-action` uses the [actions/upload-artifact@v4](https://github.com/actions/upload-artifact)@v4 action to handle artifact uploads and [actions/download-artifact@v4](https://github.com/actions/download-artifact) to handle artifact downloads.
 
 ```admonish example
 You can use these outputs in subsequent steps:
