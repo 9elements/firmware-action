@@ -3,6 +3,116 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.15.0 - 2025-03-18
+#### Bug Fixes
+- **(action)** multiple configuration files in cache and artifact uploads - (26da39e) - AtomicFS
+- **(ci)** update container cleanup workflow - (35d5d95) - AtomicFS
+- **(ci)** coreboot 24.02 container was discontinued - (451ef19) - AtomicFS
+- **(cmd)** generate-config u-boot was empty - (7009a28) - AtomicFS
+- **(cmd)** prevent nil pointer dereference in DetectChanges method - (4879282) - AtomicFS
+- **(cmd)** golang test for linux module - (d53c1bd) - AtomicFS
+- **(example)** use shallow fetch - (75aa7fb) - AtomicFS
+- **(example)** update when golang is compiled in examples - (701b57f) - AtomicFS
+- **(example)** fail on release - (d0d7042) - AtomicFS
+- **(python)** downloading docker-compose executable - (5c616d0) - AtomicFS
+- update Taskfile - (771f70b) - AtomicFS
+#### Build system
+- **(deps)** update anyio requirement in /.dagger-ci/daggerci - (1011e11) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (314b8c2) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (7af6129) - dependabot[bot]
+- **(deps)** bump github.com/jedib0t/go-pretty/v6 - (ddd1295) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (12a238e) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (f29f69b) - dependabot[bot]
+- **(deps)** update prettytable requirement in /.dagger-ci/daggerci - (04b95e8) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (26426ce) - dependabot[bot]
+- **(deps)** bump github.com/google/go-cmp in /cmd/firmware-action - (fed74da) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (870af31) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (9ef4ae6) - dependabot[bot]
+- **(deps)** update dagger-io requirement in /.dagger-ci/daggerci - (0112e79) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (5b518b8) - dependabot[bot]
+#### Continuous Integration
+- speed comparison between pruning and not pruning - (d14d821) - AtomicFS
+- add prune example test - (092b6ed) - AtomicFS
+#### Documentation
+- update comment in action.yml - (12d1827) - AtomicFS
+- add notes on migrating to new version - (12109cf) - AtomicFS
+- update GitHub CI usage documentation - (4f26c24) - AtomicFS
+- add notes on YAML multi-line strings - (4fd9898) - AtomicFS
+- add artifact and caching documentation to GitHub CI usage - (a8bb3f4) - AtomicFS
+- move examples into separate section - (c6baee1) - AtomicFS
+- add note on discontinued container in docker-compose - (b488d50) - AtomicFS
+- cosmetic changes - (dbcf1d2) - AtomicFS
+- add documentation for git commit hash change detection - (96ef385) - AtomicFS
+- cosmetic - (8c3c8ac) - AtomicFS
+- add notes about change detection - (b5a15a3) - AtomicFS
+- fix typo - (dfbcf29) - AtomicFS
+- update shell-completions - (5a59061) - AtomicFS
+- add citation-file - (1edea9f) - AtomicFS
+- add CONVENTIONS.md and upadte CONTRIBUTING.md - (cf233a7) - AtomicFS
+- support multiple configuration files - (e737afc) - AtomicFS
+- add tips and tricks page - (f11698d) - AtomicFS
+- add bug report template - (b2cafeb) - AtomicFS
+- fix broken link - (fe305bb) - AtomicFS
+#### Features
+- **(action)** add input options to control action behavior - (eec0710) - AtomicFS
+- **(action)** automatically upload artifacts - (a6fda90) - AtomicFS
+- **(action)** automatically cache - (c103f63) - AtomicFS
+- **(cmd)** add option to prune Dagge Engine - (fb86de0) - AtomicFS
+- **(cmd)** add docker cleanup function - (bc381ef) - AtomicFS
+- **(cmd)** large refactor for change detection - (9ebfb19) - AtomicFS
+- **(cmd)** add ErrNotGitRepository into runGit - (7eee655) - AtomicFS
+- **(cmd)** make GitDescribe more universal - (c962e1c) - AtomicFS
+- **(cmd)** detect changed in configuration - (ad7d104) - AtomicFS
+- **(cmd)** support multiple configuration files - (2c35324) - AtomicFS
+- **(docker)** add script to switching to python2 into edk2 containers - (b1bc223) - AtomicFS
+- **(example)** enable debug in CI - (9d1c501) - AtomicFS
+- add validate-config command to CLI for config validation - (26b12f9) - AtomicFS
+#### Miscellaneous Chores
+- **(action)** improve CI logging by grouping output log - (33eb36b) - AtomicFS
+- **(cmd)** better warning - (740dfdc) - AtomicFS
+- **(cmd)** move GitHub CI detection into separate function - (e0bce25) - AtomicFS
+- **(cmd)** cosmetic changes - (77e5e12) - AtomicFS
+- **(cmd)** add debug message into AnyFileNewerThan - (330c67b) - AtomicFS
+- **(cmd)** use Filenamify function for time-stamps too - (132ae26) - AtomicFS
+- **(cmd)** cosmetic - (c778e1b) - AtomicFS
+- **(cmd)** add Filenamify function into filesystem - (ec52f42) - AtomicFS
+- **(cmd)** replace hardcoded version strings with ldflag - (aa105fc) - AtomicFS
+- **(cmd)** formatter cleanup - (79aabdd) - AtomicFS
+- **(cmd)** cleanup in config test - (f3b2ec6) - AtomicFS
+- **(cmd)** add old linux containers into discontinued list - (13e81b4) - AtomicFS
+- **(cmd)** sort discontinued containers alphabetically - (b8b2fcd) - AtomicFS
+- **(docker)** add NodeJS to uboot and uroot containers - (562fbf7) - AtomicFS
+- **(docker)** add new linux containers and remove old - (f910c3b) - AtomicFS
+- **(example)** update example - (ab0964d) - AtomicFS
+- **(example)** cleanup - (08ca77b) - AtomicFS
+- **(linter)** cspell - (ca4955f) - AtomicFS
+- **(linter)** cspell - (fc5f193) - AtomicFS
+- **(linter)** cspell - (48f4d1e) - AtomicFS
+- changes according to review - (e94ebb8) - AtomicFS
+- cosmetic - (68de45b) - AtomicFS
+- go mod tidy - (f6a76e4) - AtomicFS
+- update .gitignore - (b1eec2e) - AtomicFS
+- update goreleaser configuration - (33017f7) - AtomicFS
+- fix typo - (9d0e2ba) - AtomicFS
+- go mod tidy - (2b240bb) - AtomicFS
+- remove temporary symlinks for defconfigs - (020e041) - AtomicFS
+- add temporary symlinks for defconfigs - (d3d44ef) - AtomicFS
+- update linux defconfigs - (4e85464) - AtomicFS
+#### Refactoring
+- **(action)** update action.yml multi-line string styles - (9418ccd) - AtomicFS
+- **(cmd)** tweak AnyFileNewerThan function - (7943906) - AtomicFS
+- **(cmd)** use reflection in Merge method - (4889bbd) - AtomicFS
+- **(cmd)** use reflection in AllModules method - (69f5eda) - AtomicFS
+#### Tests
+- **(cmd)** add test for the new up-to-date detection - (601d332) - AtomicFS
+- **(cmd)** use reflection in AllModules method - (c8d7636) - AtomicFS
+- **(example)** update Linux matrix - (d3daf24) - AtomicFS
+- **(lint)** add goreleaser check - (cf0a9d5) - AtomicFS
+- update Taskfile to simulate GitHub - (844ec07) - AtomicFS
+- add universal module into examples - (877de4e) - AtomicFS
+
+- - -
+
 ## v0.14.1 - 2025-02-17
 #### Bug Fixes
 - **(cmd)** empty coreboot blob handling - (5d58179) - AtomicFS
