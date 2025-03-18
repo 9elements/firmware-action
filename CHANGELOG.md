@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. See [conven
 - **(example)** update when golang is compiled in examples - (701b57f) - AtomicFS
 - **(example)** fail on release - (d0d7042) - AtomicFS
 - **(python)** downloading docker-compose executable - (5c616d0) - AtomicFS
+- release workflow - (986bec65) - AtomicFS
 - update Taskfile - (771f70b) - AtomicFS
 #### Build system
 - **(deps)** update anyio requirement in /.dagger-ci/daggerci - (1011e11) - dependabot[bot]
