@@ -35,7 +35,7 @@ inputs:
     default: 'false'
 
   # Options for automatic caches and artifacts
-  auto-cache:
+  enable-cache:
     description: |
       Automatically cache the '.firmware-action' directory along with all existing output directories.
       Firmware-action can automatically cache the produced files, by iterating over all 'output_dir'
@@ -44,64 +44,49 @@ inputs:
         rebuild the files if needed. But it there was no change, it can greatly speed up the CI run.
     required: false
     default: 'false'
-  auto-artifact-download:
+  auto-download-artifacts:
     description: |
       Automatically download all artifacts for the current workflow run.
       There is no easy convenient way to download all required artifacts, so firmware-action offers the
         option to just automatically download all available artifacts. This does not mean that they will
         be used during the build, but it means that you do not need to handle the downloading of artifacts
         yourself.
+      Internally a actions/download-artifact@v4 is used
     required: false
     default: 'false'
-  auto-artifact-upload:
+  auto-upload-artifacts:
     description: |
-      Automatically upload all artifacts.
+      Automatically upload all artifacts.inputs.auto-upload-artifacts-if-no-files-found
       Firmware action can automatically upload the artifacts for the current target (upload the 'output_dir'
-        directory), so that you don't have it. Combined with the option 'auto-artifact-download'
+        directory), so that you don't have it. Combined with the option 'auto-download-artifacts'
         firmware-action should be able to built entire firmware stack in CI even if it is split into multiple
         jobs and even if there are multiple matrix builds running in parallel.
+      Internally a actions/upload-artifact@v4 is used
     required: false
     default: 'false'
 
   # Options passed over to artifact uploading
-  artifact-if-no-files-found:
+  auto-upload-artifacts-if-no-files-found:
     description: |
-      The desired behavior if no files are found using the provided path.
-
-      Available Options:
-        warn: Output a warning but do not fail the action
-        error: Fail the action with an error message
-        ignore: Do not output any warnings or errors, the action does not fail
+      See 'if-no-files-found' at https://github.com/actions/upload-artifact
     default: 'warn'
-  artifact-compression-level:
+  auto-upload-artifacts-retention-days:
     description: |
-      The level of compression for Zlib to be applied to the artifact archive.
-      The value can range from 0 to 9:
-      - 0: No compression
-      - 1: Best speed
-      - 6: Default compression (same as GNU Gzip)
-      - 9: Best compression
-      Higher levels will result in better compression, but will take longer to complete.
-      For large files that are not easily compressed, a value of 0 is recommended for significantly faster uploads.
+      See 'retention-days' at https://github.com/actions/upload-artifact
+    default: '0'
+  auto-upload-artifacts-compression-level:
+    description: |
+      See 'compression-level' at https://github.com/actions/upload-artifact
     default: '6'
-  artifact-overwrite:
+  auto-upload-artifacts-overwrite:
     description: |
-      If true, an artifact with a matching name will be deleted before a new one is uploaded.
-      If false, the action will fail if an artifact for the given name already exists.
-      Does not fail if the artifact does not exist.
+      See 'overwrite' at https://github.com/actions/upload-artifact
     default: 'false'
-  # We do need this enabled because we are uploading the `./firmware-action` directory
+  # As for the only omitted input 'include-hidden-files', we do need this enabled
+  #   because we are uploading the `./firmware-action` directory
   #   which would not get uploaded at all with this option set to 'false'
   #   We might change the behavior in the future if anyone needs it
   #   (maybe just renaming the directory before upload)
-  #
-  # Action `actions/upload-artifact` also has these inputs:
-  #    - artifact-include-hidden-files:
-  #    - artifact-retention-days:
-  # Not sure how the action would behave if a empty input would be provided,
-  #   and not sure if I want to just give it some arbitrarily picked default.
-  #   So let's leave it empty and the actions/upload-artifact will just pick the
-  #   repository default.
 
 outputs:
   artifact-name:
@@ -193,7 +178,7 @@ runs:
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
       run: |
-        echo "::group::curl"
+        echo "::group::curl"inputs.auto-upload-artifacts-if-no-files-found
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
         tar -xvzf "${{ steps.filename.outputs.filename }}"
         chmod +x firmware-action
@@ -245,7 +230,7 @@ runs:
 
     - name: restore_cache
       uses: actions/cache/restore@v4
-      if: inputs.auto-cache == 'true'
+      if: inputs.enable-cache == 'true'
       id: cache
       with:
         path: .firmware-action/
@@ -292,12 +277,12 @@ runs:
 
     - name: download_artifacts
       uses: actions/download-artifact@v4
-      if: inputs.auto-artifact-download == 'true'
+      if: inputs.auto-download-artifacts == 'true'
       with:
         path: .firmware-action2/
         merge-multiple: true
     - name: merge_firmware_action_directory
-      if: inputs.auto-artifact-download == 'true'
+      if: inputs.auto-download-artifacts == 'true'
       shell: bash
       run: |
         echo "::group::merge"
@@ -314,7 +299,7 @@ runs:
 
     - name: unpack_cached_files
       shell: bash
-      if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.auto-cache == 'true' }}
+      if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.enable-cache == 'true' }}
       run: |
         echo "::group::unpack"
         # Get output directories from merged config
@@ -359,7 +344,7 @@ runs:
     #===============
 
     - name: copy_artifacts
-      if: ${{ always() && ( inputs.auto-cache == 'true' || inputs.auto-artifact-upload == 'true' ) }}
+      if: ${{ always() && ( inputs.enable-cache == 'true' || inputs.auto-upload-artifacts == 'true' ) }}
       shell: bash
       run: |
         echo "::group::pack"
@@ -377,7 +362,7 @@ runs:
         echo "::endgroup::"
 
     - name: save_cache
-      if: ${{ always() && inputs.auto-cache == 'true' }}
+      if: ${{ always() && inputs.enable-cache == 'true' }}
       uses: actions/cache/save@v4
       with:
         path: .firmware-action/
@@ -388,7 +373,7 @@ runs:
     #===================
 
     - name: get_artifact_name
-      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
+      if: ${{ always() && inputs.auto-upload-artifacts == 'true' }}
       shell: bash
       id: get_artifact_name
       run: |
@@ -400,13 +385,14 @@ runs:
         echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
 
     - name: upload_artifact
-      if: ${{ always() && inputs.auto-artifact-upload == 'true' }}
+      if: ${{ always() && inputs.auto-upload-artifacts == 'true' }}
       uses: actions/upload-artifact@v4
       id: upload_artifact
       with:
         name: ${{ steps.get_artifact_name.outputs.artifact_name }}
         path: .firmware-action/
         include-hidden-files: true
-        if-no-files-found: ${{ inputs.artifact-if-no-files-found }}
-        compression-level: ${{ inputs.artifact-compression-level }}
-        overwrite: ${{ inputs.artifact-overwrite }}
+        if-no-files-found: ${{ inputs.auto-upload-artifacts-if-no-files-found }}
+        retention-days: ${{ inputs.auto-upload-artifacts-retention-days }}
+        compression-level: ${{ inputs.auto-upload-artifacts-compression-level }}
+        overwrite: ${{ inputs.auto-upload-artifacts-overwrite }}
