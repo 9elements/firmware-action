@@ -36,6 +36,10 @@ When enabled, the cache is:
 
 You can also use the `recursive` option to build a target with all its dependencies, and the `debug` option for increased verbosity when troubleshooting.
 
+```admonish tip
+You still might want to cache other files and directories as `firmware-action` caches only outputs and its temporary files.
+```
+
 ## Artifact Downloading
 
 When `auto-artifact-download` is enabled (disabled by default), the action automatically downloads all artifacts from the current workflow run. This feature is particularly useful in workflows with multiple jobs that depend on each other, as it can save a lot of copy-pasting between workflow steps.
