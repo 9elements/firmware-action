@@ -302,17 +302,9 @@ runs:
       shell: bash
       if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.enable-cache == 'true' }}
       run: |
-        echo "::group::unpack"
-        # Get output directories from merged config
-        while IFS= read -r DIR; do
-          # Expand any environment variables in DIR
-          EXPANDED_DIR=$(eval echo "${DIR}")
-          if [ -d ".firmware-action/artifacts/${EXPANDED_DIR}" ]; then
-            echo "moving ${EXPANDED_DIR}"
-            mv ".firmware-action/artifacts/${EXPANDED_DIR}" ./
-          fi
-        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
-        echo "::endgroup::"
+        if [ -d ".firmware-action/artifacts" ] && [ -n "$(ls -A .firmware-action/artifacts/ 2>/dev/null)" ]; then
+          mv .firmware-action/artifacts/* ./
+        fi
 
     #=================================
     # RUN: firmware-action executable
