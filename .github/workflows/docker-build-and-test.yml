@@ -8,14 +8,22 @@ on:
       - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
-      - 'tests/**'
+      - 'tests/*.sh'
+      - 'tests/coreboot_*/**'
+      - 'tests/edk2-patches/**'
+      - 'tests/linux_*/**'
+      - 'tests/uboot_*/**'
   push:
     branches: ['main']
     paths:
       - '.dagger-ci'
       - '.github/workflows/docker-build-and-test.yml'
       - 'docker/**'
-      - 'tests/**'
+      - 'tests/*.sh'
+      - 'tests/coreboot_*/**'
+      - 'tests/edk2-patches/**'
+      - 'tests/linux_*/**'
+      - 'tests/uboot_*/**'
   release:
   workflow_dispatch:
     inputs:
