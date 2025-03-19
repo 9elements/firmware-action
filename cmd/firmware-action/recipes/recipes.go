@@ -220,7 +220,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 			},
 			GitHash: ChangeGitHash{
 				Change: Change{
-					ResultFile: filepath.Join(GitRepoHashDir, filesystem.Filenamify(target, ".txt")),
+					ResultFile: filepath.Join(GitRepoHashDir, filesystem.Filenamify(target, "txt")),
 				},
 				RepoPath: modules[target].GetRepoPath(),
 			},
