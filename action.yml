@@ -178,7 +178,7 @@ runs:
       if: ${{ ( runner.os == 'Linux' || runner.os == 'macOS' ) && inputs.compile == 'false' }}
       shell: bash
       run: |
-        echo "::group::curl"inputs.auto-upload-artifacts-if-no-files-found
+        echo "::group::curl"
         curl -L -o "${{ steps.filename.outputs.filename }}" "${{ steps.url.outputs.url }}"
         tar -xvzf "${{ steps.filename.outputs.filename }}"
         chmod +x firmware-action
