@@ -358,7 +358,7 @@ runs:
             echo "copying ${EXPANDED_DIR}"
             cp -r "${EXPANDED_DIR}" .firmware-action/artifacts/
           fi
-        done < <(jq -r '[.. | objects | ."output_dir"? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
+        done < <(jq -r --arg TARGET "${{ inputs.target }}" '[.. | objects | select(has($TARGET)) | .[$TARGET].output_dir? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}")
         echo "::endgroup::"
 
     - name: save_cache
