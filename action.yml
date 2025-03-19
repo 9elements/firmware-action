@@ -378,7 +378,7 @@ runs:
       id: get_artifact_name
       run: |
         # Extract output_dir for the specific target from merged config
-        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\/$//g')
+        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\///g')
         # Expand any environment variables in OUTPUT_DIR
         OUTPUT_DIR=$(eval echo "${OUTPUT_DIR}")
         DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
