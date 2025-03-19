@@ -4,6 +4,12 @@ description: |
   Compile a selected firmware solution like coreboot, EDKII, OpenBMC and more
 author: '9elements'
 inputs:
+  version:
+    description: |
+      Version of firmware-action to use. If not specified, latest release will be used.
+      Must be a tag if 'compile' is false, must be a branch is 'compile' is true.
+    required: false
+    default: 'v0.15.0'
   config:
     description: |
       Path to the JSON configuration file.
@@ -115,10 +121,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - id: version
-      shell: bash
-      run: echo "version=v0.15.0" >> "${GITHUB_OUTPUT}"
-
     - id: arch
       # This ARCH is used to fetch correct executable of firmware-action
       # GoReleaser uses 'x86_64' instead of 'amd64'
@@ -163,7 +165,7 @@ runs:
     - id: url
       shell: bash
       run: |
-        echo "url=https://github.com/9elements/firmware-action/releases/download/${{ steps.version.outputs.version }}/${{ steps.filename.outputs.filename }}" >> "${GITHUB_OUTPUT}"
+        echo "url=https://github.com/9elements/firmware-action/releases/download/${{ inputs.version }}/${{ steps.filename.outputs.filename }}" >> "${GITHUB_OUTPUT}"
 
     - name: setup_go
       if: ${{ inputs.compile == 'true' }}
