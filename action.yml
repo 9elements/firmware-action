@@ -292,6 +292,7 @@ runs:
           # Copy all content from firmware-action2 to firmware-action, overwriting existing files
           cp -rf .firmware-action2/. .firmware-action/
           echo "Merged downloaded artifacts into .firmware-action directory"
+          rm -rf .firmware-action2/
         else
           echo "No downloaded artifacts found in .firmware-action2/"
         fi
