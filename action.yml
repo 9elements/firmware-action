@@ -385,24 +385,6 @@ runs:
     # CACHE: Create
     #===============
 
-    - name: copy_artifacts
-      if: ${{ always() && ( inputs.enable-cache == 'true' || inputs.auto-upload-artifacts == 'true' ) }}
-      shell: bash
-      run: |
-        echo "::group::pack"
-        mkdir -p .firmware-action/artifacts/
-
-        # Get output directories from merged config and copy them
-        while IFS= read -r DIR; do
-          # Expand any environment variables in DIR
-          EXPANDED_DIR=$(eval echo "${DIR}")
-          if [ -d "${EXPANDED_DIR}" ]; then
-            echo "copying ${EXPANDED_DIR}"
-            cp -r "${EXPANDED_DIR}" .firmware-action/artifacts/
-          fi
-        done < <(jq -r --arg TARGET "${{ inputs.target }}" '[.. | objects | select(has($TARGET)) | .[$TARGET].output_dir? | select(. != null)][]' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\/$//g')
-        echo "::endgroup::"
-
     - name: save_cache
       if: ${{ always() && inputs.enable-cache == 'true' }}
       uses: actions/cache/save@v4
@@ -419,12 +401,8 @@ runs:
       shell: bash
       id: get_artifact_name
       run: |
-        # Extract output_dir for the specific target from merged config
-        OUTPUT_DIR=$(jq -r --arg TARGET "${{ inputs.target }}" 'to_entries[] | select(.value | to_entries[].key == $TARGET) | .value[$TARGET].output_dir' "${{ steps.merge_config.outputs.merged_config }}" | sed -E 's/\///g')
-        # Expand any environment variables in OUTPUT_DIR
-        OUTPUT_DIR=$(eval echo "${OUTPUT_DIR}")
         DATETIME=$(date "+%Y-%m-%d_%H-%M-%S.%N")
-        echo "artifact_name=artifacts--${{ inputs.target }}--${OUTPUT_DIR}--${DATETIME}" >> "${GITHUB_OUTPUT}"
+        echo "artifact_name=artifacts--${{ inputs.target }}--${DATETIME}" >> "${GITHUB_OUTPUT}"
 
     - name: upload_artifact
       if: ${{ always() && inputs.auto-upload-artifacts == 'true' }}
