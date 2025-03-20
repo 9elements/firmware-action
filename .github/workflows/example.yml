@@ -119,7 +119,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        coreboot-version: ['4.19', '4.20.1', '4.21', '24.02.01']
+        coreboot-version: ['24.02.01']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
@@ -181,7 +181,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        linux-version: ['6.1', '6.6', '6.12']
+        linux-version: ['6.12']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
@@ -254,7 +254,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        edk2-version: ['edk2-stable202208', 'edk2-stable202211']
+        edk2-version: ['edk2-stable202211']
     # TODO
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
     # Skip if pull_request_review on PR not made by a bot
