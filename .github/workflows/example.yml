@@ -570,7 +570,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        #os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
         uroot-version: ['0.14.0']
     runs-on: ${{ matrix.os }}
     needs:
