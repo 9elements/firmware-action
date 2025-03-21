@@ -16,6 +16,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/cmd/firmware-action/container"
+	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/heimdalr/dag"
 )
@@ -44,6 +45,8 @@ var (
 	CompiledConfigsDir = filepath.Join(StatusDir, "configs")
 	// GitRepoHashDir specifies directory for git hashes to detect changes in sources
 	GitRepoHashDir = filepath.Join(StatusDir, "git-hashes")
+	// ArtifactDir specifies directory where to store a copy of artifacts for caching in CI
+	ArtifactDir = filepath.Join(StatusDir, "artifacts")
 )
 
 func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependencies [][]string) ([][]string, error) {
@@ -283,6 +286,20 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		if err == nil {
 			// On successful build, save checkpoint data for next change detection
 			detectedChanges.SaveCheckpoint(target, true)
+			if environment.DetectGithub() {
+				// If in GitHub, copy output directory into 'StatusDir', so that it can be cached
+				//   and also automatically uploaded as artifact
+				dirToCache := modules[target].GetOutputDir()
+				pathToCache := filepath.Join(ArtifactDir, filepath.Base(dirToCache))
+				slog.Debug(
+					fmt.Sprintf("Copying output files to '%s' for caching and artifact upload", StatusDir),
+					slog.String("source", dirToCache),
+					slog.String("Destination", pathToCache),
+				)
+				if err := filesystem.CopyDir(dirToCache, pathToCache); err != nil {
+					return err
+				}
+			}
 		}
 		return err
 	}

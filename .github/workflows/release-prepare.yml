@@ -34,7 +34,7 @@ jobs:
       # Bump version
       - name: Update action.yml
         run: |
-          sed -i -E "s/version=v[a-zA-Z0-9\.]+/version=${{ steps.semver.outputs.next }}/g" action.yml
+          sed -i -E "s/default: 'v[0-9\.]+'/default: '${{ steps.semver.outputs.next }}'/g" action.yml
 
       # Changelog
       - name: Get cocogitto
