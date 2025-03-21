@@ -135,9 +135,9 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 		// Clone
 		cmd := exec.Command(command[0], command[1:]...)
-		err = cmd.Run()
+		stdout, err := cmd.CombinedOutput()
 		if err != nil {
-			tb.Errorf("failed to 'git clone': %s", err.Error())
+			tb.Errorf("failed to 'git clone': '%s' (%s)", string(stdout), err.Error())
 		}
 
 		// Change to repository
@@ -154,9 +154,9 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 			}
 			for _, cmd := range cmds {
 				command := exec.Command(cmd[0], cmd[1:]...)
-				err = command.Run()
+				stdout, err := command.CombinedOutput()
 				if err != nil {
-					tb.Errorf("failed to 'git fetch': %s", err.Error())
+					tb.Errorf("failed to 'git fetch': '%s' (%s)", string(stdout), err.Error())
 				}
 			}
 		}
@@ -164,17 +164,17 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 		if opts.tag != "" {
 			// Checkout a tag
 			cmd = exec.Command("git", "checkout", opts.tag)
-			err = cmd.Run()
+			stdout, err := cmd.CombinedOutput()
 			if err != nil {
-				tb.Errorf("failed to 'git checkout %s': %s", opts.tag, err.Error())
+				tb.Errorf("failed to 'git checkout %s': '%s' (%s)", opts.tag, string(stdout), err.Error())
 			}
 		}
 
 		// Init git submodules
 		cmd = exec.Command("git", "submodule", "update", "--init", "--checkout")
-		err = cmd.Run()
+		stdout, err = cmd.CombinedOutput()
 		if err != nil {
-			tb.Errorf("failed to init git submodules: %s", err.Error())
+			tb.Errorf("failed to init git submodules: '%s' ('%s')", string(stdout), err.Error())
 		}
 	}
 
