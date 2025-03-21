@@ -41,22 +41,30 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Restore cached mdbook
+      - name: Restore cached mdbook cargo stuff
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.CARGO_TARGET_DIR }}
-          key: mdbook-${{ hashFiles('*', '**/*') }}
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            ${{ env.CARGO_TARGET_DIR }}
+          key: mdbook-cache
           restore-keys: |
             mdbook-
             mdbook
+
       - name: Install mdBook
         run: |
-          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf -y | sh
+          echo "::group::curl rustup"
+          curl --proto '=https' --tlsv1.2 https://sh.rustup.rs --show-error --silent --fail --speed-limit 300 --speed-time 10 -y | sh
           rustup update
           # Cleanup cache
-          cargo install cargo-cache
-          cargo cache --autoclean
+          cargo install cargo-cache --no-default-features --features ci-autoclean cargo-cache
+          cargo cache
+          echo "::endgroup::"
+
           # Install mdbook with plugins
+          echo "::group::cargo install mdbook"
           cargo install \
             mdbook \
             mdbook-admonish \
@@ -65,11 +73,16 @@ jobs:
             mdbook-pagetoc \
             mdbook-template \
             mdbook-toc
-      - name: Store cached mdbook
+          echo "::endgroup::"
+
+      - name: Store mdbook cargo stuff
         uses: actions/cache/save@v4
         with:
-          path: ${{ env.CARGO_TARGET_DIR }}
-          key: mdbook-${{ hashFiles('*', '**/*') }}
+          path: |
+            ~/.cargo/registry/
+            ~/.cargo/git/
+            ${{ env.CARGO_TARGET_DIR }}
+          key: mdbook-cache
 
       - name: Setup Pages
         id: pages
