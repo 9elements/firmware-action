@@ -5,7 +5,7 @@ go 1.23.1
 toolchain go1.24.0
 
 require (
-	dagger.io/dagger v0.16.3
+	dagger.io/dagger v0.17.0
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.9.0
 	github.com/dustin/go-humanize v1.0.1
@@ -21,7 +21,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/99designs/gqlgen v0.17.66 // indirect
+	github.com/99designs/gqlgen v0.17.68 // indirect
 	github.com/Khan/genqlient v0.8.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.5 // indirect
