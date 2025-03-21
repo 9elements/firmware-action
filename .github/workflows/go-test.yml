@@ -81,10 +81,25 @@ jobs:
         run: |
           cd cmd/firmware-action
           go get -d ./...
+
+      - name: Restore cached tmp files
+        uses: actions/cache/restore@v4
+        id: cache-tmp-files
+        with:
+          path: /tmp/__firmware-action_tmp_files__
+          key: go-test-${{ matrix.testregex }}-cache
+
       - name: Run go test
         run: |
           cd cmd/firmware-action
           go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -run ${{ matrix.testregex }} ./...
+
+      - name: Store tmp files
+        uses: actions/cache/save@v4
+        if: steps.cache-tmp-files.outputs.cache-hit != 'true'
+        with:
+          path: /tmp/__firmware-action_tmp_files__
+          key: go-test-${{ matrix.testregex }}-cache
 
   go-test:
     # Run all remaining light tests
