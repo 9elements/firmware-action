@@ -43,7 +43,8 @@ jobs:
       - name: Get current version
         id: get_version
         run: |
-          echo "version=$(grep 'version=v' < action.yml | sed -E 's/.*=//g' | sed -E 's/" .*//g')" >> "${GITHUB_OUTPUT}"
+          VERSION=$( grep -E "default: 'v[0-9\.]+'" < action.yml | sed -E "s/.*: '//g" | sed -E "s/'.*$//g" )
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
           # Can't really use cocogitto here
 
       - name: Create tag
