@@ -135,7 +135,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) e
 
 	// Assemble commands to build
 	buildSteps := [][]string{}
-	if !(runtime.GOARCH == "386" || runtime.GOARCH == "amd64") {
+	if runtime.GOARCH != "386" && runtime.GOARCH != "amd64" {
 		// On all non-x86 architectures we have to also build the BaseTools
 		// Docs: https://go.dev/doc/install/source#environment
 		buildSteps = append(buildSteps, []string{"bash", "-c", "cd ${TOOLSDIR}/Edk2/; make -C BaseTools/ -j $(nproc)"})

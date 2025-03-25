@@ -124,7 +124,7 @@ func TestChangeConfig(t *testing.T) {
 
 	// make a change to the configuration
 	opts := myChangeConfig.Config.Universal[target]
-	opts.UniversalSpecific.BuildCommands = []string{}
+	opts.BuildCommands = []string{}
 	myChangeConfig.Config.Universal[target] = opts
 	assert.True(t, myChangeConfig.DetectChanges(target))
 }
