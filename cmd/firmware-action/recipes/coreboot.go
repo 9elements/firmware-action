@@ -185,7 +185,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		return err
 	}
 	//   strip newline from mainboardDir
-	mainboardDir = strings.Replace(mainboardDir, "\n", "", -1)
+	mainboardDir = strings.ReplaceAll(mainboardDir, "\n", "")
 
 	// Assemble commands to build
 	buildSteps := [][]string{
