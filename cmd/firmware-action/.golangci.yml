@@ -1,27 +1,30 @@
-linters-settings:
-  sloglint:
-    # Enforce not mixing key-value pairs and attributes.
-    # Default: true
-    no-mixed-args: false
-    # Enforce using key-value pairs only (overrides no-mixed-args, incompatible with attr-only).
-    # Default: false
-    kv-only: true
-    # Enforce using attributes only (overrides no-mixed-args, incompatible with kv-only).
-    # Default: false
-    attr-only: true
-    # Enforce using methods that accept a context.
-    # Default: ""
-    context: "all"
-    # Enforce using static values for log messages.
-    # Default: false
-    static-msg: true
-    # Enforce using constants instead of raw keys.
-    # Default: false
-    no-raw-keys: true
-    # Enforce a single key naming convention.
-    # Values: snake, kebab, camel, pascal
-    # Default: ""
-    key-naming-case: snake
-    # Enforce putting arguments on separate lines.
-    # Default: false
-    args-on-sep-lines: true
+version: "2"
+linters:
+  settings:
+    sloglint:
+      no-mixed-args: false
+      kv-only: true
+      attr-only: true
+      context: all
+      static-msg: true
+      no-raw-keys: true
+      key-naming-case: snake
+      args-on-sep-lines: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
