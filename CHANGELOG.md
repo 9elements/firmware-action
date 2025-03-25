@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.16.0 - 2025-03-25
+#### Bug Fixes
+- **(action)** trailing slash - (90984b9) - AtomicFS
+- **(action)** pass debug into firmware-action executable - (8e1bf7c) - AtomicFS
+- **(action)** upload artifact only for specified target - (a86f0cb) - AtomicFS
+- **(action)** remove forward slashes from artifact name - (879ea76) - AtomicFS
+- **(action)** typo - (a586ba6) - AtomicFS
+- **(cmd)** typo - (c70e61e) - AtomicFS
+- **(example)** undefined environment variable - (20ba823) - AtomicFS
+- **(example)** remove windows an macos test - (6ca45b0) - AtomicFS
+#### Build system
+- **(deps)** bump golangci/golangci-lint-action from 6 to 7 - (0ae9038) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (f9c7fff) - dependabot[bot]
+- **(deps)** update prettytable requirement in /.dagger-ci/daggerci - (7afd080) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (3c5fcd9) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (64974ab) - dependabot[bot]
+#### Continuous Integration
+- speed up go-test - (e184893) - AtomicFS
+- optimize when docker containers are build - (0378964) - AtomicFS
+- disable scheduled container-cleanup - (04bada2) - AtomicFS
+#### Features
+- **(action)** make compile option work on the outside too - (54e799c) - AtomicFS
+- **(action)** add optional input for version - (56c885a) - AtomicFS
+- **(cmd)** move artifact and cache preparation into golang - (ed0c552) - AtomicFS
+#### Miscellaneous Chores
+- **(action)** simplify unpacking - (3f546be) - AtomicFS
+- **(action)** cleanup after unpacking - (260b8af) - AtomicFS
+- **(mdbook)** improve cache - (c8a056a) - AtomicFS
+- add comment - (8751734) - AtomicFS
+#### Refactoring
+- **(cmd)** according to new golangci-lint v2 - (daeefef) - AtomicFS
+#### Tests
+- **(cmd)** improve logging - (107533c) - AtomicFS
+- **(lint)** update golangci config to v2 - (f75f420) - AtomicFS
+- reduce number of example variants - (a984ccd) - AtomicFS
+
+- - -
+
 ## v0.15.0 - 2025-03-18
 #### Bug Fixes
 - **(action)** multiple configuration files in cache and artifact uploads - (26da39e) - AtomicFS
