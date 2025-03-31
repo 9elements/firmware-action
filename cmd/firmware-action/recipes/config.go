@@ -108,18 +108,20 @@ type CommonOpts struct {
 	ContainerInputDir string `json:"container_input_dir" validate:"filepath|dirpath"`
 
 	// Overview:
+	//   NOTE: $PWD in the container is /workdir
+	//   defined in recipes.go with "ContainerWorkDir"
 	//
-	// | Configuration option   | Host side              | Direction            | Container side                 |
-	// |:-----------------------|:-----------------------|:--------------------:|:-------------------------------|
-	// | RepoPath               | $RepoPath              | Host  --> Container  | $(pwd)                         |
-	// |                        |                        |                      |                                |
-	// | OutputDir              | $(pwd)/$OutputDir      | Host <--  Container  | N/A                            |
-	// | ContainerOutputDirs    | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputDirs           |
-	// | ContainerOutputFiles   | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputFiles          |
-	// |                        |                        |                      |                                |
-	// | ContainerInputDir      | N/A                    | Host  --> Container  | $(pwd)/$ContainerInputDir      |
-	// | InputDirs              | $InputDirs             | Host  --> Container  | $(pwd)/$ContainerInputDir/...  |
-	// | InputFiles             | $InputFiles            | Host  --> Container  | $(pwd)/$ContainerInputDir/...  |
+	// | Configuration option   | Host side              | Direction            | Container side                   |
+	// |:-----------------------|:-----------------------|:--------------------:|:---------------------------------|
+	// | RepoPath               | $RepoPath              | Host  --> Container  | /workdir                         |
+	// |                        |                        |                      |                                  |
+	// | OutputDir              | $(pwd)/$OutputDir      | Host <--  Container  | N/A                              |
+	// | ContainerOutputDirs    | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputDirs             |
+	// | ContainerOutputFiles   | $(pwd)/$OutputDir/...  | Host <--  Container  | $ContainerOutputFiles            |
+	// |                        |                        |                      |                                  |
+	// | ContainerInputDir      | N/A                    | Host  --> Container  | /workdir/$ContainerInputDir      |
+	// | InputDirs              | $InputDirs             | Host  --> Container  | /workdir/$ContainerInputDir/...  |
+	// | InputFiles             | $InputFiles            | Host  --> Container  | /workdir/$ContainerInputDir/...  |
 }
 
 // ANCHOR_END: CommonOpts

@@ -32,7 +32,7 @@ type SetupOpts struct {
 	ContainerURL      string   // URL or name of docker container
 	MountHostDir      string   // Directory from host to mount into container
 	MountContainerDir string   // Where to mount ^^^ host directory inside container
-	WorkdirContainer  string   // Workdir of the container, specified by GITHUB_WORKSPACE environment variable
+	WorkdirContainer  string   // Workdir of the container
 	ContainerInputDir string   // Directory for input files
 	InputDirs         []string // List of directories to copy into container
 	InputFiles        []string // List of files to copy into container
