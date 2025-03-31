@@ -9,7 +9,7 @@ require (
 	github.com/alecthomas/kong v1.9.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.14.0
-	github.com/go-playground/validator/v10 v10.25.0
+	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/go-cmp v0.7.0
 	github.com/heimdalr/dag v1.5.0
 	github.com/jedib0t/go-pretty/v6 v6.6.7
