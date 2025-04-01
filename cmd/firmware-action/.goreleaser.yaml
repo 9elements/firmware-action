@@ -46,3 +46,33 @@ archives:
     format_overrides:
       - goos: windows
         formats: ['zip']
+
+nfpms:
+  # Docs: https://goreleaser.com/customization/nfpm/
+  - id: packages
+    package_name: 'firmware-action'
+    file_name_template: >-
+      {{- trimsuffix .ConventionalFileName .ConventionalExtension -}}
+      {{- if and (eq .Arm "6") (eq .ConventionalExtension ".deb") }}6{{ end -}}
+      {{- if not (eq .Amd64 "v1")}}{{ .Amd64 }}{{ end -}}
+      {{- .ConventionalExtension -}}
+    vendor: '9elements GmbH'
+    homepage: 'https://github.com/9elements/firmware-action'
+    maintainer: 'AtomicFS'
+    description: |
+      Build system for open source firmware with unified builds across
+      development and CI environments
+    license: 'MIT'
+    formats:
+      - deb
+      - rpm
+      - archlinux
+    replaces:
+      - golang-github-fti
+      - golang-fti
+    bindir: /usr/bin
+    section: default
+    priority: extra
+    contents:
+      - src: ./kernel-modules-load.conf
+        dst: /lib/modules-load.d/firmware-action.conf
