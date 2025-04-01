@@ -24,6 +24,7 @@ var (
 	errDirectoryNotSpecified = errors.New("empty string for directory path was given")
 	errDirectoryInvalid      = errors.New("host directory cannot be mounted into '/' or '.' in the container")
 	errExportFailed          = errors.New("failed to export artifacts from container")
+	errContainerDiscontinued = errors.New("the used container is discontinued")
 )
 
 // SetupOpts congregates options for Setup function
@@ -113,29 +114,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 			dockerfileDirectoryPath = filepath.Dir(dockerfileDirectoryPath)
 		}
 	} else {
-		// Check for discontinued containers
-		listDiscontinued := []string{
-			`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_24\.02(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.20(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/coreboot_4\.22(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/edk2\-stable202408(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.11(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.1\.11(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.1\.45(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.6\.52(:.*)?$`,
-			`.*ghcr\.io\/9elements\/firmware\-action\/linux_6\.9\.9(:.*)?$`,
-			`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
-		}
-		for _, discontinued := range listDiscontinued {
-			pattern := regexp.MustCompile(discontinued)
-			if pattern.MatchString(opts.ContainerURL) {
-				slog.Warn(
-					"Using discontinued container",
-					slog.String("suggestion", "The container will remain available, but will no longer receive any bug-fixes or updates. If you want maintained and up-to-date container, look at https://github.com/9elements/firmware-action#containers"),
-				)
-			}
-		}
+		_ = CheckIfDiscontinued(opts.ContainerURL)
 	}
 
 	// Setup container either from URL or build from Dockerfile
@@ -431,5 +410,54 @@ func CleanupAfterContainer(ctx context.Context) error {
 	}
 
 	slog.Info("Dagger container resources cleaned up successfully")
+	return nil
+}
+
+// CheckIfDiscontinued prints a warning if the used container is discontinued
+func CheckIfDiscontinued(containerURL string) error {
+	// Check for discontinued containers
+	listDiscontinued := []string{
+		`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
+		`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
+	}
+
+	// Patterns to use with 'containerHub'
+	listDiscontinuedPattern := []string{
+		`coreboot_24\.02(:.*)?$`,
+		`coreboot_4\.20(:.*)?$`,
+		`coreboot_4\.22(:.*)?$`,
+		`edk2\-stable202408(:.*)?$`,
+		`linux_6\.11(:.*)?$`,
+		`linux_6\.1\.11(:.*)?$`,
+		`linux_6\.1\.45(:.*)?$`,
+		`linux_6\.6\.52(:.*)?$`,
+		`linux_6\.9\.9(:.*)?$`,
+	}
+	// The containers can be in multiple container hubs (GitHub, DockerHub, ...)
+	containerHub := []string{
+		`.*ghcr\.io\/9elements\/firmware\-action\/`,
+		`.*docker\.io\/9elementscyberops\/`,
+		`.*9elementscyberops\/`,
+		// '9elementscyberops' is short for 'docker.io/9elementscyberops'
+	}
+	// For each hub, add each pattern
+	for _, hub := range containerHub {
+		for _, pattern := range listDiscontinuedPattern {
+			listDiscontinued = append(listDiscontinued, hub+pattern)
+		}
+	}
+
+	// Iterate over all patterns and check to match
+	for _, discontinued := range listDiscontinued {
+		pattern := regexp.MustCompile(discontinued)
+		if pattern.MatchString(containerURL) {
+			slog.Warn(
+				"Using discontinued container",
+				slog.String("suggestion", "The container will remain available, but will no longer receive any bug-fixes or updates. If you want maintained and up-to-date container, look at https://github.com/9elements/firmware-action#containers"),
+			)
+			return errContainerDiscontinued
+		}
+	}
+
 	return nil
 }
