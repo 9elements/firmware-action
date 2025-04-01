@@ -20,6 +20,10 @@ includes:
     optional: true
     vars:
       VERSION: 'v{{.VERSION}}'
+  goreleaser:
+    taskfile: ./cmd/firmware-action/Taskfile.yml
+    dir: ./cmd/firmware-action/
+    optional: true
 
 tasks:
   build-go-binary:

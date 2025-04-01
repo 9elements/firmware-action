@@ -1,0 +1,20 @@
+---
+version: '3'
+
+tasks:
+  goreleaser:check:
+    desc: Checks if goreleaser configuration is valid
+    cmds:
+      - goreleaser check
+
+  goreleaser:build:
+    desc: Use goreleaser to build the project
+    cmds:
+      - goreleaser build --auto-snapshot --clean
+
+  goreleaser:release-test:
+    desc: Use goreleaser to test release the project
+    cmds:
+      - goreleaser release --draft --snapshot --clean
+    env:
+      GITHUB_TOKEN: 'dummy'
