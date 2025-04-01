@@ -379,3 +379,47 @@ func TestGetArtifacts(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckIfDiscontinued(t *testing.T) {
+	testCases := []struct {
+		name    string
+		url     string
+		wantErr error
+	}{
+		{
+			name:    "not discontinued",
+			url:     "ghcr.io/9elements/firmware-action/edk2-stable202408.01:main",
+			wantErr: nil,
+		},
+		{
+			name:    "discontinued main github",
+			url:     "ghcr.io/9elements/firmware-action/edk2-stable202408:main",
+			wantErr: errContainerDiscontinued,
+		},
+		{
+			name:    "discontinued main dockerhub",
+			url:     "docker.io/9elementscyberops/edk2-stable202408:main",
+			wantErr: errContainerDiscontinued,
+		},
+		{
+			name:    "discontinued latest",
+			url:     "docker.io/9elementscyberops/edk2-stable202408:latest",
+			wantErr: errContainerDiscontinued,
+		},
+		{
+			name:    "discontinued tagged",
+			url:     "docker.io/9elementscyberops/edk2-stable202408:v0.15.0",
+			wantErr: errContainerDiscontinued,
+		},
+		{
+			name:    "discontinued short",
+			url:     "9elementscyberops/edk2-stable202408:v0.15.0",
+			wantErr: errContainerDiscontinued,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.ErrorIs(t, CheckIfDiscontinued(tc.url), tc.wantErr)
+		})
+	}
+}
