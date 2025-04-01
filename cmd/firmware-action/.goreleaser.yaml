@@ -12,14 +12,27 @@ dist: '../bin'
 project_name: 'firmware-action'
 
 builds:
-  - env:
+  - id: build
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
       - windows
       - darwin
+    goarch:
+      - 386
+      - amd64
+      - arm64
+    goarm64:
+      - v8.0
+    goamd64:
+      - v1
+    ignore:
+      - goos: darwin
+        goarch: 386
 
 archives:
+  # Docs: https://goreleaser.com/customization/archive/
   - formats: ['tar.gz']
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
