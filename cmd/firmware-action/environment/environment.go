@@ -4,6 +4,7 @@
 package environment
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -28,4 +29,29 @@ func DetectGithub() bool {
 	// https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
 	_, exists := os.LookupEnv("GITHUB_ACTIONS")
 	return exists
+}
+
+// LogGroupStart is used to group log lines
+func LogGroupStart(groupName string) {
+	// GitHub
+	if DetectGithub() {
+		// Docs:
+		// https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#grouping-log-lines
+		fmt.Println("::group::" + groupName)
+	}
+
+	// TODO: GitLab
+	// Docs: https://docs.gitlab.com/ci/jobs/job_logs/#custom-collapsible-sections
+}
+
+// LogGroupStop is used to group log lines
+func LogGroupStop(groupName string) {
+	// GitHub
+	if DetectGithub() {
+		fmt.Println("::endgroup::")
+	}
+
+	// TODO: GitLab (needs 'groupName')
+	// Docs: https://docs.gitlab.com/ci/jobs/job_logs/#custom-collapsible-sections
+	_ = groupName
 }
