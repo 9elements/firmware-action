@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"dagger.io/dagger"
+	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 )
 
@@ -134,7 +135,11 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		}
 
 		// Pull docker container
+		environment.LogGroupStart("container from url")
+		//   I don't think this log grouping makes any difference
 		container = client.Container().From(opts.ContainerURL)
+		environment.LogGroupStop("container from url")
+
 		imageRef, _ := container.ImageRef(ctx)
 		slog.Info(
 			"Container information",
@@ -144,9 +149,12 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		// Use Dockerfile
 		slog.Info("Container setup running in Dockerfile mode")
 
+		environment.LogGroupStart("container from file")
+		//   I have not used this feature in a long time, so not sure how much log would be affected
 		container = client.Container().Build(
 			client.Host().Directory(dockerfileDirectoryPath),
 		)
+		environment.LogGroupStop("container from file")
 	}
 
 	// Mount repository into the container
@@ -175,6 +183,8 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 	}
 
 	// Make input directory
+	environment.LogGroupStart("prepare container - copy over input files")
+	//   this will make around 30+ lines of irrelevant-to-the-user log collapsible
 	inputDirPath := filepath.Join(opts.WorkdirContainer, opts.ContainerInputDir)
 	container = container.WithExec([]string{"mkdir", "-p", inputDirPath})
 
@@ -199,6 +209,8 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 	}
 
 	container, err = container.Sync(ctx)
+	environment.LogGroupStop("prepare container - copy over input files")
+
 	if err != nil {
 		message := "Failed to spin up a container"
 		if errors.Is(err, context.DeadlineExceeded) {
@@ -251,6 +263,8 @@ type Artifacts struct {
 // GetArtifacts extracts files from container to host
 // Either both ContainerDir and HostDir must be directories, or both must be files
 func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[]Artifacts) error {
+	environment.LogGroupStart("get artifacts from container")
+	//   this will make around 6+ line per artifact to collapsible log
 	for _, artifact := range *artifacts {
 		if artifact.ContainerPath == "" || artifact.HostPath == "" {
 			return errDirectoryNotSpecified
@@ -289,6 +303,7 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		}
 		slog.Debug(fmt.Sprintf("Artifact export: %s -> %s", artifact.ContainerPath, artifact.HostPath))
 	}
+	environment.LogGroupStop("get artifacts from container")
 
 	return nil
 }

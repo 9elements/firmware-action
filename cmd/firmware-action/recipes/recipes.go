@@ -275,11 +275,14 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		}
 
 		// Setup dagger client
+		environment.LogGroupStart("connect to dagger engine")
+		//   this will make around 400 lines of irrelevant-to-the-user log collapsible
 		client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 		if err != nil {
 			return err
 		}
 		defer client.Close()
+		environment.LogGroupStop("connect to dagger engine")
 
 		// Build the module
 		err = modules[target].buildFirmware(ctx, client)
