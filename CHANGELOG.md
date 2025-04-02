@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.17.0 - 2025-04-02
+#### Bug Fixes
+- **(cmd)** update detection of discontinued containers - (0a9cef4) - AtomicFS
+#### Build system
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (f173548) - dependabot[bot]
+- **(deps)** update pytest-cov requirement in /.dagger-ci/daggerci - (2bfe9db) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (0425abf) - dependabot[bot]
+- **(deps)** bump github.com/go-playground/validator/v10 - (b65c794) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (3e73e88) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (7aa1fce) - dependabot[bot]
+#### Documentation
+- update paths in documentation - (ea6c140) - AtomicFS
+#### Features
+- **(goreleaser)** add Taskfile - (2139058) - AtomicFS
+- **(goreleaser)** add nFPM to goreleaser - (816c294) - AtomicFS
+- **(goreleaser)** add config to automatically load linux kernel modules - (21f78af) - AtomicFS
+- **(goreleaser)** make defaults explicit - (0888d83) - AtomicFS
+#### Miscellaneous Chores
+- **(cmd)** improve logging in GitHub - (9978796) - AtomicFS
+- changes according to review - (2c346eb) - AtomicFS
+
+- - -
+
 ## v0.16.0 - 2025-03-25
 #### Bug Fixes
 - **(action)** trailing slash - (90984b9) - AtomicFS
