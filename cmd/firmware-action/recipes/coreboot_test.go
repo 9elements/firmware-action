@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / coreboot
 package recipes
 
@@ -288,10 +290,8 @@ func TestCorebootBuild(t *testing.T) {
 
 			// Change current working directory
 			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
 			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			opts := gitCloneOpts{
@@ -572,10 +572,8 @@ func TestCorebootSubmodule(t *testing.T) {
 
 			// Change current working directory
 			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
 			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			opts := gitCloneOpts{

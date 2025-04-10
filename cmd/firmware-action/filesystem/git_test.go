@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: MIT
+
+//go:build go1.24
+
 package filesystem
 
 import (
@@ -44,15 +47,10 @@ func gitRepoPrepare(t *testing.T, tmpDir string) {
 
 func TestGitRun(t *testing.T) {
 	tmpDir := t.TempDir()
-
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
-	err = os.Chdir(tmpDir)
-	assert.NoError(t, err)
+	t.Chdir(tmpDir)
 
 	// Test git status ordinary directory (not git repo)
-	_, err = gitRun("./", []string{"git", "status"})
+	_, err := gitRun("./", []string{"git", "status"})
 	assert.ErrorIs(t, err, ErrNotGitRepository)
 
 	gitRepoPrepare(t, tmpDir)
@@ -65,12 +63,7 @@ func TestGitRun(t *testing.T) {
 
 func TestGitDescribeCoreboot(t *testing.T) {
 	tmpDir := t.TempDir()
-
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
-	err = os.Chdir(tmpDir)
-	assert.NoError(t, err)
+	t.Chdir(tmpDir)
 
 	gitRepoPrepare(t, tmpDir)
 

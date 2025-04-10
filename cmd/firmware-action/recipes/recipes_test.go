@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: MIT
+
+//go:build go1.24
+
 package recipes
 
 import (
@@ -51,12 +54,8 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	defer client.Close()
 
 	// Change current working directory
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 	tmpDir := t.TempDir()
-	err = os.Chdir(tmpDir)
-	assert.NoError(t, err)
+	t.Chdir(tmpDir)
 
 	// Create configuration
 	const target = "dummy"
