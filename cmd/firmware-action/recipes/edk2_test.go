@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / edk2
 package recipes
 
@@ -19,10 +21,6 @@ func TestEdk2(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
 	}
-
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 
 	common := CommonOpts{
 		SdkURL:              "ghcr.io/9elements/firmware-action/edk2-stable202105:main",
@@ -62,15 +60,12 @@ func TestEdk2(t *testing.T) {
 			tmpDir := t.TempDir()
 			tc.edk2Options.RepoPath = filepath.Join(tmpDir, "Edk2")
 
-			// Change current working directory
-			//   create __tmp_files__ directory to store source-code
-			//   mostly useful for repeated local-run tests to save bandwidth and time
+			// Create __tmp_files__ directory to store source-code
+			// mostly useful for repeated local-run tests to save bandwidth and time
 			tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
 			err = os.MkdirAll(tmpFiles, 0o750)
 			assert.NoError(t, err)
-			err = os.Chdir(tmpFiles)
-			assert.NoError(t, err)
-			defer os.Chdir(pwd) // nolint:errcheck
+			t.Chdir(tmpFiles)
 
 			// Clone edk2 repo
 			_, err = os.Stat(tc.version)
@@ -84,9 +79,7 @@ func TestEdk2(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Change current working directory
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
-			defer os.Chdir(pwd) // nolint:errcheck
+			t.Chdir(tmpDir)
 
 			// Create "defconfig_path" file
 			err = os.WriteFile(tc.edk2Options.DefconfigPath, []byte("-D BOOTLOADER=COREBOOT"), 0o644)

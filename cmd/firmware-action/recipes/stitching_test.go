@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / linux
 package recipes
 
@@ -178,10 +180,6 @@ func TestStitching(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
-
 	// Define common variables and values
 	baseFileName := "base.img"
 	common := CommonOpts{
@@ -349,8 +347,7 @@ func TestStitching(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Change current working directory
-			assert.NoError(t, os.Chdir(tmpDir)) // just to make sure
-			defer os.Chdir(pwd)                 // nolint:errcheck
+			t.Chdir(tmpDir)
 
 			// Move files
 			for i := range tc.files {

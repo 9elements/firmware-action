@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / linux
 package recipes
 
@@ -26,7 +28,6 @@ func TestLinux(t *testing.T) {
 
 	pwd, err := os.Getwd()
 	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 
 	linuxOpts := LinuxOpts{
 		CommonOpts: CommonOpts{
@@ -66,8 +67,6 @@ func TestLinux(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.NoError(t, os.Chdir(pwd)) // just to make sure
-
 			linuxVersion, err := semver.NewVersion(tc.linuxVersion)
 			assert.NoError(t, err)
 			ctx := context.Background()
@@ -83,15 +82,12 @@ func TestLinux(t *testing.T) {
 			myLinuxOpts.Arch = tc.arch
 			myLinuxOpts.RepoPath = filepath.Join(tmpDir, "linux")
 
-			// Change current working directory
-			//   create __tmp_files__ directory to store source-code of Linux Kernel
-			//   mostly useful for repeated local-run tests to save bandwidth and time
+			// Create __tmp_files__ directory to store source-code of Linux Kernel
+			// mostly useful for repeated local-run tests to save bandwidth and time
 			tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
 			err = os.MkdirAll(tmpFiles, 0o750)
 			assert.NoError(t, err)
-			err = os.Chdir(tmpFiles)
-			assert.NoError(t, err)
-			defer os.Chdir(pwd) // nolint:errcheck
+			t.Chdir(tmpFiles)
 
 			// Download linux source code to __tmp_files__
 			var commands [][]string
@@ -116,8 +112,7 @@ func TestLinux(t *testing.T) {
 				err = exec.Command(cmd[0], cmd[1:]...).Run()
 				assert.NoError(t, err)
 			}
-			err = os.Chdir(myLinuxOpts.RepoPath)
-			assert.NoError(t, err)
+			t.Chdir(myLinuxOpts.RepoPath)
 
 			// Copy over defconfig file into tmpDir/linux
 			defconfigPath := filepath.Join(myLinuxOpts.RepoPath, myLinuxOpts.DefconfigPath)
@@ -153,5 +148,4 @@ func TestLinux(t *testing.T) {
 			}
 		})
 	}
-	assert.NoError(t, os.Chdir(pwd)) // just to make sure
 }

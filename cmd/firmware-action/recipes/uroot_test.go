@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / uroot
 package recipes
 
@@ -21,10 +23,6 @@ func TestURoot(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
 	}
-
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 
 	URootOpts := URootOpts{
 		CommonOpts: CommonOpts{
@@ -80,11 +78,7 @@ func TestURoot(t *testing.T) {
 			myURootOpts.RepoPath = filepath.Join(tmpDir, "u-root")
 
 			// Change current working directory
-			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
-			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			cmd := exec.Command("git", "clone", "--branch", fmt.Sprintf("v%s", tc.uRootVersion), "--depth", "1", "https://github.com/u-root/u-root.git")
@@ -105,5 +99,4 @@ func TestURoot(t *testing.T) {
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "initramfs.cpio")), os.ErrExist)
 		})
 	}
-	assert.NoError(t, os.Chdir(pwd)) // just to make sure
 }
