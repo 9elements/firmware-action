@@ -6,7 +6,6 @@
 package recipes
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -356,7 +355,7 @@ func TestStitching(t *testing.T) {
 			}
 
 			// Stitch
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()

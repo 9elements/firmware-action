@@ -14,7 +14,7 @@ import (
 )
 
 func TestExecute(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()
@@ -48,7 +48,7 @@ func TestExecute(t *testing.T) {
 }
 
 func TestExecuteSkipAndMissing(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()
@@ -104,7 +104,7 @@ func executeDummy(_ context.Context, _ string, _ *Config) error {
 }
 
 func TestBuild(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	testConfig := Config{
 		Coreboot: map[string]CorebootOpts{

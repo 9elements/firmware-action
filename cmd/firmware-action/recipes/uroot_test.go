@@ -6,7 +6,6 @@
 package recipes
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -64,7 +63,7 @@ func TestURoot(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()

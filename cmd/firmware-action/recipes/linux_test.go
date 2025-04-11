@@ -6,7 +6,6 @@
 package recipes
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -69,7 +68,7 @@ func TestLinux(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			linuxVersion, err := semver.NewVersion(tc.linuxVersion)
 			assert.NoError(t, err)
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()

@@ -6,7 +6,6 @@
 package container
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ func TestSetup(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()
@@ -202,7 +201,7 @@ func TestGetArtifacts(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()
