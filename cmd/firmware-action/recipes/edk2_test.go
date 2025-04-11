@@ -6,7 +6,6 @@
 package recipes
 
 import (
-	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,7 +50,7 @@ func TestEdk2(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()
