@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package container
 package container
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,7 +22,7 @@ func TestSetup(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()
@@ -147,12 +148,8 @@ func TestSetup(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create test files
-			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
-			assert.NoError(t, err)
 			tmpDir := t.TempDir()
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Create InputDirs
 			for _, val := range tc.opts.InputDirs {
@@ -204,7 +201,7 @@ func TestGetArtifacts(t *testing.T) {
 		t.Skip("skipping test in short mode")
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
 	defer client.Close()

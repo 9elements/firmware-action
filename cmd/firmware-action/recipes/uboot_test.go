@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / uboot
 package recipes
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -24,7 +25,6 @@ func TestUBoot(t *testing.T) {
 
 	pwd, err := os.Getwd()
 	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 
 	UBootOpts := UBootOpts{
 		CommonOpts: CommonOpts{
@@ -51,7 +51,7 @@ func TestUBoot(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()
@@ -64,11 +64,7 @@ func TestUBoot(t *testing.T) {
 			myUBootOpts.RepoPath = filepath.Join(tmpDir, "u-boot")
 
 			// Change current working directory
-			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
-			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			cmd := exec.Command("bash", "-c", fmt.Sprintf("git clone https://source.denx.de/u-boot/u-boot.git; cd u-boot; git fetch -a; git checkout v%s", tc.uBootVersion))
@@ -106,5 +102,4 @@ func TestUBoot(t *testing.T) {
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "u-boot")), os.ErrExist)
 		})
 	}
-	assert.NoError(t, os.Chdir(pwd)) // just to make sure
 }

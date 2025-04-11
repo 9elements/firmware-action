@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / coreboot
 package recipes
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -272,7 +273,7 @@ func TestCorebootBuild(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()
@@ -288,10 +289,8 @@ func TestCorebootBuild(t *testing.T) {
 
 			// Change current working directory
 			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
 			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			opts := gitCloneOpts{
@@ -554,7 +553,7 @@ func TestCorebootSubmodule(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()
@@ -572,10 +571,8 @@ func TestCorebootSubmodule(t *testing.T) {
 
 			// Change current working directory
 			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
 			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
 			opts := gitCloneOpts{

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+//go:build go1.24
+
 // Package recipes / universal
 package recipes
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -19,10 +20,6 @@ func TestUniversal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
 	}
-
-	pwd, err := os.Getwd()
-	assert.NoError(t, err)
-	defer os.Chdir(pwd) // nolint:errcheck
 
 	UniversalOpts := UniversalOpts{
 		CommonOpts: CommonOpts{
@@ -44,7 +41,7 @@ func TestUniversal(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
 			defer client.Close()
@@ -60,11 +57,7 @@ func TestUniversal(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Change current working directory
-			pwd, err := os.Getwd()
-			defer os.Chdir(pwd) // nolint:errcheck
-			assert.NoError(t, err)
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
+			t.Chdir(tmpDir)
 
 			// Artifacts
 			outputPath := filepath.Join(tmpDir, myUniversalOpts.OutputDir)
@@ -80,5 +73,4 @@ func TestUniversal(t *testing.T) {
 			assert.ErrorIs(t, filesystem.CheckFileExists(filepath.Join(outputPath, "hello.txt")), os.ErrExist)
 		})
 	}
-	assert.NoError(t, os.Chdir(pwd)) // just to make sure
 }
