@@ -9,7 +9,7 @@ inputs:
       Version of firmware-action to use. If not specified, latest release will be used.
       Must be a tag if 'compile' is false, must be a branch is 'compile' is true.
     required: false
-    default: 'v0.17.0'
+    default: 'v0.17.1'
   config:
     description: |
       Path to the JSON configuration file.

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.17.1 - 2025-04-15
+#### Bug Fixes
+- **(cmd)** convert version command to flag with improved help formatting - (206ce27) - AtomicFS
+#### Build system
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (bfd36cb) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (1a91224) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (682ef42) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (df30d3b) - dependabot[bot]
+#### Miscellaneous Chores
+- **(docker)** bump golang to v1.24 for u-root - (5d9471e) - AtomicFS
+#### Refactoring
+- **(cmd)** use T.Context for in tests - (fa92def) - AtomicFS
+- **(cmd)** use T.Chdir for cleaner tests - (b9a68cc) - AtomicFS
+
+- - -
+
 ## v0.17.0 - 2025-04-02
 #### Bug Fixes
 - **(cmd)** update detection of discontinued containers - (0a9cef4) - AtomicFS
