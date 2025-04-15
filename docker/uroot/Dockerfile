@@ -1,7 +1,7 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
-ARG GO_VERSION=1.22
+ARG GO_VERSION=1.24
 ARG SOURCE_IMAGE=golang:${GO_VERSION}
 
 #=============
