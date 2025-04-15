@@ -44,9 +44,10 @@ func main() {
 
 // CLI (Command Line Interface) holds data from environment
 var CLI struct {
-	JSON   bool `default:"false" help:"switch to JSON stdout and stderr output"`
-	Indent bool `default:"false" help:"enable indentation for JSON output"`
-	Debug  bool `default:"false" help:"increase verbosity"`
+	JSON    bool             `default:"false" help:"switch to JSON stdout and stderr output"`
+	Indent  bool             `default:"false" help:"enable indentation for JSON output"`
+	Debug   bool             `default:"false" help:"increase verbosity"`
+	Version kong.VersionFlag `help:"Print version and exit"`
 
 	Config []string `type:"path" required:"" default:"${config_file}" help:"Path to configuration file, supports multiple flags to use multiple configuration files"`
 
@@ -58,7 +59,6 @@ var CLI struct {
 
 	GenerateConfig struct{} `cmd:"generate-config" help:"Generate empty configuration file"`
 	ValidateConfig struct{} `cmd:"validate-config" help:"Validate configuration file"`
-	Version        struct{} `cmd:"version" help:"Print version and exit"`
 }
 
 func run(ctx context.Context) error {
@@ -186,8 +186,13 @@ func parseCli() (string, error) {
 		kong.UsageOnError(),
 		kong.Vars{
 			"config_file": "firmware-action.json",
+			"version":     fmt.Sprintf("version: %s\ncommit:  %s\ndate:    %s", version, commit, date),
 		},
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: true,
+		}),
 	)
+
 	mode := "CLI"
 
 	switch ctx.Command() {
@@ -265,13 +270,6 @@ func parseCli() (string, error) {
 			)
 			return "", err
 		}
-		return "", nil
-
-	case "version":
-		// Print version and exit
-		fmt.Printf("version: %s\n", version)
-		fmt.Printf("commit: %s\n", commit)
-		fmt.Printf("date: %s\n", date)
 		return "", nil
 
 	default:
