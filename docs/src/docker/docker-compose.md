@@ -81,7 +81,6 @@ In addition, there might be `VERIFICATION_TEST_*` variables. These are used insi
 
 - (optional) Add new `Dockerfile` into `docker` directory
 - Add new entry in `docker/compose.yaml`
-- Add new entry into strategy matrix in `.github/workflows/docker-build-and-test.yml`
 - (optional) Add new strategy matrix in `.github/workflows/example.yml` examples
     - this requires adding new configuration file in `tests` directory
 - Add entry into a list of containers in `README.md`
