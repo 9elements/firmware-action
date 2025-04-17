@@ -50,6 +50,12 @@ services:
       args:
         - COREBOOT_VERSION=24.12
         - SOURCE_IMAGE=ubuntu:noble
+  coreboot_25.03:
+    build:
+      context: coreboot
+      args:
+        - COREBOOT_VERSION=25.03
+        - SOURCE_IMAGE=ubuntu:noble
   #==================
   # edk2
   #==================
@@ -266,6 +272,20 @@ services:
         - PYTHON_PACKAGES=python-is-python3 python3
         - PYTHON_VERSION=python3
         - NODESOURCE=https://deb.nodesource.com/setup_20.x
+  edk2-stable202502:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202502
+        - EDK2_VERSION_COMMIT=fbe0805b2091393406952e84724188f8c1941837
+        - SOURCE_IMAGE=buildpack-deps:noble
+        - EDK2_PLATFORM_COMMIT=728c8bb974be69b4034fad7a1c60917cca2dd03d
+        - EDK2_NON_OSI_COMMIT=ea2040c2d4e2200557e87b9f9fbd4f8fb7a2b6e8
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=13
+        - PYTHON_PACKAGES=python-is-python3 python3
+        - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
   #==================
   # linux
   #==================
@@ -319,4 +339,10 @@ services:
       context: uboot
       args:
         - UBOOT_VERSION=2025.01
+        - SOURCE_IMAGE=ubuntu:noble
+  uboot_2025.04:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2025.04
         - SOURCE_IMAGE=ubuntu:noble
