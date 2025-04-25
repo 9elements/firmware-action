@@ -565,6 +565,34 @@ jobs:
           retention-days: 14
   # ANCHOR_END: example_build_prune
 
+  build-universal-nested-output:
+    needs:
+      - changes
+      - skip-check
+    runs-on: ubuntu-latest
+    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
+    # Skip if pull_request_review on PR not made by a bot
+    steps:
+      - name: Cleanup
+        run: |
+          rm -rf ./* || true
+          rm -rf ./.??* || true
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: firmware-action
+        uses: ./
+        # uses: 9elements/firmware-action
+        with:
+          config: 'tests/example_config__universal__with_nested_output.json'
+          target: 'universal-example-nested-output'
+          recursive: 'false'
+          compile: ${{ needs.changes.outputs.compile }}
+          debug: 'true'
+          enable-cache: 'true'
+          auto-download-artifacts: 'true'
+          auto-upload-artifacts: 'true'
+
   # Example of running on non-Linux systems
   test-operating-systems:
     strategy:
