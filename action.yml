@@ -350,7 +350,37 @@ runs:
       if: ${{ steps.cache.outputs.cache-hit == 'true' || inputs.enable-cache == 'true' }}
       run: |
         if [ -d ".firmware-action/artifacts" ] && [ -n "$(ls -A .firmware-action/artifacts/ 2>/dev/null)" ]; then
-          mv .firmware-action/artifacts/* ./
+          echo "::group::Unpacking cached artifacts"
+
+          # Process each artifact directory
+          for ARTIFACT in .firmware-action/artifacts/*; do
+            # Skip if not a directory
+            if [ ! -d "${ARTIFACT}" ]; then
+              continue
+            fi
+
+            # Get the base name of the artifact directory
+            ARTIFACT_NAME=$(basename "${ARTIFACT}")
+
+            # Check if there's a corresponding text file with the original path
+            PATH_FILE=".firmware-action/artifacts/${ARTIFACT_NAME}.txt"
+            if [ -f "${PATH_FILE}" ]; then
+              # Read the original output_dir path from the file
+              ORIGINAL_PATH=$(cat "${PATH_FILE}")
+              echo "Restoring artifact '${ARTIFACT_NAME}' to original path: ${ORIGINAL_PATH}"
+
+              # Create parent directories if they don't exist
+              mkdir -p "$(dirname "${ORIGINAL_PATH}")"
+
+              # Move the artifact to its original location
+              mv "${ARTIFACT}" "${ORIGINAL_PATH}"
+            else
+              # Fallback to old behavior if no path file exists
+              echo "No path information found for '${ARTIFACT_NAME}', moving to root directory"
+              mv "${ARTIFACT}" ./
+            fi
+          done
+          echo "::endgroup::"
         fi
 
     #=================================
