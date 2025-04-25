@@ -293,13 +293,24 @@ func Execute(ctx context.Context, target string, config *Config) error {
 				// If in GitHub, copy output directory into 'StatusDir', so that it can be cached
 				//   and also automatically uploaded as artifact
 				dirToCache := modules[target].GetOutputDir()
+				// .GetOutputDir() returns verbatim what is defined in the configuration file, no
+				//   pre-processing or any alterations
+				//   (must be relative path)
 				pathToCache := filepath.Join(ArtifactDir, filepath.Base(dirToCache))
+
 				slog.Debug(
 					fmt.Sprintf("Copying output files to '%s' for caching and artifact upload", StatusDir),
-					slog.String("source", dirToCache),
+					slog.String("Source", dirToCache),
 					slog.String("Destination", pathToCache),
 				)
 				if err := filesystem.CopyDir(dirToCache, pathToCache); err != nil {
+					return err
+				}
+
+				// Store path to the original directory which was cached
+				//   (to be used in the GitHub wrapper for unpacking)
+				dirToCacheFilename := filepath.Join(ArtifactDir, filepath.Base(dirToCache)+".txt")
+				if err := os.WriteFile(dirToCacheFilename, []byte(dirToCache), 0o644); err != nil {
 					return err
 				}
 			}
