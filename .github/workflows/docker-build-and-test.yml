@@ -91,6 +91,7 @@ jobs:
       - get-matrix-coreboot
     strategy:
       fail-fast: false
+      max-parallel: 15
       matrix:
         arch: ['amd64', 'arm64']
         dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
@@ -380,6 +381,7 @@ jobs:
       - build-coreboot-toolchains
     strategy:
       fail-fast: false
+      max-parallel: 15
       matrix:
         dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
     permissions:
