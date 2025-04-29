@@ -40,6 +40,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
     # Skip if pull_request_review on PR not made by a bot
+    permissions:
+      contents: read
+      # Needed by GitHub Comment Reporter:
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
