@@ -7,10 +7,7 @@
       "defconfig_path": "seabios_defconfig",
       "output_dir": "output-coreboot/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "build/coreboot.rom",
-        "defconfig"
-      ],
+      "container_output_files": ["build/coreboot.rom", "defconfig"],
       "blobs": {},
       "container_input_dir": "inputs/",
       "input_dirs": null,
@@ -23,36 +20,36 @@
       "sdk_url": "golang:latest",
       "repo_path": "./",
       "container_output_dirs": null,
-      "container_output_files": [
-        "test.txt"
-      ],
+      "container_output_files": ["test.txt"],
       "output_dir": "output-universal-example-A/",
       "input_dirs": null,
       "input_files": null,
       "container_input_dir": "inputs/",
-      "build_commands": [
-        "echo 'hello world'",
-        "touch test.txt"
-      ]
+      "build_commands": ["echo 'hello world'", "touch test.txt"]
     },
     "universal-example-B": {
-      "depends": [
-        "universal-example-A"
-      ],
+      "depends": ["universal-example-A"],
       "sdk_url": "golang:latest",
       "repo_path": "./",
       "container_output_dirs": null,
-      "container_output_files": [
-        "test.txt"
-      ],
+      "container_output_files": ["test.txt"],
       "output_dir": "output-universal-example-B/",
       "input_dirs": null,
       "input_files": null,
       "container_input_dir": "inputs/",
-      "build_commands": [
-        "echo 'hello world'",
-        "touch test.txt"
-      ]
+      "build_commands": ["echo 'hello world'", "touch test.txt"]
+    },
+    "universal-example": {
+      "depends": null,
+      "sdk_url": "golang:latest",
+      "repo_path": "./",
+      "container_output_dirs": null,
+      "container_output_files": ["test.txt"],
+      "output_dir": "output-universal/",
+      "input_dirs": null,
+      "input_files": null,
+      "container_input_dir": "inputs/",
+      "build_commands": ["echo 'hello world'", "touch test.txt"]
     }
   },
   "edk2": {
@@ -63,9 +60,7 @@
       "repo_path": "Edk2/",
       "defconfig_path": "edk2_config.cfg",
       "output_dir": "output-edk2/",
-      "container_output_dirs": [
-        "Build/"
-      ],
+      "container_output_dirs": ["Build/"],
       "container_output_files": null,
       "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t ${GCC_TOOLCHAIN_VERSION}",
       "container_input_dir": "inputs/",
@@ -79,9 +74,7 @@
       "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_${COREBOOT_VERSION}:main",
       "repo_path": "stitch/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "new_descriptor.bin"
-      ],
+      "container_output_files": ["new_descriptor.bin"],
       "output_dir": "output-stitch/",
       "base_file_path": "stitch/mainboard/intel/emeraldlake2/descriptor.bin",
       "platform": "",
@@ -106,10 +99,7 @@
       "defconfig_path": "ci_defconfig",
       "output_dir": "output-linux/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "vmlinux",
-        "defconfig"
-      ],
+      "container_output_files": ["vmlinux", "defconfig"],
       "gcc_version": "",
       "container_input_dir": "inputs/",
       "input_dirs": null,
@@ -125,33 +115,10 @@
       "defconfig_path": "uboot_defconfig",
       "output_dir": "output-uboot/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "u-boot",
-        "u-boot.cfg",
-        "u-boot.elf"
-      ],
+      "container_output_files": ["u-boot", "u-boot.cfg", "u-boot.elf"],
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null
-    }
-  },
-  "universal": {
-    "universal-example": {
-      "depends": null,
-      "sdk_url": "golang:latest",
-      "repo_path": "./",
-      "container_output_dirs": null,
-      "container_output_files": [
-        "test.txt"
-      ],
-      "output_dir": "output-universal/",
-      "input_dirs": null,
-      "input_files": null,
-      "container_input_dir": "inputs/",
-      "build_commands": [
-        "echo 'hello world'",
-        "touch test.txt"
-      ]
     }
   },
   "u-root": {
@@ -161,9 +128,7 @@
       "repo_path": "u-root/",
       "output_dir": "output-uroot/",
       "container_output_dirs": null,
-      "container_output_files": [
-        "initramfs.cpio"
-      ],
+      "container_output_files": ["initramfs.cpio"],
       "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
       "container_input_dir": "inputs/",
       "input_dirs": null,

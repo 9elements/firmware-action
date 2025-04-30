@@ -1,10 +1,7 @@
-name: "Bug Report"
+name: 'Bug Report'
 description: File a bug report.
-title: "bug: <title>"
-labels: [
-  "bug",
-  "not_reproduced"
-]
+title: 'bug: <title>'
+labels: ['bug', 'not_reproduced']
 assignees:
   - AtomicFS
 body:
@@ -15,7 +12,7 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
+      label: 'Description'
       description: Please enter an explicit description of your issue
       placeholder: Short and explicit description of your incident...
     validations:
@@ -23,7 +20,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: "Version of firmware-action"
+      label: 'Version of firmware-action'
       description: Please enter version of firmware-action you are using.
       placeholder: ex. v0.14.0
     validations:
@@ -31,7 +28,7 @@ body:
   - type: dropdown
     id: env
     attributes:
-      label: "Environment"
+      label: 'Environment'
       description: What is the execution environment, is it on you local computer, or somewhere in CI/CD pipeline ?
       multiple: true
       options:
@@ -43,7 +40,7 @@ body:
   - type: dropdown
     id: architecture
     attributes:
-      label: "CPU architecture"
+      label: 'CPU architecture'
       description: What CPU architectures are you seeing the problem on ?
       multiple: true
       options:
@@ -55,7 +52,7 @@ body:
   - type: input
     id: os
     attributes:
-      label: "OS"
+      label: 'OS'
       description: What is the impacted Operating System, please include distribution (for Linux) and version.
       placeholder: ex. Ubuntu 24.04
     validations:
@@ -63,7 +60,7 @@ body:
   - type: input
     id: reproduction-url
     attributes:
-      label: "Reproduction URL"
+      label: 'Reproduction URL'
       description: Please enter your GitHub URL to provide a reproduction of the issue
       placeholder: ex. https://github.com/USERNAME/REPO-NAME
     validations:
@@ -71,7 +68,7 @@ body:
   - type: textarea
     id: reproduction
     attributes:
-      label: "Reproduction steps"
+      label: 'Reproduction steps'
       description: Please enter an explicit description of your issue
       value: |
         1. Go to '...'
@@ -84,7 +81,7 @@ body:
   - type: textarea
     id: screenshot
     attributes:
-      label: "Screenshots"
+      label: 'Screenshots'
       description: If applicable, add screenshots to help explain your problem.
       value: |
         ![DESCRIPTION](LINK.png)
@@ -94,7 +91,7 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: "Logs"
+      label: 'Logs'
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: bash
     validations:
@@ -102,7 +99,7 @@ body:
   - type: textarea
     id: config
     attributes:
-      label: "JSON configuration"
+      label: 'JSON configuration'
       description: Please provide a copy of firmware-action configuration file (at least partial).
       render: json
     validations:
