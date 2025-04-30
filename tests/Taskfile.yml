@@ -47,7 +47,7 @@ tasks:
     env:
       LINUX_VERSION: '{{.LINUX_VERSION}}'
       SYSTEM_ARCH: 'amd64'
-      UROOT_VERSION: ""
+      UROOT_VERSION: ''
     requires:
       vars: [LINUX_VERSION]
 
@@ -61,14 +61,14 @@ tasks:
     env:
       LINUX_VERSION: '{{.LINUX_VERSION}}'
       SYSTEM_ARCH: 'amd64'
-      UROOT_VERSION: ""
+      UROOT_VERSION: ''
       # Fake GitHub runner
-      GITHUB_ACTIONS: "yes"
-      INPUT_TARGET: "linux-example"
-      INPUT_RECURSIVE: "false"
+      GITHUB_ACTIONS: 'yes'
+      INPUT_TARGET: 'linux-example'
+      INPUT_RECURSIVE: 'false'
       # For testing multiple config inputs
       #INPUT_CONFIG: "  ../tests/example_config__linux.json\n  ../tests/example_config__uroot.json  \n   "
-      INPUT_CONFIG: "../tests/example_config__linux.json"
+      INPUT_CONFIG: '../tests/example_config__linux.json'
     requires:
       vars: [LINUX_VERSION]
 
@@ -102,7 +102,6 @@ tasks:
       - task: linux-run-github
         vars:
           LINUX_VERSION: '{{.VARIANT}}'
-
 
   #========
   # U-BOOT

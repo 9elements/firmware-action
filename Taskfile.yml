@@ -85,3 +85,4 @@ tasks:
     dir: tests
     cmds:
       - jq -s 'reduce .[] as $item ({}; . * $item)' example_config__*.json > example_config.json
+      - prettier -w example_config.json

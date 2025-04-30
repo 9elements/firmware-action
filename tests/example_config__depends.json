@@ -5,36 +5,24 @@
       "sdk_url": "golang:latest",
       "repo_path": "./",
       "container_output_dirs": null,
-      "container_output_files": [
-        "test.txt"
-      ],
+      "container_output_files": ["test.txt"],
       "output_dir": "output-universal-example-A/",
       "input_dirs": null,
       "input_files": null,
       "container_input_dir": "inputs/",
-      "build_commands": [
-        "echo 'hello world'",
-        "touch test.txt"
-      ]
+      "build_commands": ["echo 'hello world'", "touch test.txt"]
     },
     "universal-example-B": {
-      "depends": [
-        "universal-example-A"
-      ],
+      "depends": ["universal-example-A"],
       "sdk_url": "golang:latest",
       "repo_path": "./",
       "container_output_dirs": null,
-      "container_output_files": [
-        "test.txt"
-      ],
+      "container_output_files": ["test.txt"],
       "output_dir": "output-universal-example-B/",
       "input_dirs": null,
       "input_files": null,
       "container_input_dir": "inputs/",
-      "build_commands": [
-        "echo 'hello world'",
-        "touch test.txt"
-      ]
+      "build_commands": ["echo 'hello world'", "touch test.txt"]
     }
   }
 }
