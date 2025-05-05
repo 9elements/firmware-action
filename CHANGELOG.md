@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.17.2 - 2025-05-05
+#### Bug Fixes
+- **(action)** handle nested output directories in artifact caching - (7e5b2e4) - AtomicFS
+- **(cmd)** store artifact path in txt file - (a75dd06) - AtomicFS
+#### Build system
+- **(deps)** bump golangci/golangci-lint-action from 7 to 8 - (03578de) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (00af04c) - dependabot[bot]
+- **(deps)** bump github.com/sethvargo/go-githubactions - (5e32903) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (f5e3af8) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (209376f) - dependabot[bot]
+#### Continuous Integration
+- **(lint)** enable GitHub reporter for megalinter - (ffdc34f) - AtomicFS
+- limit maximum parallel jobs - (aa11e5d) - AtomicFS
+#### Documentation
+- update notes on adding new container - (7ea554f) - AtomicFS
+- fix forgotten old naming in migration guide - (10991a2) - AtomicFS
+#### Miscellaneous Chores
+- **(docker)** add new containers - (aa41509) - AtomicFS
+- **(linter)** formatting changes according to linter - (c2ee01b) - AtomicFS
+#### Tests
+- add example to test nested output dir - (c6ff4b8) - AtomicFS
+
+- - -
+
 ## v0.17.1 - 2025-04-15
 #### Bug Fixes
 - **(cmd)** convert version command to flag with improved help formatting - (206ce27) - AtomicFS
