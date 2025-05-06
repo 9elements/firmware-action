@@ -97,6 +97,7 @@ jobs:
           filters: |
             action:
               - 'cmd/firmware-action/**'
+              - 'action.yml'
       - name: Compile
         id: compile
         # Require compilation if:
