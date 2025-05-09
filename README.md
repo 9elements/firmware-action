@@ -1,9 +1,13 @@
 # Firmware-Action
 
 [![Lint](https://github.com/9elements/firmware-action/actions/workflows/lint.yml/badge.svg)](https://github.com/9elements/firmware-action/actions/workflows/lint.yml)
-[![pytest](https://github.com/9elements/firmware-action/actions/workflows/pytest.yml/badge.svg)](https://github.com/9elements/firmware-action/actions/workflows/pytest.yml)
-[![dagger](https://github.com/9elements/firmware-action/actions/workflows/docker-build-and-test.yml/badge.svg)](https://github.com/9elements/firmware-action/actions/workflows/docker-build-and-test.yml)
+[![building containers](https://github.com/9elements/firmware-action/actions/workflows/docker-build-and-test.yml/badge.svg)](https://github.com/9elements/firmware-action/actions/workflows/docker-build-and-test.yml)
 [![go test](https://github.com/9elements/firmware-action/actions/workflows/go-test.yml/badge.svg)](https://github.com/9elements/firmware-action/actions/workflows/go-test.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/9elements/firmware-action/cmd/firmware-action)](https://goreportcard.com/report/github.com/9elements/firmware-action/cmd/firmware-action)
+[![codecov](https://codecov.io/gh/9elements/firmware-action/graph/badge.svg?token=FDWKRAJIJ0)](https://codecov.io/gh/9elements/firmware-action)
+
+
+## Description
 
 `Firmware-action` is a tool to simplify building firmware. Think of it as `Makefile` or `Taskfile` but specifically for firmware. The tool it-self is written entirely in [Golang](https://go.dev/).
 
