@@ -30,6 +30,48 @@ jobs:
           allowed-skips: ${{ toJSON(needs) }}
           jobs: ${{ toJSON(needs) }}
 
+  # Collect and merge coverage reports
+  coverage-reports:
+    runs-on: ubuntu-latest
+    needs:
+      - go-test-resource-hogs
+      - go-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: cmd/firmware-action/coverage-reports
+          merge-multiple: true
+
+      - name: Merge coverage reports
+        run: |
+          cd cmd/firmware-action
+
+          # Create an empty merged file
+          echo "mode: atomic" > coverage-merged.out
+
+          # Append all coverage data (skipping the mode line after the first file)
+          for file in coverage-reports/*.out; do
+            tail -n +2 "$file" >> coverage-merged.out
+          done
+
+          # Print coverage summary
+          go tool cover -func=coverage-merged.out
+
+      - name: Upload merged coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: "coverage-merged"
+          path: "cmd/firmware-action/coverage-merged.out"
+
   # Check we jobs should be ran or skipped
   skip-check:
     runs-on: ubuntu-latest
@@ -92,7 +134,7 @@ jobs:
       - name: Run go test
         run: |
           cd cmd/firmware-action
-          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -run ${{ matrix.testregex }} ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile "coverage-${{ matrix.testregex }}.out" -run ${{ matrix.testregex }} ./...
 
       - name: Store tmp files
         uses: actions/cache/save@v4
@@ -100,6 +142,12 @@ jobs:
         with:
           path: /tmp/__firmware-action_tmp_files__
           key: go-test-${{ matrix.testregex }}-cache
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: "coverage-${{ matrix.testregex }}"
+          path: "cmd/firmware-action/coverage-${{ matrix.testregex }}.out"
 
   go-test:
     # Run all remaining light tests
@@ -121,4 +169,10 @@ jobs:
       - name: Run go test
         run: |
           cd cmd/firmware-action
-          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile coverage.out -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching|TestURoot|TestUniversal|TestUBoot)' ./...
+          go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile "coverage-short.out" -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching|TestURoot|TestUniversal|TestUBoot)' ./...
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: "coverage-short"
+          path: "cmd/firmware-action/coverage-short.out"
