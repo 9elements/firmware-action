@@ -22,7 +22,7 @@ import (
 //	simplified because of issue #92
 type Edk2Specific struct {
 	// Specifies which build command to use
-	// GCC version is exposed in the container container as USE_GCC_VERSION environment variable
+	// GCC version is exposed in the container as USE_GCC_VERSION environment variable
 	// Examples:
 	//   "source ./edksetup.sh; build -t GCC5 -a IA32 -p UefiPayloadPkg/UefiPayloadPkg.dsc"
 	//   "python UefiPayloadPkg/UniversalPayloadBuild.py"

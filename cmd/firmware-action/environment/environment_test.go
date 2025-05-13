@@ -4,7 +4,6 @@
 package environment
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,8 +47,7 @@ func TestValidateConfig(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			for key, value := range tc.envCreate {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				t.Setenv(key, value)
 				t.Logf("Setting %s = %s\n", key, value)
 			}
 

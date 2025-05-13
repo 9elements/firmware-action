@@ -184,12 +184,12 @@ func TestSetup(t *testing.T) {
 			for _, val := range tc.TestDirs {
 				_, err = container.WithExec([]string{"bash", "-c", fmt.Sprintf("[ -d %s ]", val)}).
 					Sync(ctx)
-				assert.NoError(t, err, fmt.Sprintf("Directory '%s' does not exists", val))
+				assert.NoErrorf(t, err, "Directory '%s' does not exists", val)
 			}
 			for _, val := range tc.TestFiles {
 				_, err = container.WithExec([]string{"bash", "-c", fmt.Sprintf("[ -f %s ]", val)}).
 					Sync(ctx)
-				assert.NoError(t, err, fmt.Sprintf("File '%s' does not exists", val))
+				assert.NoErrorf(t, err, "File '%s' does not exists", val)
 			}
 		})
 	}

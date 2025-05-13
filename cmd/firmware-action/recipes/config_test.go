@@ -4,7 +4,6 @@
 package recipes
 
 import (
-	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -294,7 +293,7 @@ func TestFindAllEnvVars(t *testing.T) {
 			t.Log(foundVars)
 			t.Log(tc.expectedEnvVars)
 
-			assert.Equal(t, len(tc.expectedEnvVars), len(foundVars))
+			assert.Len(t, foundVars, len(tc.expectedEnvVars))
 			// If both slices are of zero length, then the comparison fails for whatever reason
 			if len(tc.expectedEnvVars) > 0 {
 				assert.True(t, reflect.DeepEqual(tc.expectedEnvVars, foundVars))
@@ -389,8 +388,7 @@ func TestConfigEnvVars(t *testing.T) {
 				},
 			}
 			for key, value := range tc.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				t.Setenv(key, value)
 				t.Logf("Setting %s = %s\n", key, value)
 			}
 
