@@ -266,10 +266,10 @@ func TestBuild(t *testing.T) {
 			&testConfigDependencyHell,
 			executeDummy,
 		)
-		assert.ErrorIs(t, err, nil)
+		assert.NoError(t, err)
 
 		// Check for length
-		assert.Equal(t, len(testConfigDependencyHell.Coreboot), len(builds))
+		assert.Len(t, builds, len(testConfigDependencyHell.Coreboot))
 
 		// Go though 'builds' and check if for each builds, the dependencies are already complete
 		done := []string{}
