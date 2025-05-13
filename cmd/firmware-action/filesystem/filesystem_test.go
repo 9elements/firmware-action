@@ -98,7 +98,7 @@ func TestDirTree(t *testing.T) {
 	assert.NoError(t, err)
 	files, err := DirTree(pwd)
 	assert.NoError(t, err)
-	assert.True(t, len(files) > 0, "found no files or directories")
+	assert.NotEmpty(t, files, "found no files or directories")
 }
 
 func TestLastSaveRunTime(t *testing.T) {

@@ -51,13 +51,8 @@ func TestCorebootProcessBlobs(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			pwd, err := os.Getwd()
-			assert.NoError(t, err)
-
 			tmpDir := t.TempDir()
-			err = os.Chdir(tmpDir)
-			assert.NoError(t, err)
-			defer os.Chdir(pwd) // nolint:errcheck
+			t.Chdir(tmpDir)
 
 			for i := range tc.expected {
 				// If we do not want error
@@ -103,15 +98,9 @@ type gitCloneOpts struct {
 func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 	tb.Helper()
 
-	// Get current working directory
-	pwd, err := os.Getwd()
-	if err != nil {
-		tb.Error(err)
-	}
-
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
-	err = os.MkdirAll(tmpFiles, 0o750)
+	err := os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
@@ -120,7 +109,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 	// Clone repository into cache if not done yet
 	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
-		err = os.Chdir(tmpFiles)
+		tb.Chdir(tmpFiles)
 		if err != nil {
 			tb.Errorf("failed to change directory to '%s': %s", tmpFiles, err.Error())
 		}
@@ -142,10 +131,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 		}
 
 		// Change to repository
-		err = os.Chdir(repoPath)
-		if err != nil {
-			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
-		}
+		tb.Chdir(repoPath)
 
 		if opts.fetch || opts.tag != "" {
 			// Fetch
@@ -183,11 +169,6 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 	err = filesystem.CopyDir(repoPath, opts.destination)
 	if err != nil {
 		tb.Errorf("failed to copy git repository from cache: %s", err.Error())
-	}
-
-	err = os.Chdir(pwd)
-	if err != nil {
-		tb.Error(err)
 	}
 }
 
@@ -352,7 +333,7 @@ func TestCorebootBuild(t *testing.T) {
 				version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
 
 				versionPattern := regexp.MustCompile(tc.versionRegex)
-				assert.True(t, versionPattern.MatchString(version), fmt.Sprintf("found version '%s' does not match expected regex '%s'", version, tc.versionRegex))
+				assert.Truef(t, versionPattern.MatchString(version), "found version '%s' does not match expected regex '%s'", version, tc.versionRegex)
 			}
 		})
 	}
@@ -361,15 +342,9 @@ func TestCorebootBuild(t *testing.T) {
 func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 	tb.Helper()
 
-	// Get current working directory
-	pwd, err := os.Getwd()
-	if err != nil {
-		tb.Error(err)
-	}
-
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
-	err = os.MkdirAll(tmpFiles, 0o750)
+	err := os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
@@ -381,10 +356,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 	// Clone repository into cache if not done yet
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
-		err = os.Chdir(repoPath)
-		if err != nil {
-			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
-		}
+		tb.Chdir(repoPath)
 
 		// Make empty repository and add coreboot as git submodule
 		cmds := [][]string{
@@ -401,10 +373,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 		}
 
 		// Change to coreboot submodule
-		err = os.Chdir(filepath.Join(repoPath, "coreboot"))
-		if err != nil {
-			tb.Errorf("failed to change directory to '%s': %s", repoPath, err.Error())
-		}
+		tb.Chdir(filepath.Join(repoPath, "coreboot"))
 
 		if opts.fetch || opts.tag != "" {
 			// Fetch
@@ -452,11 +421,6 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 	err = filesystem.CopyDir(repoPath, opts.destination)
 	if err != nil {
 		tb.Errorf("failed to copy git repository from cache: %s", err.Error())
-	}
-
-	err = os.Chdir(pwd)
-	if err != nil {
-		tb.Error(err)
 	}
 }
 
@@ -606,8 +570,7 @@ func TestCorebootSubmodule(t *testing.T) {
 
 			// Prep - environment variables
 			for key, value := range tc.envVars {
-				os.Setenv(key, value)
-				defer os.Unsetenv(key)
+				t.Setenv(key, value)
 				t.Logf("Setting %s = %s\n", key, value)
 			}
 
@@ -641,7 +604,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
 
 			versionPattern := regexp.MustCompile(tc.versionRegex)
-			assert.True(t, versionPattern.MatchString(version), fmt.Sprintf("found version '%s' does not match expected regex '%s'", version, tc.versionRegex))
+			assert.Truef(t, versionPattern.MatchString(version), "found version '%s' does not match expected regex '%s'", version, tc.versionRegex)
 		})
 	}
 }
