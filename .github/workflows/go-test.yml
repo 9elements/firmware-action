@@ -72,6 +72,15 @@ jobs:
           name: "coverage-merged"
           path: "cmd/firmware-action/coverage-merged.out"
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: "coverage-merged.out"
+          working-directory: "cmd/firmware-action/"
+          disable_search: true
+          verbose: true
+
   # Check we jobs should be ran or skipped
   skip-check:
     runs-on: ubuntu-latest
