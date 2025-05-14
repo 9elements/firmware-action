@@ -57,6 +57,7 @@
     "acpica",
     "addinivalue",
     "addoption",
+    "autobuild",
     "automerge",
     "autopep",
     "blkio",
