@@ -479,13 +479,13 @@ func JSONVerboseError(jsonString string, err error) {
 	)
 }
 
-func offsetToLineNumber(input string, offset int) (line int, character int, err error) {
+func offsetToLineNumber(input string, offset int) (int, int, error) {
 	// NOTE: I do not take into account windows line endings
 	//       I can't be bothered, the worst case is that with windows line-endings the character counter
 	//       will be off by 1, which is a sacrifice I am willing to make
 
 	if offset > len(input) || offset < 0 {
-		err = fmt.Errorf("offset is out of bounds for given string: %w", ErrVerboseJSON)
+		err := fmt.Errorf("offset is out of bounds for given string: %w", ErrVerboseJSON)
 		slog.Warn(
 			"Failed to pinpoint exact location of error in JSON configuration file",
 			slog.Any("error", err),
@@ -493,8 +493,8 @@ func offsetToLineNumber(input string, offset int) (line int, character int, err 
 		return 0, 0, err
 	}
 
-	line = 1
-	character = 0
+	line := 1
+	character := 0
 	for index, char := range input {
 		if char == '\n' {
 			line++
@@ -507,5 +507,5 @@ func offsetToLineNumber(input string, offset int) (line int, character int, err 
 		}
 	}
 
-	return
+	return line, character, nil
 }
