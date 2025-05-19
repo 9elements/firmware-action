@@ -336,6 +336,7 @@ func ValidateConfig(conf Config) error {
 
 // validateOutputDirectories checks for nested or duplicate output directories
 func validateOutputDirectories(modules map[string]FirmwareModule) error {
+	// ANCHOR: NestedOutputs
 	// Check for nested output directories
 	//
 	// Here are few examples:
@@ -358,6 +359,7 @@ func validateOutputDirectories(modules map[string]FirmwareModule) error {
 	//         ├── output-linux
 	//         │   └── linux.bin
 	//         └── uroot.bin
+	// ANCHOR_END: NestedOutputs
 
 	outputDirs := make(map[string]string) // Map of output dir -> module name
 	var issues []error
