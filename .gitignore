@@ -1,3 +1,5 @@
+.aider*
+!.aiderignore
 .coverage
 .example_runs
 .task
@@ -6,7 +8,7 @@ cmd/firmware-action/coverage.html
 cmd/firmware-action/coverage.out
 cmd/firmware-action/recipes/__tmp_files__/
 docker/coreboot/coreboot-*
-megalinter-reports
-node_modules
+docs/public/
+megalinter-reports/
+node_modules/
 output-*/
-.aider*
