@@ -230,6 +230,168 @@ func TestValidateConfig(t *testing.T) {
 	}
 }
 
+func TestValidateConfigNestedOutputDirs(t *testing.T) {
+	commonDummy := CommonOpts{
+		SdkURL:            "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+		RepoPath:          "dummy/dir/",
+		ContainerInputDir: "inputs/",
+	}
+
+	testCases := []struct {
+		name    string
+		wantErr error
+		opts    Config
+	}{
+		{
+			name:    "valid - different output dirs",
+			wantErr: nil,
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output-coreboot/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output-linux/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+		},
+		{
+			name:    "valid - sibling output dirs",
+			wantErr: nil,
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/coreboot/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/linux/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+		},
+		{
+			name:    "invalid - nested output dirs",
+			wantErr: ErrNestedOutputDirs,
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/linux/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+		},
+		{
+			name:    "invalid - duplicate output dirs",
+			wantErr: ErrDuplicateOutputDirs,
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+		},
+		{
+			name:    "valid - similar but not nested dirs",
+			wantErr: nil,
+			opts: Config{
+				Coreboot: map[string]CorebootOpts{
+					"coreboot-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output-dir/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+				Linux: map[string]LinuxOpts{
+					"linux-A": {
+						CommonOpts: CommonOpts{
+							SdkURL:            commonDummy.SdkURL,
+							RepoPath:          commonDummy.RepoPath,
+							OutputDir:         "output-dir-extra/",
+							ContainerInputDir: commonDummy.ContainerInputDir,
+						},
+						DefconfigPath: "dummy",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidateConfig(tc.opts)
+			assert.ErrorIs(t, err, tc.wantErr)
+		})
+	}
+}
+
 func TestConfigReadAndWrite(t *testing.T) {
 	configOriginal := Config{
 		Coreboot: map[string]CorebootOpts{},

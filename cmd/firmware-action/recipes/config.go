@@ -26,6 +26,10 @@ var (
 	ErrVerboseJSON = errors.New("unable to pinpoint the problem in JSON file")
 	// ErrEnvVarUndefined is raised when undefined environment variable is found in JSON configuration file
 	ErrEnvVarUndefined = errors.New("environment variable used in JSON file is not present in the environment")
+	// ErrNestedOutputDirs is raised when one module's output directory is a subdirectory of another module's output directory
+	ErrNestedOutputDirs = errors.New("nested output directories detected")
+	// ErrDuplicateOutputDirs is raised when multiple modules use the same output directory
+	ErrDuplicateOutputDirs = errors.New("duplicate output directories detected")
 )
 
 // =================
@@ -325,6 +329,95 @@ func ValidateConfig(conf Config) error {
 		)
 		return err
 	}
+
+	// Check for nested/duplicate output directories
+	return validateOutputDirectories(conf.AllModules())
+}
+
+// validateOutputDirectories checks for nested or duplicate output directories
+func validateOutputDirectories(modules map[string]FirmwareModule) error {
+	// Check for nested output directories
+	//
+	// Here are few examples:
+	//   VALID:
+	//     .
+	//     ├── output-linux
+	//     │   └── linux.bin
+	//     └── output-uroot
+	//         └── uroot.bin
+	//   VALID:
+	//     .
+	//     └── output
+	//         ├── output-linux
+	//         │   └── linux.bin
+	//         └── output-uroot
+	//             └── uroot.bin
+	//   INVALID:
+	//     .
+	//     └── output
+	//         ├── output-linux
+	//         │   └── linux.bin
+	//         └── uroot.bin
+
+	outputDirs := make(map[string]string) // Map of output dir -> module name
+	var issues []error
+
+	// Check for duplicate output directories
+	for moduleName, module := range modules {
+		outputDir := filepath.Clean(module.GetOutputDir())
+
+		// Check if this output directory already exists in our map
+		if existingModule, exists := outputDirs[outputDir]; exists {
+			// We found a duplicate output directory
+			errMsg := fmt.Sprintf("modules '%s' and '%s' have the same output directory '%s'",
+				existingModule, moduleName, outputDir)
+			err := fmt.Errorf("%w: %s", ErrDuplicateOutputDirs, errMsg)
+			slog.Error(
+				"Detected duplicate output directories",
+				slog.String("suggestion", "Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory."),
+				slog.Any("error", err),
+			)
+			issues = append(issues, err)
+		}
+
+		// Add this output directory to our map
+		outputDirs[outputDir] = moduleName
+	}
+
+	// Check if any output directory is a subdirectory of another
+	for dir1, module1 := range outputDirs {
+		for dir2, module2 := range outputDirs {
+			// Skip comparing to itself
+			if dir1 == dir2 {
+				continue
+			}
+
+			// Check for nesting
+			// adding `filepath.Separator` is necessary because of the `strings.HasPrefix` to avoid false positives
+			dirSep := string(filepath.Separator)
+			if strings.HasPrefix(dir1+dirSep, dir2+dirSep) {
+				errMsg := fmt.Sprintf("output directory '%s' of module '%s' is a subdirectory of '%s' from module '%s'",
+					dir1, module1, dir2, module2)
+				err := fmt.Errorf("%w: %s", ErrNestedOutputDirs, errMsg)
+				slog.Error(
+					"Detected nested output directories",
+					slog.String("suggestion", "Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory. This directory is deleted when changes are detected and re-build is required."),
+					slog.Any("error", err),
+				)
+				issues = append(issues, err)
+			}
+		}
+	}
+
+	// If we found any issues, return a combined error
+	if len(issues) > 0 {
+		var combinedErr error
+		for _, err := range issues {
+			combinedErr = errors.Join(combinedErr, err)
+		}
+		return combinedErr
+	}
+
 	return nil
 }
 
