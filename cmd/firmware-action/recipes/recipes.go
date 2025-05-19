@@ -238,6 +238,9 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		if errExists == nil && !empty {
 			if detectedChanges.DetectChanges(target) {
 				// If any of the sources changed, we need to rebuild
+				slog.Debug(
+					fmt.Sprintf("Deleting '%s'", modules[target].GetOutputDir()),
+				)
 				os.RemoveAll(modules[target].GetOutputDir())
 			} else {
 				// Is already up-to-date
