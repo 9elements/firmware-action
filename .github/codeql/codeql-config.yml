@@ -1,0 +1,6 @@
+paths:
+  - .dagger-ci
+paths-ignore:
+  - '**/node_modules/**'
+  - '**/vendor/**'
+  - '**/tests/**'
