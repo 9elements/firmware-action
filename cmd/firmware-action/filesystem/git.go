@@ -27,7 +27,7 @@ func gitRun(subdir string, command []string) (string, error) {
 	}
 
 	// Change current working directory into the repository / submodule
-	defer os.Chdir(pwd) // nolint:errcheck
+	defer os.Chdir(pwd) //nolint:errcheck
 	err = os.Chdir(subdir)
 	if err != nil {
 		slog.Error(

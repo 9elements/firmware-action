@@ -147,7 +147,7 @@ submodule_out:
 
 	// Create overview table
 	for _, item := range results {
-		result := ""
+		var result string
 		if item.BuildResult == nil {
 			result = "Success"
 		} else if errors.Is(item.BuildResult, recipes.ErrBuildUpToDate) {
@@ -162,6 +162,7 @@ submodule_out:
 	if err == nil {
 		slog.Info("Build finished successfully")
 	}
+
 	return err
 }
 
@@ -217,6 +218,7 @@ func parseCli() (string, error) {
 		}
 
 		slog.Info("Configuration file(s) validated successfully")
+
 		return "", nil
 
 	case "generate-config":
