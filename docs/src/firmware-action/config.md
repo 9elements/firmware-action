@@ -152,6 +152,13 @@ For more tails see [go-playground/validator](https://github.com/go-playground/va
 {{#include ../../../cmd/firmware-action/recipes/config.go:CommonOpts}}
 ```
 
+```admonish warning
+Avoid nesting output directories. Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory. This directory is deleted when changes are detected and re-build is required.
+~~~go
+{{#include ../../../cmd/firmware-action/recipes/config.go:NestedOutputs}}
+~~~
+```
+
 ### Specific / coreboot
 ```go
 {{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
