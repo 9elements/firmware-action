@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.17.3 - 2025-06-02
+#### Bug Fixes
+- **(ci)** release merge group checks - (ea7b660) - AtomicFS
+- **(cmd)** add validation for nested output directories - (38f7d43) - AtomicFS
+- **(codeql)** python code analysis - (e019e21) - AtomicFS
+#### Build system
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (729c66d) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (1a89545) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (fe0281e) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (a34e4f1) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (e195fab) - dependabot[bot]
+- **(deps)** update pytest-timeout requirement in /.dagger-ci/daggerci - (bd70b7a) - dependabot[bot]
+#### Continuous Integration
+- **(test)** add Codecov reporting - (f1c2f11) - AtomicFS
+- **(test)** collect coverage reports - (fad3f27) - AtomicFS
+- add codeql.yml - (507e1e1) - AtomicFS
+#### Documentation
+- add notes about new validation rules - (9cb87d5) - AtomicFS
+- update readme - (0e98c6f) - AtomicFS
+#### Miscellaneous Chores
+- **(cmd)** add debug message - (40bb765) - AtomicFS
+- **(lint)** golangci more strict - (772ef06) - AtomicFS
+- changes according to linter - (e770375) - AtomicFS
+- update .gitignore - (775c106) - AtomicFS
+- cosmetic fix - (1959ca6) - AtomicFS
+
+- - -
+
 ## v0.17.2 - 2025-05-05
 #### Bug Fixes
 - **(action)** handle nested output directories in artifact caching - (7e5b2e4) - AtomicFS
