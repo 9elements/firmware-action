@@ -18,11 +18,15 @@ import (
 func TestChangeTimeStamp(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	const StatusDir = ".firmware-action"
-	const target = "dummy"
+	const (
+		StatusDir = ".firmware-action"
+		target    = "dummy"
+	)
+
 	timestampsDir := filepath.Join(tmpDir, StatusDir, "timestamps")
 	repoPath := filepath.Join(tmpDir, "repo")
 	assert.NoError(t, os.MkdirAll(repoPath, os.ModePerm))
+
 	resultFile := filepath.Join(timestampsDir, filesystem.Filenamify(target, "txt"))
 
 	myTimeStamp := ChangeTimeStamp{
@@ -61,16 +65,22 @@ func TestChangeTimeStamp(t *testing.T) {
 func TestChangeConfig(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	const StatusDir = ".firmware-action"
-	const target = "dummy"
+	const (
+		StatusDir = ".firmware-action"
+		target    = "dummy"
+	)
+
 	CompiledConfigsDir = filepath.Join(tmpDir, StatusDir, "configs")
 	repoPath := filepath.Join(tmpDir, "repo/")
 	assert.NoError(t, os.MkdirAll(repoPath, os.ModePerm))
+
 	resultFile := filepath.Join(CompiledConfigsDir, filesystem.Filenamify(target, "json"))
 
-	const outputDir = "output-universal/"
-	const depends = "pre-dummy"
-	const outputDir2 = "output-universal2/"
+	const (
+		outputDir  = "output-universal/"
+		depends    = "pre-dummy"
+		outputDir2 = "output-universal2/"
+	)
 
 	config := Config{
 		Universal: map[string]UniversalOpts{
@@ -194,11 +204,15 @@ func gitRepoUpdateReadme(t *testing.T, tmpDir string) {
 func TestChangeGitHash(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	const StatusDir = ".firmware-action"
-	const target = "dummy"
+	const (
+		StatusDir = ".firmware-action"
+		target    = "dummy"
+	)
+
 	gitRepoHashDir := filepath.Join(tmpDir, StatusDir, "git-hashes")
 	repoPath := filepath.Join(tmpDir, "repo")
 	assert.NoError(t, os.MkdirAll(repoPath, os.ModePerm))
+
 	resultFile := filepath.Join(gitRepoHashDir, filesystem.Filenamify(target, "txt"))
 
 	myChangeGitHash := ChangeGitHash{

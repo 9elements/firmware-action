@@ -35,12 +35,15 @@ type LinuxSpecific struct {
 
 // LinuxOpts is used to store all data needed to build linux
 type LinuxOpts struct {
+	// Common options like paths etc.
+	CommonOpts
+
+	// Linux specific options
+	LinuxSpecific
+
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
 	Depends []string `json:"depends"`
-
-	// Common options like paths etc.
-	CommonOpts
 
 	// Specifies target architecture, such as 'x86' or 'arm64'.
 	// Supported options:
@@ -52,9 +55,6 @@ type LinuxOpts struct {
 
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`
-
-	// Linux specific options
-	LinuxSpecific
 }
 
 // ANCHOR_END: LinuxOpts

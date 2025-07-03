@@ -25,15 +25,15 @@ type URootSpecific struct {
 
 // URootOpts is used to store all data needed to build u-root
 type URootOpts struct {
-	// List of IDs this instance depends on
-	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
-	Depends []string `json:"depends"`
-
 	// Common options like paths etc.
 	CommonOpts
 
 	// u-root specific options
 	URootSpecific
+
+	// List of IDs this instance depends on
+	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
+	Depends []string `json:"depends"`
 }
 
 // ANCHOR_END: URootOpts

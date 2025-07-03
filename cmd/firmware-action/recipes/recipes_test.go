@@ -60,10 +60,13 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	t.Chdir(tmpDir)
 
 	// Create configuration
-	const target = "dummy"
-	const outputDir = "output-coreboot/"
-	const depends = "pre-dummy"
-	const outputDir2 = "output-coreboot2/"
+	const (
+		target     = "dummy"
+		outputDir  = "output-coreboot/"
+		depends    = "pre-dummy"
+		outputDir2 = "output-coreboot2/"
+	)
+
 	myConfig := Config{
 		Coreboot: map[string]CorebootOpts{
 			target: {

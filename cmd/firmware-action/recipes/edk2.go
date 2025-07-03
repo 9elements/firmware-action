@@ -36,12 +36,15 @@ type Edk2Specific struct {
 
 // Edk2Opts is used to store all data needed to build edk2.
 type Edk2Opts struct {
+	// Common options like paths etc.
+	CommonOpts
+
+	// Coreboot specific options
+	Edk2Specific `validate:"required"`
+
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleLinux"]
 	Depends []string `json:"depends"`
-
-	// Common options like paths etc.
-	CommonOpts
 
 	// Specifies target architecture, such as 'x86' or 'arm64'. Currently unused for coreboot.
 	// Supported options:
@@ -56,9 +59,6 @@ type Edk2Opts struct {
 	// For EDK2 this is a one-line file containing the build arguments such as
 	//   '-D BOOTLOADER=COREBOOT -D TPM_ENABLE=TRUE -D NETWORK_IPXE=TRUE'.
 	DefconfigPath string `json:"defconfig_path" validate:"filepath"`
-
-	// Coreboot specific options
-	Edk2Specific `validate:"required"`
 }
 
 // ANCHOR_END: Edk2Opts

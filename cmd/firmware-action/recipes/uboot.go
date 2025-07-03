@@ -22,12 +22,12 @@ import (
 
 // UBootOpts is used to store all data needed to build u-root
 type UBootOpts struct {
+	// Common options like paths etc.
+	CommonOpts
+
 	// List of IDs this instance depends on
 	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
 	Depends []string `json:"depends"`
-
-	// Common options like paths etc.
-	CommonOpts
 
 	// Specifies target architecture, such as 'x86' or 'arm64'
 	Arch string `json:"arch"`
