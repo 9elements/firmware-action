@@ -53,6 +53,7 @@ linters:
     - godox
     - gosec
     - intrange
+    - maintidx
     - mirror
     - mnd
     - musttag
