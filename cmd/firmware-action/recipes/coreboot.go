@@ -37,11 +37,11 @@ type BlobDef struct {
 
 // CorebootOpts is used to store all data needed to build coreboot.
 type CorebootOpts struct {
-	// List of IDs this instance depends on
-	Depends []string `json:"depends"`
-
 	// Common options like paths etc.
 	CommonOpts
+
+	// List of IDs this instance depends on
+	Depends []string `json:"depends"`
 
 	// Gives the (relative) path to the defconfig that should be used to build the target.
 	DefconfigPath string `json:"defconfig_path" validate:"required,filepath"`

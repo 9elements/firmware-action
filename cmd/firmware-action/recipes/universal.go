@@ -25,15 +25,15 @@ type UniversalSpecific struct {
 
 // UniversalOpts is used to store all data needed to run universal commands
 type UniversalOpts struct {
-	// List of IDs this instance depends on
-	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
-	Depends []string `json:"depends"`
-
 	// Common options like paths etc.
 	CommonOpts
 
 	// Universal specific options
 	UniversalSpecific
+
+	// List of IDs this instance depends on
+	// Example: [ "MyLittleCoreboot", "MyLittleEdk2"]
+	Depends []string `json:"depends"`
 }
 
 // ANCHOR_END: UniversalOpts

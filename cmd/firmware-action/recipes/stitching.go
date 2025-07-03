@@ -58,11 +58,11 @@ type IfdtoolEntry struct {
 
 // FirmwareStitchingOpts is used to store all data needed to stitch firmware
 type FirmwareStitchingOpts struct {
-	// List of IDs this instance depends on
-	Depends []string `json:"depends"`
-
 	// Common options like paths etc.
 	CommonOpts
+
+	// List of IDs this instance depends on
+	Depends []string `json:"depends"`
 
 	// BaseFile into which inject files.
 	// !!! Must contain IFD !!!
