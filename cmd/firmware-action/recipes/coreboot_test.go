@@ -98,9 +98,19 @@ type gitCloneOpts struct {
 func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 	tb.Helper()
 
+	// Save current directory
+	originalDir, err := os.Getwd()
+	if err != nil {
+		tb.Errorf("failed to get current directory: %s", err.Error())
+	}
+	defer func() {
+		// Restore original directory
+		tb.Chdir(originalDir)
+	}()
+
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
-	err := os.MkdirAll(tmpFiles, 0o750)
+	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
@@ -342,9 +352,19 @@ func TestCorebootBuild(t *testing.T) {
 func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 	tb.Helper()
 
+	// Save current directory
+	originalDir, err := os.Getwd()
+	if err != nil {
+		tb.Errorf("failed to get current directory: %s", err.Error())
+	}
+	defer func() {
+		// Restore original directory
+		tb.Chdir(originalDir)
+	}()
+
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
-	err := os.MkdirAll(tmpFiles, 0o750)
+	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
