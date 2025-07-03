@@ -30,6 +30,7 @@ type Change struct {
 // ChangeTimeStamp is for detecting any change in source files based on time-stamps
 type ChangeTimeStamp struct {
 	Change
+
 	Sources []string
 }
 
@@ -41,6 +42,7 @@ func (c *ChangeTimeStamp) DetectChanges() bool {
 		c.ChangesDetected = false
 		return false
 	}
+
 	for _, source := range c.Sources {
 		// Either returns time, or zero time and error
 		//   zero time means there was no previous run
@@ -50,7 +52,9 @@ func (c *ChangeTimeStamp) DetectChanges() bool {
 			return true
 		}
 	}
+
 	c.ChangesDetected = false
+
 	return false
 }
 
@@ -60,6 +64,7 @@ func (c *ChangeTimeStamp) SaveCheckpoint(override bool) {
 	err := filesystem.CheckFileExists(c.ResultFile)
 	if errors.Is(err, os.ErrNotExist) || override {
 		slog.Debug("Saving timestamp checkpoint")
+
 		_ = filesystem.SaveCurrentRunTime(c.ResultFile)
 	}
 }
@@ -70,6 +75,7 @@ func (c *ChangeTimeStamp) SaveCheckpoint(override bool) {
 // ChangeConfig is for detecting any change in firmware-action configuration
 type ChangeConfig struct {
 	Change
+
 	Config *Config
 }
 
@@ -84,7 +90,9 @@ func (c *ChangeConfig) DetectChanges(target string) bool {
 		slog.Warn("Current configuration is nil, assuming no changes are needed",
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 		)
+
 		c.ChangesDetected = false
+
 		return false
 	}
 
@@ -98,19 +106,23 @@ func (c *ChangeConfig) DetectChanges(target string) bool {
 			slog.Warn(
 				fmt.Sprintf("The configuration used for previous build, stored in '%s', is not valid and will be assumed obsolete", CompiledConfigsDir),
 			)
+
 			c.ChangesDetected = true
+
 			return true
 		}
 
 		oldModules := oldConfig.AllModules()
 		modules := c.Config.AllModules()
 		c.ChangesDetected = !cmp.Equal(modules[target], oldModules[target])
+
 		return c.ChangesDetected
 	}
 
 	// The file might be missing (user deleted it, CI did not cache it, etc.)
 	// If the old config file is missing, just return false since no changes can be detected
 	c.ChangesDetected = false
+
 	return false
 }
 
@@ -121,6 +133,7 @@ func (c *ChangeConfig) SaveCheckpoint(override bool) {
 		slog.Debug("Saving config checkpoint")
 
 		dir := filepath.Dir(c.ResultFile)
+
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			slog.Error("Cannot create directory for files to aid in change detection",
@@ -143,12 +156,14 @@ func (c *ChangeConfig) SaveCheckpoint(override bool) {
 // ChangeGitHash is for detecting any change in git current commit hash
 type ChangeGitHash struct {
 	Change
+
 	RepoPath           string
 	currentGitDescribe string
 }
 
 func (c *ChangeGitHash) gitDescribe() {
 	var err error
+
 	c.currentGitDescribe, err = filesystem.GitDescribe(c.RepoPath)
 	if err != nil {
 		slog.Warn(
@@ -177,7 +192,9 @@ func (c *ChangeGitHash) DetectChanges() bool {
 			}
 		}
 	}
+
 	c.ChangesDetected = false
+
 	return false
 }
 
@@ -191,6 +208,7 @@ func (c *ChangeGitHash) SaveCheckpoint(target string, override bool) {
 		slog.Debug("Saving git commit hash checkpoint")
 
 		dir := filepath.Dir(c.ResultFile)
+
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
 			slog.Error("Cannot create directory for files to aid in change detection",

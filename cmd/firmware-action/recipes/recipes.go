@@ -54,9 +54,11 @@ func forestAddVertex(forest *dag.DAG, key string, value FirmwareModule, dependen
 	if err != nil {
 		return nil, err
 	}
+
 	for _, dep := range value.GetDepends() {
 		dependencies = append(dependencies, []string{key, dep})
 	}
+
 	return dependencies, nil
 }
 
@@ -77,6 +79,7 @@ func Build(
 ) ([]BuildResults, error) {
 	dependencyForest := dag.NewDAG()
 	dependencies := [][]string{}
+
 	var err error
 
 	// Create the forest (forest = multiple independent trees)
@@ -111,9 +114,13 @@ func Build(
 		if err != nil {
 			return nil, err
 		}
+
 		queueMutex.Lock()
+
 		queue = append(queue, v.(string))
+
 		queueMutex.Unlock()
+
 		return nil, nil
 	}
 
@@ -128,19 +135,23 @@ func Build(
 	if err != nil {
 		return nil, err
 	}
+
 	slices.Reverse(queue)
 
 	// Build each item in queue (if recursive)
 	slog.Info(fmt.Sprintf("Building queue: %v", queue))
+
 	builds := []BuildResults{}
+
 	if recursive {
 		slog.Info(fmt.Sprintf("Building '%s' recursively", target))
+
 		for _, item := range queue {
 			slog.Info(fmt.Sprintf("Building: %s", item))
 
 			err = executor(ctx, item, config)
-			builds = append(builds, BuildResults{item, err})
 
+			builds = append(builds, BuildResults{item, err})
 			if err != nil && !errors.Is(err, ErrBuildUpToDate) {
 				break
 			}
@@ -190,6 +201,7 @@ func IsDirEmpty(path string) (bool, error) {
 	if err == io.EOF {
 		return true, nil
 	}
+
 	return false, err // Either not empty or error, suits both cases
 }
 
@@ -234,6 +246,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		// If it is empty, then just continue with the building
 		// If changes in sources were detected, re-build
 		_, errExists := os.Stat(modules[target].GetOutputDir())
+
 		empty, _ := IsDirEmpty(modules[target].GetOutputDir())
 		if errExists == nil && !empty {
 			if detectedChanges.DetectChanges(target) {
@@ -253,6 +266,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 				//   be overridden
 				// We want these files to reflect last successful build, not last check
 				detectedChanges.SaveCheckpoint(target, false)
+
 				return ErrBuildUpToDate
 			}
 		}
@@ -266,12 +280,14 @@ func Execute(ctx context.Context, target string, config *Config) error {
 			for _, path := range paths {
 				finalPath := filepath.Join(outputDir, filepath.Base(path))
 				slog.Info(finalPath)
+
 				if _, err := os.Stat(finalPath); os.IsNotExist(err) {
 					slog.Error(
 						"Missing output files and/or directories from one or more required module(s) defined in 'Depends'",
 						slog.String("suggestion", "build needed modules or use '--recursive' build"),
 						slog.Any("error", errors.Join(err, ErrDependencyOutputMissing)),
 					)
+
 					return ErrDependencyOutputMissing
 				}
 			}
@@ -285,6 +301,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 			return err
 		}
 		defer client.Close()
+
 		environment.LogGroupStop("connect to dagger engine")
 
 		// Build the module
@@ -292,6 +309,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 		if err == nil {
 			// On successful build, save checkpoint data for next change detection
 			detectedChanges.SaveCheckpoint(target, true)
+
 			if environment.DetectGithub() {
 				// If in GitHub, copy output directory into 'StatusDir', so that it can be cached
 				//   and also automatically uploaded as artifact
@@ -306,6 +324,7 @@ func Execute(ctx context.Context, target string, config *Config) error {
 					slog.String("Source", dirToCache),
 					slog.String("Destination", pathToCache),
 				)
+
 				if err := filesystem.CopyDir(dirToCache, pathToCache); err != nil {
 					return err
 				}
@@ -318,8 +337,10 @@ func Execute(ctx context.Context, target string, config *Config) error {
 				}
 			}
 		}
+
 		return err
 	}
+
 	return ErrTargetMissing
 }
 
@@ -340,6 +361,7 @@ func NormalizeArchitecture(arch string) string {
 		"x86-64": "amd64",
 		"x86_64": "amd64",
 	}
+
 	result, ok := archMap[arch]
 	if result != "" && ok {
 		return result
@@ -357,6 +379,7 @@ func NormalizeArchitectureForLinux(arch string) string {
 		// x86 64-bit (x86_64 reuses x86)
 		"amd64": "x86",
 	}
+
 	result, ok := archMap[normalArch]
 	if result != "" && ok {
 		return result

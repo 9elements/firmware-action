@@ -284,6 +284,7 @@ func (c Config) Merge(other Config) (Config, error) {
 					if existing := mergedMap.MapIndex(key); existing.IsValid() {
 						fmt.Printf("Warning: overriding key %v in field %s\n", key, fieldType.Name)
 					}
+
 					mergedMap.SetMapIndex(key, mapOther.MapIndex(key))
 				}
 			}
@@ -327,6 +328,7 @@ func ValidateConfig(conf Config) error {
 			slog.String("suggestion", "Double check the used configuration file"),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -360,8 +362,8 @@ func validateOutputDirectories(modules map[string]FirmwareModule) error {
 	//         │   └── linux.bin
 	//         └── uroot.bin
 	// ANCHOR_END: NestedOutputs
-
 	outputDirs := make(map[string]string) // Map of output dir -> module name
+
 	var issues []error
 
 	// Check for duplicate output directories
@@ -417,6 +419,7 @@ func validateOutputDirectories(modules map[string]FirmwareModule) error {
 		for _, err := range issues {
 			combinedErr = errors.Join(combinedErr, err)
 		}
+
 		return combinedErr
 	}
 
@@ -426,30 +429,36 @@ func validateOutputDirectories(modules map[string]FirmwareModule) error {
 // FindAllEnvVars returns all environment variables found in the provided string
 func FindAllEnvVars(text string) []string {
 	pattern := regexp.MustCompile(`\${?([a-zA-Z0-9_]+)}?`)
+
 	result := pattern.FindAllString(text, -1)
 	for index, value := range result {
 		result[index] = pattern.ReplaceAllString(value, "$1")
 	}
+
 	return result
 }
 
 // ReadConfigs is for reading and parsing multiple JSON configuration files into single Config struct
 func ReadConfigs(filepaths []string) (*Config, error) {
 	var allConfigs Config
+
 	for _, filepath := range filepaths {
 		trimmedFilepath := strings.TrimSpace(filepath)
 		slog.Debug("Reading config",
 			slog.String("path", trimmedFilepath),
 		)
+
 		payload, err := ReadConfig(trimmedFilepath)
 		if err != nil {
 			return nil, err
 		}
+
 		allConfigs, err = allConfigs.Merge(*payload)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return &allConfigs, nil
 }
 
@@ -462,13 +471,16 @@ func ReadConfig(filepath string) (*Config, error) {
 			fmt.Sprintf("Unable to open the configuration file '%s'", filepath),
 			slog.Any("error", err),
 		)
+
 		return nil, err
 	}
+
 	contentStr := string(content)
 
 	// Check if all environment variables are defined
 	envVars := FindAllEnvVars(contentStr)
 	undefinedVarFound := false
+
 	for _, envVar := range envVars {
 		_, found := os.LookupEnv(envVar)
 		if !found {
@@ -477,9 +489,11 @@ func ReadConfig(filepath string) (*Config, error) {
 				slog.String("suggestion", "define the environment variable in the environment"),
 				slog.Any("error", ErrEnvVarUndefined),
 			)
+
 			undefinedVarFound = true
 		}
 	}
+
 	if undefinedVarFound {
 		return nil, ErrEnvVarUndefined
 	}
@@ -492,6 +506,7 @@ func ReadConfig(filepath string) (*Config, error) {
 	jsonDecoder.DisallowUnknownFields()
 	// jsonDecoder will return error when contentStr has keys not matching fields in Config struct
 	var payload Config
+
 	err = jsonDecoder.Decode(&payload)
 	if err != nil {
 		JSONVerboseError(contentStr, err)
@@ -518,6 +533,7 @@ func WriteConfig(filepath string, config *Config) error {
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -527,6 +543,7 @@ func WriteConfig(filepath string, config *Config) error {
 			"Failed to write configuration into JSON file",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -548,8 +565,10 @@ func JSONVerboseError(jsonString string, err error) {
 			fmt.Sprintf("Syntax error at line %d, character %d", line, character),
 			slog.Any("error", jsonError.Error()),
 		)
+
 		return
 	}
+
 	if jsonError, ok := err.(*json.UnmarshalTypeError); ok {
 		// JSON value is not appropriate for a given target type
 		line, character, _ := offsetToLineNumber(jsonString, int(jsonError.Offset))
@@ -566,8 +585,10 @@ func JSONVerboseError(jsonString string, err error) {
 			),
 			slog.Any("error", jsonError.Error()),
 		)
+
 		return
 	}
+
 	slog.Error(
 		"Sorry but could not pinpoint specific location of the problem in the JSON configuration file",
 		slog.Any("error", err),
@@ -578,25 +599,29 @@ func offsetToLineNumber(input string, offset int) (int, int, error) {
 	// NOTE: I do not take into account windows line endings
 	//       I can't be bothered, the worst case is that with windows line-endings the character counter
 	//       will be off by 1, which is a sacrifice I am willing to make
-
 	if offset > len(input) || offset < 0 {
 		err := fmt.Errorf("offset is out of bounds for given string: %w", ErrVerboseJSON)
 		slog.Warn(
 			"Failed to pinpoint exact location of error in JSON configuration file",
 			slog.Any("error", err),
 		)
+
 		return 0, 0, err
 	}
 
 	line := 1
 	character := 0
+
 	for index, char := range input {
 		if char == '\n' {
 			line++
 			character = 0
+
 			continue
 		}
+
 		character++
+
 		if index >= offset {
 			break
 		}

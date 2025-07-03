@@ -53,6 +53,7 @@ func TestEdk2(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -73,6 +74,7 @@ func TestEdk2(t *testing.T) {
 				err = cmd.Run()
 				assert.NoError(t, err)
 			}
+
 			cmd := exec.Command("cp", "-R", tc.version, filepath.Join(tmpDir, "Edk2"))
 			err = cmd.Run()
 			assert.NoError(t, err)
@@ -88,6 +90,7 @@ func TestEdk2(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, tc.edk2Options.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			tc.edk2Options.OutputDir = outputPath
 
 			// Try to build edk2

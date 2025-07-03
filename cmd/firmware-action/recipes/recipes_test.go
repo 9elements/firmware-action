@@ -17,6 +17,7 @@ func TestExecute(t *testing.T) {
 	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
+
 	defer client.Close()
 
 	testCases := []struct {
@@ -51,6 +52,7 @@ func TestExecuteSkipAndMissing(t *testing.T) {
 	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
+
 	defer client.Close()
 
 	// Change current working directory
@@ -256,7 +258,9 @@ func TestBuild(t *testing.T) {
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
+
 	const recursive = true
+
 	t.Run("recursive", func(t *testing.T) {
 		builds, err := Build(
 			ctx,
@@ -273,10 +277,12 @@ func TestBuild(t *testing.T) {
 
 		// Go though 'builds' and check if for each builds, the dependencies are already complete
 		done := []string{}
+
 		for _, item := range builds {
 			for _, i := range testConfigDependencyHell.Coreboot[item.Name].Depends {
 				assert.Contains(t, done, i)
 			}
+
 			done = append(done, item.Name)
 		}
 	})

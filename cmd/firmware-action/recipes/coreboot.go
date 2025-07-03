@@ -87,6 +87,7 @@ func (opts CorebootOpts) GetSources() []string {
 			"Failed to process all blobs",
 			slog.Any("error", err),
 		)
+
 		return nil
 	}
 
@@ -97,8 +98,10 @@ func (opts CorebootOpts) GetSources() []string {
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return nil
 	}
+
 	for blob := range blobs {
 		// Path to local file on host
 		src := filepath.Join(
@@ -129,6 +132,7 @@ func (opts CorebootOpts) ProcessBlobs() ([]BlobDef, error) {
 			blobs = append(blobs, newBlob)
 		}
 	}
+
 	return blobs, nil
 }
 
@@ -144,12 +148,14 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 		InputDirs:         opts.InputDirs,
 		InputFiles:        opts.InputFiles,
 	}
+
 	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -163,8 +169,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
+
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
 		client.Host().File(filepath.Join(pwd, opts.DefconfigPath)),
@@ -173,6 +181,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 	// Get value of CONFIG_MAINBOARD_DIR / MAINBOARD_DIR variable from dotconfig
 	//   to extract value of 'CONFIG_MAINBOARD_DIR', there must be '.config'
 	generateDotConfigCmd := []string{"make", fmt.Sprintf("KBUILD_DEFCONFIG=%s", defconfigBasename), "defconfig"}
+
 	mainboardDir, err := myContainer.
 		WithExec(generateDotConfigCmd).
 		WithExec([]string{"./util/scripts/config", "-s", "CONFIG_MAINBOARD_DIR"}).
@@ -182,6 +191,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to get value of MAINBOARD_DIR from .config",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 	//   strip newline from mainboardDir
@@ -206,8 +216,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to process all blobs",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
+
 	for blob := range blobs {
 		// Path to local file on host
 		src := filepath.Join(
@@ -228,8 +240,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				slog.String("suggestion", "blobs are copied into container separately from 'input_files' and 'input_dirs', the path should point to files on your host"),
 				slog.Any("error", err),
 			)
+
 			return err
 		}
+
 		if errors.Is(err, filesystem.ErrPathIsDirectory) {
 			// Directory
 			slog.Info(fmt.Sprintf("Copying directory '%s' to container at '%s'", src, dst))
@@ -257,6 +271,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				slog.String("blob_kconfig", blobs[blob].KconfigKey),
 				slog.Any("error", err),
 			)
+
 			return err
 		}
 
@@ -284,8 +299,10 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 			"Failed to extract environment variables from current environment",
 			slog.Any("error", err),
 		)
+
 		return fmt.Errorf("coreboot build failed: %w", err)
 	}
+
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
@@ -300,6 +317,7 @@ func (opts CorebootOpts) buildFirmware(ctx context.Context, client *dagger.Clien
 				"Failed to build coreboot",
 				slog.Any("error", err),
 			)
+
 			return fmt.Errorf("coreboot build failed: %w", err)
 		}
 	}
@@ -335,6 +353,7 @@ func corebootPassEnvVars(repoPath string) (map[string]string, error) {
 
 	// If .coreboot-version file exists in coreboot directory, do nothing
 	corebootVersionPath := filepath.Join(repoPath, ".coreboot-version")
+
 	err := filesystem.CheckFileExists(corebootVersionPath)
 	if errors.Is(err, os.ErrExist) {
 		return envVariables, nil
@@ -350,6 +369,7 @@ func corebootPassEnvVars(repoPath string) (map[string]string, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		envVariables["KERNELVERSION"] = describe
 	}
 

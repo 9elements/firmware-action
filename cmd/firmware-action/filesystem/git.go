@@ -28,12 +28,14 @@ func gitRun(subdir string, command []string) (string, error) {
 
 	// Change current working directory into the repository / submodule
 	defer os.Chdir(pwd) //nolint:errcheck
+
 	err = os.Chdir(subdir)
 	if err != nil {
 		slog.Error(
 			fmt.Sprintf("Failed to change current working directory to '%s'", subdir),
 			slog.Any("error", err),
 		)
+
 		return "", err
 	}
 
@@ -41,8 +43,10 @@ func gitRun(subdir string, command []string) (string, error) {
 	cmd := exec.Command(command[0], command[1:]...)
 	stdout, err := cmd.CombinedOutput()
 	stdoutStr := string(stdout)
+
 	if err != nil {
 		pattern := regexp.MustCompile(`^fatal: not a git repository.*`)
+
 		match := pattern.MatchString(stdoutStr)
 		if match {
 			err = ErrNotGitRepository
@@ -53,6 +57,7 @@ func gitRun(subdir string, command []string) (string, error) {
 			slog.String("stdout and stderr", stdoutStr),
 			slog.Any("error", err),
 		)
+
 		return stdoutStr, err
 	}
 
@@ -77,6 +82,7 @@ func GitDescribeCoreboot(repoPath string) (string, error) {
 	hash, err := gitDescribe(repoPath, &cfg)
 
 	pattern := regexp.MustCompile(`[\d\w]{13}(\-dirty)?`)
+
 	valid := pattern.MatchString(hash)
 	if !valid {
 		slog.Warn(
@@ -94,6 +100,7 @@ func GitDescribe(repoPath string) (string, error) {
 		dirty:  true,
 		always: true,
 	}
+
 	return gitDescribe(repoPath, &cfg)
 }
 
@@ -102,9 +109,11 @@ func gitDescribe(repoPath string, cfg *describe) (string, error) {
 	if cfg.abbrev > 0 {
 		cmd = append(cmd, fmt.Sprintf("--abbrev=%d", cfg.abbrev))
 	}
+
 	if cfg.dirty {
 		cmd = append(cmd, "--dirty")
 	}
+
 	if cfg.always {
 		cmd = append(cmd, "--always")
 	}
@@ -119,6 +128,7 @@ func gitDescribe(repoPath string, cfg *describe) (string, error) {
 
 	// Check validity of the returned string
 	pattern := regexp.MustCompile(`[\d\w]{13}(\-dirty)?`)
+
 	valid := pattern.MatchString(result)
 	if !valid {
 		slog.Warn(

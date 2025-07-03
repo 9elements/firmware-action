@@ -46,8 +46,10 @@ func CheckFileExists(path string) error {
 		if fileInfo.IsDir() {
 			return fmt.Errorf("%w: %s", ErrPathIsDirectory, path)
 		}
+
 		return os.ErrExist
 	}
+
 	return err
 }
 
@@ -69,6 +71,7 @@ func checkBeforeCopyOrMove(pathSource, pathDestination string) error {
 	if err != nil {
 		return err
 	}
+
 	if !pathSourceStat.Mode().IsRegular() && !pathSourceStat.IsDir() {
 		return fmt.Errorf("%w: %s", ErrFileNotRegular, pathSource)
 	}
@@ -99,6 +102,7 @@ func CopyFile(pathSource, pathDestination string) error {
 
 	// Copy
 	_, err = io.Copy(dst, src)
+
 	return err
 }
 
@@ -141,7 +145,9 @@ func DirTree(root string) ([]string, error) {
 		if info.IsDir() {
 			foundItem = fmt.Sprintf("%s/", path)
 		}
+
 		files = append(files, foundItem)
+
 		return nil
 	})
 
@@ -167,6 +173,7 @@ func LoadLastRunTime(pathLastRun string) (time.Time, error) {
 			fmt.Sprintf("Error when reading file '%s'", pathLastRun),
 			slog.Any("error", err),
 		)
+
 		return time.Time{}, err
 	}
 
@@ -178,8 +185,10 @@ func LoadLastRunTime(pathLastRun string) (time.Time, error) {
 			fmt.Sprintf("Error when parsing time-stamp from '%s'", pathLastRun),
 			slog.Any("error", err),
 		)
+
 		return time.Time{}, err
 	}
+
 	return lastRun, nil
 }
 
@@ -189,6 +198,7 @@ func SaveCurrentRunTime(pathLastRun string) error {
 
 	// Create directory if needed
 	dir := filepath.Dir(pathLastRun)
+
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
 		return err
@@ -204,6 +214,7 @@ func GetFileModTime(filePath string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+
 	return info.ModTime(), nil
 }
 
@@ -234,15 +245,18 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 			if info.Name() == ".git" && info.IsDir() {
 				return filepath.SkipDir
 			}
+
 			if !info.IsDir() {
 				fileInfo, err := info.Info()
 				if err != nil {
 					return err
 				}
+
 				if fileInfo.ModTime().After(givenTime) {
 					return fmt.Errorf("file '%s' has been modified: %w", path, ErrFileModified)
 				}
 			}
+
 			return nil
 		})
 		if errors.Is(errMod, ErrFileModified) {
@@ -250,8 +264,10 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 				"Detected changes in files",
 				slog.Any("error", errMod),
 			)
+
 			return true, nil
 		}
+
 		return false, nil
 	}
 
@@ -263,8 +279,10 @@ func AnyFileNewerThan(path string, givenTime time.Time) (bool, error) {
 				fmt.Sprintf("Encountered error when getting modification time of file '%s'", path),
 				slog.Any("error", errMod),
 			)
+
 			return false, errMod
 		}
+
 		return modTime.After(givenTime), nil
 	}
 
@@ -295,6 +313,7 @@ func sanitizeAndTruncate(input string, length int) string {
 	if len(result) > length {
 		return string(result[:length])
 	}
+
 	return result
 }
 

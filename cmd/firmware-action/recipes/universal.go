@@ -60,12 +60,14 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 		InputDirs:         opts.InputDirs,
 		InputFiles:        opts.InputFiles,
 	}
+
 	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -88,6 +90,7 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 				"Failed to build universal",
 				slog.Any("error", err),
 			)
+
 			return fmt.Errorf("universal build failed: %w", err)
 		}
 	}

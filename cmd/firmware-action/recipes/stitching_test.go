@@ -56,11 +56,13 @@ func TestExtractSizeFromString(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := ExtractSizeFromString(tc.stdout)
+
 			equal := cmp.Equal(tc.expected, result)
 			if !equal {
 				t.Log(cmp.Diff(tc.expected, result))
 				assert.True(t, equal, "failed to extract size of ROM from string")
 			}
+
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
@@ -125,11 +127,13 @@ func TestStringToSizeMB(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := StringToSizeMB(tc.text)
+
 			equal := cmp.Equal(tc.expected, result)
 			if !equal {
 				t.Log(cmp.Diff(tc.expected, result))
 				assert.True(t, equal, "failed to decipher size")
 			}
+
 			assert.ErrorIs(t, err, tc.wantErr)
 		})
 	}
@@ -145,6 +149,7 @@ func (base makeFile) MakeMe() error {
 	log.Printf("Path:       %s", base.Path)
 	log.Printf("Content:    %s", base.Content)
 	log.Printf("SourcePath: %s", base.SourcePath)
+
 	pwd, _ := os.Getwd()
 	log.Printf("PWD:        %s", pwd)
 
@@ -156,6 +161,7 @@ func (base makeFile) MakeMe() error {
 			if err != nil {
 				return err
 			}
+
 			_, err = file.Write([]byte(base.Content))
 			if err != nil {
 				return err
@@ -166,11 +172,15 @@ func (base makeFile) MakeMe() error {
 				log.Printf("[Mock MakeMe] file '%s' does not exists", base.SourcePath)
 				return os.ErrNotExist
 			}
+
 			log.Print("Success")
+
 			return filesystem.CopyFile(base.SourcePath, base.Path)
 		}
 	}
+
 	log.Print("Success")
+
 	return nil
 }
 
@@ -341,6 +351,7 @@ func TestStitching(t *testing.T) {
 			//   make repo dir
 			err := os.Mkdir(tc.stitchingOpts.RepoPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			outputPath := filepath.Join(tmpDir, tc.stitchingOpts.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
@@ -358,10 +369,12 @@ func TestStitching(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			err = tc.stitchingOpts.buildFirmware(ctx, client)
 			assert.ErrorIs(t, err, tc.wantErr)
+
 			if tc.wantErr != nil {
 				return
 			}
@@ -378,6 +391,7 @@ func TestStitching(t *testing.T) {
 			// Compare
 			newContent, err := os.ReadFile(finalImageFile)
 			assert.NoError(t, err)
+
 			hash := sha256.New()
 			hash.Write(newContent)
 			hashHex := hex.EncodeToString(hash.Sum(nil))

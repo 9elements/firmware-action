@@ -71,6 +71,7 @@ func TestLinux(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -111,6 +112,7 @@ func TestLinux(t *testing.T) {
 				err = exec.Command(cmd[0], cmd[1:]...).Run()
 				assert.NoError(t, err)
 			}
+
 			t.Chdir(myLinuxOpts.RepoPath)
 
 			// Copy over defconfig file into tmpDir/linux
@@ -134,6 +136,7 @@ func TestLinux(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, myLinuxOpts.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			myLinuxOpts.OutputDir = outputPath
 
 			// Try to build linux kernel

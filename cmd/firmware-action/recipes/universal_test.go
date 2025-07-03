@@ -44,6 +44,7 @@ func TestUniversal(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -63,6 +64,7 @@ func TestUniversal(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, myUniversalOpts.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			myUniversalOpts.OutputDir = outputPath
 
 			// Try to build universal

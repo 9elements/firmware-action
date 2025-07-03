@@ -566,6 +566,7 @@ func TestConfigEnvVars(t *testing.T) {
 
 			// err = ValidateConfig(optsConverted)
 			assert.ErrorIs(t, err, tc.wantErr)
+
 			if tc.wantErr == nil {
 				assert.Equal(t, tc.urlExpected, optsConverted.Coreboot["coreboot-A"].SdkURL)
 				assert.Equal(t, tc.repoPathExpected, optsConverted.Coreboot["coreboot-A"].RepoPath)
@@ -645,10 +646,12 @@ func TestOffsetToLineNumber(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			line, character, err := offsetToLineNumber(tc.input, tc.offset)
 			assert.ErrorIs(t, err, tc.wantErr)
+
 			if err != nil {
 				// no need to continue on error
 				return
 			}
+
 			assert.Equal(t, tc.line, line, "line is wrong")
 			assert.Equal(t, tc.character, character, "character is wrong")
 		})
