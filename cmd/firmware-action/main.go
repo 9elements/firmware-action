@@ -67,6 +67,7 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if mode == "" {
 		// Exit on "version" or "generate-config"
 		return nil
@@ -77,6 +78,7 @@ func run(ctx context.Context) error {
 	if CLI.Debug {
 		level = slog.LevelDebug
 	}
+
 	logging.InitLogger(
 		level,
 		logging.WithJSON(CLI.JSON),
@@ -97,21 +99,26 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	repo, err := git.PlainOpen(pwd)
 	if err == nil {
 		worktree, err := repo.Worktree()
 		if err != nil {
 			goto submodule_out
 		}
+
 		submodules, err := worktree.Submodules()
 		if err != nil {
 			goto submodule_out
 		}
+
 		status, err := submodules.Status()
 		if err != nil {
 			goto submodule_out
 		}
+
 		pattern := regexp.MustCompile(`(?m)^\-.*`)
+
 		matches := pattern.FindAllString(status.String(), -1)
 		for _, v := range matches {
 			patterSub := regexp.MustCompile(`^\-[\d\w]* `)
@@ -122,10 +129,13 @@ func run(ctx context.Context) error {
 			)
 		}
 	}
+
 submodule_out:
 
 	// Parse configuration file
+
 	var myConfig *recipes.Config
+
 	myConfig, err = recipes.ReadConfigs(CLI.Config)
 	if err != nil {
 		return err
@@ -155,8 +165,10 @@ submodule_out:
 		} else {
 			result = "Fail"
 		}
+
 		summaryTable.AppendRow([]interface{}{item.Name, result})
 	}
+
 	slog.Info(fmt.Sprintf("Build summary:\n%s", summaryTable.Render()))
 
 	if err == nil {
@@ -208,6 +220,7 @@ func parseCli() (string, error) {
 				"No configuration file was supplied",
 				slog.Any("error", os.ErrNotExist),
 			)
+
 			return "", os.ErrNotExist
 		}
 
@@ -228,6 +241,7 @@ func parseCli() (string, error) {
 				"No configuration file was supplied",
 				slog.Any("error", os.ErrNotExist),
 			)
+
 			return "", os.ErrNotExist
 		}
 		// Check if config file exists
@@ -238,6 +252,7 @@ func parseCli() (string, error) {
 				fmt.Sprintf("Can't generate configuration file at: %s", CLI.Config),
 				slog.Any("error", err),
 			)
+
 			return "", err
 		}
 
@@ -260,18 +275,22 @@ func parseCli() (string, error) {
 				slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 				slog.Any("error", err),
 			)
+
 			return "", err
 		}
 
 		// Write to file
 		slog.Info(fmt.Sprintf("Generating configuration file at: %s", CLI.Config))
+
 		if err := os.WriteFile(CLI.Config[0], jsonString, 0o666); err != nil {
 			slog.Error(
 				"Unable to write generated configuration into file",
 				slog.Any("error", err),
 			)
+
 			return "", err
 		}
+
 		return "", nil
 
 	default:
@@ -282,6 +301,7 @@ func parseCli() (string, error) {
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return mode, err
 	}
 }

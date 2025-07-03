@@ -103,6 +103,7 @@ func NewPrettyHandler(output io.Writer, opts ...PrettyHandlerOption) *PrettyHand
 	if h.opts.Level == nil {
 		h.opts.Level = slog.LevelInfo
 	}
+
 	return h
 }
 
@@ -164,9 +165,11 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 		} else {
 			bytes, err = json.Marshal(attrs)
 		}
+
 		if err != nil {
 			return err
 		}
+
 		tmpBuffer = append(tmpBuffer, bytes[:]...)
 	} else {
 		// Don't do JSON, rather use some more human-readable format
@@ -177,6 +180,7 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 			if slices.Contains(ignore, key) {
 				continue
 			}
+
 			switch val.(type) {
 			case bool:
 				details += fmt.Sprintf("    - %s: %t\n", key, val)
@@ -184,6 +188,7 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 				details += fmt.Sprintf("    - %s: %s\n", key, val)
 			}
 		}
+
 		tmpBuffer = append(tmpBuffer,
 			[]byte(fmt.Sprintf(
 				"[%-7s] %s\n%s",
@@ -197,6 +202,7 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	// Write into output
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
+
 	_, err = h.output.Write(tmpBuffer)
 
 	return err
@@ -205,6 +211,7 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 func (h *PrettyHandler) computeAttrs(ctx context.Context, r slog.Record) (map[string]any, error) {
 	// Deal with concurrency
 	h.mutex.Lock()
+
 	defer func() {
 		h.buffer.Reset()
 		h.mutex.Unlock()

@@ -25,6 +25,7 @@ func TestSetup(t *testing.T) {
 	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
+
 	defer client.Close()
 
 	testCases := []struct {
@@ -175,6 +176,7 @@ func TestSetup(t *testing.T) {
 			// Spin up container
 			container, err := Setup(ctx, client, &tc.opts)
 			assert.ErrorIs(t, err, tc.wantErr)
+
 			if err != nil {
 				// No need to continue on err
 				return
@@ -186,6 +188,7 @@ func TestSetup(t *testing.T) {
 					Sync(ctx)
 				assert.NoErrorf(t, err, "Directory '%s' does not exists", val)
 			}
+
 			for _, val := range tc.TestFiles {
 				_, err = container.WithExec([]string{"bash", "-c", fmt.Sprintf("[ -f %s ]", val)}).
 					Sync(ctx)
@@ -204,7 +207,9 @@ func TestGetArtifacts(t *testing.T) {
 	ctx := t.Context()
 	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 	assert.NoError(t, err)
+
 	defer client.Close()
+
 	filename := "my_file.txt"
 	filename2 := "my_file2.txt"
 	prefix := "my_directory"
@@ -361,13 +366,16 @@ func TestGetArtifacts(t *testing.T) {
 			for key := range tc.artifacts {
 				tc.artifacts[key].HostPath = filepath.Join(tmpDir, tc.artifacts[key].HostPath)
 			}
+
 			err = GetArtifacts(ctx, container, &tc.artifacts)
 
 			assert.ErrorIs(t, err, tc.wantErrExport)
+
 			if err != nil {
 				// No need to continue on err
 				return
 			}
+
 			for _, file := range tc.filepathsToTest {
 				assert.ErrorIs(t,
 					filesystem.CheckFileExists(filepath.Join(tmpDir, file)),

@@ -54,6 +54,7 @@ func TestUBoot(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -92,6 +93,7 @@ func TestUBoot(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, myUBootOpts.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			myUBootOpts.OutputDir = outputPath
 
 			// Try to build u-boot initramfs

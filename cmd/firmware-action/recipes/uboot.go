@@ -60,18 +60,21 @@ func (opts UBootOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 		InputDirs:         opts.InputDirs,
 		InputFiles:        opts.InputFiles,
 	}
+
 	myContainer, err := container.Setup(ctx, client, &containerOpts)
 	if err != nil {
 		slog.Error(
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
 	// U-Boot is closely related to Linux, so I assume similar requirements / problems
 	// Copy over the defconfig file
 	defconfigBasename := filepath.Base(opts.DefconfigPath)
+
 	err = ValidateLinuxDefconfigFilename(opts.DefconfigPath)
 	if err != nil {
 		return err
@@ -84,8 +87,10 @@ func (opts UBootOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
+
 	myContainer = myContainer.WithFile(
 		filepath.Join(ContainerWorkDir, defconfigBasename),
 		client.Host().File(filepath.Join(pwd, opts.DefconfigPath)),
@@ -97,6 +102,7 @@ func (opts UBootOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 	if err != nil {
 		return err
 	}
+
 	for key, value := range envVars {
 		myContainer = myContainer.WithEnvVariable(key, value)
 	}
@@ -126,6 +132,7 @@ func (opts UBootOpts) buildFirmware(ctx context.Context, client *dagger.Client) 
 				"Failed to build u-boot",
 				slog.Any("error", err),
 			)
+
 			return fmt.Errorf("u-boot build failed: %w", err)
 		}
 	}

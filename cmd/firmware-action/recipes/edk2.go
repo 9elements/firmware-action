@@ -107,6 +107,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) e
 			"Failed to start a container",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -118,6 +119,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) e
 	// Assemble build arguments
 	//   and read content of the config file at "defconfig_path"
 	var defconfigFileArgs []byte
+
 	if opts.DefconfigPath != "" {
 		if _, err := os.Stat(opts.DefconfigPath); !errors.Is(err, os.ErrNotExist) {
 			defconfigFileArgs, err = os.ReadFile(opts.DefconfigPath)
@@ -140,6 +142,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) e
 		// Docs: https://go.dev/doc/install/source#environment
 		buildSteps = append(buildSteps, []string{"bash", "-c", "cd ${TOOLSDIR}/Edk2/; make -C BaseTools/ -j $(nproc)"})
 	}
+
 	buildSteps = append(buildSteps, []string{"bash", "-c", fmt.Sprintf("%s %s", opts.BuildCommand, string(defconfigFileArgs))})
 
 	// Build
@@ -152,6 +155,7 @@ func (opts Edk2Opts) buildFirmware(ctx context.Context, client *dagger.Client) e
 				"Failed to build edk2",
 				slog.Any("error", err),
 			)
+
 			return fmt.Errorf("edk2 build failed: %w", err)
 		}
 	}

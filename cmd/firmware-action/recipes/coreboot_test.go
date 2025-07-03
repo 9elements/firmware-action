@@ -57,6 +57,7 @@ func TestCorebootProcessBlobs(t *testing.T) {
 			for i := range tc.expected {
 				// If we do not want error
 				payloadFile := filepath.Join(tmpDir, tc.expected[i].Path)
+
 				payloadDir := filepath.Dir(payloadFile)
 				if tc.wantErr == nil {
 					// Create the temp directory
@@ -73,6 +74,7 @@ func TestCorebootProcessBlobs(t *testing.T) {
 			}
 			output, err := opts.ProcessBlobs()
 			assert.ErrorIs(t, err, tc.wantErr)
+
 			if err == nil {
 				equal := cmp.Equal(tc.expected, output)
 				if !equal {
@@ -103,6 +105,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 	if err != nil {
 		tb.Errorf("failed to get current directory: %s", err.Error())
 	}
+
 	defer func() {
 		// Restore original directory
 		tb.Chdir(originalDir)
@@ -110,6 +113,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
+
 	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
@@ -120,6 +124,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 	// Clone repository into cache if not done yet
 	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
 		tb.Chdir(tmpFiles)
+
 		if err != nil {
 			tb.Errorf("failed to change directory to '%s': %s", tmpFiles, err.Error())
 		}
@@ -128,13 +133,16 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 		if opts.branch != "" {
 			command = append(command, "--branch", opts.branch)
 		}
+
 		if opts.depth != 0 {
 			command = append(command, "--depth", strconv.Itoa(opts.depth))
 		}
+
 		command = append(command, opts.url, opts.dirName)
 
 		// Clone
 		cmd := exec.Command(command[0], command[1:]...)
+
 		stdout, err := cmd.CombinedOutput()
 		if err != nil {
 			tb.Errorf("failed to 'git clone': '%s' (%s)", string(stdout), err.Error())
@@ -151,6 +159,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 			}
 			for _, cmd := range cmds {
 				command := exec.Command(cmd[0], cmd[1:]...)
+
 				stdout, err := command.CombinedOutput()
 				if err != nil {
 					tb.Errorf("failed to 'git fetch': '%s' (%s)", string(stdout), err.Error())
@@ -161,6 +170,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 		if opts.tag != "" {
 			// Checkout a tag
 			cmd = exec.Command("git", "checkout", opts.tag)
+
 			stdout, err := cmd.CombinedOutput()
 			if err != nil {
 				tb.Errorf("failed to 'git checkout %s': '%s' (%s)", opts.tag, string(stdout), err.Error())
@@ -169,6 +179,7 @@ func gitCloneWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 		// Init git submodules
 		cmd = exec.Command("git", "submodule", "update", "--init", "--checkout")
+
 		stdout, err = cmd.CombinedOutput()
 		if err != nil {
 			tb.Errorf("failed to init git submodules: '%s' ('%s')", string(stdout), err.Error())
@@ -267,6 +278,7 @@ func TestCorebootBuild(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -308,6 +320,7 @@ func TestCorebootBuild(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			tc.corebootOptions.OutputDir = outputPath
 			outputPathUniversal := filepath.Join(tmpDir, tc.universalOptions.OutputDir)
 			tc.universalOptions.OutputDir = outputPathUniversal
@@ -339,6 +352,7 @@ func TestCorebootBuild(t *testing.T) {
 				// Find the coreboot version
 				corebootVersionFileContent, err := os.ReadFile(corebootVersionFile)
 				assert.NoError(t, err)
+
 				versionEntryPatter := regexp.MustCompile(`COREBOOT_VERSION: (.*)`)
 				version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
 
@@ -357,6 +371,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 	if err != nil {
 		tb.Errorf("failed to get current directory: %s", err.Error())
 	}
+
 	defer func() {
 		// Restore original directory
 		tb.Chdir(originalDir)
@@ -364,11 +379,14 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 	// Make directory for temporary testing files
 	tmpFiles := filepath.Join(os.TempDir(), "__firmware-action_tmp_files__")
+
 	err = os.MkdirAll(tmpFiles, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
 	}
+
 	repoPath := filepath.Join(tmpFiles, opts.projectName)
+
 	err = os.MkdirAll(repoPath, 0o750)
 	if err != nil {
 		tb.Errorf("failed to create TMP dir: %s", err.Error())
@@ -386,6 +404,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 		}
 		for _, cmd := range cmds {
 			command := exec.Command(cmd[0], cmd[1:]...)
+
 			err = command.Run()
 			if err != nil {
 				tb.Errorf("failed to run command: '%v': %s", cmd, err.Error())
@@ -403,6 +422,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 			}
 			for _, cmd := range cmds {
 				command := exec.Command(cmd[0], cmd[1:]...)
+
 				err = command.Run()
 				if err != nil {
 					tb.Errorf("failed to 'git fetch': %s", err.Error())
@@ -413,6 +433,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 		if opts.tag != "" {
 			// Checkout tag
 			cmd := exec.Command("git", "checkout", opts.tag)
+
 			err = cmd.Run()
 			if err != nil {
 				tb.Errorf("failed to 'git checkout %s': %s", opts.tag, err.Error())
@@ -421,6 +442,7 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 
 		// Init git submodules
 		cmd := exec.Command("git", "submodule", "update", "--init", "--checkout")
+
 		err = cmd.Run()
 		if err != nil {
 			tb.Errorf("failed to init git submodules: %s", err.Error())
@@ -430,9 +452,11 @@ func gitCloneAsSubmoduleWithCache(tb testing.TB, opts *gitCloneOpts) {
 	if errors.Is(filesystem.CheckFileExists(repoPath), os.ErrNotExist) {
 		tb.Errorf("dir does not exists '%s'", repoPath)
 	}
+
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, ".git")), os.ErrNotExist) {
 		tb.Errorf("dir does not exists '%s/%s'", repoPath, ".git")
 	}
+
 	if errors.Is(filesystem.CheckFileExists(filepath.Join(repoPath, "coreboot")), os.ErrNotExist) {
 		tb.Errorf("dir does not exists '%s/%s'", repoPath, "coreboot")
 	}
@@ -540,6 +564,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			ctx := t.Context()
 			client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
 			assert.NoError(t, err)
+
 			defer client.Close()
 
 			// Prepare options
@@ -584,6 +609,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			outputPath := filepath.Join(tmpDir, tc.corebootOptions.OutputDir)
 			err = os.MkdirAll(outputPath, os.ModePerm)
 			assert.NoError(t, err)
+
 			tc.corebootOptions.OutputDir = outputPath
 			outputPathUniversal := filepath.Join(tmpDir, tc.universalOptions.OutputDir)
 			tc.universalOptions.OutputDir = outputPathUniversal
@@ -620,6 +646,7 @@ func TestCorebootSubmodule(t *testing.T) {
 			// Find the coreboot version
 			corebootVersionFileContent, err := os.ReadFile(corebootVersionFile)
 			assert.NoError(t, err)
+
 			versionEntryPatter := regexp.MustCompile(`COREBOOT_VERSION: (.*)`)
 			version := string(versionEntryPatter.FindSubmatch(corebootVersionFileContent)[1])
 

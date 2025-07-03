@@ -52,6 +52,7 @@ func (opts SetupOpts) Validate() error {
 			slog.Any("error", err),
 		)
 	}
+
 	if opts.MountHostDir == "" {
 		err = errors.Join(err, errDirectoryNotSpecified)
 		slog.Error(
@@ -60,6 +61,7 @@ func (opts SetupOpts) Validate() error {
 			slog.Any("error", err),
 		)
 	}
+
 	if opts.WorkdirContainer == "" {
 		err = errors.Join(err, errDirectoryNotSpecified)
 		slog.Error(
@@ -88,6 +90,7 @@ func (opts SetupOpts) Validate() error {
 			slog.Any("error", err),
 		)
 	}
+
 	return err
 }
 
@@ -102,6 +105,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 	//   which is handy for testing changes to said Dockerfile without the need to
 	//   have the container uploaded into package registry
 	dockerfileDirectoryPath := ""
+
 	dockerfilePathPattern := regexp.MustCompile(`^file:\/\/.*`)
 	if dockerfilePathPattern.MatchString(opts.ContainerURL) {
 		// opts.ContainerURL is actually filepath
@@ -120,6 +124,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 
 	// Setup container either from URL or build from Dockerfile
 	var container *dagger.Container
+
 	if dockerfileDirectoryPath == "" {
 		// Use URL
 		slog.Info("Container setup running in URL mode")
@@ -131,6 +136,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 				slog.String("suggestion", "Provide URL or Dockerfile"),
 				slog.Any("error", errEmptyURL),
 			)
+
 			return nil, errEmptyURL
 		}
 
@@ -138,6 +144,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		environment.LogGroupStart("container from url")
 		//   I don't think this log grouping makes any difference
 		container = client.Container().From(opts.ContainerURL)
+
 		environment.LogGroupStop("container from url")
 
 		imageRef, _ := container.ImageRef(ctx)
@@ -154,6 +161,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		container = client.Container().Build(
 			client.Host().Directory(dockerfileDirectoryPath),
 		)
+
 		environment.LogGroupStop("container from file")
 	}
 
@@ -179,6 +187,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 			slog.Any("error", err),
 		)
+
 		return nil, err
 	}
 
@@ -209,6 +218,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 	}
 
 	container, err = container.Sync(ctx)
+
 	environment.LogGroupStop("prepare container - copy over input files")
 
 	if err != nil {
@@ -220,6 +230,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 				slog.Any("error", err),
 			)
 		}
+
 		if strings.Contains(err.Error(), "failed to do request") && strings.Contains(err.Error(), "i/o timeout") {
 			slog.Error(
 				message,
@@ -227,6 +238,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 				slog.Any("error", err),
 			)
 		}
+
 		if strings.Contains(err.Error(), "timed out waiting for session params") && runtime.GOOS == "linux" {
 			// On Linux, check if 'iptable_nat' kernel module is loaded
 			content, err := os.ReadFile("/proc/modules")
@@ -241,6 +253,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 				}
 			}
 		}
+
 		slog.Error(
 			message,
 			slog.String("suggestion", "something is wrong with dagger, please check dagger troubleshooting guide at: https://docs.dagger.io/troubleshooting"),
@@ -301,8 +314,10 @@ func GetArtifacts(ctx context.Context, container *dagger.Container, artifacts *[
 		if err != nil {
 			return fmt.Errorf("%w: %w: %s -> %s", errExportFailed, err, artifact.ContainerPath, artifact.HostPath)
 		}
+
 		slog.Debug(fmt.Sprintf("Artifact export: %s -> %s", artifact.ContainerPath, artifact.HostPath))
 	}
+
 	environment.LogGroupStop("get artifacts from container")
 
 	return nil
@@ -322,17 +337,18 @@ func CleanupAfterContainer(ctx context.Context) error {
 	//
 	// WARNING: This will completely stop the Dagger engine. Any subsequent Dagger
 	//   operations will need to reinitialize the Dagger client.
-
 	slog.Info("Cleaning up Dagger container resources")
 
 	// Step 1: Find the Dagger engine container
 	findCmd := exec.CommandContext(ctx, "docker", "container", "ls", "--filter", "name=dagger-engine", "--format", "{{.ID}}")
+
 	containerID, err := findCmd.Output()
 	if err != nil {
 		slog.Error(
 			"Failed to find Dagger engine container",
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -348,6 +364,7 @@ func CleanupAfterContainer(ctx context.Context) error {
 		slog.String("containerID", containerIDStr),
 	)
 	stopCmd := exec.CommandContext(ctx, "docker", "container", "stop", containerIDStr)
+
 	stopOutput, err := stopCmd.CombinedOutput()
 	if err != nil {
 		slog.Error(
@@ -355,6 +372,7 @@ func CleanupAfterContainer(ctx context.Context) error {
 			slog.String("output", strings.TrimSpace(string(stopOutput))),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
@@ -364,6 +382,7 @@ func CleanupAfterContainer(ctx context.Context) error {
 		slog.String("containerID", containerIDStr),
 	)
 	rmCmd := exec.CommandContext(ctx, "docker", "container", "rm", containerIDStr)
+
 	rmOutput, err := rmCmd.CombinedOutput()
 	if err != nil {
 		slog.Error(
@@ -371,11 +390,13 @@ func CleanupAfterContainer(ctx context.Context) error {
 			slog.String("output", strings.TrimSpace(string(rmOutput))),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
 	// Step 4: Find and remove Dagger volumes
 	volCmd := exec.CommandContext(ctx, "docker", "volume", "ls", "--filter", "dangling=true", "--format", "{{.Name}}")
+
 	volumes, err := volCmd.Output()
 	if err != nil {
 		slog.Warn(
@@ -389,11 +410,13 @@ func CleanupAfterContainer(ctx context.Context) error {
 			if vol == "" {
 				continue
 			}
+
 			slog.Debug(
 				"Removing Docker volume",
 				slog.String("volume", vol),
 			)
 			rmVolCmd := exec.CommandContext(ctx, "docker", "volume", "rm", vol)
+
 			rmVolOutput, err := rmVolCmd.CombinedOutput()
 			if err != nil {
 				slog.Warn(
@@ -415,16 +438,19 @@ func CleanupAfterContainer(ctx context.Context) error {
 		slog.String("command", "docker system prune -f"),
 		slog.String("output", strings.TrimSpace(string(pruneOutput))),
 	)
+
 	if err != nil {
 		slog.Error(
 			"Failed to prune Docker system",
 			slog.String("output", strings.TrimSpace(string(pruneOutput))),
 			slog.Any("error", err),
 		)
+
 		return err
 	}
 
 	slog.Info("Dagger container resources cleaned up successfully")
+
 	return nil
 }
 
@@ -470,6 +496,7 @@ func CheckIfDiscontinued(containerURL string) error {
 				"Using discontinued container",
 				slog.String("suggestion", "The container will remain available, but will no longer receive any bug-fixes or updates. If you want maintained and up-to-date container, look at https://github.com/9elements/firmware-action#containers"),
 			)
+
 			return errContainerDiscontinued
 		}
 	}
