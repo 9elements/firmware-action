@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.17.4 - 2025-07-04
+#### Bug Fixes
+- **(cmd)** chdir back after gitClone - (44053d3) - AtomicFS
+- **(lint)** misc golangci-lint issues - (f3c7a20) - AtomicFS
+- **(lint)** wsl_v5 - (b2fba87) - AtomicFS
+#### Build system
+- **(deps)** bump github.com/go-playground/validator/v10 - (eec9e54) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (1ef83f4) - dependabot[bot]
+- **(deps)** bump github.com/alecthomas/kong in /cmd/firmware-action - (dfa1722) - dependabot[bot]
+- **(deps)** update pytest-cov requirement in /.dagger-ci/daggerci - (537b4b8) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (0a34e48) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (cd6792a) - dependabot[bot]
+- **(deps)** bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (8bbcf4f) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (e1cea95) - dependabot[bot]
+- **(deps)** update pytest requirement in /.dagger-ci/daggerci - (f015c4d) - dependabot[bot]
+#### Miscellaneous Chores
+- **(lint)** add option into config to easily auto-fix - (9124f60) - AtomicFS
+#### Tests
+- **(lint)** for now ignore maintidx - (4c55c70) - AtomicFS
+- **(lint)** disable noinlineerr linter - (11f89b4) - AtomicFS
+
+- - -
+
 ## v0.17.3 - 2025-06-02
 #### Bug Fixes
 - **(ci)** release merge group checks - (ea7b660) - AtomicFS
