@@ -82,5 +82,6 @@ linters:
     - godot
     - lll
     - nlreturn
+    - noctx
     - noinlineerr
     - perfsprint
