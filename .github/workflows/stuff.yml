@@ -1,0 +1,27 @@
+---
+# Run linters
+
+name: stuff
+on:
+  push
+
+env:
+  APPLY_FIXES: none
+  APPLY_FIXES_EVENT: pull_request
+  APPLY_FIXES_MODE: commit
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  stuff:
+    #runs-on: ubuntu-latest
+    #runs-on: [self-hosted, k3s, light]
+    runs-on: [self-hosted, light, linux, x64, k3s, kubernetes, 9elements]
+    steps:
+      - name: test
+        run: |
+          echo "hello world"
