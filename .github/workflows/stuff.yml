@@ -20,7 +20,7 @@ jobs:
   stuff:
     #runs-on: ubuntu-latest
     #runs-on: [self-hosted, k3s, light]
-    runs-on: [self-hosted, light, linux, x64, k3s, kubernetes, 9elements]
+    runs-on: light-runners-9elements
     steps:
       - name: test
         run: |
