@@ -462,7 +462,7 @@ jobs:
       - name: Clone u-boot repo
         if: steps.cache-repo.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/u-boot/u-boot.git
+          git clone https://source.denx.de/u-boot/u-boot.git
           cd u-boot
           git fetch -a
           git checkout "v${{ matrix.uboot-version }}"
