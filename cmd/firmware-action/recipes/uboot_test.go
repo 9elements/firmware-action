@@ -68,7 +68,7 @@ func TestUBoot(t *testing.T) {
 			t.Chdir(tmpDir)
 
 			// Clone coreboot repo
-			cmd := exec.Command("bash", "-c", fmt.Sprintf("git clone https://github.com/u-boot/u-boot.git; cd u-boot; git fetch -a; git checkout v%s", tc.uBootVersion))
+			cmd := exec.Command("bash", "-c", fmt.Sprintf("git clone https://source.denx.de/u-boot/u-boot.git; cd u-boot; git fetch -a; git checkout v%s", tc.uBootVersion))
 			err = cmd.Run()
 			assert.NoError(t, err)
 
