@@ -53,7 +53,7 @@ jobs:
       changes: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v3
@@ -79,7 +79,7 @@ jobs:
     if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Get latest release
@@ -131,7 +131,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached coreboot repo
         uses: actions/cache/restore@v4
@@ -193,7 +193,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached linux source
         id: cache-repo
@@ -265,7 +265,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached edk2 repo
         uses: actions/cache/restore@v4
@@ -341,7 +341,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached coreboot-blobs repo
         uses: actions/cache/restore@v4
@@ -396,7 +396,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached u-root repo
         uses: actions/cache/restore@v4
@@ -451,7 +451,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached u-boot repo
         uses: actions/cache/restore@v4
@@ -508,7 +508,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: firmware-action
         uses: ./
@@ -546,7 +546,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: firmware-action
         uses: ./
@@ -579,7 +579,7 @@ jobs:
           rm -rf ./* || true
           rm -rf ./.??* || true
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: firmware-action
         uses: ./
@@ -610,7 +610,7 @@ jobs:
     # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Restore cached u-root repo
         uses: actions/cache/restore@v4

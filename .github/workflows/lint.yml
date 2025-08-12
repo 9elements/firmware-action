@@ -29,7 +29,7 @@ jobs:
     # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Commit-Lint
@@ -47,7 +47,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: MegaLinter
@@ -61,7 +61,7 @@ jobs:
     # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup go
         uses: actions/setup-go@v5
         with:
@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Check goreleaser configuration
         uses: goreleaser/goreleaser-action@v6
         with:

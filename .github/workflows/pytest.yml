@@ -39,7 +39,7 @@ jobs:
       changes: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: dorny/paths-filter@v3
@@ -63,7 +63,7 @@ jobs:
         with:
           python-version: '3.x'
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install deps
         run: |
           curl -SL "$( curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'browser_download_url' | grep "docker-compose-linux-$(uname -m)" | grep -v '.sha256' | sed -E 's/.*https/https/g' | sed -E 's/\"//g' | grep -vE '.json$' )" -o docker-compose
