@@ -16,6 +16,100 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestDetectMode(t *testing.T) {
+	// Create tmp testing directory
+	tmpDir := t.TempDir()
+
+	tarfileExists := filepath.Join(tmpDir, "tarfile-exists", "test.tar")
+	err := os.MkdirAll(filepath.Dir(tarfileExists), 0o755)
+	assert.NoError(t, err)
+	f, err := os.Create(tarfileExists)
+	assert.NoError(t, err)
+	f.Close()
+
+	tarfileNotExists := filepath.Join(tmpDir, "tarfile-not-exists", "nonexistent.tar")
+
+	dockerfileDirExists := filepath.Join(tmpDir, "dockerfile-exists")
+	err = os.MkdirAll(dockerfileDirExists, 0o755)
+	dockerfileExists := filepath.Join(dockerfileDirExists, "Dockerfile")
+	assert.NoError(t, err)
+
+	dockerfileNotExists := filepath.Join(tmpDir, "dockerfile-not-exists")
+
+	testCases := []struct {
+		name         string
+		url          string
+		expectedURL  string
+		expectedMode containerURLtype
+		wantErr      error
+	}{
+		{
+			name:         "URL mode - docker hub",
+			url:          "ubuntu:latest",
+			expectedURL:  "ubuntu:latest",
+			expectedMode: ModeURL,
+			wantErr:      nil,
+		},
+		{
+			name:         "URL mode - full registry URL",
+			url:          "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+			expectedURL:  "ghcr.io/9elements/firmware-action/coreboot_4.19:main",
+			expectedMode: ModeURL,
+			wantErr:      nil,
+		},
+		{
+			name:         "Tarfile mode - existing tar file",
+			url:          "file://" + tarfileExists,
+			expectedURL:  tarfileExists,
+			expectedMode: ModeTarfile,
+			wantErr:      nil,
+		},
+		{
+			name:         "Tarfile mode - non-existing tar file",
+			url:          "file://" + tarfileNotExists,
+			expectedURL:  tarfileNotExists,
+			expectedMode: ModeTarfile,
+			wantErr:      os.ErrNotExist,
+		},
+		{
+			name:         "Dockerfile mode - existing directory",
+			url:          "file://" + dockerfileDirExists,
+			expectedURL:  dockerfileDirExists,
+			expectedMode: ModeDockerfile,
+			wantErr:      nil,
+		},
+		{
+			name:         "Dockerfile mode - with Dockerfile suffix",
+			url:          "file://" + dockerfileExists,
+			expectedURL:  dockerfileDirExists,
+			expectedMode: ModeDockerfile,
+			wantErr:      nil,
+		},
+		{
+			name:         "Dockerfile mode - non-existing directory",
+			url:          "file://" + dockerfileNotExists,
+			expectedURL:  dockerfileNotExists,
+			expectedMode: ModeDockerfile,
+			wantErr:      os.ErrNotExist,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			url := tc.url
+			actualURL, actualMode, actualErr := detectMode(url)
+
+			assert.Equal(t, tc.expectedURL, actualURL)
+			assert.Equal(t, tc.expectedMode, actualMode)
+			if tc.wantErr != nil {
+				assert.ErrorIs(t, actualErr, tc.wantErr)
+			} else {
+				assert.NoError(t, actualErr)
+			}
+		})
+	}
+}
+
 func TestSetup(t *testing.T) {
 	// This test is rather slow (between 10s and 20s)
 	if testing.Short() {

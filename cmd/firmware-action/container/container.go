@@ -17,6 +17,7 @@ import (
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
+	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
 	"github.com/9elements/firmware-action/cmd/firmware-action/logging"
 )
 
@@ -94,6 +95,65 @@ func (opts SetupOpts) Validate() error {
 	return err
 }
 
+type containerURLtype int
+
+const (
+	// ModeURL means that opts.ContainerURL is actual URL
+	ModeURL containerURLtype = iota
+	// ModeDockerfile means that opts.ContainerURL is filepath to Dockerfile
+	ModeDockerfile
+	// ModeTarfile means that opts.ContainerURL is filepath to TAR file
+	ModeTarfile
+)
+
+func detectMode(url string) (string, containerURLtype, error) {
+	filepathPattern := regexp.MustCompile(`^file:\/\/.*`)
+
+	//=====
+	// URL
+	if !filepathPattern.MatchString(url) {
+		// url is actually URL
+		return url, ModeURL, nil
+	}
+
+	// url is actually filepath, so we can remove the prefix
+	filepathPrefixPattern := regexp.MustCompile(`^file:\/\/`)
+	url = filepathPrefixPattern.ReplaceAllString(url, "")
+
+	//==========
+	// TAR file
+	tarfilePattern := regexp.MustCompile(`.*\.tar$`)
+	if tarfilePattern.MatchString(url) {
+		// Check if file exists
+		err := filesystem.CheckFileExists(url)
+		if errors.Is(err, os.ErrExist) {
+			// If file exists, everything is OK
+			return url, ModeTarfile, nil
+		}
+
+		return url, ModeTarfile, err
+	}
+
+	//============
+	// Dockerfile
+	dockerfileDockerfilePattern := regexp.MustCompile(`.*\/Dockerfile$`)
+
+	// Docker requires to use directory, if path contains also Dockerfile as last element, remove it
+	// to get the base directory
+	if dockerfileDockerfilePattern.MatchString(url) {
+		url = filepath.Dir(url)
+	}
+
+	// Check if directory exists
+	err := filesystem.CheckFileExists(url)
+	if errors.Is(err, filesystem.ErrPathIsDirectory) {
+		// If directory exists, everything is OK
+		return url, ModeDockerfile, nil
+	}
+
+	return url, ModeDockerfile, err
+}
+
 // Setup for setting up a Docker container via dagger
 func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger.Container, error) {
 	err := opts.Validate()
@@ -101,32 +161,22 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		return nil, err
 	}
 
-	// dockerfileDirectoryPath allows to use Dockerfile and build locally,
+	// mode allows to use Dockerfile and build locally,
 	//   which is handy for testing changes to said Dockerfile without the need to
 	//   have the container uploaded into package registry
-	dockerfileDirectoryPath := ""
-
-	dockerfilePathPattern := regexp.MustCompile(`^file:\/\/.*`)
-	if dockerfilePathPattern.MatchString(opts.ContainerURL) {
-		// opts.ContainerURL is actually filepath
-		dockerfileDockerfilePattern := regexp.MustCompile(`.*\/Dockerfile$`)
-		pathPattern := regexp.MustCompile(`^file:\/\/`)
-		dockerfileDirectoryPath = pathPattern.ReplaceAllString(opts.ContainerURL, "")
-
-		// Docker requires to use directory, if path contains also Dockerfile as last element, remove it
-		// to get the base directory
-		if dockerfileDockerfilePattern.MatchString(opts.ContainerURL) {
-			dockerfileDirectoryPath = filepath.Dir(dockerfileDirectoryPath)
-		}
-	} else {
-		_ = CheckIfDiscontinued(opts.ContainerURL)
+	containerPath, mode, err := detectMode(opts.ContainerURL)
+	if err != nil {
+		return nil, err
 	}
 
 	// Setup container either from URL or build from Dockerfile
 	var container *dagger.Container
 
-	if dockerfileDirectoryPath == "" {
+	switch mode {
+	case ModeURL:
 		// Use URL
+		_ = CheckIfDiscontinued(opts.ContainerURL)
+
 		slog.Info("Container setup running in URL mode")
 
 		// Make sure there is a non-empty URL or name provided
@@ -152,17 +202,28 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 			"Container information",
 			slog.String("Image reference", imageRef),
 		)
-	} else {
+	case ModeDockerfile:
 		// Use Dockerfile
 		slog.Info("Container setup running in Dockerfile mode")
 
-		environment.LogGroupStart("container from file")
+		environment.LogGroupStart("container from dockerfile")
 		//   I have not used this feature in a long time, so not sure how much log would be affected
 		container = client.Container().Build(
-			client.Host().Directory(dockerfileDirectoryPath),
+			client.Host().Directory(containerPath),
 		)
 
-		environment.LogGroupStop("container from file")
+		environment.LogGroupStop("container from dockerfile")
+	case ModeTarfile:
+		// Use Tarfile
+		slog.Info("Container setup running in Tarfile mode")
+
+		environment.LogGroupStart("container from tarfile")
+
+		container = client.Container().Import(
+			client.Host().File(containerPath),
+		)
+
+		environment.LogGroupStop("container from tarfile")
 	}
 
 	// Mount repository into the container
