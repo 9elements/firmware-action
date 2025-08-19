@@ -1,5 +1,10 @@
 # Offline usage
 
+
+## Occasionally offline machines
+
+This approach is useful for example when people travel. They run `firmware-action` beforehand to pull the necessary containers and then use this method to work offline.
+
 `firmware-action` under the hood uses [dagger](https://docs.dagger.io/) / docker. As such, the configuration contains entry `sdk_url` which specifies the docker image / container to use.
 
 ```admonish example
@@ -31,3 +36,16 @@ It will also be displayed every time `firmware-action` is executed as `INFO` mes
 ```
 
 Simply copy-paste the digest (or image reference) into your configuration file and `firmware-action` will not connect to the internet to fetch a container if one matching is already present.
+
+
+## Always offline machines
+
+Besides running a offline docker registry, there is also a option to use tarballs.
+
+`firmware-action` can import a tarfile and use it.
+
+```admonish example
+~~~json
+"sdk_url": "file:///home/user/my-image/ubuntu-latest.tar"
+~~~
+```
