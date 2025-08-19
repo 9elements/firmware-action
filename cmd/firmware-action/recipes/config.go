@@ -45,6 +45,7 @@ type CommonOpts struct {
 	// This has an influence on the IASL, GCC and host GCC version that is used to build
 	//   the target. You must match the source level and sdk_version.
 	// Can also be a absolute or relative path to Dockerfile to build the image on the fly.
+	// Can also be a path to tarfile.
 	// NOTE: Updating the sdk_version might result in different binaries using the
 	//   same source code.
 	// ANCHOR: CommonOptsSdkURLExamples
@@ -57,6 +58,7 @@ type CommonOpts struct {
 	//   file://my-image/Dockerfile
 	//   file:///home/user/my-image/Dockerfile
 	//   file:///home/user/my-image/
+	//   file:///home/user/ubuntu-latest.tar
 	// ANCHOR_END: CommonOptsSdkURLExamples
 	// NOTE:
 	//   'file://' path cannot contain '..'
