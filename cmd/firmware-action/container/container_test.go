@@ -32,6 +32,7 @@ func TestDetectMode(t *testing.T) {
 	dockerfileDirExists := filepath.Join(tmpDir, "dockerfile-exists")
 	err = os.MkdirAll(dockerfileDirExists, 0o755)
 	dockerfileExists := filepath.Join(dockerfileDirExists, "Dockerfile")
+
 	assert.NoError(t, err)
 
 	dockerfileNotExists := filepath.Join(tmpDir, "dockerfile-not-exists")
@@ -101,6 +102,7 @@ func TestDetectMode(t *testing.T) {
 
 			assert.Equal(t, tc.expectedURL, actualURL)
 			assert.Equal(t, tc.expectedMode, actualMode)
+
 			if tc.wantErr != nil {
 				assert.ErrorIs(t, actualErr, tc.wantErr)
 			} else {
@@ -288,6 +290,110 @@ func TestSetup(t *testing.T) {
 					Sync(ctx)
 				assert.NoErrorf(t, err, "File '%s' does not exists", val)
 			}
+		})
+	}
+}
+
+func TestSetupAllModes(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode")
+	}
+
+	ctx := t.Context()
+	client, err := dagger.Connect(ctx, dagger.WithLogOutput(os.Stdout))
+	assert.NoError(t, err)
+
+	defer client.Close()
+
+	tmpDir := t.TempDir()
+	t.Chdir(tmpDir)
+
+	// Create test Dockerfile
+	dockerfileDir := filepath.Join(tmpDir, "dockerfile-test")
+	err = os.MkdirAll(dockerfileDir, 0o755)
+	assert.NoError(t, err)
+
+	dockerfileContent := "FROM ubuntu:latest"
+	err = os.WriteFile(filepath.Join(dockerfileDir, "Dockerfile"), []byte(dockerfileContent), 0o644)
+	assert.NoError(t, err)
+
+	tarfilePath := filepath.Join(tmpDir, "ubuntu-latest.tar")
+
+	testCases := []struct {
+		name         string
+		containerURL string
+		mode         containerURLtype
+		saveAs       string
+	}{
+		{
+			name:         "URL mode - ubuntu latest",
+			containerURL: "ubuntu:latest",
+			mode:         ModeURL,
+			saveAs:       tarfilePath,
+		},
+		{
+			name:         "Dockerfile mode",
+			containerURL: "file://" + dockerfileDir,
+			mode:         ModeDockerfile,
+			saveAs:       "",
+		},
+		{
+			name:         "Dockerfile mode with Dockerfile suffix",
+			containerURL: "file://" + filepath.Join(dockerfileDir, "Dockerfile"),
+			mode:         ModeDockerfile,
+			saveAs:       "",
+		},
+		{
+			// Note: Tarfile test depends on URL test creating the tar file first
+			name:         "Tarfile mode",
+			containerURL: "file://" + tarfilePath,
+			mode:         ModeTarfile,
+			saveAs:       "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Verify mode detection
+			detectedURL, detectedMode, err := detectMode(tc.containerURL)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.mode, detectedMode)
+
+			// Setup container options
+			opts := SetupOpts{
+				ContainerURL:      tc.containerURL,
+				MountContainerDir: "/src",
+				MountHostDir:      tmpDir,
+				WorkdirContainer:  "/src",
+				ContainerInputDir: "inputs",
+				InputFiles:        []string{},
+				InputDirs:         []string{},
+			}
+
+			// Test container setup
+			container, err := Setup(ctx, client, &opts)
+			assert.NoError(t, err)
+			assert.NotNil(t, container)
+
+			if tc.saveAs != "" {
+				_, err = container.Export(ctx, tc.saveAs)
+				assert.NoError(t, err)
+			}
+
+			// Verify container is working by running a simple command
+			_, err = container.WithExec([]string{"echo", "test"}).Sync(ctx)
+			assert.NoError(t, err)
+
+			// Verify working directory is set correctly
+			output, err := container.WithExec([]string{"pwd"}).Stdout(ctx)
+			assert.NoError(t, err)
+			assert.Equal(t, "/src\n", output)
+
+			// Verify mount point exists
+			_, err = container.WithExec([]string{"ls", "/src"}).Sync(ctx)
+			assert.NoError(t, err)
+
+			t.Logf("Successfully tested %s mode with URL: %s", tc.name, detectedURL)
 		})
 	}
 }
