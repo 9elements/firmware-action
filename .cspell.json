@@ -143,6 +143,7 @@
     "opencontainers",
     "oxsecurity",
     "pacman",
+    "pipefail",
     "pwsh",
     "pyaload",
     "pylint",
