@@ -40,7 +40,7 @@ func TestEdk2(t *testing.T) {
 				CommonOpts:    common,
 				DefconfigPath: "defconfig",
 				Edk2Specific: Edk2Specific{
-					BuildCommand: "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
+					BuildCommand: "set -Eeo pipefail; source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t GCC5",
 				},
 			},
 			version:    "edk2-stable202105",

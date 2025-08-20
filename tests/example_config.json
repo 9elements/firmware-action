@@ -74,7 +74,7 @@
       "output_dir": "output-edk2/",
       "container_output_dirs": ["Build/"],
       "container_output_files": null,
-      "build_command": "source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t ${GCC_TOOLCHAIN_VERSION}",
+      "build_command": "set -Eeo pipefail; source ./edksetup.sh; build -a X64 -p UefiPayloadPkg/UefiPayloadPkg.dsc -b DEBUG -t ${GCC_TOOLCHAIN_VERSION}",
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null
@@ -141,7 +141,7 @@
       "output_dir": "output-uroot/",
       "container_output_dirs": null,
       "container_output_files": ["initramfs.cpio"],
-      "build_command": "go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
+      "build_command": "set -Eeuo pipefail; go build; GOARCH=amd64 ./u-root -defaultsh gosh -o initramfs.cpio boot coreboot-app ./cmds/core/* ./cmds/boot/*",
       "container_input_dir": "inputs/",
       "input_dirs": null,
       "input_files": null
