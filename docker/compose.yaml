@@ -66,6 +66,7 @@ services:
   #==================
   # edk2
   #==================
+  ## Source: https://github.com/tianocore/edk2
   udk2017:
     build:
       context: edk2
@@ -287,6 +288,34 @@ services:
         - EDK2_VERSION_COMMIT=fbe0805b2091393406952e84724188f8c1941837
         - SOURCE_IMAGE=buildpack-deps:noble
         - EDK2_PLATFORM_COMMIT=728c8bb974be69b4034fad7a1c60917cca2dd03d
+        - EDK2_NON_OSI_COMMIT=ea2040c2d4e2200557e87b9f9fbd4f8fb7a2b6e8
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=13
+        - PYTHON_PACKAGES=python-is-python3 python3
+        - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
+  edk2-stable202505:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202505
+        - EDK2_VERSION_COMMIT=6951dfe7d59d144a3a980bd7eda699db2d8554ac
+        - SOURCE_IMAGE=buildpack-deps:noble
+        - EDK2_PLATFORM_COMMIT=19dd90b7345c419e81aa47ee32ab0ca728dd948c
+        - EDK2_NON_OSI_COMMIT=ea2040c2d4e2200557e87b9f9fbd4f8fb7a2b6e8
+        - INTERMEDIATE_IMAGE=universalpayload
+        - GCC_VERSION=13
+        - PYTHON_PACKAGES=python-is-python3 python3
+        - PYTHON_VERSION=python3
+        - NODESOURCE=https://deb.nodesource.com/setup_20.x
+  edk2-stable202508:
+    build:
+      context: edk2
+      args:
+        - EDK2_VERSION=edk2-stable202508
+        - EDK2_VERSION_COMMIT=d46aa46c8361194521391aa581593e556c707c6e
+        - SOURCE_IMAGE=buildpack-deps:noble
+        - EDK2_PLATFORM_COMMIT=d6eb4de31701a50b26da061919565c3a3460db88
         - EDK2_NON_OSI_COMMIT=ea2040c2d4e2200557e87b9f9fbd4f8fb7a2b6e8
         - INTERMEDIATE_IMAGE=universalpayload
         - GCC_VERSION=13
