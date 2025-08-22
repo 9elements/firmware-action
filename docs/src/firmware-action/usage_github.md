@@ -27,7 +27,7 @@ You can configure artifact handling with these options:
 
 ## Build Caching
 
-The action can cache build artifacts between runs to speed up builds, but this feature must be explicitly enabled with the `auto-cache` input (disabled by default).
+The action can cache build artifacts between runs to speed up builds, but this feature must be explicitly enabled with the `enable-cache` input (disabled by default).
 
 When enabled, the cache is:
 - Keyed by the config file contents and commit SHA
