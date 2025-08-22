@@ -2,6 +2,7 @@ services:
   #==================
   # coreboot
   #==================
+  # Source: https://review.coreboot.org/coreboot
   coreboot_4.19:
     build:
       context: coreboot
@@ -55,6 +56,12 @@ services:
       context: coreboot
       args:
         - COREBOOT_VERSION=25.03
+        - SOURCE_IMAGE=ubuntu:noble
+  coreboot_25.06:
+    build:
+      context: coreboot
+      args:
+        - COREBOOT_VERSION=25.06
         - SOURCE_IMAGE=ubuntu:noble
   #==================
   # edk2
