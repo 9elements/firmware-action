@@ -385,7 +385,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        uroot-version: ['0.14.0']
+        uroot-version: ['0.15.0']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
