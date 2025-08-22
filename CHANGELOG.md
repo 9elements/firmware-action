@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.18.0 - 2025-08-22
+#### Bug Fixes
+- **(test)** better error handling - (c8ef906) - AtomicFS
+- typo in documentation - (1a81af0) - AtomicFS
+- cspell - (790ad2b) - AtomicFS
+#### Build system
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (48e86a2) - dependabot[bot]
+- **(deps)** bump userdocs/gh-cli-workflow-reruns - (922296b) - dependabot[bot]
+- **(deps)** bump userdocs/gh-cli-workflow-reruns - (552e161) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (9cf3152) - dependabot[bot]
+- **(deps)** bump userdocs/gh-cli-workflow-reruns - (00e4d74) - dependabot[bot]
+- **(deps)** bump actions/checkout from 4 to 5 - (e4412c7) - dependabot[bot]
+- **(deps)** bump userdocs/gh-cli-workflow-reruns - (43a86bf) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (ad99449) - dependabot[bot]
+#### Documentation
+- add tarfile support - (f296090) - AtomicFS
+#### Features
+- **(cmd)** add support for containers from Tarfiles - (a941167) - AtomicFS
+#### Miscellaneous Chores
+- update - (5c223db) - AtomicFS
+#### Tests
+- **(cmd)** add TestSetupAllModes test - (a7495b7) - AtomicFS
+
+- - -
+
 ## v0.17.4 - 2025-07-04
 #### Bug Fixes
 - **(cmd)** chdir back after gitClone - (44053d3) - AtomicFS
