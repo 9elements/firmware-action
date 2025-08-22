@@ -208,9 +208,7 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 
 		environment.LogGroupStart("container from dockerfile")
 		//   I have not used this feature in a long time, so not sure how much log would be affected
-		container = client.Container().Build(
-			client.Host().Directory(containerPath),
-		)
+		container = client.Host().Directory(containerPath).DockerBuild()
 
 		environment.LogGroupStop("container from dockerfile")
 	case ModeTarfile:
