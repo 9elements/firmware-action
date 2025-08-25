@@ -325,15 +325,23 @@ services:
   #==================
   # u-root
   #==================
+  # Source: https://github.com/u-root/u-root
   uroot_0.14.0:
     build:
       context: uroot
       args:
         - GO_VERSION=1.24
         - UROOT_VERSION=0.14.0
+  uroot_0.15.0:
+    build:
+      context: uroot
+      args:
+        - GO_VERSION=1.24
+        - UROOT_VERSION=0.15.0
   #==================
   # u-boot
   #==================
+  # Source: https://github.com/u-boot/u-boot
   uboot_2025.01:
     build:
       context: uboot
@@ -345,4 +353,10 @@ services:
       context: uboot
       args:
         - UBOOT_VERSION=2025.04
+        - SOURCE_IMAGE=ubuntu:noble
+  uboot_2025.07:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2025.07
         - SOURCE_IMAGE=ubuntu:noble
