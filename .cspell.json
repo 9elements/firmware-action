@@ -171,6 +171,7 @@
     "textfile",
     "tianocore",
     "tinyconfig",
+    "tokeninternal",
     "tzdata",
     "uboot",
     "uefi",
