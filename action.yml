@@ -169,7 +169,7 @@ runs:
 
     - name: setup_go
       if: ${{ inputs.compile == 'true' }}
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: stable
 
