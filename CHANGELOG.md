@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.0 - 2025-09-17
+#### Bug Fixes
+- **(cmd)** universal module build performance - (b339b84) - AtomicFS
+- **(cmd)** u-root test v0.15 - (2540679) - AtomicFS
+- **(lint)** spell - (18d0391) - AtomicFS
+- uroot compilation issues - (13839a3) - AtomicFS
+#### Build system
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (f7ce411) - dependabot[bot]
+- **(deps)** update pytest-cov requirement in /.dagger-ci/daggerci - (7095f2c) - dependabot[bot]
+- **(deps)** update pytest-cov requirement in /.dagger-ci/daggerci - (9224828) - dependabot[bot]
+- **(deps)** bump dagger.io/dagger in /cmd/firmware-action - (c24ece7) - dependabot[bot]
+- **(deps)** bump actions/setup-go from 5 to 6 - (b1610a7) - dependabot[bot]
+- **(deps)** bump actions/setup-python from 5 to 6 - (5d03364) - dependabot[bot]
+- **(deps)** bump actions/github-script from 7 to 8 - (98942f4) - dependabot[bot]
+- **(deps)** bump actions/labeler from 5 to 6 - (e5672ad) - dependabot[bot]
+- **(deps)** bump github.com/stretchr/testify in /cmd/firmware-action - (9149c93) - dependabot[bot]
+- **(deps)** bump docs/src/firmware-action-example - (c015773) - dependabot[bot]
+- **(deps)** bump action rerun - (bc2aee1) - AtomicFS
+- **(deps)** bump github.com/stretchr/testify in /cmd/firmware-action - (1f42a6b) - dependabot[bot]
+- **(deps)** bump actions/upload-pages-artifact from 3 to 4 - (c8e1ac3) - dependabot[bot]
+#### Features
+- **(docker)** add new edk2 stable202505 and stable202508 containers - (75d7408) - AtomicFS
+- **(docker)** add new coreboot v25.06 container - (0f74795) - AtomicFS
+- **(docker)** add new u-boot v2025.07 container - (45c7803) - AtomicFS
+- **(docker)** add new u-root v0.15.0 container - (6e244b7) - AtomicFS
+#### Miscellaneous Chores
+- **(lint)** cspell - (f8a3ef2) - AtomicFS
+#### Tests
+- add missing coreboot configs for tests - (b754c6f) - AtomicFS
+
+- - -
+
 ## v0.18.0 - 2025-08-22
 #### Bug Fixes
 - **(test)** better error handling - (c8ef906) - AtomicFS
