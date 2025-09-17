@@ -277,6 +277,7 @@ class Orchestrator:
             all_dockerfiles = dockerfiles_override
         logging.info("To build: %s", all_dockerfiles)
 
+        print("::group::dagger-setup")
         async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
             for dockerfile in all_dockerfiles:
                 if self.concurrent:
@@ -299,6 +300,9 @@ class Orchestrator:
         Build, test and publish ...
         The actual calls, logic and error handling is here.
         """
+        # End previous GitHub log group
+        print("::endgroup::")
+
         # Prepare variables
         dockerfile_dir = os.path.join(
             os.path.dirname(self.docker_compose_path),
