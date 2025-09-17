@@ -82,17 +82,17 @@ func (opts UniversalOpts) buildFirmware(ctx context.Context, client *dagger.Clie
 
 	// Execute build commands
 	for step := range buildSteps {
-		myContainer, err = myContainer.
-			WithExec(buildSteps[step]).
-			Sync(ctx)
-		if err != nil {
-			slog.Error(
-				"Failed to build universal",
-				slog.Any("error", err),
-			)
+		myContainer = myContainer.WithExec(buildSteps[step])
+	}
 
-			return fmt.Errorf("universal build failed: %w", err)
-		}
+	myContainer, err = myContainer.Sync(ctx)
+	if err != nil {
+		slog.Error(
+			"Failed to build universal",
+			slog.Any("error", err),
+		)
+
+		return fmt.Errorf("universal build failed: %w", err)
 	}
 
 	// Extract artifacts

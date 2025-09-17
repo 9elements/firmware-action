@@ -6,9 +6,11 @@
 package recipes
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"dagger.io/dagger"
 	"github.com/9elements/firmware-action/cmd/firmware-action/filesystem"
@@ -52,7 +54,10 @@ func TestUniversal(t *testing.T) {
 
 			myUniversalOpts := UniversalOpts
 			myUniversalOpts.SdkURL = "ghcr.io/9elements/firmware-action/coreboot_4.19:main"
-			myUniversalOpts.BuildCommands = []string{"echo 'Hello World!'", "touch hello.txt"}
+
+			cachebusterCmd := fmt.Sprintf("echo %q", time.Now().String())
+			myUniversalOpts.BuildCommands = []string{cachebusterCmd, "echo 'Hello World!'", "touch hello.txt"}
+
 			myUniversalOpts.RepoPath = filepath.Join(tmpDir, "dummy-repo")
 			err = os.Mkdir(myUniversalOpts.RepoPath, 0o755)
 			assert.NoError(t, err)
