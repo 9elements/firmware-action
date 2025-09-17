@@ -498,6 +498,16 @@ jobs:
       - name: Install python dependencies
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
+      - name: Debug
+        run: |
+          which docker || true
+      - name: Debug
+        run: |
+          docker --version || true
+      - name: Debug
+        run: |
+          pip show dagger-io || true
+
       - name: Run dagger pipeline
         timeout-minutes: 60
         run: |
