@@ -383,7 +383,7 @@ jobs:
       fail-fast: false
       max-parallel: 15
       matrix:
-        dockerfile: ${{ fromJson(needs.get-matrix.outputs.matrix) }}
+        dockerfile: ["coreboot_4.19"]
     permissions:
       contents: read
       packages: write
