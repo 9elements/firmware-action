@@ -383,7 +383,7 @@ jobs:
       fail-fast: false
       max-parallel: 15
       matrix:
-        dockerfile: ["coreboot_4.19"]
+        dockerfile: ["uroot_0.15.0"]
     permissions:
       contents: read
       packages: write
