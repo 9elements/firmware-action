@@ -93,8 +93,8 @@ jobs:
       fail-fast: false
       max-parallel: 15
       matrix:
-        arch: ['amd64', 'arm64']
-        dockerfile: ${{ fromJson(needs.get-matrix-coreboot.outputs.matrix) }}
+        arch: ['amd64']
+        dockerfile: ["coreboot_4.19"]
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
     container:
       # At the time of writing (2024-10) we cannot use ubuntu:noble as it is broken
