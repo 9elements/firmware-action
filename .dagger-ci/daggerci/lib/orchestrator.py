@@ -323,6 +323,7 @@ class Orchestrator:
 
         # =======
         # BUILD
+        print("::group::build")
         logging.info("%s/%s: BUILDING", top_element, dockerfile)
         variants = await self.__build__(
             client=client,
@@ -332,6 +333,7 @@ class Orchestrator:
             top_element=top_element,
         )
         if not variants:
+            print("::endgroup::")
             return
 
         # add container specific labels into self.labels
@@ -352,8 +354,11 @@ class Orchestrator:
             for label in await variants[key].labels():
                 logging.info("label: %s = %s", await label.name(), await label.value())
 
+        print("::endgroup::")
+
         # =======
         # TEST
+        print("::group::test")
         logging.info("%s/%s: TESTING", top_element, dockerfile)
         try:
             await self.__test__(
@@ -365,8 +370,10 @@ class Orchestrator:
             self.results.add(
                 top_element, dockerfile, f"test {get_current_arch()}", False
             )
+            print("::endgroup::")
             return
         self.results.add(top_element, dockerfile, f"test {get_current_arch()}")
+        print("::endgroup::")
 
         # =======
         # PUBLISH
@@ -386,6 +393,7 @@ class Orchestrator:
         #  publish_tag_only | True  | False    | True      |
         #                   | False | True     | True      |
 
+        print("::group::publish")
         for registry in self.container_registry:
             publish_filter = True
             if registry.publish_tag_only and self.tag_tag is None:
@@ -411,11 +419,13 @@ class Orchestrator:
                     self.results.add(
                         top_element, dockerfile, f"publish {registry.name}", False
                     )
+                    print("::endgroup::")
                     return
             else:
                 self.results.add(
                     top_element, dockerfile, f"publish {registry.name}", False, "skip"
                 )
+        print("::endgroup::")
 
     async def __build__(
         self,
