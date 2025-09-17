@@ -327,7 +327,6 @@ class Orchestrator:
 
         # =======
         # BUILD
-        print("::group::build")
         logging.info("%s/%s: BUILDING", top_element, dockerfile)
         variants = await self.__build__(
             client=client,
@@ -337,9 +336,9 @@ class Orchestrator:
             top_element=top_element,
         )
         if not variants:
-            print("::endgroup::")
             return
 
+        print("::group::build-metadata")
         # add container specific labels into self.labels
         self.labels["org.opencontainers.image.description"] = (
             f"Container for building {dockerfile}"
@@ -465,6 +464,7 @@ class Orchestrator:
         platform_variants = {}
 
         for p in platforms:
+            print(f"::group::build-{p}")
             try:
                 logging.info("** building platform: %s", p)
                 container = await context_dir.docker_build(  # type: ignore [no-any-return]
@@ -491,6 +491,7 @@ class Orchestrator:
                 )  # type: ignore [no-untyped-call]
                 return {}
             self.results.add(top_element, dockerfile, f"build {p}")
+            print("::endgroup::")
 
         return platform_variants
 
