@@ -32,7 +32,38 @@ Each module type has then additional source files. For example `coreboot`, where
 
 When a module is successfully built, a file containing time stamp is saved to `.firmware-action/timestamps/` directory.
 
+```admonish note
+The saved time stamp is the time of the check (when was the check performed), and not the time when module is successfully built.
+```
+
 On next run, this file (if exists) is loaded with time stamp of last successful run. Then all sources are recursively checked for any file that was modified since the last successful run. If no file was modified since the loaded time stamp, module is considered up-to-date and build is skipped. If any of the files has newer modified time, module is re-built.
+
+
+### False positives
+
+```admonish warning
+As mentioned in [configuration section](config.md#common), you should avoid nested outputs (placing output of one module into output of another module).
+
+However you should also avoid nesting output inside of `repo_path`.
+```
+
+When `firmware-action` is checking for modification time, it checks the entirety of the `repo_path` (except `.git` directory), and any single file newer than the saved time stamp will trigger rebuild.
+
+This means that if the output is inside `repo_path`, it will always rebuild because the output artifacts will always be newer that the saved time stamp, and the output in this case is always searched as part of `repo_path`.
+
+```text
+Ideal setup:
+  .
+  ├── repo_path/
+  └── output-uroot/
+      └── uroot.bin
+
+Will always rebuild:
+  .
+  └── repo_path/
+      └── output-uroot/
+          └── uroot.bin
+```
 
 
 ## Configuration file changes
