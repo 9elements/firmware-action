@@ -517,8 +517,10 @@ func CleanupAfterContainer(ctx context.Context) error {
 func CheckIfDiscontinued(containerURL string) error {
 	// Check for discontinued containers
 	listDiscontinued := []string{
-		`.*ghcr\.io\/9elements\/coreboot:4\.19.*`,
-		`.*ghcr\.io\/9elements\/uefi:edk\-stable202208.*`,
+		`.*ghcr\.io\/9elements\/coreboot:.*`,
+		// We no longer use this naming scheme `coreboot`, but `coreboot_x.xx` instead.
+		`.*ghcr\.io\/9elements\/uefi:.*`,
+		// All the old `uefi` container were made by hand back in the day. They are all discontinued now.
 	}
 
 	// Patterns to use with 'containerHub'
