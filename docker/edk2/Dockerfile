@@ -4,7 +4,7 @@
 ARG SOURCE_IMAGE=buildpack-deps:focal
 ARG INTERMEDIATE_IMAGE=base
 ARG TARGETARCH=amd64
-ARG NODESOURCE=https://deb.nodesource.com/setup_20.x
+ARG NODESOURCE=https://deb.nodesource.com/setup_24.x
 
 #=============
 # "base" stage with all needed build dependencies
