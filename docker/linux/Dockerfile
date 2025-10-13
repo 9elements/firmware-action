@@ -1,7 +1,7 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
-ARG SOURCE_IMAGE=ubuntu:jammy
+ARG SOURCE_IMAGE=ubuntu:noble
 ARG TARGETARCH=amd64
 
 #=============
