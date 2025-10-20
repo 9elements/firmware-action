@@ -1,7 +1,7 @@
 # This is multi-stage Dockerfile
 #   Docs: https://docs.docker.com/build/building/multi-stage/
 
-ARG SOURCE_IMAGE=ubuntu:noble
+ARG SOURCE_IMAGE=ubuntu:plucky
 ARG TARGETARCH=amd64
 
 #=============
@@ -62,7 +62,8 @@ RUN apt-get update && \
         python3-virtualenv \
         swig \
         uuid-dev \
-    && \
+    || true && \
+    apt-get install -y --no-install-recommends --fix-broken && \
     if [ "${TARGETARCH}" = 'amd64' ]; then \
         apt-get install -y --no-install-recommends \
             gcc-aarch64-linux-gnu; \
