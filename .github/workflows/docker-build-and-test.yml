@@ -374,7 +374,8 @@ jobs:
 
   build:
     name: build_test_publish
-    runs-on: ubuntu-latest
+    # coreboot 25.06 runs out of disk-space when it comes the the testing, so run it on our self-hosted Hydra runners
+    runs-on: ${{ (matrix.dockerfile == 'coreboot_25.06' && 'Hydra') || 'ubuntu-latest' }}
     timeout-minutes: 60
     needs:
       - get-matrix
