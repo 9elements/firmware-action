@@ -391,8 +391,6 @@ jobs:
     steps:
       - name: Setup python
         uses: actions/setup-python@v6
-        with:
-          python-version: '3.x'
 
       - name: Checkout
         uses: actions/checkout@v5
