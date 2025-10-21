@@ -15,6 +15,9 @@ declare -a PAYLOADS=(
 git clone --branch "${VERIFICATION_TEST_COREBOOT_VERSION}" --depth 1 https://review.coreboot.org/coreboot
 cd coreboot
 
+# Pull in all submodules
+git submodule update --init --recursive --checkout --depth 1
+
 # Make
 for PAYLOAD in "${PAYLOADS[@]}"; do
 	echo "TESTING: ${PAYLOAD}"
