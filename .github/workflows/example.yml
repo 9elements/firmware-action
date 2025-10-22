@@ -3,10 +3,10 @@
 
 name: example
 on:
-  pull_request:
+  pull_request: {}
   pull_request_review:
     types: ['submitted']
-  merge_group:
+  merge_group: {}
   push:
     branches: ['main']
     tags: ['v*']

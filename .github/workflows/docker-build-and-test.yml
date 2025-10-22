@@ -24,7 +24,7 @@ on:
       - 'tests/edk2-patches/**'
       - 'tests/linux_*/**'
       - 'tests/uboot_*/**'
-  release:
+  release: {}
   workflow_dispatch:
     inputs:
       skip_rerun:
