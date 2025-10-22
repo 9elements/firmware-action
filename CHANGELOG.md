@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.1 - 2025-10-22
+#### Bug Fixes
+- (**cmd**) fix regex in discontinued containers check - (697019f) - AtomicFS
+- (**cmd**) godoclint complains - (883651c) - AtomicFS
+- (**docker**) unset optional python version - (bcba1a8) - AtomicFS
+- (**docker**) coreboot 25.06 test script - (1a87954) - AtomicFS
+- (**docker**) python bytecode compilation - (14c0a5c) - AtomicFS
+#### Documentation
+- add warning about output nested in repo_path - (7044aec) - AtomicFS
+#### Build system
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (59b36af) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (fa2f794) - dependabot[bot]
+- (**deps**) bump github/codeql-action from 3 to 4 - (d69acc1) - dependabot[bot]
+- (**deps**) update dagger-io requirement in /.dagger-ci/daggerci - (9411727) - dependabot[bot]
+- (**deps**) bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (14f4dd2) - dependabot[bot]
+- (**deps**) bump github.com/go-playground/validator/v10 - (97faa98) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (5296cfe) - dependabot[bot]
+- (**deps**) update anyio requirement in /.dagger-ci/daggerci - (143873b) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (498ca14) - dependabot[bot]
+- (**deps**) bump oxsecurity/megalinter from 8 to 9 - (342dfca) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (eaf0efd) - dependabot[bot]
+#### Continuous Integration
+- (**docker**) build coreboot 25.06 on our self-hosted runner - (e8a8898) - AtomicFS
+#### Miscellaneous Chores
+- (**docker**) bump default Ubuntu to Noble for Linux kernel - (5f29316) - AtomicFS
+- (**docker**) bump NodeJS versions in Edk2 containers - (5a3fcaf) - AtomicFS
+
+- - -
+
 ## v0.19.0 - 2025-09-17
 #### Bug Fixes
 - **(cmd)** universal module build performance - (b339b84) - AtomicFS
