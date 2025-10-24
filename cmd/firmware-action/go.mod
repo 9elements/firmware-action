@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	dagger.io/dagger v0.19.2
+	dagger.io/dagger v0.19.3
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.12.1
 	github.com/dustin/go-humanize v1.0.1
@@ -21,7 +21,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/99designs/gqlgen v0.17.80 // indirect
+	github.com/99designs/gqlgen v0.17.81 // indirect
 	github.com/Khan/genqlient v0.8.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
@@ -78,7 +78,7 @@ require (
 	golang.org/x/text v0.29.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250825161204-c5933d9347a5 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250825161204-c5933d9347a5 // indirect
-	google.golang.org/grpc v1.75.1 // indirect
+	google.golang.org/grpc v1.76.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
