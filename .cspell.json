@@ -85,6 +85,7 @@
     "daggerci",
     "defconfig",
     "delenv",
+    "devel",
     "dirpath",
     "distclean",
     "dockerfile",
