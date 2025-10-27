@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 
 	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
@@ -29,6 +30,65 @@ var (
 	commit  = "none"
 	date    = "unknown"
 )
+
+// getVersionInfo returns version information, falling back to build info if ldflags weren't used
+func getVersionInfo() (string, string, string) {
+	// Fall back to build info from go install
+	buildVersion := "dev"
+	buildCommit := "none"
+	buildDate := "unknown"
+
+	// If ldflags were used, return those values
+	if version != buildVersion || commit != buildCommit || date != buildDate {
+		return version, commit, date
+	}
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		// Get version from module info - this works for `go install` with proper versions
+		if info.Main.Version != "" && info.Main.Version != "(devel)" {
+			buildVersion = strings.TrimPrefix(info.Main.Version, "v")
+
+			// Extract commit hash from pseudo-version if present
+			// Pseudo-versions look like: v0.0.0-20251027111505-19cbf8ae6306
+			if strings.Contains(buildVersion, "-") {
+				parts := strings.Split(buildVersion, "-")
+				if len(parts) >= 3 {
+					commitPart := parts[len(parts)-1]
+					if len(commitPart) >= 8 {
+						buildCommit = commitPart[:8]
+					} else {
+						buildCommit = commitPart
+					}
+				}
+			}
+		}
+
+		// Extract VCS information - this works for local builds and go install from VCS
+		for _, setting := range info.Settings {
+			switch setting.Key {
+			case "vcs.revision":
+				if len(setting.Value) >= 8 {
+					buildCommit = setting.Value[:8] // Short commit hash
+				} else {
+					buildCommit = setting.Value
+				}
+			case "vcs.time":
+				buildDate = setting.Value
+			case "vcs.modified":
+				if setting.Value == "true" {
+					buildCommit += "-dirty"
+				}
+			}
+		}
+
+		// If we still don't have a version but we have VCS info, create a dev version
+		if buildVersion == "dev" && buildCommit != "none" {
+			buildVersion = "dev-" + buildCommit
+		}
+	}
+
+	return buildVersion, buildCommit, buildDate
+}
 
 func main() {
 	logging.InitLogger(slog.LevelInfo)
@@ -192,6 +252,9 @@ func getInputsFromEnvironment() (string, error) {
 }
 
 func parseCli() (string, error) {
+	// Get version info dynamically
+	versionInfo, commitInfo, dateInfo := getVersionInfo()
+
 	// Get inputs from command line options
 	ctx := kong.Parse(
 		&CLI,
@@ -199,7 +262,7 @@ func parseCli() (string, error) {
 		kong.UsageOnError(),
 		kong.Vars{
 			"config_file": "firmware-action.json",
-			"version":     fmt.Sprintf("version: %s\ncommit:  %s\ndate:    %s", version, commit, date),
+			"version":     fmt.Sprintf("version: %s\ncommit:  %s\ndate:    %s", versionInfo, commitInfo, dateInfo),
 		},
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
