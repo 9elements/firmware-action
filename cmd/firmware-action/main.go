@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"regexp"
+	"runtime/debug"
 	"strings"
 
 	"github.com/9elements/firmware-action/cmd/firmware-action/environment"
@@ -29,6 +30,42 @@ var (
 	commit  = "none"
 	date    = "unknown"
 )
+
+// getVersionInfo returns version information, falling back to build info if ldflags weren't used
+func getVersionInfo() (string, string, string) {
+	// If ldflags were used, return those values
+	if version != "dev" || commit != "none" || date != "unknown" {
+		return version, commit, date
+	}
+
+	// Fall back to build info from go install
+	buildVersion := "dev"
+	buildCommit := "none"
+	buildDate := "unknown"
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		// Get version from module info
+		if info.Main.Version != "" && info.Main.Version != "(devel)" {
+			buildVersion = strings.TrimPrefix(info.Main.Version, "v")
+		}
+
+		// Extract VCS information
+		for _, setting := range info.Settings {
+			switch setting.Key {
+			case "vcs.revision":
+				if len(setting.Value) >= 8 {
+					buildCommit = setting.Value[:8] // Short commit hash
+				} else {
+					buildCommit = setting.Value
+				}
+			case "vcs.time":
+				buildDate = setting.Value
+			}
+		}
+	}
+
+	return buildVersion, buildCommit, buildDate
+}
 
 func main() {
 	logging.InitLogger(slog.LevelInfo)
@@ -192,6 +229,9 @@ func getInputsFromEnvironment() (string, error) {
 }
 
 func parseCli() (string, error) {
+	// Get version info dynamically
+	versionInfo, commitInfo, dateInfo := getVersionInfo()
+
 	// Get inputs from command line options
 	ctx := kong.Parse(
 		&CLI,
@@ -199,7 +239,7 @@ func parseCli() (string, error) {
 		kong.UsageOnError(),
 		kong.Vars{
 			"config_file": "firmware-action.json",
-			"version":     fmt.Sprintf("version: %s\ncommit:  %s\ndate:    %s", version, commit, date),
+			"version":     fmt.Sprintf("version: %s\ncommit:  %s\ndate:    %s", versionInfo, commitInfo, dateInfo),
 		},
 		kong.ConfigureHelp(kong.HelpOptions{
 			Compact: true,
