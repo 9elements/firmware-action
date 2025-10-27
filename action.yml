@@ -57,7 +57,7 @@ inputs:
         option to just automatically download all available artifacts. This does not mean that they will
         be used during the build, but it means that you do not need to handle the downloading of artifacts
         yourself.
-      Internally a actions/download-artifact@v5 is used
+      Internally a actions/download-artifact@v6 is used
     required: false
     default: 'false'
   auto-upload-artifacts:
@@ -323,7 +323,7 @@ runs:
     # Docs: https://github.com/actions/download-artifact?tab=readme-ov-file#download-all-artifacts
 
     - name: download_artifacts
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       if: inputs.auto-download-artifacts == 'true'
       with:
         path: .firmware-action2/
