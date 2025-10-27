@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.2 - 2025-10-27
+#### Bug Fixes
+- (**cmd**) unknown version when go install - (c93007d) - AtomicFS
+#### Build system
+- (**deps**) bump actions/download-artifact from 5 to 6 - (835de1e) - dependabot[bot]
+- (**deps**) bump actions/upload-artifact from 4 to 5 - (fff524a) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (8bb9c07) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (5e49632) - dependabot[bot]
+#### Miscellaneous Chores
+- (**ci**) corrected workflow syntax - (fc34a22) - AtomicFS
+- (**lint**) cspell - (1d5e90c) - AtomicFS
+
+- - -
+
 ## v0.19.1 - 2025-10-22
 #### Bug Fixes
 - (**cmd**) fix regex in discontinued containers check - (697019f) - AtomicFS
