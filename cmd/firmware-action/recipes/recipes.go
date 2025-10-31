@@ -109,7 +109,7 @@ func Build(
 	// Create a queue in correct order (starting with leaves)
 	queue := []string{}
 	queueMutex := &sync.Mutex{} // Mutex to ensure concurrent access to queue is safe in the callback
-	flowCallback := func(d *dag.DAG, id string, _ []dag.FlowResult) (interface{}, error) {
+	flowCallback := func(d *dag.DAG, id string, _ []dag.FlowResult) (any, error) {
 		v, err := d.GetVertex(id)
 		if err != nil {
 			return nil, err
@@ -176,6 +176,7 @@ func Build(
 
 	// Check results
 	err = nil
+
 	for _, item := range builds {
 		if item.BuildResult != nil && !errors.Is(item.BuildResult, ErrBuildUpToDate) {
 			err = item.BuildResult
