@@ -17,6 +17,7 @@ import (
 	"log/slog"
 	"runtime"
 	"slices"
+	"strings"
 	"sync"
 )
 
@@ -173,7 +174,8 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 		tmpBuffer = append(tmpBuffer, bytes[:]...)
 	} else {
 		// Don't do JSON, rather use some more human-readable format
-		details := ""
+		var details strings.Builder
+
 		ignore := []string{"level", "msg"}
 		//   ^^^ ignore is to omit fields from 'details' section because already in main body of log message
 		for key, val := range attrs {
@@ -183,19 +185,18 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 
 			switch val.(type) {
 			case bool:
-				details += fmt.Sprintf("    - %s: %t\n", key, val)
+				details.WriteString(fmt.Sprintf("    - %s: %t\n", key, val))
 			default:
-				details += fmt.Sprintf("    - %s: %s\n", key, val)
+				details.WriteString(fmt.Sprintf("    - %s: %s\n", key, val))
 			}
 		}
 
-		tmpBuffer = append(tmpBuffer,
-			[]byte(fmt.Sprintf(
-				"[%-7s] %s\n%s",
-				attrs["level"],
-				attrs["msg"],
-				details,
-			))[:]...,
+		tmpBuffer = fmt.Appendf(
+			tmpBuffer,
+			"[%-7s] %s\n%s",
+			attrs["level"],
+			attrs["msg"],
+			details.String(),
 		)
 	}
 

@@ -226,7 +226,7 @@ submodule_out:
 			result = "Fail"
 		}
 
-		summaryTable.AppendRow([]interface{}{item.Name, result})
+		summaryTable.AppendRow([]any{item.Name, result})
 	}
 
 	slog.Info(fmt.Sprintf("Build summary:\n%s", summaryTable.Render()))

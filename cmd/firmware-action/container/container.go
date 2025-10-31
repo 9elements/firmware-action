@@ -464,8 +464,8 @@ func CleanupAfterContainer(ctx context.Context) error {
 		)
 		// Continue even if this fails
 	} else {
-		volumeList := strings.Split(strings.TrimSpace(string(volumes)), "\n")
-		for _, vol := range volumeList {
+		volumeList := strings.SplitSeq(strings.TrimSpace(string(volumes)), "\n")
+		for vol := range volumeList {
 			if vol == "" {
 				continue
 			}
