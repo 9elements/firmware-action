@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.3 - 2025-11-03
+#### Bug Fixes
+- (**ci**) return git tag message - (bb2d659) - AtomicFS
+#### Documentation
+- update list of containers - (0508097) - AtomicFS
+#### Build system
+- (**deps**) update pytest-benchmark requirement in /.dagger-ci/daggerci - (96ac73a) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (f945967) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (982ee7a) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (be94038) - dependabot[bot]
+#### Continuous Integration
+- fix golang install version - (08538b7) - AtomicFS
+#### Miscellaneous Chores
+- (**action**) bump version to v0.19.3 - (7ccf40b) - AtomicFS
+- (**cmd**) modernize golang code - (6bc82e8) - AtomicFS
+
+- - -
+
 ## v0.19.2 - 2025-10-27
 #### Bug Fixes
 - (**cmd**) unknown version when go install - (c93007d) - AtomicFS
