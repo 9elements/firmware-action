@@ -59,6 +59,7 @@ Here is a list of all containers:
 | coreboot_24.02.01    | [x]        |                                            |
 | coreboot_24.05       | [x]        |                                            |
 | coreboot_25.03       | [x]        |                                            |
+| coreboot_25.06       | [x]        |                                            |
 | udk2017              | [x]        |                                            |
 | edk2-stable202008    | [x]        |                                            |
 | edk2-stable202105    | [x]        |                                            |
@@ -76,6 +77,8 @@ Here is a list of all containers:
 | edk2-stable202408.01 | [x]        |                                            |
 | edk2-stable202411    | [x]        |                                            |
 | edk2-stable202502    | [x]        |                                            |
+| edk2-stable202505    | [x]        |                                            |
+| edk2-stable202508    | [x]        |                                            |
 | linux_6.1.111        | [ ]        | discontinued in favor of `linux_6.1`       |
 | linux_6.1.45         | [ ]        | discontinued in favor of `linux_6.1`       |
 | linux_6.1            | [x]        |                                            |
@@ -85,8 +88,10 @@ Here is a list of all containers:
 | linux_6.11           | [ ]        | discontinued because not LTS               |
 | linux_6.12           | [x]        |                                            |
 | uroot_0.14.0         | [x]        |                                            |
+| uroot_0.15.0         | [x]        |                                            |
 | uboot_2025.01        | [x]        |                                            |
 | uboot_2025.04        | [x]        |                                            |
+| uboot_2025.07        | [x]        |                                            |
 
 
 ## Legacy containers
