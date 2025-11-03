@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.4 - 2025-11-03
+#### Bug Fixes
+- (**ci**) docker release - (d7de6ba) - AtomicFS
+#### Documentation
+- add note about prune option - (22f0804) - AtomicFS
+
+- - -
+
 ## v0.19.3 - 2025-11-03
 #### Bug Fixes
 - (**ci**) return git tag message - (bb2d659) - AtomicFS
