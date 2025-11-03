@@ -397,7 +397,7 @@ runs:
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
         INPUT_PRUNE: ${{ inputs.prune }}
-        INPUT_DEBUG: ${{ inputs.debug }}
+        INPUT_DEBUG: ${{ inputs.debug == 'true' || env.RUNNER_DEBUG == '1' }}
 
     - name: run_windows
       if: ${{ runner.os == 'Windows' }}
@@ -409,7 +409,7 @@ runs:
         INPUT_TARGET: ${{ inputs.target }}
         INPUT_RECURSIVE: ${{ inputs.recursive }}
         INPUT_PRUNE: ${{ inputs.prune }}
-        INPUT_DEBUG: ${{ inputs.debug }}
+        INPUT_DEBUG: ${{ inputs.debug == 'true' || env.RUNNER_DEBUG == '1' }}
 
     #===============
     # CACHE: Create
