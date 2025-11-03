@@ -93,7 +93,7 @@ jobs:
       - name: Get tag of current commit
         id: get_version
         run: |
-          echo "version=$(git tag --points-at HEAD)" >> "${GITHUB_OUTPUT}"
+          echo "version=$(git tag --points-at HEAD | grep -E '^v')" >> "${GITHUB_OUTPUT}"
 
       - name: Trigger dagger workflow
         uses: actions/github-script@v8
