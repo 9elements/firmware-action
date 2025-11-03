@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.5 - 2025-11-03
+#### Bug Fixes
+- (**cmd**) git describe regex - (20ac32a) - AtomicFS
+#### Continuous Integration
+- (**docker**) build coreboot 25.06 on our self-hosted runner - (dc87a90) - AtomicFS
+- automatic debug detection in GitHub - (d42e10d) - AtomicFS
+
+- - -
+
 ## v0.19.4 - 2025-11-03
 #### Bug Fixes
 - (**ci**) docker release - (d7de6ba) - AtomicFS
