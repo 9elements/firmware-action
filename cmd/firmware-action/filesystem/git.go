@@ -127,7 +127,10 @@ func gitDescribe(repoPath string, cfg *describe) (string, error) {
 	result := strings.TrimSpace(describe)
 
 	// Check validity of the returned string
-	pattern := regexp.MustCompile(`[\d\w]{13}(\-dirty)?`)
+	pattern := regexp.MustCompile(`[\d\w]{8,64}(\-dirty)?`)
+	//   We set --abbrev=8 (see GitDescribe cfg above), so the smallest length should be 8
+	//   SHA-1 produces 40 characters long string, but git also supports SHA-256,
+	//   which is 64 characters long
 
 	valid := pattern.MatchString(result)
 	if !valid {
