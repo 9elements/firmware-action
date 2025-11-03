@@ -51,7 +51,8 @@ jobs:
         run: |
           NEXT_VERSION=${{ steps.get_version.outputs.version }}
           git pull
-          git tag -a "${NEXT_VERSION}" -m "${NEXT_VERSION}"
+          git tag -a "${NEXT_VERSION}"
+          git tag -a "cmd/firmware-action/${NEXT_VERSION}"
           git push --follow-tags
           git checkout "${NEXT_VERSION}"
 
