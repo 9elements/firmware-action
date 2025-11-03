@@ -56,6 +56,10 @@ When using `auto-artifact-download`, be careful to avoid naming conflicts in the
 At the time of writing, GitHub-hosted runners have only 14GB of disk space. If your artifacts are large and/or you have many matrix combinations, the workflow could run out of disk space. Monitor your disk usage when using this feature with large builds.
 ```
 
+## Docker image pruning
+
+When recursively building a target with multiple dependencies in single job, it is possible that the CI runner will run out of disk space. The option `prune` is there to delete the docker containers and their volumes after each module is built, and container is no longer needed.
+
 ## Complete Configuration Example
 
 For a complete example with all options:
