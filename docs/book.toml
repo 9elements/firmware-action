@@ -1,7 +1,6 @@
 [book]
 authors = ["AtomicFS"]
 language = "en"
-multilingual = false
 src = "src"
 title = "firmware-action"
 description = "Build system for firmware images for several open source firmware solutions"
