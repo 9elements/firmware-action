@@ -112,7 +112,7 @@ tasks:
     dir: '{{.WORKDIR}}'
     cmds:
       - git clone https://source.denx.de/u-boot/u-boot.git "uboot-{{.UBOOT_VERSION}}"
-      - cd u-boot && git fetch -a && git checkout "{{.UBOOT_VERSION}}"
+      - cd "uboot-{{.UBOOT_VERSION}}" && git fetch -a && git checkout "v{{.UBOOT_VERSION}}"
     requires:
       vars: [UBOOT_VERSION]
     status:
@@ -133,7 +133,7 @@ tasks:
       vars: [UBOOT_VERSION]
 
   uboot-*:
-    desc: Run example
+    desc: Run uboot example (uboot-2025.01)
     deps:
       - task: mkdir
       - task: :build-go-binary
