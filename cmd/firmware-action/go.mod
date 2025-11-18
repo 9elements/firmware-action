@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	dagger.io/dagger v0.19.6
 	github.com/Masterminds/semver v1.5.0
-	github.com/alecthomas/kong v1.12.1
+	github.com/alecthomas/kong v1.13.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-git/go-git/v5 v5.16.3
 	github.com/go-playground/validator/v10 v10.28.0
