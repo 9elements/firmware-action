@@ -20,7 +20,7 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Enable pull request auto-merge
         run: |
           gh pr merge --auto "${{ github.event.pull_request.number }}"
@@ -38,7 +38,7 @@ jobs:
     if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Auto approve dependabot pull requests
         if: ${{ github.actor == 'dependabot[bot]' }}
         run: |

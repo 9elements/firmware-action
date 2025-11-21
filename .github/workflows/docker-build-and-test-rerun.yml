@@ -34,7 +34,7 @@ jobs:
       GH_TOKEN: '${{ secrets.AUTO_RERUN || github.token }}'
     steps:
       - name: Host - Checkout action ${{ inputs.distinct_id }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
