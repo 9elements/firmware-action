@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: get-matrix
         id: get-matrix
         run: |
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: get-matrix
         id: get-matrix
         run: |
@@ -128,7 +128,7 @@ jobs:
         run: |
           dpkg-reconfigure --frontend noninteractive tzdata
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Get coreboot version
         id: version
         run: |
@@ -323,7 +323,7 @@ jobs:
           key: ${{ steps.cache-tools-key.outputs.CACHE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         if: steps.toolchains-exist.outputs.EXIST == 'false' || steps.tools-exist.outputs.EXIST == 'false'
         with:
           repository: '9elements/firmware-action-toolchains'
@@ -393,7 +393,7 @@ jobs:
         uses: actions/setup-python@v6
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get coreboot version
         id: version
@@ -536,7 +536,7 @@ jobs:
       distinct_id: ${{ github.run_id }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: ci-auto-rerun-failed-jobs via ${{ env.github_repo || github.repository }}
         run: >
