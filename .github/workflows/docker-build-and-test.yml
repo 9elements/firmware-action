@@ -389,6 +389,12 @@ jobs:
       contents: read
       packages: write
     steps:
+        # DEBUG DISK SPACE
+      - name: Show disk usage
+        run: df -h
+      - name: Top-level directories
+        run: sudo du -h -d1 / | sort -hr | head -n 20
+
       - name: Setup python
         uses: actions/setup-python@v6
 
@@ -497,22 +503,12 @@ jobs:
       - name: Install python dependencies
         run: pip install -r ./.dagger-ci/daggerci/requirements.txt
 
-      - name: Run dagger pipeline
-        timeout-minutes: 60
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" == 'release' ]] || [[ "${GITHUB_REF}" == *'main' ]] || [[ "${GITHUB_REF_TYPE}" == 'tag' ]]; then
-            echo "Enable publishing"
-            python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }} --publish
-          else
-            echo "Disable publishing"
-            python .dagger-ci/daggerci/main.py -d ${{ matrix.dockerfile }}
-          fi
-        shell: bash
-        env:
-          GITHUB_USER: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCKERHUB_USER: ${{ vars.DOCKERHUB_USER }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        # DEBUG DISK SPACE
+      - name: Show disk usage
+        run: df -h
+      - name: Top-level directories
+        run: sudo du -h -d1 / | sort -hr | head -n 20
+
 
   #====================
   # Re-run failed jobs
