@@ -9,7 +9,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.13.0
 	github.com/dustin/go-humanize v1.0.1
-	github.com/go-git/go-git/v5 v5.16.3
+	github.com/go-git/go-git/v5 v5.16.4
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/google/go-cmp v0.7.0
 	github.com/heimdalr/dag v1.5.0
