@@ -1,7 +1,9 @@
-.aider*
 !.aiderignore
+.aider*
 .coverage
 .example_runs
+.list_compose.txt
+.list_readme.txt
 .task
 bin/
 cmd/firmware-action/coverage.html
