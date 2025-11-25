@@ -68,7 +68,7 @@ jobs:
           cargo install \
             mdbook@0.4.52 \
             mdbook-admonish \
-            mdbook-footnote \
+            mdbook-footnote@0.1.1 \
             mdbook-katex \
             mdbook-pagetoc \
             mdbook-template \
