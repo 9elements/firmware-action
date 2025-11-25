@@ -58,6 +58,8 @@ Here is a list of all containers:
 | coreboot_24.02       | [ ]        | discontinued in favor of `24.02.01`        |
 | coreboot_24.02.01    | [x]        |                                            |
 | coreboot_24.05       | [x]        |                                            |
+| coreboot_24.08       | [x]        |                                            |
+| coreboot_24.12       | [x]        |                                            |
 | coreboot_25.03       | [x]        |                                            |
 | coreboot_25.06       | [x]        |                                            |
 | udk2017              | [x]        |                                            |

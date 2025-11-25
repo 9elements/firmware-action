@@ -86,3 +86,31 @@ tasks:
     cmds:
       - jq -s 'reduce .[] as $item ({}; . * $item)' example_config__*.json > example_config.json
       - prettier -w example_config.json
+
+  check-list-supported-containers:
+    desc: Check that the list of supported containers in README is not missing any containers
+    deps:
+      - list-readme
+      - list-compose
+    cmds:
+      - comm -13 .list_readme.txt .list_compose.txt
+
+  list-readme:
+    desc: Update container list from README
+    internal: true
+    cmds:
+      - cat README.md | grep -E '\| (coreboot_|udk2017|edk2-stable2|linux_|uroot_|uboot_)' | sed -E 's/^\| //' | sed -E 's/ .*//g' | sort > .list_readme.txt
+    sources:
+      - README.md
+    generates:
+      - .list_readme.txt
+
+  list-compose:
+    desc: Update container list from docker compose
+    internal: true
+    cmds:
+      - go-task containers:build:list-available | sort > .list_compose.txt
+    sources:
+      - docker/compose.yaml
+    generates:
+      - .list_compose.txt
