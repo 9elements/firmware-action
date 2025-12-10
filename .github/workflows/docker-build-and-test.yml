@@ -355,7 +355,7 @@ jobs:
           mv "../${{ steps.tar-filename-tools.outputs.TAR_FILENAME }}" "coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/"
           mv "../${{ steps.tar-filename-tools.outputs.TAR_FILENAME }}.sha256" "coreboot/${{ steps.version.outputs.COREBOOT_VERSION }}/"
       - name: Create pull request in firmware-action-toolchains repository
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         if: steps.toolchains-exist.outputs.EXIST == 'false' || steps.tools-exist.outputs.EXIST == 'false'
         with:
           path: 'firmware-action-toolchains'
