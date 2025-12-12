@@ -135,7 +135,7 @@ jobs:
           yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
 
       - name: Restore cached coreboot repo
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: cache-coreboot-repo
         with:
           path: ./coreboot
@@ -145,7 +145,7 @@ jobs:
         run: |
           git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
       - name: Store coreboot repo in cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.cache-coreboot-repo.outputs.cache-hit != 'true'
         with:
           path: ./coreboot
@@ -217,7 +217,7 @@ jobs:
 
       - name: Restore cached toolchains
         id: cache-toolchains
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         if: steps.toolchains-exist.outputs.EXIST == 'false'
         with:
           path: |
@@ -226,7 +226,7 @@ jobs:
           key: ${{ steps.cache-key.outputs.CACHE_KEY }}
       - name: Restore cached tools
         id: cache-tools
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         if: steps.tools-exist.outputs.EXIST == 'false'
         with:
           path: |
@@ -306,7 +306,7 @@ jobs:
 
       # Store toolchains and utils in cache
       - name: Cache toolchains
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.toolchains-exist.outputs.EXIST == 'false' && steps.cache-toolchains.outputs.cache-hit != 'true'
         with:
           path: |
@@ -314,7 +314,7 @@ jobs:
             ${{ steps.tar-filename.outputs.TAR_FILENAME }}.sha256
           key: ${{ steps.cache-key.outputs.CACHE_KEY }}
       - name: Cache tools
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.tools-exist.outputs.EXIST == 'false' && steps.cache-tools.outputs.cache-hit != 'true'
         with:
           path: |
@@ -401,7 +401,7 @@ jobs:
         run: yq -r '.services.["${{ matrix.dockerfile }}"].build.args[] | select(test("COREBOOT_VERSION=.*"))' docker/compose.yaml >> "${GITHUB_OUTPUT}"
 
       - name: Restore cached coreboot repo
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         if: startsWith(matrix.dockerfile, 'coreboot')
         id: cache-coreboot-repo
         with:
@@ -412,7 +412,7 @@ jobs:
         run: |
           git clone --depth 1 "https://review.coreboot.org/coreboot.git" -b "${{ steps.version.outputs.COREBOOT_VERSION }}"
       - name: Store coreboot repo in cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: startsWith(matrix.dockerfile, 'coreboot') && steps.cache-coreboot-repo.outputs.cache-hit != 'true'
         with:
           path: ./coreboot

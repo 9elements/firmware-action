@@ -42,7 +42,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Restore cached mdbook cargo stuff
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             ~/.cargo/registry/
@@ -76,7 +76,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Store mdbook cargo stuff
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: |
             ~/.cargo/registry/
