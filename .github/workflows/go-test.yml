@@ -134,7 +134,7 @@ jobs:
           go get -d ./...
 
       - name: Restore cached tmp files
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         id: cache-tmp-files
         with:
           path: /tmp/__firmware-action_tmp_files__
@@ -146,7 +146,7 @@ jobs:
           go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile "coverage-${{ matrix.testregex }}.out" -run ${{ matrix.testregex }} ./...
 
       - name: Store tmp files
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: steps.cache-tmp-files.outputs.cache-hit != 'true'
         with:
           path: /tmp/__firmware-action_tmp_files__

@@ -276,7 +276,7 @@ runs:
     #   overkill for what we want.
 
     - name: restore_cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v5
       if: inputs.enable-cache == 'true'
       id: cache
       with:
@@ -417,7 +417,7 @@ runs:
 
     - name: save_cache
       if: ${{ always() && inputs.enable-cache == 'true' }}
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: .firmware-action/
         key: firmware-action-${{ inputs.target }}-${{ hashFiles(inputs.config) }}-${{ github.sha }}-${{ github.run_id }}
