@@ -67,7 +67,7 @@ inputs:
         directory), so that you don't have it. Combined with the option 'auto-download-artifacts'
         firmware-action should be able to built entire firmware stack in CI even if it is split into multiple
         jobs and even if there are multiple matrix builds running in parallel.
-      Internally a actions/upload-artifact@v5 is used
+      Internally a actions/upload-artifact@v6 is used
     required: false
     default: 'false'
 
@@ -436,7 +436,7 @@ runs:
 
     - name: upload_artifact
       if: ${{ always() && inputs.auto-upload-artifacts == 'true' }}
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       id: upload_artifact
       with:
         name: ${{ steps.get_artifact_name.outputs.artifact_name }}
