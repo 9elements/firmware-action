@@ -520,7 +520,7 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
 
       - name: Get artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: universal
           path: output-universal
@@ -559,7 +559,7 @@ jobs:
           compile: ${{ needs.changes.outputs.compile }}
 
       - name: Get artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: prune
           path: output-universal-example-B-${{ matrix.prune }}
