@@ -38,6 +38,8 @@ There is a standalone repository with usage examples at [firmware-action-example
 
 Pre-compiled coreboot toolchains for docker containers are stored in separate repository [firmware-action-toolchains](https://github.com/9elements/firmware-action-toolchains).
 
+There was also a presentation about `firmware-action` at [FOSDEM 2025](https://mirror.as35701.net/video.fosdem.org/2025/ub4136/fosdem-2025-5197-building-firmware-with-firmware-action.mp4).
+
 
 ## Containers
 
