@@ -79,7 +79,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Check goreleaser configuration
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           args: check
           workdir: cmd/firmware-action
