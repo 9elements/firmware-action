@@ -185,9 +185,9 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 
 			switch val.(type) {
 			case bool:
-				details.WriteString(fmt.Sprintf("    - %s: %t\n", key, val))
+				fmt.Fprintf(&details, "    - %s: %t\n", key, val)
 			default:
-				details.WriteString(fmt.Sprintf("    - %s: %s\n", key, val))
+				fmt.Fprintf(&details, "    - %s: %s\n", key, val)
 			}
 		}
 
