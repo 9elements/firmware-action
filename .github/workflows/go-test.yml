@@ -67,7 +67,7 @@ jobs:
           go tool cover -func=coverage-merged.out
 
       - name: Upload merged coverage report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: "coverage-merged"
           path: "cmd/firmware-action/coverage-merged.out"
@@ -153,7 +153,7 @@ jobs:
           key: go-test-${{ matrix.testregex }}-cache
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: "coverage-${{ matrix.testregex }}"
           path: "cmd/firmware-action/coverage-${{ matrix.testregex }}.out"
@@ -181,7 +181,7 @@ jobs:
           go test -race -v -timeout 60m -shuffle=on -covermode=atomic -coverprofile "coverage-short.out" -skip '(TestLinux|TestEdk2|TestCoreboot|TestStitching|TestURoot|TestUniversal|TestUBoot)' ./...
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: "coverage-short"
           path: "cmd/firmware-action/coverage-short.out"
