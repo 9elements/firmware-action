@@ -3,6 +3,72 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.19.6 - 2026-03-26
+#### Bug Fixes
+- (**cmd**) staticcheck QF1012 - (329d950) - AtomicFS
+- (**codeql**) we do not use javascript - (cfbce66) - AtomicFS
+- (**taskfile**) fix running uboot test - (733234a) - AtomicFS
+#### Documentation
+- (**fix**) ping mdbook to v0.4.52 - (a3622e3) - AtomicFS
+- (**readme**) fix wrong word - (97e9701) - AtomicFS
+- add link to FOSDEM presentation - (a84ae76) - AtomicFS
+- update list of supported containers - (9f7247f) - AtomicFS
+- migrate to mdbook v0.5 - (bfd9930) - AtomicFS
+#### Build system
+- (**deps**) bump actions/deploy-pages from 4 to 5 - (9d624b2) - dependabot[bot]
+- (**deps**) update anyio requirement in /.dagger-ci/daggerci - (0c1db6a) - dependabot[bot]
+- (**deps**) update pytest-cov requirement in /.dagger-ci/daggerci - (1f57f26) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (c7a9379) - dependabot[bot]
+- (**deps**) bump dorny/paths-filter from 3 to 4 - (23f354d) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (4e0e9d0) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (788b2dc) - dependabot[bot]
+- (**deps**) update dagger-io requirement in /.dagger-ci/daggerci - (c8af2e8) - dependabot[bot]
+- (**deps**) bump go.opentelemetry.io/otel/sdk in /cmd/firmware-action - (c506f9e) - dependabot[bot]
+- (**deps**) bump actions/download-artifact from 7 to 8 - (eefa5d1) - dependabot[bot]
+- (**deps**) bump actions/upload-artifact from 6 to 7 - (b1449f0) - dependabot[bot]
+- (**deps**) bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (53acc99) - dependabot[bot]
+- (**deps**) bump goreleaser/goreleaser-action from 6 to 7 - (3fb1e81) - dependabot[bot]
+- (**deps**) bump github.com/cloudflare/circl in /cmd/firmware-action - (656f61a) - dependabot[bot]
+- (**deps**) bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (341ea82) - dependabot[bot]
+- (**deps**) bump github.com/alecthomas/kong in /cmd/firmware-action - (300eec4) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (c02389c) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (7754b49) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (e817248) - dependabot[bot]
+- (**deps**) bump actions/download-artifact from 6 to 7 - (efa8fc6) - dependabot[bot]
+- (**deps**) bump actions/upload-artifact from 5 to 6 - (117c3f9) - dependabot[bot]
+- (**deps**) bump github.com/go-playground/validator/v10 - (f8cfd60) - dependabot[bot]
+- (**deps**) bump github.com/sethvargo/go-githubactions - (fd5d6ff) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (79ba3c0) - dependabot[bot]
+- (**deps**) bump github.com/go-playground/validator/v10 - (9993005) - dependabot[bot]
+- (**deps**) bump actions/cache from 4 to 5 - (4c19936) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (9577d7c) - dependabot[bot]
+- (**deps**) bump peter-evans/create-pull-request from 7 to 8 - (d8fee4b) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (a27f206) - dependabot[bot]
+- (**deps**) update anyio requirement in /.dagger-ci/daggerci - (2a1290a) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (e09a58f) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (34d92f9) - dependabot[bot]
+- (**deps**) bump github.com/go-git/go-git/v5 in /cmd/firmware-action - (da53971) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (7afdf74) - dependabot[bot]
+- (**deps**) bump actions/checkout from 5 to 6 - (fd7aed4) - dependabot[bot]
+- (**deps**) bump golang.org/x/crypto in /cmd/firmware-action - (5dc60d7) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (2a47714) - dependabot[bot]
+- (**deps**) bump github.com/alecthomas/kong in /cmd/firmware-action - (881c767) - dependabot[bot]
+- (**deps**) update prettytable requirement in /.dagger-ci/daggerci - (52b1312) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (e7a954d) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (0735984) - dependabot[bot]
+- (**deps**) bump golangci/golangci-lint-action from 8 to 9 - (ba77c93) - dependabot[bot]
+- (**deps**) update pytest requirement in /.dagger-ci/daggerci - (4a2892f) - dependabot[bot]
+- (**deps**) bump github.com/jedib0t/go-pretty/v6 - (87c3191) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (1bbd8d8) - dependabot[bot]
+- (**deps**) bump dagger.io/dagger in /cmd/firmware-action - (7004887) - dependabot[bot]
+- (**deps**) bump docs/src/firmware-action-example - (33eaeb3) - dependabot[bot]
+#### Continuous Integration
+- (**docker**) fix running out of disk space for docker coreboot builds - (c2acf76) - AtomicFS
+- (**docs**) pin mdbook-footnote - (13a381d) - AtomicFS
+- (**fix**) coreboot resource hog test running fail - (4e27687) - AtomicFS
+
+- - -
+
 ## v0.19.5 - 2025-11-03
 #### Bug Fixes
 - (**cmd**) git describe regex - (20ac32a) - AtomicFS
