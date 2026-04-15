@@ -10,7 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.17.2
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/google/go-cmp v0.7.0
-	github.com/heimdalr/dag v1.5.0
+	github.com/heimdalr/dag v1.5.1
 	github.com/jedib0t/go-pretty/v6 v6.7.9
 	github.com/plus3it/gorecurcopy v0.0.1
 	github.com/sethvargo/go-githubactions v1.3.2
