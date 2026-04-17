@@ -3,7 +3,7 @@ module github.com/9elements/firmware-action/cmd/firmware-action
 go 1.25.0
 
 require (
-	dagger.io/dagger v0.20.5
+	dagger.io/dagger v0.20.6
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/dustin/go-humanize v1.0.1
