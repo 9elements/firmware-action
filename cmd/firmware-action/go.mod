@@ -1,9 +1,9 @@
 module github.com/9elements/firmware-action/cmd/firmware-action
 
-go 1.25.0
+go 1.26.1
 
 require (
-	dagger.io/dagger v0.20.8
+	dagger.io/dagger v0.21.3
 	github.com/Masterminds/semver v1.5.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/dustin/go-humanize v1.0.1
@@ -27,6 +27,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
+	github.com/dagger/querybuilder v0.0.0-20260402040506-574a5e81cb59 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
