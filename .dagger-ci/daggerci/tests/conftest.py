@@ -90,12 +90,10 @@ def fixture_dockerfile():
     """
     Generic Dockerfile content
     """
-    return textwrap.dedent(
-        """\
+    return textwrap.dedent("""\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64\
-        """
-    )
+        """)
 
 
 @pytest.fixture
@@ -103,16 +101,14 @@ def dockerfile_dummy_tests_success():
     """
     Dockerfile content specifically for executing tests inside docker
     """
-    return textwrap.dedent(
-        """\
+    return textwrap.dedent("""\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64
         ARG CONTEXT=dummy
         ARG VARIANT=success
         ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
         RUN echo 'hello world'\
-        """
-    )
+        """)
 
 
 @pytest.fixture
@@ -120,16 +116,14 @@ def dockerfile_dummy_tests_fail():
     """
     Dockerfile content specifically for executing tests inside docker
     """
-    return textwrap.dedent(
-        """\
+    return textwrap.dedent("""\
         FROM ubuntu:22.04 AS base
         ARG TARGETARCH=amd64
         ARG CONTEXT=dummy
         ARG VARIANT=fail
         ENV VERIFICATION_TEST=./tests/test_${CONTEXT}_${VARIANT}.sh
         RUN echo 'hello world'\
-        """
-    )
+        """)
 
 
 @pytest.fixture
@@ -137,12 +131,10 @@ def dockerfile_broken():
     """
     Dockerfile content which should fail to build
     """
-    return textwrap.dedent(
-        """\
+    return textwrap.dedent("""\
         FROM ubuntu:22.04 AS base
         RUN false\
-        """
-    )
+        """)
 
 
 # ===========================
