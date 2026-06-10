@@ -133,8 +133,7 @@ func TestMerge(t *testing.T) {
 
 			// Initialize empty maps in wantConfig so that deep equal works correctly
 			wantConfigValue := reflect.ValueOf(&tc.wantConfig).Elem()
-			for i := 0; i < wantConfigValue.NumField(); i++ {
-				fieldValue := wantConfigValue.Field(i)
+			for _, fieldValue := range wantConfigValue.Fields() {
 				if fieldValue.Kind() == reflect.Map && fieldValue.IsNil() {
 					fieldValue.Set(reflect.MakeMap(fieldValue.Type()))
 				}
