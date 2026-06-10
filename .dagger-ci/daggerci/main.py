@@ -2,6 +2,7 @@
 """
 Python script to build and test Docker containers for coreboot and EDK2 compilation
 """
+
 # mypy: disable-error-code="import"
 
 # Logging

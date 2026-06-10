@@ -34,13 +34,11 @@ def cli(
     parser.add_argument(
         "-d",
         "--dockerfile",
-        help=textwrap.dedent(
-            """\
+        help=textwrap.dedent("""\
                 select which dockerfile to build
                 - enter name from docker-compose
                 - multiple entries are possible
-                - by default tries to build all"""
-        ),
+                - by default tries to build all"""),
         nargs="+",
     )
     parser.add_argument(
