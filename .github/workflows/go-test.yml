@@ -69,15 +69,15 @@ jobs:
       - name: Upload merged coverage report
         uses: actions/upload-artifact@v7
         with:
-          name: "coverage-merged"
-          path: "cmd/firmware-action/coverage-merged.out"
+          name: 'coverage-merged'
+          path: 'cmd/firmware-action/coverage-merged.out'
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: "coverage-merged.out"
-          working-directory: "cmd/firmware-action/"
+          files: 'coverage-merged.out'
+          working-directory: 'cmd/firmware-action/'
           disable_search: true
           verbose: true
 
@@ -155,8 +155,8 @@ jobs:
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
-          name: "coverage-${{ matrix.testregex }}"
-          path: "cmd/firmware-action/coverage-${{ matrix.testregex }}.out"
+          name: 'coverage-${{ matrix.testregex }}'
+          path: 'cmd/firmware-action/coverage-${{ matrix.testregex }}.out'
 
   go-test:
     # Run all remaining light tests
@@ -183,5 +183,5 @@ jobs:
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
-          name: "coverage-short"
-          path: "cmd/firmware-action/coverage-short.out"
+          name: 'coverage-short'
+          path: 'cmd/firmware-action/coverage-short.out'
