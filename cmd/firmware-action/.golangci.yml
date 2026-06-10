@@ -13,6 +13,8 @@ linters:
     testifylint:
       disable:
         - require-error
+    goconst:
+      ignore-tests: true
   # Defines a set of rules to ignore issues.
   # It does not skip the analysis, and so does not ignore "typecheck" errors.
   exclusions:
@@ -69,6 +71,7 @@ linters:
     - unconvert
     # Not sure
     - exhaustruct
+    - goconst
     - godoclint
     - tagalign
     - tagliatelle
