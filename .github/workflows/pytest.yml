@@ -57,7 +57,7 @@ jobs:
     # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Install Taskfile
-        uses: arduino/setup-task@v2
+        uses: arduino/setup-task@v3
       - name: Setup python
         uses: actions/setup-python@v6
         with:
