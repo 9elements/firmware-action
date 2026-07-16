@@ -9,6 +9,7 @@ bin/
 cmd/firmware-action/coverage.html
 cmd/firmware-action/coverage.out
 cmd/firmware-action/recipes/__tmp_files__/
+cmd/firmware-action/vendor/
 docker/coreboot/coreboot-*
 docs/public/
 megalinter-reports/
