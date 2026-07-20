@@ -13,7 +13,7 @@ require (
 	github.com/heimdalr/dag v1.5.1
 	github.com/jedib0t/go-pretty/v6 v6.8.2
 	github.com/plus3it/gorecurcopy v0.0.1
-	github.com/sethvargo/go-githubactions v1.3.2
+	github.com/sethvargo/go-githubactions v1.4.0
 	github.com/stretchr/testify v1.11.1
 )
 
