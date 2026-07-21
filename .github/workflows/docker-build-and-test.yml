@@ -390,7 +390,7 @@ jobs:
       packages: write
     steps:
       - name: Setup python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
 
       - name: Checkout
         uses: actions/checkout@v7
