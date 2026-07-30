@@ -9,6 +9,17 @@ description = "Build system for firmware images for several open source firmware
 build-dir = "public"
 create-missing = false
 
+# `{{#include}}` (built-in "links" preprocessor) only re-applies the
+# prefix of the directive's line (e.g. blockquote markers `> ` used by
+# native admonitions) to the *first* line of a multi-line include,
+# breaking the blockquote/indentation for the rest of the included
+# content. This preprocessor re-implements `{{#include}}` and copies
+# the original line's prefix onto every included line, then runs
+# before "links" so there is nothing left for it to (mis-)process.
+[preprocessor.prefix-include]
+command = "python3 preprocessors/prefix_include.py"
+before = ["links"]
+
 [output.html]
 mathjax-support = true
 no-section-label = true
