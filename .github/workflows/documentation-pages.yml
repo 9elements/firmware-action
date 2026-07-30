@@ -71,9 +71,9 @@ jobs:
           # Install mdbook with plugins
           echo "::group::cargo install mdbook"
           cargo install \
-            mdbook@0.4.52 \
+            mdbook \
             mdbook-admonish \
-            mdbook-footnote@0.1.1 \
+            mdbook-footnote \
             mdbook-katex \
             mdbook-pagetoc \
             mdbook-template \
