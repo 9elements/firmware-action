@@ -87,7 +87,8 @@ func (c *ChangeConfig) DetectChanges(target string) bool {
 
 	// Check if current config is nil
 	if c.Config == nil {
-		slog.Warn("Current configuration is nil, assuming no changes are needed",
+		slog.Warn(
+			"Current configuration is nil, assuming no changes are needed",
 			slog.String("suggestion", logging.ThisShouldNotHappenMessage),
 		)
 
@@ -136,14 +137,16 @@ func (c *ChangeConfig) SaveCheckpoint(override bool) {
 
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			slog.Error("Cannot create directory for files to aid in change detection",
+			slog.Error(
+				"Cannot create directory for files to aid in change detection",
 				slog.Any("error", err),
 			)
 		}
 
 		err = WriteConfig(c.ResultFile, c.Config)
 		if err != nil {
-			slog.Warn("Failed to create a snapshot of configuration for detecting future changes",
+			slog.Warn(
+				"Failed to create a snapshot of configuration for detecting future changes",
 				slog.Any("error", err),
 			)
 		}
@@ -211,7 +214,8 @@ func (c *ChangeGitHash) SaveCheckpoint(target string, override bool) {
 
 		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			slog.Error("Cannot create directory for files to aid in change detection",
+			slog.Error(
+				"Cannot create directory for files to aid in change detection",
 				slog.Any("error", err),
 			)
 		}
@@ -245,7 +249,8 @@ func (c *AllChanges) DetectChanges(target string) bool {
 	result := c.TimeStamp.ChangesDetected || c.Configuration.ChangesDetected || c.GitHash.ChangesDetected
 
 	// Debug output
-	slog.Debug("Detected changes",
+	slog.Debug(
+		"Detected changes",
 		slog.Bool("time-stamp", c.TimeStamp.ChangesDetected),
 		slog.Bool("config", c.Configuration.ChangesDetected),
 		slog.Bool("git-hash", c.GitHash.ChangesDetected),

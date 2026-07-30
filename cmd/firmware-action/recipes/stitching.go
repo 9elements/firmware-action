@@ -302,7 +302,8 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	if baseFileSize > totalSize {
 		err = errBaseFileBiggerThanIfd
 		slog.Error(
-			fmt.Sprintf("Provided base_file '%s' is bigger (%s B) than defined in IFD (%s B)",
+			fmt.Sprintf(
+				"Provided base_file '%s' is bigger (%s B) than defined in IFD (%s B)",
 				filepath.Base(oldBaseFilePath),
 				humanize.Comma(int64(baseFileSize)),
 				humanize.Comma(int64(totalSize)),
@@ -354,7 +355,8 @@ func (opts FirmwareStitchingOpts) buildFirmware(ctx context.Context, client *dag
 	// Populate regions with ifdtool
 	for entry := range opts.IfdtoolEntries {
 		slog.Info(
-			fmt.Sprintf("Injecting '%s' into '%s' region in '%s'",
+			fmt.Sprintf(
+				"Injecting '%s' into '%s' region in '%s'",
 				opts.IfdtoolEntries[entry].Path,
 				opts.IfdtoolEntries[entry].TargetRegion,
 				imageFilename,

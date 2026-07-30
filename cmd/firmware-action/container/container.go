@@ -235,7 +235,8 @@ func Setup(ctx context.Context, client *dagger.Client, opts *SetupOpts) (*dagger
 		WithExec([]string{"mkdir", "-p", opts.MountContainerDir}).
 		WithMountedDirectory(
 			opts.MountContainerDir,
-			client.Host().Directory(opts.MountHostDir)).
+			client.Host().Directory(opts.MountHostDir),
+		).
 		WithWorkdir(opts.WorkdirContainer)
 
 	// Get current working directory
