@@ -11,6 +11,7 @@ cmd/firmware-action/coverage.out
 cmd/firmware-action/recipes/__tmp_files__/
 cmd/firmware-action/vendor/
 docker/coreboot/coreboot-*
+docs/preprocessors/__pycache__
 docs/public/
 megalinter-reports/
 node_modules/

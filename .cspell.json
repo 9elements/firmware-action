@@ -22,6 +22,7 @@
     "cmd/firmware-action/.golangci.yml",
     "docker/**",
     "docs/book.toml",
+    "docs/preprocessors/**",
     "docs/theme/index.hbs",
     "docs/theme/pagetoc.css",
     "docs/theme/pagetoc.js",
