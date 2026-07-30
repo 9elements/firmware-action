@@ -3,6 +3,7 @@
     "**/*.defconfig",
     "**/.git/**",
     "**/node_modules/**",
+    "**/osv-scanner.toml",
     "**/vscode-extension/**",
     ".cspell.json",
     ".editorconfig",

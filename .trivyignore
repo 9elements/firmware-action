@@ -16,3 +16,6 @@ AVD-DS-0026
 #     FROM ${INTERMEDIATE_IMAGE} AS toolchain
 # All containers are tagged to a specific release, we never use 'latest'
 AVD-DS-0001
+
+# Golang indirect dependency golang.org/x/crypto is unmaintained. But we do not really use any crypto stuff.
+GO-2026-5932
