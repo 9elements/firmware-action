@@ -36,6 +36,7 @@ jobs:
         uses: wagoid/commitlint-github-action@v6
         with:
           configFile: .commitlint.config.mjs
+
   megalinter:
     runs-on: ubuntu-latest
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
@@ -50,11 +51,16 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
       - name: MegaLinter
         uses: oxsecurity/megalinter/flavors/cupcake@v9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: true
+          GOTOOLCHAIN: auto
+
   golangci-lint:
     runs-on: ubuntu-latest
     if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
