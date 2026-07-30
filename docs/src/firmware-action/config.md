@@ -158,7 +158,6 @@ To explain each and every entry in the configuration, here are snippets of the s
 ### Specific / coreboot
 ```go
 {{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
-{{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootBlobs}}
 ```
 
 ### Specific / Linux
