@@ -446,7 +446,8 @@ func ReadConfigs(filepaths []string) (*Config, error) {
 
 	for _, filepath := range filepaths {
 		trimmedFilepath := strings.TrimSpace(filepath)
-		slog.Debug("Reading config",
+		slog.Debug(
+			"Reading config",
 			slog.String("path", trimmedFilepath),
 		)
 
