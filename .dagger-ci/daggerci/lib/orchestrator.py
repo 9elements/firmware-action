@@ -453,7 +453,7 @@ class Orchestrator:
         for p in platforms:
             try:
                 logging.info("** building platform: %s", p)
-                container = await context_dir.docker_build(  # type: ignore [no-any-return]
+                container = await context_dir.docker_build(
                     platform=dagger.Platform("linux/" + p),
                     build_args=dockerfile_args + [dagger.BuildArg("TARGETARCH", p)],
                 )
@@ -474,7 +474,7 @@ class Orchestrator:
                     f"build {p}",
                     False,
                     exc.debug_query(),
-                )  # type: ignore [no-untyped-call]
+                )
                 return {}
             self.results.add(top_element, dockerfile, f"build {p}")
 
