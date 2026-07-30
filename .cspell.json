@@ -22,7 +22,6 @@
     "cmd/firmware-action/.golangci.yml",
     "docker/**",
     "docs/book.toml",
-    "docs/mdbook-admonish.css",
     "docs/theme/index.hbs",
     "docs/theme/pagetoc.css",
     "docs/theme/pagetoc.js",

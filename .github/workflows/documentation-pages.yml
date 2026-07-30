@@ -72,11 +72,7 @@ jobs:
           echo "::group::cargo install mdbook"
           cargo install \
             mdbook \
-            mdbook-admonish \
-            mdbook-footnote \
             mdbook-katex \
-            mdbook-pagetoc \
-            mdbook-template \
             mdbook-toc
           echo "::endgroup::"
 

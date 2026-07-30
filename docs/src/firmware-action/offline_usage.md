@@ -7,11 +7,10 @@ This approach is useful for example when people travel. They run `firmware-actio
 
 `firmware-action` under the hood uses [dagger](https://docs.dagger.io/) / docker. As such, the configuration contains entry `sdk_url` which specifies the docker image / container to use.
 
-```admonish example
-~~~json
-"sdk_url": "ghcr.io/9elements/firmware-action/coreboot_4.19:main"
-~~~
-```
+> [!TIP]
+> ~~~json
+> "sdk_url": "ghcr.io/9elements/firmware-action/coreboot_4.19:main"
+> ~~~
 
 However, in this configuration `firmware-action` (or rather `dagger`) will always connect to the internet and download the manifest to see if a new container needs to be downloaded. This applies to all tags (`main`, `latest`, `v0.8.0`, and so on).
 
@@ -19,11 +18,10 @@ If you need to use `firmware-action` offline, you have to first acquire the cont
 
 Then you need to change the `firmware-action` configuration to include the image reference (digest hash).
 
-```admonish example
-~~~json
-"sdk_url": "http://ghcr.io/9elements/firmware-action/coreboot_4.19:main@sha256:25b4f859e26f84a276fe0c4395a4f0c713f5b564679fbff51a621903712a695b"
-~~~
-```
+> [!TIP]
+> ~~~json
+> "sdk_url": "http://ghcr.io/9elements/firmware-action/coreboot_4.19:main@sha256:25b4f859e26f84a276fe0c4395a4f0c713f5b564679fbff51a621903712a695b"
+> ~~~
 
 Digest hash can be found in the container hub. For `firmware-action` containers see [GitHub](https://github.com/orgs/9elements/packages?repo_name=firmware-action).
 
@@ -44,8 +42,7 @@ Besides running a offline docker registry, there is also a option to use tarball
 
 `firmware-action` can import a tarfile and use it.
 
-```admonish example
-~~~json
-"sdk_url": "file:///home/user/my-image/ubuntu-latest.tar"
-~~~
-```
+> [!TIP]
+> ~~~json
+> "sdk_url": "file:///home/user/my-image/ubuntu-latest.tar"
+> ~~~

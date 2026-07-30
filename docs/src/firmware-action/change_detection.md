@@ -4,48 +4,47 @@
 
 Related temporary files to aid in change detection are stored in `.firmware-action/` directory, which is always created in current working directory.
 
-```admonish note
-It is save to delete the `.firmware-action/` directory, but keep in mind that change detection depends on its existence.
-
-If `.firmware-action/` directory is deleted, it will be re-created on next `firmware-action` execution.
-
-It might be advantageous to also include this directory in caches / artifacts when in CI. Preserving these files might reduce run time in the CI.
-```
+> [!NOTE]
+> It is save to delete the `.firmware-action/` directory, but keep in mind that change detection depends on its existence.
+>
+> If `.firmware-action/` directory is deleted, it will be re-created on next `firmware-action` execution.
+>
+> It might be advantageous to also include this directory in caches / artifacts when in CI. Preserving these files might reduce run time in the CI.
 
 
 ## Sources modification time
 
 When building a module, `firmware-action` checks recursively all sources for a given module. For all module types, list of sources include repository and all input files.
 
-```admonish example collapsible=true title="Code snippet: Common sources"
-~~~golang
-{{#include ../../../cmd/firmware-action/recipes/config.go:CommonOptsGetSources}}
-~~~
-```
+> [!TIP]
+> **Code snippet: Common sources**
+>
+> ~~~golang
+> {{#include ../../../cmd/firmware-action/recipes/config.go:CommonOptsGetSources}}
+> ~~~
 
 Each module type has then additional source files. For example `coreboot`, where list of sources also includes `defconfig` and all the blobs.
-```admonish example collapsible=true title="Code snippet: Additional coreboot sources"
-~~~golang
-{{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOptsGetSources}}
-~~~
-```
+> [!TIP]
+> **Code snippet: Additional coreboot sources**
+>
+> ~~~golang
+> {{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOptsGetSources}}
+> ~~~
 
 When a module is successfully built, a file containing time stamp is saved to `.firmware-action/timestamps/` directory.
 
-```admonish note
-The saved time stamp is the time of the check (when was the check performed), and not the time when module is successfully built.
-```
+> [!NOTE]
+> The saved time stamp is the time of the check (when was the check performed), and not the time when module is successfully built.
 
 On next run, this file (if exists) is loaded with time stamp of last successful run. Then all sources are recursively checked for any file that was modified since the last successful run. If no file was modified since the loaded time stamp, module is considered up-to-date and build is skipped. If any of the files has newer modified time, module is re-built.
 
 
 ### False positives
 
-```admonish warning
-As mentioned in [configuration section](config.md#common), you should avoid nested outputs (placing output of one module into output of another module).
-
-However you should also avoid nesting output inside of `repo_path`.
-```
+> [!WARNING]
+> As mentioned in [configuration section](config.md#common), you should avoid nested outputs (placing output of one module into output of another module).
+>
+> However you should also avoid nesting output inside of `repo_path`.
 
 When `firmware-action` is checking for modification time, it checks the entirety of the `repo_path` (except `.git` directory), and any single file newer than the saved time stamp will trigger rebuild.
 

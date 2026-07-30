@@ -1,46 +1,45 @@
 # Configuration
 
-```admonish example collapsible=true title="Example of JSON configuration file"
-~~~json
-{{#include ../../../tests/example_config.json}}
-~~~
-```
+> [!TIP]
+> **Example of JSON configuration file**
+>
+> ~~~json
+> {{#include ../../../tests/example_config.json}}
+> ~~~
 
-```admonish tip
-Multiple configuration files can be supplied to `firmware-action`. Dependencies also work across files.
+> [!TIP]
+> Multiple configuration files can be supplied to `firmware-action`. Dependencies also work across files.
+>
+> Multiple configs in local build:
+> ~~~
+> firmware-action build --config=config-01.json --config=config-02.json ...
+> ~~~
+>
+> Multiple configs in GitHub CI:
+> ~~~
+> - name: firmware-action
+>   uses: ./
+>   with:
+>     config: |-
+>       config-01.json
+>       config-02.json
+> ~~~
 
-Multiple configs in local build:
-~~~
-firmware-action build --config=config-01.json --config=config-02.json ...
-~~~
-
-Multiple configs in GitHub CI:
-~~~
-- name: firmware-action
-  uses: ./
-  with:
-    config: |-
-      config-01.json
-      config-02.json
-~~~
-```
-
-```admonish tip
-For YAML multi-line string please refer to documentation [Block Style Productions in YAML](https://yaml.org/spec/1.2.2/#block-style-productions)
-
-| Indicator | Name                | Behavior                                          |
-|-----------|---------------------|---------------------------------------------------|
-| `\|`      | Literal Block       | Preserves newlines, strips final newline          |
-| `\|+`     | Literal Block Keep  | Preserves all newlines including final            |
-| `\|-`     | Literal Block Strip | Strips all trailing newlines                      |
-| `>`       | Folded Block        | Folds newlines to spaces, keeps paragraph breaks  |
-| `>+`      | Folded Block Keep   | Like > but keeps final newline                    |
-| `>-`      | Folded Block Strip  | Like > but strips final newline                   |
-
-Beware that modules with identical names are permitted, as long as they are not in the same configuration file.
-
-`firmware-action` processes the files in order in which they were supplied and in case of name-collision, the configuration in last file takes precedence.
-```
+> [!TIP]
+> For YAML multi-line string please refer to documentation [Block Style Productions in YAML](https://yaml.org/spec/1.2.2/#block-style-productions)
+>
+> | Indicator | Name                | Behavior                                          |
+> |-----------|---------------------|---------------------------------------------------|
+> | `\|`      | Literal Block       | Preserves newlines, strips final newline          |
+> | `\|+`     | Literal Block Keep  | Preserves all newlines including final            |
+> | `\|-`     | Literal Block Strip | Strips all trailing newlines                      |
+> | `>`       | Folded Block        | Folds newlines to spaces, keeps paragraph breaks  |
+> | `>+`      | Folded Block Keep   | Like > but keeps final newline                    |
+> | `>-`      | Folded Block Strip  | Like > but strips final newline                   |
+>
+> Beware that modules with identical names are permitted, as long as they are not in the same configuration file.
+>
+> `firmware-action` processes the files in order in which they were supplied and in case of name-collision, the configuration in last file takes precedence.
 
 The configuration is split by type (`coreboot`, `linux`, `edk2`, ...).
 
@@ -124,40 +123,37 @@ With such configuration, you can then run `firmware-action` recursively, and it 
 ```
 In this case `firmware-action` would build `edk2-example` first and then `coreboot-example`.
 
-```admonish tip
-By changing inputs and outputs, you can then feed output of one module into input of another module.
-
-This way you can build the entire firmware stack in single step.
-```
+> [!TIP]
+> By changing inputs and outputs, you can then feed output of one module into input of another module.
+>
+> This way you can build the entire firmware stack in single step.
 
 
 ## Common and Specific
 
 To explain each and every entry in the configuration, here are snippets of the source code with comments.
 
-```admonish info
-In the code below, the tag `json` (for example `json:"sdk_url"`) specifies what the field is called in JSON file.
-
-Tag `validate:"required"`, it means that the field is required and must not be empty. Empty required field will fail validation and terminate program with error.
-
-Tag `validate:"dirpath"` means that field must contain a valid path to a directory. It is not necessary for the path or directory to exists, but must be a valid path. Be warned - that means that the string must end with `/`. For example `output-coreboot/`.
-
-Tag `validate:"filepath"` means that the field must contain a valid path to a file. It is not necessary for the file to exist.
-
-For more tails see [go-playground/validator](https://github.com/go-playground/validator) package.
-```
+> [!NOTE]
+> In the code below, the tag `json` (for example `json:"sdk_url"`) specifies what the field is called in JSON file.
+>
+> Tag `validate:"required"`, it means that the field is required and must not be empty. Empty required field will fail validation and terminate program with error.
+>
+> Tag `validate:"dirpath"` means that field must contain a valid path to a directory. It is not necessary for the path or directory to exists, but must be a valid path. Be warned - that means that the string must end with `/`. For example `output-coreboot/`.
+>
+> Tag `validate:"filepath"` means that the field must contain a valid path to a file. It is not necessary for the file to exist.
+>
+> For more tails see [go-playground/validator](https://github.com/go-playground/validator) package.
 
 ### Common
 ```go
 {{#include ../../../cmd/firmware-action/recipes/config.go:CommonOpts}}
 ```
 
-```admonish warning
-Avoid nesting output directories. Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory. This directory is deleted when changes are detected and re-build is required.
-~~~go
-{{#include ../../../cmd/firmware-action/recipes/config.go:NestedOutputs}}
-~~~
-```
+> [!WARNING]
+> Avoid nesting output directories. Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory. This directory is deleted when changes are detected and re-build is required.
+> ~~~go
+> {{#include ../../../cmd/firmware-action/recipes/config.go:NestedOutputs}}
+> ~~~
 
 ### Specific / coreboot
 ```go
