@@ -92,6 +92,7 @@ Here is a list of all containers:
 | linux_6.12           | [x]        |                                            |
 | uroot_0.14.0         | [x]        |                                            |
 | uroot_0.15.0         | [x]        |                                            |
+| uroot_0.16.0         | [x]        |                                            |
 | uboot_2025.01        | [x]        |                                            |
 | uboot_2025.04        | [x]        |                                            |
 | uboot_2025.07        | [x]        |                                            |
