@@ -400,3 +400,27 @@ services:
       args:
         - UBOOT_VERSION=2025.07
         - SOURCE_IMAGE=ubuntu:noble
+  uboot_2025.10:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2025.10
+        - SOURCE_IMAGE=ubuntu:noble
+  uboot_2026.01:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2026.01
+        - SOURCE_IMAGE=ubuntu:noble
+  uboot_2026.04:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2026.04
+        - SOURCE_IMAGE=ubuntu:noble
+  uboot_2026.07:
+    build:
+      context: uboot
+      args:
+        - UBOOT_VERSION=2026.07
+        - SOURCE_IMAGE=ubuntu:noble
