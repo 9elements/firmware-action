@@ -33,42 +33,17 @@ func TestURoot(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name          string
-		uRootVersion  string
-		golangVersion string
-		arch          string
-		wantErr       error
+		name         string
+		uRootVersion string
+		arch         string
+		wantErr      error
 	}{
 		{
-			name:          "normal build v0.15 in v1.x",
-			uRootVersion:  "0.15.0",
-			golangVersion: "1",
-			arch:          "amd64",
-			wantErr:       nil,
+			name:         "normal build v0.15 in v1.x",
+			uRootVersion: "0.15.0",
+			arch:         "amd64",
+			wantErr:      nil,
 		},
-		// These tests fail because of Error:
-		//   vendor/golang.org/x/tools/internal/tokeninternal/tokeninternal.go:78:9: invalid array length -delta * delta (constant -256 of type int64)
-		//{
-		//	name:          "normal build v0.14 in v1.x",
-		//	uRootVersion:  "0.14.0",
-		//	golangVersion: "1",
-		//	arch:          "amd64",
-		//	wantErr:       nil,
-		//},
-		//{
-		//	name:          "normal build v0.13.1 in v1.x",
-		//	uRootVersion:  "0.13.1",
-		//	golangVersion: "1",
-		//	arch:          "amd64",
-		//	wantErr:       nil,
-		//},
-		//{
-		//	name:          "normal build v0.12 in v1.x",
-		//	uRootVersion:  "0.12.0",
-		//	golangVersion: "1",
-		//	arch:          "amd64",
-		//	wantErr:       nil,
-		//},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -82,7 +57,7 @@ func TestURoot(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			myURootOpts := URootOpts
-			myURootOpts.SdkURL = fmt.Sprintf("golang:%s", tc.golangVersion)
+			myURootOpts.SdkURL = fmt.Sprintf("ghcr.io/9elements/firmware-action/uroot_%s:main", tc.uRootVersion)
 			myURootOpts.BuildCommand = fmt.Sprintf("set -Eeuo pipefail; go build; GOARCH=%s ./u-root -o initramfs.cpio core boot", tc.arch)
 			myURootOpts.RepoPath = filepath.Join(tmpDir, "u-root")
 
