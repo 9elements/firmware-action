@@ -1,0 +1,7 @@
+.dagger-ci/daggerci/requirements.txt linguist-generated
+shell-completion/firmware-action.bash linguist-generated
+shell-completion/firmware-action.fish linguist-generated
+shell-completion/firmware-action.zsh linguist-generated
+tests/coreboot_*/*.defconfig linguist-generated
+tests/linux_*/*.defconfig linguist-generated
+tests/uboot_*/*.defconfig linguist-generated
