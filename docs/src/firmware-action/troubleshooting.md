@@ -21,14 +21,14 @@ Other than that, here are some common problems and solutions.
 ## Missing submodules / missing files
 
 The problem can manifest in multiple way, most commonly with error messages of missing files.
-```
+~~~
 make: *** BaseTools: No such file or directory.  Stop.
-```
+~~~
 
 Solution is to get all git submodules.
-```
+~~~
 git submodule update --depth 1 --init --recursive --checkout
-```
+~~~
 
 
 ## Coreboot blob not found

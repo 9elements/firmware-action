@@ -50,7 +50,7 @@ When `firmware-action` is checking for modification time, it checks the entirety
 
 This means that if the output is inside `repo_path`, it will always rebuild because the output artifacts will always be newer that the saved time stamp, and the output in this case is always searched as part of `repo_path`.
 
-```text
+~~~text
 Ideal setup:
   .
   ├── repo_path/
@@ -62,7 +62,7 @@ Will always rebuild:
   └── repo_path/
       └── output-uroot/
           └── uroot.bin
-```
+~~~
 
 
 ## Configuration file changes

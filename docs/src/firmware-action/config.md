@@ -48,7 +48,7 @@ In each type can be any number of modules.
 Each module has a name, which can be anything as long as it is unique (unique string across all modules of all types). In the example above there are 3 modules (`coreboot-example`, `linux-example`, `edk2-example`).
 
 The configuration above can be simplified to this:
-```
+~~~
 /
 ├── coreboot/
 │   └── coreboot-example
@@ -58,17 +58,17 @@ The configuration above can be simplified to this:
 │   └── stitching-example
 └── linux/
     └── linux-example
-```
+~~~
 
 Not all types must be present or defined. If you are building coreboot and coreboot only, you can have only coreboot present.
-```
+~~~
 /
 └── coreboot/
     └── coreboot_example
-```
+~~~
 
 You can have multiple modules of each type, as long as their names are unique.
-```
+~~~
 /
 ├── coreboot/
 │   ├── coreboot_example
@@ -82,7 +82,7 @@ You can have multiple modules of each type, as long as their names are unique.
 └── edk2/
     ├── edk2_example
     └── edk2_C
-```
+~~~
 
 
 ## Modules
@@ -92,15 +92,15 @@ Each module has sections:
 - `common`
 - `specific`
 
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
-```
+~~~
 
 `common` & `specific` are identical in function. There is no real difference between these two. They are split to simplify the code. They define things like path to source code, version and source of SDK to use, and so on.
 
 `depends` on the other hand allows you to specify dependency (or relation) between modules. For example your `coreboot` uses `edk2` as payload. So you can specify this dependency by listing name of the `edk2` module in `depends` of your `coreboot` module.
 
-```json
+~~~json
 {
   "coreboot": {
     "coreboot-example": {
@@ -115,12 +115,12 @@ Each module has sections:
     }
   }
 }
-```
+~~~
 
 With such configuration, you can then run `firmware-action` recursively, and it will build all of the modules in proper order.
-```
+~~~
 ./firmware-action build --config=./my-config.json --target=coreboot-example --recursive
-```
+~~~
 In this case `firmware-action` would build `edk2-example` first and then `coreboot-example`.
 
 > [!TIP]
@@ -145,9 +145,9 @@ To explain each and every entry in the configuration, here are snippets of the s
 > For more tails see [go-playground/validator](https://github.com/go-playground/validator) package.
 
 ### Common
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/config.go:CommonOpts}}
-```
+~~~
 
 > [!WARNING]
 > Avoid nesting output directories. Please make sure that each module has its own unique output directory. Each module needs exclusive control over its output directory. This directory is deleted when changes are detected and re-build is required.
@@ -156,41 +156,41 @@ To explain each and every entry in the configuration, here are snippets of the s
 > ~~~
 
 ### Specific / coreboot
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/coreboot.go:CorebootOpts}}
-```
+~~~
 
 ### Specific / Linux
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/linux.go:LinuxOpts}}
 {{#include ../../../cmd/firmware-action/recipes/linux.go:LinuxSpecific}}
-```
+~~~
 
 ### Specific / Edk2
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/edk2.go:Edk2Opts}}
 {{#include ../../../cmd/firmware-action/recipes/edk2.go:Edk2Specific}}
-```
+~~~
 
 ### Specific / Firmware stitching
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/stitching.go:FirmwareStitchingOpts}}
 {{#include ../../../cmd/firmware-action/recipes/stitching.go:IfdtoolEntry}}
-```
+~~~
 
 ### Specific / u-root
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/uroot.go:URootOpts}}
 {{#include ../../../cmd/firmware-action/recipes/uroot.go:URootSpecific}}
-```
+~~~
 
 ### Specific / Universal module
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/universal.go:UniversalOpts}}
 {{#include ../../../cmd/firmware-action/recipes/universal.go:UniversalSpecific}}
-```
+~~~
 
 ### Specific / u-boot module
-```go
+~~~go
 {{#include ../../../cmd/firmware-action/recipes/uboot.go:UBootOpts}}
-```
+~~~
