@@ -1,0 +1,23 @@
+[[IgnoredVulns]]
+id = "PYSEC-2026-215"
+reason = "idna / indirect dependency, this is also python tool to build containers, not critical"
+
+[[IgnoredVulns]]
+id = "PYSEC-2018-28"
+reason = "requests / indirect dependency, this is also python tool to build containers, not critical"
+
+[[IgnoredVulns]]
+id = "PYSEC-2023-74"
+reason = "requests / indirect dependency, this is also python tool to build containers, not critical"
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-1872"
+reason = "requests / indirect dependency, this is also python tool to build containers, not critical"
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-1873"
+reason = "requests / indirect dependency, this is also python tool to build containers, not critical"
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-2275"
+reason = "requests / indirect dependency, this is also python tool to build containers, not critical"
