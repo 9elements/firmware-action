@@ -95,6 +95,10 @@ Here is a list of all containers:
 | uboot_2025.01        | [x]        |                                            |
 | uboot_2025.04        | [x]        |                                            |
 | uboot_2025.07        | [x]        |                                            |
+| uboot_2025.10        | [x]        |                                            |
+| uboot_2026.01        | [x]        |                                            |
+| uboot_2026.04        | [x]        |                                            |
+| uboot_2026.07        | [x]        |                                            |
 
 
 ## Legacy containers
