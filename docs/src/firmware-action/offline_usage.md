@@ -26,12 +26,12 @@ Then you need to change the `firmware-action` configuration to include the image
 Digest hash can be found in the container hub. For `firmware-action` containers see [GitHub](https://github.com/orgs/9elements/packages?repo_name=firmware-action).
 
 It will also be displayed every time `firmware-action` is executed as `INFO` message near the start:
-```
+~~~
 [INFO   ] Container information
     - time: 2024-12-01T12:09:43.62620859+01:00
     - Image reference: ghcr.io/9elements/firmware-action/coreboot_4.19:main@sha256:25b4f859e26f84a276fe0c4395a4f0c713f5b564679fbff51a621903712a695b
     - origin of this message: container.Setup
-```
+~~~
 
 Simply copy-paste the digest (or image reference) into your configuration file and `firmware-action` will not connect to the internet to fetch a container if one matching is already present.
 
