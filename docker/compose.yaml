@@ -338,7 +338,7 @@ services:
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.1.127
+        - LINUX_VERSION=6.1.180
         - LINUX_VERSION_MAJOR_MINOR=6.1
         - GCC_VERSION=11
         - SOURCE_IMAGE=ubuntu:noble
@@ -348,7 +348,7 @@ services:
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.6.74
+        - LINUX_VERSION=6.6.148
         - LINUX_VERSION_MAJOR_MINOR=6.6
         - GCC_VERSION=12
         - SOURCE_IMAGE=ubuntu:noble
@@ -358,7 +358,7 @@ services:
     build:
       context: linux
       args:
-        - LINUX_VERSION=6.12.11
+        - LINUX_VERSION=6.12.101
         - LINUX_VERSION_MAJOR_MINOR=6.12
         - GCC_VERSION=14
         - SOURCE_IMAGE=ubuntu:noble
