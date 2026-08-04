@@ -90,6 +90,7 @@ Here is a list of all containers:
 | linux_6.9.9          | [ ]        | discontinued because not LTS               |
 | linux_6.11           | [ ]        | discontinued because not LTS               |
 | linux_6.12           | [x]        |                                            |
+| linux_6.18           | [x]        |                                            |
 | uroot_0.14.0         | [x]        |                                            |
 | uroot_0.15.0         | [x]        |                                            |
 | uroot_0.16.0         | [x]        |                                            |

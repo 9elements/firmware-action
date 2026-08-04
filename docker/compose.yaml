@@ -362,6 +362,16 @@ services:
         - LINUX_VERSION_MAJOR_MINOR=6.12
         - GCC_VERSION=14
         - SOURCE_IMAGE=ubuntu:noble
+  linux_6.18:
+    # 2025-11
+    # LTS
+    build:
+      context: linux
+      args:
+        - LINUX_VERSION=6.18.42
+        - LINUX_VERSION_MAJOR_MINOR=6.18
+        - GCC_VERSION=14
+        - SOURCE_IMAGE=ubuntu:noble
   #==================
   # u-root
   #==================
