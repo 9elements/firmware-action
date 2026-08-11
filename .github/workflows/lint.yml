@@ -55,7 +55,7 @@ jobs:
         with:
           go-version: stable
       - name: MegaLinter
-        uses: oxsecurity/megalinter/flavors/cupcake@v9
+        uses: oxsecurity/megalinter/flavors/cupcake@v10
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: true
