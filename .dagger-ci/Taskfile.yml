@@ -17,10 +17,17 @@ tasks:
     cmds:
       - mypy --strict {{.PROJECT}}
 
+  lint-ruff:
+    desc: Run ruff
+    ignore_error: true
+    cmds:
+      - ruff check --config daggerci/.ruff.toml {{.CLI_ARGS}}
+
   format:
     desc: Run formatters
     cmds:
       - find ./{{.PROJECT}}/ -type f -name '*.py' -exec sh -c 'echo "$1"; autopep8 -i "$1"' shell {} \;
+      - ruff format
       - black {{.PROJECT}}
 
   test:
