@@ -82,7 +82,7 @@ def select_by_anchor(lines: list[str], name: str) -> list[str]:
                 break
     if start_idx is None or end_idx is None:
         raise IncludeError(f"anchor '{name}' not found")
-    selected = lines[start_idx + 1 : end_idx]  # noqa: E203
+    selected = lines[start_idx + 1 : end_idx]
     return strip_anchor_markers(selected)
 
 
@@ -91,7 +91,7 @@ def select_by_range(lines: list[str], start: str, end: str) -> list[str]:
     start_n = int(start) if start else 1
     end_n = int(end) if end else len(lines)
     # Line numbers in the spec are 1-indexed and inclusive.
-    return lines[max(start_n - 1, 0) : end_n]  # noqa: E203
+    return lines[max(start_n - 1, 0) : end_n]
 
 
 def resolve_include(base_dir: Path, spec: str) -> list[str]:
