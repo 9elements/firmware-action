@@ -45,7 +45,7 @@ async def test__orchestrator__broken_dockerfile(
 
     # because of multi-platform nature we have to be flexible
     build_found = False
-    for key, _ in result.results["services"]["coreboot_4.19"].items():
+    for key in result.results["services"]["coreboot_4.19"]:
         if re.match("build .*", key) and not re.match(".*_msg$", key):
             build_found = True
             assert result.results["services"]["coreboot_4.19"][key] is False
@@ -207,10 +207,10 @@ def test__orchestrator__tags(
     Test tags
     """
     datetime_mock = MagicMock(wraps=datetime.datetime)
-    FAKE_NOW = datetime.datetime(2023, 1, 1, 10, 20, 30)
+    FAKE_NOW = datetime.datetime(2023, 1, 1, 10, 20, 30, tzinfo=datetime.timezone.utc)
     datetime_mock.now.return_value = FAKE_NOW
     monkeypatch.setattr(datetime, "datetime", datetime_mock)
-    assert datetime.datetime.now() == FAKE_NOW
+    assert datetime.datetime.now().astimezone() == FAKE_NOW
 
     with (
         patch("lib.git.git_describe", return_value=git_tag),

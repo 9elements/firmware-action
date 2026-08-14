@@ -72,8 +72,7 @@ def get_current_platform() -> str:
     # Figure out CPU
     current_arch = get_current_arch()
 
-    # pylint: disable=consider-using-f-string
-    return "{}/{}".format(platform_dict[current_platform], current_arch)
+    return f"{platform_dict[current_platform]}/{current_arch}"
 
 
 class ContainerRegistry:
@@ -153,7 +152,9 @@ class Orchestrator:
         self.tag_sha = git_get_latest_commit_sha_long()
         self.tag_sha_short = git_get_latest_commit_sha_short()
         self.tag_tag = git_get_tag()
-        self.tag_timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.tag_timestamp = (
+            datetime.datetime.now().astimezone().strftime("%Y%m%d-%H%M%S")
+        )
         self.tag_branch = git_get_branch_name()
         self.tag_pull_request_number = github_get_pull_request_number()
         self.tag_pull_request = f"pull_request_{self.tag_pull_request_number}"
@@ -343,12 +344,12 @@ class Orchestrator:
         )
 
         # add labels to the container
-        for key, _ in variants.items():
+        for key in variants:
             for name, val in self.labels.items():
                 variants[key] = await variants[key].with_label(name=name, value=val)
 
         logging.info("Docker container labels:")
-        for key, _ in variants.items():
+        for key in variants:
             for label in await variants[key].labels():
                 logging.info("label: %s = %s", await label.name(), await label.value())
 
@@ -523,10 +524,9 @@ class Orchestrator:
                 [f"{test_container_name}_stdout.log", ex.stdout],
                 [f"{test_container_name}_stderr.log", ex.stderr],
             ]:
-                with open(
-                    os.path.join(self.logdir, std_streams[0]), "w", encoding="utf-8"
-                ) as logfile:
-                    logfile.write(std_streams[1])
+                await anyio.Path(os.path.join(self.logdir, std_streams[0])).write_text(
+                    std_streams[1], encoding="utf-8"
+                )
             logging.error("Test on %s failed", test_container_name)
             raise ContainerTestFailed(ex.message)  # pylint: disable=raise-missing-from
             # This return will execute after 'finally' completes

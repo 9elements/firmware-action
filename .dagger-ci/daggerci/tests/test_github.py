@@ -11,7 +11,6 @@ from lib.github import github_get_project_url, github_get_pull_request_number
     "env_vars, expected",
     [
         (
-            #
             [
                 ["GITHUB_SERVER_URL", "https://github.com"],
                 ["GITHUB_REPOSITORY", "9elements/firmware-action"],
