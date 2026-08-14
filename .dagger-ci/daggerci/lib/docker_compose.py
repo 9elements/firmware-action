@@ -63,9 +63,9 @@ class DockerCompose:
         try:
             cmd = ["docker-compose", "-f", self.path, "config"]
             output = subprocess.run(cmd, check=False, capture_output=True)
-        except FileNotFoundError as exc:
+        except FileNotFoundError:
             logging.error('Missing dependency "docker-compose", please install it')
-            raise exc
+            raise
         if output.returncode != 0:
             logging.critical('Docker-compose file "%s" failed validation', self.path)
             logging.critical(pformat(output))
@@ -128,11 +128,11 @@ class DockerCompose:
         this_top_element = self.__select_top_element__(top_element)
         this_dockerfile = self.__select_dockerfile__(dockerfile)
 
-        if "build" in self.yaml[this_top_element][this_dockerfile]:
-            if "context" in self.yaml[this_top_element][this_dockerfile]["build"]:
-                return str(
-                    self.yaml[this_top_element][this_dockerfile]["build"]["context"]
-                )
+        if (
+            "build" in self.yaml[this_top_element][this_dockerfile]
+            and "context" in self.yaml[this_top_element][this_dockerfile]["build"]
+        ):
+            return str(self.yaml[this_top_element][this_dockerfile]["build"]["context"])
         return None
 
     def get_dockerfile_args(
