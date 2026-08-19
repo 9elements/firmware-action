@@ -68,7 +68,7 @@ async def test__orchestrator__missing_env_var(tmpdir, create_orchestrator, docke
 @pytest.mark.slow
 @pytest.mark.anyio
 @pytest.mark.skip(reason="testing currently causes running out of disk space")
-async def test__orchestrator__run_test_script_fail(
+async def test__orchestrator__run_test_script_fail(  # trufflehog:ignore - false positive, Lob detector matches test function name
     tmpdir, create_orchestrator, dockerfile_dummy_tests_fail
 ):
     """
