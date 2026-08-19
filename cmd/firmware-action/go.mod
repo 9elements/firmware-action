@@ -1,6 +1,6 @@
 module github.com/9elements/firmware-action/cmd/firmware-action
 
-go 1.26.5
+go 1.26.6
 
 require (
 	dagger.io/dagger v0.21.8
