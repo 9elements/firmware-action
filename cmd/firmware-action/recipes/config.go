@@ -237,7 +237,7 @@ func (c Config) AllModules() map[string]FirmwareModule {
 				value := fieldValue.MapIndex(key)
 
 				// Type-assert the value to FirmwareModule.
-				if module, ok := value.Interface().(FirmwareModule); ok {
+				if module, ok := reflect.TypeAssert[FirmwareModule](value); ok {
 					modules[key.String()] = module
 				} else {
 					slog.Error(

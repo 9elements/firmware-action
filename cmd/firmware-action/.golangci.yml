@@ -71,6 +71,7 @@ linters:
     - unconvert
     # Not sure
     - exhaustruct
+    - exhaustruct_v5
     - goconst
     - godoclint
     - tagalign
