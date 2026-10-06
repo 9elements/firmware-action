@@ -63,6 +63,7 @@ Here is a list of all containers:
 | coreboot_24.12       | [x]        |                                            |
 | coreboot_25.03       | [x]        |                                            |
 | coreboot_25.06       | [x]        |                                            |
+| coreboot_26.06       | [x]        |                                            |
 | udk2017              | [x]        |                                            |
 | edk2-stable202008    | [x]        |                                            |
 | edk2-stable202105    | [x]        |                                            |
