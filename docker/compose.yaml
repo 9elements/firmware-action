@@ -63,6 +63,12 @@ services:
       args:
         - COREBOOT_VERSION=25.06
         - SOURCE_IMAGE=ubuntu:noble
+  coreboot_26.06:
+    build:
+      context: coreboot
+      args:
+        - COREBOOT_VERSION=26.06
+        - SOURCE_IMAGE=ubuntu:noble
   #==================
   # edk2
   #==================
