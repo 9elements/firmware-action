@@ -5,7 +5,7 @@ go 1.26.6
 require (
 	dagger.io/dagger v0.21.11
 	github.com/Masterminds/semver v1.5.0
-	github.com/alecthomas/kong v1.16.1
+	github.com/alecthomas/kong v1.17.0
 	github.com/dustin/go-humanize v1.1.0
 	github.com/go-git/go-git/v5 v5.19.3
 	github.com/go-playground/validator/v10 v10.30.5
