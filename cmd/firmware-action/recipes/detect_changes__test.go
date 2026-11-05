@@ -30,10 +30,8 @@ func TestChangeTimeStamp(t *testing.T) {
 	resultFile := filepath.Join(timestampsDir, filesystem.Filenamify(target, "txt"))
 
 	myTimeStamp := ChangeTimeStamp{
-		Change: Change{
-			ResultFile: resultFile,
-		},
-		Sources: []string{repoPath},
+		ResultFile: resultFile,
+		Sources:    []string{repoPath},
 	}
 
 	// Also quick and dirty test for AllChanges
@@ -117,10 +115,8 @@ func TestChangeConfig(t *testing.T) {
 	}
 
 	myChangeConfig := ChangeConfig{
-		Change: Change{
-			ResultFile: resultFile,
-		},
-		Config: &config,
+		ResultFile: resultFile,
+		Config:     &config,
 	}
 
 	// No file, nothing
@@ -216,10 +212,8 @@ func TestChangeGitHash(t *testing.T) {
 	resultFile := filepath.Join(gitRepoHashDir, filesystem.Filenamify(target, "txt"))
 
 	myChangeGitHash := ChangeGitHash{
-		Change: Change{
-			ResultFile: resultFile,
-		},
-		RepoPath: repoPath,
+		ResultFile: resultFile,
+		RepoPath:   repoPath,
 	}
 
 	// No file, nothing
