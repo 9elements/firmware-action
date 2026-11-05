@@ -207,7 +207,7 @@ def test__orchestrator__tags(
     Test tags
     """
     datetime_mock = MagicMock(wraps=datetime.datetime)
-    FAKE_NOW = datetime.datetime(2023, 1, 1, 10, 20, 30, tzinfo=datetime.timezone.utc)
+    FAKE_NOW = datetime.datetime(2023, 1, 1, 10, 20, 30, tzinfo=datetime.UTC)
     datetime_mock.now.return_value = FAKE_NOW
     monkeypatch.setattr(datetime, "datetime", datetime_mock)
     assert datetime.datetime.now().astimezone() == FAKE_NOW
