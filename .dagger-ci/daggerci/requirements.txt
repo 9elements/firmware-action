@@ -1,4 +1,5 @@
 anyio~=4.16
+certifi>=2026.10.18
 dagger-io~=0.21
 prettytable~=3.18
 pytest~=9.2
