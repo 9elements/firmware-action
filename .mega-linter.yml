@@ -42,6 +42,11 @@ JAVASCRIPT_STANDARD_FILTER_REGEX_EXCLUDE: (pagetoc\.js)
 BASH_SHELLCHECK_FILTER_REGEX_EXCLUDE: (shell-completion)
 BASH_SHFMT_FILTER_REGEX_EXCLUDE: (shell-completion)
 
+# Go revive
+# Temporary: the revive binary in MegaLinter v10 is built with Go 1.26 and cannot load Go 1.27 code.
+# Remove this when MegaLinter ships revive built with Go 1.27 or newer.
+GO_REVIVE_DISABLE_ERRORS: true
+
 # Zizmor
 ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
   - GITHUB_TOKEN
