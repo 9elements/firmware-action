@@ -33,6 +33,7 @@ RUN apt-get update && \
         build-essential \
         flex \
         gnat \
+        golang-go \
         imagemagick \
         libelf-dev \
         libncurses5-dev \
