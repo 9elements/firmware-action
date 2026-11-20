@@ -28,6 +28,10 @@ SPELL_CSPELL_ANALYZE_FILE_NAMES: false
 # Trivy
 REPOSITORY_TRIVY_CONFIG_FILE: .trivy.yaml
 
+# osv-scanner: MegaLinter's govulncheck is built with an older Go than go.mod
+# requires and cannot run the call analysis
+REPOSITORY_OSV_SCANNER_ARGUMENTS: ["--no-call-analysis=go"]
+
 # yaml v8r
 YAML_V8R_DISABLE_ERRORS: true
 
