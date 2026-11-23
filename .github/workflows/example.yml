@@ -4,8 +4,6 @@
 name: example
 on:
   pull_request: {}
-  pull_request_review:
-    types: ['submitted']
   merge_group: {}
   push:
     branches: ['main']
@@ -123,8 +121,7 @@ jobs:
         coreboot-version: ['24.02.01']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -185,8 +182,7 @@ jobs:
         linux-version: ['6.12']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -257,8 +253,7 @@ jobs:
       matrix:
         edk2-version: ['edk2-stable202211']
     # TODO
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -333,8 +328,7 @@ jobs:
         coreboot-version: ['4.19']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -388,8 +382,7 @@ jobs:
         uroot-version: ['0.15.0']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -443,8 +436,7 @@ jobs:
         uboot-version: ['2025.01']
         arch: ['amd64', 'arm64']
     runs-on: ${{ matrix.arch == 'arm64' && 'ARM64' || 'ubuntu-latest' }}
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -500,8 +492,7 @@ jobs:
       - changes
       - skip-check
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -538,8 +529,7 @@ jobs:
       fail-fast: false
       matrix:
         prune: ['true', 'false']
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -571,8 +561,7 @@ jobs:
       - changes
       - skip-check
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Cleanup
         run: |
@@ -606,8 +595,7 @@ jobs:
     needs:
       - changes
       - skip-check
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
