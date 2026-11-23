@@ -4,8 +4,6 @@
 name: pytest
 on:
   pull_request: {}
-  pull_request_review:
-    types: ['submitted']
   merge_group: {}
   push:
     branches: ['main']
@@ -53,8 +51,7 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     needs: skip-check
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Install Taskfile
         uses: arduino/setup-task@v3

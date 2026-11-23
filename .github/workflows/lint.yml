@@ -4,8 +4,6 @@
 name: lint
 on:
   pull_request: {}
-  pull_request_review:
-    types: ['submitted']
   merge_group: {}
   push:
     branches: ['main']
@@ -25,8 +23,6 @@ permissions:
 jobs:
   commit-lint:
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
-    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -39,8 +35,6 @@ jobs:
 
   megalinter:
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
-    # Skip if pull_request_review on PR not made by a bot
     permissions:
       contents: read
       # Needed by GitHub Comment Reporter:
@@ -63,8 +57,6 @@ jobs:
 
   golangci-lint:
     runs-on: ubuntu-latest
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') }}
-    # Skip if pull_request_review on PR not made by a bot
     steps:
       - name: Checkout
         uses: actions/checkout@v7

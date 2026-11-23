@@ -4,8 +4,6 @@
 name: go-test
 on:
   pull_request: {}
-  pull_request_review:
-    types: ['submitted']
   merge_group: {}
   push:
     branches: ['main']
@@ -119,8 +117,7 @@ jobs:
             'TestUniversal',
             'TestUBoot'
           ]
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -162,8 +159,7 @@ jobs:
     # Run all remaining light tests
     runs-on: ubuntu-latest
     needs: skip-check
-    if: ${{ ! (github.event_name == 'pull_request_review' && github.actor != 'github-actions[bot]') && needs.skip-check.outputs.changes == 'true' }}
-    # Skip if pull_request_review on PR not made by a bot
+    if: ${{ needs.skip-check.outputs.changes == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
